@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Corner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --font:'Nunito','Trebuchet MS',system-ui,sans-serif;
+  --bg:#F6F7FB; --card:#FFFFFF; --chip:#F1F3F8; --line:#E5E7EF;
+  --ink:#1F2A37; --soft:#6B7280; --ok:#16A36F; --bad:#EF4444; --gold:#FFB020;
+  --c-creativity:#F0457A; --c-insight:#7B61FF; --c-memory:#0F9F8F; --c-focus:#FF7A2F;
+  --c-reasoning:#2F7BF0; --c-flex:#20A35A; --c-calibration:#E09A00; --c-ai:#0B9BD6;
+  --shadow:0 1px 2px rgba(17,24,39,.05),0 8px 24px rgba(17,24,39,.07);
+  --c:var(--c-insight);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 15px/1.5 var(--font);min-height:100vh;padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+h1,h2,h3{margin:0;line-height:1.1;letter-spacing:-.015em;font-weight:900}
+.app{max-width:460px;margin:0 auto;padding:16px 16px 24px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px}
+.press{transition:transform .1s ease-out}
+.press:active{transform:scale(.97)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:800;font-size:17px;padding:13px 22px;border-radius:999px;background:var(--ink);color:#fff;transition:transform .1s ease-out}
+.btn:active{transform:scale(.96)}
+.btn.c{background:var(--c)}
+.btn.light{background:var(--chip);color:var(--ink)}
+.btn.full{width:100%}
+.btn.sm{font-size:15px;padding:9px 16px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+input.field{width:100%;font:800 18px var(--font);color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px}
+input.field:focus{border-color:var(--c);outline:none}
+.muted{color:var(--soft)}
+.small{font-size:13px}
+
+/* home */
+.top{display:flex;align-items:center;gap:12px}
+.avatar{width:52px;height:52px;border-radius:50%;background:var(--c-insight);display:grid;place-items:center;font-size:26px;flex:none}
+.top h2{font-size:20px}
+.coin{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;background:var(--card);border-radius:999px;padding:2px 10px 2px 3px;box-shadow:inset 0 0 0 1.5px var(--line)}
+.coin i{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A6,var(--gold) 65%);display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:900;color:#8A5A00}
+.hero{margin-top:18px}
+.hero h1{font-size:28px}
+.hero p{margin:4px 0 12px}
+.bar{height:12px;border-radius:999px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:999px;background:var(--ok);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.checks{display:grid;gap:8px;margin-top:12px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;width:100%;text-align:left}
+.check .box{width:24px;height:24px;border-radius:8px;background:var(--chip);flex:none;display:grid;place-items:center;color:#fff;font-weight:900;font-size:14px}
+.check.done .box{background:var(--ok)}
+.check.done .box::after{content:"✓"}
+.check .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.check .nm{flex:1}
+.sect{display:flex;align-items:baseline;justify-content:space-between;margin:24px 4px 10px}
+.sect h2{font-size:20px}
+.skills{display:grid;gap:10px}
+.sk{display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:10px;font-size:13.5px}
+.sk .bar{height:10px}
+.sk b{text-align:right;font-weight:900}
+.library{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gcard{text-align:left;background:var(--card);border-radius:20px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.gcard .art{height:86px;background:var(--c);position:relative;display:grid;place-items:center;overflow:hidden}
+.gcard .art::before{content:"";position:absolute;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.12);right:-40px;top:-50px}
+.gcard .art::after{content:"";position:absolute;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);left:-20px;bottom:-34px}
+.gcard .art svg{width:40px;height:40px;color:#fff;position:relative;z-index:1}
+.gcard .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
+.gcard h3{font-size:15.5px}
+.gcard .sk-l{font-size:12px;color:var(--c);font-weight:800}
+.gcard .mini{display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:6px;font-size:11.5px;color:var(--soft)}
+.gcard .mini .bar{flex:1;height:6px}
+.gcard .stars{font-size:12px;letter-spacing:1px;color:var(--gold)}
+.tagnew{position:absolute;left:8px;top:8px;z-index:2;background:#fff;color:var(--c);font-size:11px;font-weight:900;border-radius:999px;padding:1px 8px}
+
+/* game shell */
+.gtop{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.round{width:42px;height:42px;border-radius:50%;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;font-size:19px;flex:none}
+.goal{flex:1;display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:7px 14px;box-shadow:var(--shadow);font-size:13px}
+.goal .bar{flex:1;height:8px}
+.goal .t{font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.goal.paused .t{color:var(--soft)}
+.stage{position:relative}
+
+/* intro (Lumosity-style colour header) */
+.intro-head{position:relative;overflow:hidden;background:var(--c);color:#fff;border-radius:26px;padding:22px 20px 20px;min-height:200px}
+.intro-head .orb{position:absolute;border-radius:50%;background:rgba(255,255,255,.13)}
+.intro-head .o1{width:220px;height:220px;right:-70px;top:-80px}
+.intro-head .o2{width:120px;height:120px;right:40px;bottom:-60px}
+.intro-head .o3{width:60px;height:60px;left:-20px;bottom:20px}
+.intro-head .ic{position:relative;width:76px;height:76px;border-radius:22px;background:#fff;color:var(--c);display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.15)}
+.intro-head .ic svg{width:42px;height:42px}
+.intro-head h1{position:relative;font-size:32px;margin-top:16px}
+.intro-head .meta{position:relative;font-size:13.5px;opacity:.92}
+.how{margin-top:14px}
+.how h3{font-size:16px;margin-bottom:8px}
+.how ol{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.how li{display:flex;gap:12px;align-items:flex-start}
+.how li span{flex:none;width:26px;height:26px;border-radius:50%;background:var(--c);color:#fff;font-weight:900;font-size:13px;display:grid;place-items:center}
+.intro-foot{display:flex;gap:10px;margin-top:16px;align-items:center}
+.bestline{font-size:13px;color:var(--soft);flex:1}
+
+/* countdown */
+.count{position:fixed;inset:0;display:grid;place-items:center;z-index:40;background:rgba(246,247,251,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.count b{font-size:120px;font-weight:900;color:var(--c);line-height:1}
+
+/* play area */
+.hud{display:flex;gap:8px;margin-bottom:12px}
+.hud div{flex:1;background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:6px 10px;text-align:center}
+.hud span{display:block;font-size:11.5px;color:var(--soft)}
+.hud b{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}
+.tbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:14px}
+.tbar i{display:block;height:100%;width:100%;background:var(--c);border-radius:999px;transform-origin:left;will-change:transform}
+.prompt{font-size:14px;color:var(--soft);margin:0 2px 10px}
+.big{font-size:22px;font-weight:900;letter-spacing:-.01em}
+.tile{display:grid;place-items:center;background:var(--c);color:#fff;border-radius:16px;font-weight:900;text-align:center;transition:transform .1s ease-out}
+button.tile:active{transform:scale(.95)}
+.ok-ring{box-shadow:0 0 0 4px var(--ok)!important}
+.bad-ring{box-shadow:0 0 0 4px var(--bad)!important}
+.opt{width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;font-weight:700;margin-bottom:10px;transition:transform .1s ease-out,border-color .15s}
+.opt:active{transform:scale(.98)}
+.opt.sel{border-color:var(--c);background:color-mix(in srgb,var(--c) 8%,#fff)}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,#fff)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,#fff)}
+.explain{margin-top:12px;padding:12px 14px;border-radius:16px;background:var(--chip);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chipb{background:#fff;border:2px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:800;font-size:14px;transition:transform .1s}
+.chipb:active{transform:scale(.95)}
+.row{display:flex;gap:10px;align-items:center}
+.msgcard{background:#fff;border-radius:18px 18px 18px 6px;box-shadow:var(--shadow);padding:14px 16px;font-size:15.5px;line-height:1.5}
+.msgcard .from{font-size:12px;color:var(--soft);margin-bottom:4px}
+
+/* float + feedback */
+.pop{position:fixed;z-index:50;font-weight:900;font-size:22px;pointer-events:none;transform:translate(-50%,-50%)}
+.flash{position:fixed;inset:0;z-index:45;pointer-events:none;display:grid;place-items:center}
+.flash b{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:52px;font-weight:900}
+
+/* results */
+.res{text-align:center}
+.res .ringwrap{position:relative;width:170px;height:170px;margin:6px auto 4px}
+.res .ringwrap svg{transform:rotate(-90deg)}
+.res .ringwrap .num{position:absolute;inset:0;display:grid;place-items:center;align-content:center}
+.res .num b{font-size:44px;font-weight:900;line-height:1;color:var(--ink)}
+.res .num span{font-size:12px;color:var(--soft)}
+.res .starrow{display:flex;justify-content:center;gap:8px;margin:6px 0 2px}
+.res .starrow i{font-style:normal;font-size:34px;color:var(--line)}
+.res .starrow i.on{color:var(--gold)}
+.res h2{font-size:24px;margin-top:4px}
+.res .lines{margin:12px 0 16px;display:grid;gap:6px;text-align:left}
+.res .lines div{background:var(--chip);border-radius:12px;padding:8px 12px;font-size:14px}
+.res .newbest{display:inline-block;background:var(--gold);color:#fff;font-weight:900;font-size:13px;border-radius:999px;padding:2px 12px;margin-top:6px}
+
+/* game-specific */
+.ml-cues{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.ml-cues .tile{height:86px;font-size:clamp(16px,4.6vw,20px);padding:0 4px;overflow-wrap:anywhere}
+.ss-key{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin-bottom:14px}
+.ss-key div{background:#fff;border-radius:10px;text-align:center;padding:6px 0 2px;box-shadow:var(--shadow)}
+.ss-key svg{width:62%;max-width:24px;height:auto;display:block;margin:0 auto}
+.ss-key b{font-weight:900;font-size:15px}
+.ss-target{width:110px;height:110px;margin:0 auto 16px;border-radius:26px}
+.ss-target svg{width:56px;height:56px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad .tile{height:64px;font-size:28px;width:100%}
+.lg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.lg-grid button{height:64px;border-radius:14px;background:#E9ECF4;font-weight:900;font-size:clamp(11px,3.3vw,14px);padding:0 2px;overflow-wrap:anywhere;transition:transform .1s,background .15s,color .15s}
+.lg-grid button.sel{background:#5A6478;color:#fff}
+.lg-solved{border-radius:14px;padding:10px;text-align:center;margin-bottom:8px;color:#1F2A37}
+.lg-solved b{display:block;font-weight:900}
+.lg-solved span{font-size:13px}
+.lives{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--soft)}
+.lives i{width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.lives i.off{background:var(--line)}
+.bt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:300px;margin:0 auto 18px}
+.bt-grid div{aspect-ratio:1;border-radius:18px;background:#E9ECF4;transition:background .12s}
+.bt-grid div.on{background:var(--c)}
+.wh-path{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin-bottom:12px}
+.wh-path span{background:var(--chip);border-radius:999px;padding:2px 10px}
+.wh-page{padding:18px}
+.wh-page h2{font-size:26px}
+.wh-target{display:inline-flex;gap:6px;align-items:center;background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c);border-radius:999px;padding:4px 12px;font-weight:900;font-size:14px;margin-bottom:12px}
+.passage{font-size:17px;line-height:1.65;font-weight:600}
+textarea.field{width:100%;min-height:150px;font:600 16px/1.5 var(--font);color:var(--ink);background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;resize:vertical}
+textarea.field:focus{border-color:var(--c);outline:none}
+.kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.kw span{border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800;background:var(--chip);color:var(--soft)}
+.kw span.hit{background:color-mix(in srgb,var(--ok) 15%,#fff);color:var(--ok)}
+.slider{display:flex;gap:6px}
+.slider button{flex:1;padding:10px 0;border-radius:12px;background:var(--chip);font-weight:900;font-size:14px}
+.slider button.sel{background:var(--c);color:#fff}
+.botmsg{display:flex;gap:10px;align-items:flex-start;margin-top:12px}
+.botmsg .bot{width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;flex:none;font-size:16px}
+.botmsg .txt{background:#fff;box-shadow:var(--shadow);border-radius:4px 16px 16px 16px;padding:10px 14px;font-size:14.5px}
+.idea{display:flex;gap:10px;align-items:center}
+.idea .rk{width:26px;height:26px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:13px;font-weight:900;flex:none}
+.opt.sel .rk{background:var(--c);color:#fff}
+.word-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.word-list input{font-size:16px;padding:10px 12px}
+.cal-plot{display:flex;align-items:flex-end;gap:10px;height:110px;margin:6px 0 4px;padding:0 6px}
+.cal-plot div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--soft)}
+.cal-plot i{width:100%;border-radius:8px 8px 4px 4px;background:var(--c)}
+
+/* leaderboard */
+.lbhead{position:relative;height:330px;margin:0 -16px;overflow:hidden;background:linear-gradient(180deg,#EEF0FF,#F6F7FB)}
+.lbhead h1{position:absolute;left:20px;top:22px;font-size:34px}
+.podium{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end;gap:8px;padding:0 24px}
+.pcol{flex:1;max-width:110px;text-align:center}
+.pcol .who{font-size:13px;font-weight:800}
+.pcol .face{width:54px;height:54px;margin:4px auto;border-radius:16px;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;font-size:30px}
+.pcol.first .face{width:62px;height:62px;box-shadow:0 0 0 3px var(--gold),var(--shadow)}
+.pcol .coin{margin-bottom:6px}
+.block{transform-origin:bottom;border-radius:16px 16px 0 0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:40px}
+.block.b1{height:120px;background:var(--c-insight)}
+.block.b2{height:86px;background:var(--c-focus)}
+.block.b3{height:66px;background:var(--c-memory)}
+.sheet{background:#fff;border-radius:26px 26px 0 0;margin:0 -16px;padding:12px 16px 20px;box-shadow:0 -6px 20px rgba(0,0,0,.05)}
+.lrow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;margin-bottom:8px;background:var(--bg)}
+.lrow .rk{width:22px;text-align:center;font-weight:900}
+.lrow .fc{width:36px;height:36px;border-radius:10px;background:#fff;display:grid;place-items:center;font-size:21px}
+.lrow .nm{flex:1;font-weight:800}
+.lrow .up{color:var(--ok);font-size:12px}
+.lrow.me{box-shadow:inset 0 0 0 2.5px var(--ink)}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:0 16px env(safe-area-inset-bottom,0px)}
+.tabbar .inner{max-width:428px;margin:0 auto 10px;display:flex;gap:6px;background:#fff;border-radius:999px;padding:6px;box-shadow:0 8px 30px rgba(17,24,39,.14)}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:999px;font-weight:800;font-size:15px;color:var(--soft)}
+.tab[aria-current="page"]{background:var(--ink);color:#fff}
+.tab svg{width:19px;height:19px}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:#fff;font-weight:800;padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;white-space:nowrap}
+
+.intro-head .topics{position:relative;display:inline-block;margin-top:10px;background:rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:800}
+pre.code{margin:0 0 4px;background:#1F2A37;color:#E8ECF5;border-radius:14px;padding:12px 14px;font:600 14.5px/1.55 ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+code{font-family:ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace}
+textarea.field.mono{font:600 15px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.bt-card{height:150px;max-width:300px;margin:0 auto 18px;border-radius:24px;background:#E9ECF4;display:grid;place-items:center;font:900 56px ui-monospace,Menlo,Consolas,monospace;color:var(--ink)}
+.bt-card.on{background:var(--c);color:#fff}
+.ss-key div code{display:block;font-size:14px;font-weight:800;padding:2px 0}
+.ss-target code{font-size:34px;font-weight:900}
+.wiki{padding:18px 18px 16px;border-top:4px solid var(--c)}
+.wiki .wiki-top{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
+.wiki h2{font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:28px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px}
+.wiki p{margin:0;font-size:16.5px;line-height:1.75;font-weight:600}
+.wl{color:#2F6FDE;text-decoration:none;border-bottom:2px solid rgba(47,111,222,.25);font-weight:800}
+.wl:active{background:rgba(47,111,222,.1)}
+.learn{background:#fff;border-radius:22px;box-shadow:var(--shadow);padding:18px}
+.learn h2{font-size:26px;margin:8px 0 4px;color:var(--c)}
+.learn p{margin:0}
+.pill{display:inline-block;background:var(--c);color:#fff;font-size:12px;font-weight:900;border-radius:999px;padding:2px 10px}
+.chipb.chip-right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,#fff)}
+.chipb.chip-wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,#fff)}
+.source{border-left:4px solid var(--c)}
+.idea{display:flex;gap:10px;align-items:center;overflow-wrap:anywhere}
+
+.rs-rule{text-align:center;color:#fff;font-weight:900;font-size:22px;border-radius:18px;padding:12px;margin-bottom:14px;transform-origin:top}
+.rs-card{height:150px;border-radius:24px;background:#fff;box-shadow:var(--shadow);display:grid;place-items:center;margin-bottom:16px}
+.rs-card code{font-size:44px;font-weight:900;color:var(--ink)}
+.rs-no,.rs-yes{flex:1;font-size:20px;padding:16px}
+.rs-no{background:#E9ECF4;color:var(--ink)}
+.rs-yes{background:var(--c)}
+.rp-grid{position:relative;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:4px;aspect-ratio:1;max-width:340px;margin:0 auto 12px;padding:4px;background:#fff;border-radius:18px;box-shadow:var(--shadow)}
+.rp-grid .cell{border-radius:10px;background:#EEF1F7;display:grid;place-items:center;font-size:24px}
+.rp-grid .cell.wall{background:#5A6478}
+.rp-grid .cell.trail{background:color-mix(in srgb,var(--c) 18%,#EEF1F7)}
+.rp-grid .cell.goal{background:color-mix(in srgb,var(--gold) 22%,#fff)}
+.rp-grid .cell.goal .star{display:inline-block;animation:starPulse 1.6s ease-in-out infinite}
+@keyframes starPulse{50%{transform:scale(1.15) rotate(8deg)}}
+.rp-bot{position:absolute;left:0;top:0;padding:2px;pointer-events:none;z-index:2;transition:none}
+.rp-body{width:100%;height:100%;will-change:transform}
+.rp-body svg{width:100%;height:100%;display:block;overflow:visible;animation:bob 1.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-1.5px)}}
+.rp-body .eyes{animation:blink 3.6s infinite;transform-origin:73px 50px}
+@keyframes blink{0%,94%,100%{transform:scaleX(1)}97%{transform:scaleX(.15)}}
+.rp-body .led{animation:led 1.2s steps(2) infinite}
+@keyframes led{50%{opacity:.25}}
+.rp-bot.moving .tr{animation:tread .25s linear infinite}
+@keyframes tread{to{stroke-dashoffset:-9}}
+.rp-bot.moving .rp-body svg{animation:none}
+.rp-bot.crashed .eyes{opacity:0}
+.rp-bot.crashed .xeyes{opacity:1}
+.rp-bot.crashed .led{fill:#FF6B6B}
+.rp-bot.won .eyes rect{fill:#7CF29A}
+.rp-prog{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;background:#1F2A37;border-radius:14px;padding:10px;font:600 13px ui-monospace,Menlo,Consolas,monospace;color:#E8ECF5}
+.rp-prog span{background:rgba(255,255,255,.1);border-radius:8px;padding:2px 8px}
+.rp-prog span.hi{background:var(--c);color:#fff}
+.rp-prog span.muted{background:none;color:#9AA4B8}
+
+.round.mute{font-size:17px}
+.top .round.mute{margin-left:auto}
+.combo{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));translate:-50% 0;z-index:35;pointer-events:none;display:none;align-items:center;gap:6px;padding:6px 16px;border-radius:999px;font-weight:900;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:#fff;background:linear-gradient(135deg,#FF7A2F,#F0457A);box-shadow:0 8px 24px rgba(240,69,122,.35)}
+.combo.on{display:inline-flex}
+.combo b{font-size:20px;display:inline-block}
+.spark{position:fixed;width:8px;height:8px;border-radius:50%;z-index:55;pointer-events:none;margin:-4px 0 0 -4px}
+.confetti{position:fixed;width:9px;height:14px;border-radius:2px;z-index:55;pointer-events:none}
+.edge{position:fixed;inset:0;z-index:44;pointer-events:none;opacity:0}
+.edge.good{box-shadow:inset 0 0 0 4px var(--ok),inset 0 0 70px rgba(22,163,111,.45)}
+.edge.bad{box-shadow:inset 0 0 0 4px var(--bad),inset 0 0 70px rgba(239,68,68,.45)}
+.count .ripple{position:absolute;width:160px;height:160px;border-radius:50%;border:6px solid var(--c);opacity:0}
+.tbar.urgent i{background:var(--bad)!important}
+.tbar.urgent{animation:urg .5s ease-in-out infinite alternate}
+@keyframes urg{to{background:color-mix(in srgb,var(--bad) 25%,var(--line))}}
+.tier{display:inline-flex;align-items:center;gap:6px;margin:8px auto 2px;padding:6px 16px;border-radius:999px;font-weight:900;font-size:15px;color:#fff;background:var(--t);box-shadow:0 6px 18px color-mix(in srgb,var(--t) 40%,transparent);visibility:hidden}
+.tier.show{visibility:visible}
+
+.ai-dots{display:inline-flex;gap:4px;align-items:center;height:1em}
+.ai-dots i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:aid 1s infinite ease-in-out}
+.ai-dots i:nth-child(2){animation-delay:.15s}.ai-dots i:nth-child(3){animation-delay:.3s}
+@keyframes aid{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.tier{visibility:visible}*{transition:none!important}.rp-body svg,.rp-body .eyes,.rp-body .led,.star,.tr{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section class="view" id="view-home">
+  <div class="top">
+    <div class="avatar" aria-hidden="true">🧑‍🎓</div>
+    <div style="flex:1"><h2>Your training</h2><span class="coin"><i>C</i><span id="h-points">0</span> pt</span></div>
+    <button class="round press mute" aria-label="Turn sound off">🔊</button>
+  </div>
+
+  <div class="card hero">
+    <h1>Fortnight 1</h1>
+    <p class="muted">Play each game for 10 minutes. Keep going to climb the leaderboard.</p>
+    <div class="bar"><i id="h-fort"></i></div>
+    <div class="row small muted" style="justify-content:space-between;margin-top:6px"><span id="h-fort-text"></span><span id="h-fort-min"></span></div>
+    <div class="checks" id="h-checks"></div>
+  </div>
+
+  <div class="sect"><h2>Your skills</h2><span class="small muted">best score, out of 100</span></div>
+  <div class="card skills" id="h-skills"></div>
+
+  <div class="sect"><h2>All games</h2><span class="small muted">Demo: all 15 unlocked</span></div>
+  <div class="library" id="h-library"></div>
+  <div class="card" style="margin-top:24px;text-align:center">
+    <p class="small muted" style="margin:0 0 10px">Start over: clears all minutes, scores, stars, levels and tricks learned.</p>
+    <button class="btn light sm" id="h-reset">↺ Reset progress</button>
+  </div>
+</section>
+
+<section class="view" id="view-game">
+  <div class="gtop">
+    <button class="round press" data-go="home" aria-label="Back to games">←</button>
+    <div class="goal" id="g-goal"><span aria-hidden="true">⏱</span><div class="bar"><i id="g-gbar"></i></div><span class="t" id="g-time">0:00</span></div>
+    <button class="round press mute" aria-label="Turn sound off">🔊</button>
+  </div>
+  <div class="combo" id="combo" aria-live="polite">🔥 <b>x3</b> combo</div>
+  <div class="stage" id="stage"></div>
+</section>
+
+<section class="view" id="view-leaderboard">
+  <div class="lbhead">
+    <h1>Leaderboard</h1>
+    <div class="podium" id="lb-podium"></div>
+  </div>
+  <div class="sheet">
+    <div id="lb-list"></div>
+    <p class="small muted" style="text-align:center">Classmates here are sample data for this preview. Real rankings will come from the portal.</p>
+  </div>
+</section>
+</div>
+
+<nav class="tabbar" aria-label="Main">
+  <div class="inner">
+    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Games</button>
+    <button class="tab" data-go="leaderboard" id="tab-lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>Leaderboard</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<script>
+/* ================= core ================= */
+const M = window.Motion || null;
+const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPRING = { type:'spring', bounce:0, duration:0.4 };
+const stag = d => M ? M.stagger(d) : 0;
+function anim(t, kf, o){ if (!M || reduced() || !t) return null; try { return M.animate(t, kf, Object.assign({}, SPRING, o||{})); } catch(e){ return null; } }
+function countTo(el, to, dur){
+  if (el._count) { el._count.stop(); el._count = null; }
+  if (!M || reduced() || !to) { el.textContent = to; return; }
+  el._count = M.animate(0, to, { duration: dur || 0.9, ease:[.2,.8,.2,1], onUpdate: v => el.textContent = Math.round(v) });
+}
+const $ = id => document.getElementById(id);
+const h = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+
+const SKILLS = {
+  creativity:{name:'Creativity', c:'var(--c-creativity)'},
+  insight:{name:'Insight', c:'var(--c-insight)'},
+  memory:{name:'Memory', c:'var(--c-memory)'},
+  focus:{name:'Focus', c:'var(--c-focus)'},
+  reasoning:{name:'Reasoning', c:'var(--c-reasoning)'},
+  flexibility:{name:'Flexibility', c:'var(--c-flex)'},
+  planning:{name:'Planning', c:'var(--c-calibration)'},
+  ai:{name:'Using AI well', c:'var(--c-ai)'}
+};
+const ICON = {
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/>',
+  seven:'<path d="M7 5h10l-6 14"/><path d="M9 12h6"/>',
+  chain:'<path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/>',
+  grid:'<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
+  nodes:'<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.3 7.2l3.4 8.6M16.7 7.2l-3.4 8.6M7.5 6h9"/>',
+  book:'<path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/>',
+  diamond:'<path d="M12 3 L21 12 L12 21 L3 12 Z"/>',
+  back:'<rect x="4" y="4" width="16" height="16" rx="3"/><rect x="13" y="7" width="4" height="4" rx="1" fill="currentColor"/><path d="M4 12h16M12 4v16"/>',
+  lens:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/><path d="M8.5 10.5h4"/>',
+  chat:'<path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4z"/><path d="M19 9h1a1 1 0 0 1 1 1v6h-1v3l-3-3h-3"/>',
+  gauge:'<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/>',
+  eye:'<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
+  switch:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
+  robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
+  star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>'
+};
+const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
+
+/* ---------- storage ---------- */
+const KEY = 'gc_demo_v5';
+try { localStorage.removeItem('gc_demo_v4'); } catch(e){}
+let S; try { S = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ S = {}; }
+S.g = S.g || {}; S.days = S.days || [];
+const gs = id => (S.g[id] = S.g[id] || { active:0, best:0, bestPct:0, plays:0, hit:false });
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+const TARGET = 600;
+const points = () => Object.values(S.g).reduce((a,g) => a + Math.floor(g.active/6) + g.plays*10, 0);
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg;
+  if (M && !reduced()) M.animate(t, { opacity:[0,1], y:[16,0] }, SPRING); else t.style.opacity = 1;
+  clearTimeout(t._h); t._h = setTimeout(() => { if (M && !reduced()) M.animate(t, { opacity:0, y:16 }, SPRING); else t.style.opacity = 0; }, 2800);
+}
+/* floating "+10" like Lumosity */
+function pop(text, el, color){
+  const r = el.getBoundingClientRect();
+  const p = h('<div class="pop">'+esc(text)+'</div>');
+  p.style.left = (r.left + r.width/2) + 'px'; p.style.top = (r.top + r.height/2) + 'px'; p.style.color = color || 'var(--ok)';
+  document.body.appendChild(p);
+  if (!color || color === 'var(--ok)') sparks(r.left + r.width/2, r.top + r.height/2, 'var(--ok)', 8);
+  if (M && !reduced()) M.animate(p, { y:[0,-56], opacity:[1,1,0], scale:[.6,1.15,1] }, { duration:0.8, ease:'easeOut' }).then(() => p.remove());
+  else setTimeout(() => p.remove(), 600);
+}
+/* big tick / cross burst */
+function burst(good){
+  FX.result(good);
+  const f = h('<div class="flash"><b style="background:'+(good ? 'var(--ok)' : 'var(--bad)')+'">'+(good ? '✓' : '✕')+'</b></div>');
+  document.body.appendChild(f);
+  const b = f.firstChild;
+  if (M && !reduced()) M.animate(b, { scale:[.3,1.1,1], opacity:[0,1,1,0] }, { duration:0.7, ease:'easeOut' }).then(() => f.remove());
+  else setTimeout(() => f.remove(), 500);
+}
+function shake(el){ anim(el, { x:[0,-9,8,-5,3,0] }, { type:'tween', duration:0.35 }); }
+function ring(el, good){ el.classList.remove('ok-ring','bad-ring'); el.classList.add(good ? 'ok-ring' : 'bad-ring'); clearTimeout(el._r); el._r = setTimeout(() => el.classList.remove('ok-ring','bad-ring'), 450); }
+
+/* ================= sound: synthesized with Web Audio, no files ================= */
+const SFX = (() => {
+  let ac = null, master = null, muted = false;
+  try { muted = localStorage.getItem('gc_mute') === '1'; } catch(e){}
+  const get = () => {
+    if (!ac) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; ac = new A(); master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination); }
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  };
+  function tone(f, t0, dur, o){
+    o = o || {}; const c = ac, osc = c.createOscillator(), g = c.createGain();
+    osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t0);
+    if (o.slide) osc.frequency.linearRampToValueAtTime(Math.max(30, f + o.slide), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(o.vol || 0.15, t0 + (o.attack || 0.006)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(master); osc.start(t0); osc.stop(t0 + dur + 0.02);
+  }
+  function noise(t0, dur, o){
+    o = o || {}; const c = ac, len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random()*2 - 1;
+    const src = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = buf; bp.type = 'bandpass'; bp.Q.value = o.q || 0.9;
+    bp.frequency.setValueAtTime(o.from || 400, t0); bp.frequency.exponentialRampToValueAtTime(o.to || 2400, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(o.vol || 0.1, t0 + dur*0.3); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(bp); bp.connect(g); g.connect(master); src.start(t0); src.stop(t0 + dur);
+  }
+  const N = { C5:523.25, E5:659.25, G5:783.99, C6:1046.5, E6:1318.5, G6:1568 };
+  return {
+    unlock(){ get(); },
+    get muted(){ return muted; },
+    toggle(){ muted = !muted; try { localStorage.setItem('gc_mute', muted ? '1' : '0'); } catch(e){} if (!muted) { get(); this.play('select'); } return muted; },
+    play(name, arg){
+      if (muted) return; const c = get(); if (!c) return; const t = c.currentTime + 0.005;
+      switch (name){
+        case 'tap': tone(1500, t, 0.035, { type:'triangle', vol:0.05 }); break;
+        case 'select': tone(880, t, 0.06, { type:'triangle', vol:0.08 }); tone(1320, t+0.03, 0.05, { type:'triangle', vol:0.05 }); break;
+        case 'correct': { const f = 660 * Math.pow(2, Math.min(arg||1, 12)/12); tone(f, t, 0.09, { vol:0.14 }); tone(f*1.5, t+0.07, 0.16, { vol:0.13 }); break; }
+        case 'softok': { const f = 880 * Math.pow(2, Math.min(arg||1, 12)/24); tone(f, t, 0.07, { type:'triangle', vol:0.09 }); break; }
+        case 'wrong': tone(180, t, 0.22, { type:'sawtooth', vol:0.08, slide:-80 }); tone(120, t+0.02, 0.22, { type:'square', vol:0.04, slide:-40 }); break;
+        case 'softbad': tone(150, t, 0.12, { type:'square', vol:0.05, slide:-40 }); break;
+        case 'count': tone(520, t, 0.12, { type:'square', vol:0.07 }); break;
+        case 'go': tone(784, t, 0.09, { type:'square', vol:0.08 }); tone(1046, t+0.08, 0.25, { type:'square', vol:0.08 }); noise(t, 0.3, { vol:0.05, from:600, to:5000 }); break;
+        case 'tick': tone(1900, t, 0.025, { type:'square', vol:0.04 }); break;
+        case 'urgent': tone(1200, t, 0.06, { type:'square', vol:0.07 }); break;
+        case 'whoosh': noise(t, 0.28, { vol:0.07, from:300, to:3500 }); break;
+        case 'combo': [N.C5, N.E5, N.G5, N.C6].forEach((f,i) => tone(f, t + i*0.055, 0.14, { type:'triangle', vol:0.11 })); break;
+        case 'break': tone(400, t, 0.25, { type:'triangle', vol:0.08, slide:-260 }); break;
+        case 'star': tone(N.C6 * Math.pow(2, (arg||0)*4/12), t, 0.3, { type:'triangle', vol:0.12 }); tone(N.C6 * 2 * Math.pow(2, (arg||0)*4/12), t+0.02, 0.2, { vol:0.04 }); break;
+        case 'reveal': noise(t, 0.35, { vol:0.06, from:800, to:6000 }); tone(N.G5, t+0.25, 0.35, { type:'triangle', vol:0.12 }); tone(N.C6, t+0.32, 0.45, { type:'triangle', vol:0.1 }); break;
+        case 'fanfare': [N.C5, N.E5, N.G5, N.C6, N.G5, N.C6].forEach((f,i) => tone(f, t + [0,.1,.2,.3,.48,.58][i], i === 5 ? 0.5 : 0.16, { type:'square', vol:0.06 })); break;
+        case 'levelup': tone(440, t, 0.45, { type:'triangle', vol:0.1, slide:440 }); tone(660, t+0.1, 0.4, { vol:0.06, slide:660 }); break;
+        case 'move': tone(210, t, 0.14, { type:'triangle', vol:0.06, slide:60 }); noise(t, 0.14, { vol:0.025, from:200, to:600 }); break;
+        case 'turn': tone(300, t, 0.16, { type:'sawtooth', vol:0.025, slide:160 }); break;
+        case 'bump': tone(95, t, 0.25, { vol:0.28, slide:-50 }); noise(t, 0.12, { vol:0.08, from:150, to:400 }); break;
+      }
+    }
+  };
+})();
+function vib(p){ try { if (!SFX.muted && navigator.vibrate) navigator.vibrate(p); } catch(e){} }
+document.addEventListener('pointerdown', e => {
+  SFX.unlock();
+  if (e.target.closest('.btn, .chipb, .gcard, .check, .tab, .round, [data-cmd], .lg-grid button, .slider button')) SFX.play('tap');
+}, true);
+
+/* ================= motion FX: combo, edge glow, sparks, confetti ================= */
+function sparks(x, y, color, n){
+  if (!M || reduced()) return;
+  for (let i = 0; i < (n||10); i++){
+    const d = document.createElement('i'); d.className = 'spark'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.background = color || 'var(--ok)';
+    document.body.appendChild(d);
+    const a = Math.random()*Math.PI*2, r = 30 + Math.random()*50;
+    M.animate(d, { x:[0, Math.cos(a)*r], y:[0, Math.sin(a)*r], scale:[1,0], opacity:[1,0] }, { duration:0.55 + Math.random()*0.25, ease:'easeOut' }).then(() => d.remove());
+  }
+}
+function confetti(){
+  if (!M || reduced()) return;
+  const cols = ['#7B61FF','#FF7A2F','#0F9F8F','#F0457A','#FFB020','#2F7BF0','#20A35A'];
+  for (let i = 0; i < 46; i++){
+    const d = document.createElement('i'); d.className = 'confetti'; d.style.background = pick(cols);
+    d.style.left = (10 + Math.random()*80) + 'vw'; d.style.top = '-12px';
+    document.body.appendChild(d);
+    M.animate(d, { y:[0, window.innerHeight*(0.6 + Math.random()*0.5)], x:[0, (Math.random()-0.5)*160], rotate:[0, (Math.random()-0.5)*720], opacity:[1,1,0] }, { duration:1.4 + Math.random()*0.9, delay:Math.random()*0.25, ease:[.2,.6,.4,1] }).then(() => d.remove());
+  }
+}
+function edge(good, soft){
+  if (!M || reduced()) return;
+  const e = document.createElement('div'); e.className = 'edge ' + (good ? 'good' : 'bad'); document.body.appendChild(e);
+  M.animate(e, { opacity:[0, soft ? 0.45 : 0.9, 0] }, { duration: soft ? 0.25 : 0.45 }).then(() => e.remove());
+}
+const FX = {
+  combo:0, best:0,
+  reset(){ this.combo = 0; this.best = 0; const c = $('combo'); if (c) c.classList.remove('on'); },
+  result(good, soft){
+    const c = $('combo');
+    if (good){
+      this.combo++; this.best = Math.max(this.best, this.combo);
+      SFX.play(soft ? 'softok' : 'correct', this.combo); vib(8); edge(true, soft);
+      if (this.combo >= 3 && c){
+        c.querySelector('b').textContent = 'x' + this.combo;
+        const big = [3,5,10,15,20,30,40,50].includes(this.combo);
+        if (!c.classList.contains('on') || big){
+          c.classList.add('on');
+          anim(c, { scale:[0.4,1.25,1], rotate:[-8,4,0], opacity:[0,1,1] }, { type:'tween', duration:0.45 });
+          if (big) { SFX.play('combo'); const r = c.getBoundingClientRect(); sparks(r.left + r.width/2, r.top + r.height/2, '#FFB020', 14); }
+        } else anim(c.querySelector('b'), { scale:[1.4,1] }, { duration:0.2 });
+      }
+    } else {
+      if (this.combo >= 3 && c){ SFX.play('break'); anim(c, { x:[0,-8,8,-4,0], opacity:[1,1,0], scale:[1,1,0.6] }, { type:'tween', duration:0.45 }); setTimeout(() => c.classList.remove('on'), 450); }
+      this.combo = 0;
+      SFX.play(soft ? 'softbad' : 'wrong'); vib([20,30,20]); edge(false, soft);
+    }
+  }
+};
+function syncMute(){ document.querySelectorAll('.mute').forEach(b => { b.textContent = SFX.muted ? '🔇' : '🔊'; b.setAttribute('aria-label', SFX.muted ? 'Turn sound on' : 'Turn sound off'); }); }
+document.addEventListener('click', e => { const b = e.target.closest('.mute'); if (b) { SFX.toggle(); syncMute(); } });
+
+/* ---------- routing ---------- */
+let view = null, curGame = null, cleanup = null;
+function route(){
+  const hs = location.hash.slice(1);
+  let next = 'home', gid = null;
+  if (hs === 'leaderboard') next = 'leaderboard';
+  else if (hs.startsWith('g-') && GAMES.find(g => g.id === hs.slice(2))) { next = 'game'; gid = hs.slice(2); }
+  if (cleanup) { cleanup(); cleanup = null; }
+  { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
+  view = next; curGame = gid;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'view-' + view));
+  $('tab-home').setAttribute('aria-current', view === 'leaderboard' ? 'false' : 'page');
+  $('tab-lb').setAttribute('aria-current', view === 'leaderboard' ? 'page' : 'false');
+  lastAct = Date.now();
+  if (view === 'home') renderHome();
+  if (view === 'leaderboard') renderBoard();
+  if (view === 'game') showIntro(GAMES.find(g => g.id === gid));
+  window.scrollTo(0,0); syncMute();
+  anim($('view-' + view), { opacity:[0,1], y:[10,0] });
+  renderGoal();
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]');
+  if (b) location.hash = b.dataset.go === 'home' ? '' : b.dataset.go;
+});
+window.addEventListener('hashchange', route);
+
+/* ---------- active time ---------- */
+let lastAct = Date.now(), playing = false;
+['keydown','pointerdown','input'].forEach(ev => document.addEventListener(ev, () => { lastAct = Date.now(); }, true));
+const isActive = () => curGame && !document.hidden && (Date.now() - lastAct) < 40000;
+const dayKey = d => d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+setInterval(() => {
+  if (!curGame) return;
+  if (isActive()) {
+    const g = gs(curGame); g.active++;
+    const k = dayKey(new Date()); if (!S.days.includes(k)) S.days.push(k);
+    if (g.active >= TARGET && !g.hit) { g.hit = true; toast('🎉 10 minutes done on this game'); }
+    save();
+  }
+  renderGoal();
+}, 1000);
+function renderGoal(){
+  if (!curGame) return;
+  const g = gs(curGame), on = isActive();
+  $('g-gbar').style.width = Math.min(100, g.active/TARGET*100) + '%';
+  $('g-time').textContent = on ? fmt(g.active) + ' / 10:00' : 'Paused';
+  $('g-goal').classList.toggle('paused', !on);
+}
+
+/* ---------- home ---------- */
+const FORTNIGHT = ['word-spread','missing-link','symbol-sprint'];
+function renderHome(){
+  countTo($('h-points'), points(), 0.6);
+  let mins = 0, done = 0;
+  $('h-checks').innerHTML = FORTNIGHT.map(id => {
+    const g = GAMES.find(x => x.id === id), st = gs(id), d = st.active >= TARGET;
+    mins += Math.min(st.active, TARGET); done += d;
+    return '<button class="check press'+(d ? ' done' : '')+'" data-go="g-'+id+'"><span class="box"></span><span class="nm">'+g.name+'</span><span class="small muted">'+fmt(Math.min(st.active,TARGET))+' / 10:00</span></button>';
+  }).join('');
+  $('h-fort').style.width = (mins / (TARGET*FORTNIGHT.length) * 100) + '%';
+  $('h-fort-text').textContent = done + ' of ' + FORTNIGHT.length + ' games done';
+  $('h-fort-min').textContent = Math.floor(mins/60) + ' of ' + (FORTNIGHT.length*10) + ' min';
+  $('h-skills').innerHTML = Object.entries(SKILLS).map(([k,s]) => {
+    const v = Math.max(0, ...GAMES.filter(g => g.skill === k).map(g => gs(g.id).bestPct));
+    return '<div class="sk"><span>'+s.name+'</span><div class="bar"><i style="background:'+s.c+'" data-w="'+v+'"></i></div><b>'+v+'</b></div>';
+  }).join('');
+  requestAnimationFrame(() => document.querySelectorAll('#h-skills i').forEach(i => i.style.width = i.dataset.w + '%'));
+  $('h-library').innerHTML = GAMES.map(g => {
+    const st = gs(g.id), stars = st.plays ? starCount(st.bestPct) : 0;
+    return '<button class="gcard press" data-go="g-'+g.id+'" style="--c:'+SKILLS[g.skill].c+'">'
+      + '<div class="art">'+(FORTNIGHT.includes(g.id) ? '<span class="tagnew">This fortnight</span>' : '')+svgI(g.icon)+'</div>'
+      + '<div class="body"><span class="sk-l">'+SKILLS[g.skill].name+'</span><h3>'+g.name+'</h3>'
+      + '<div class="mini"><div class="bar"><i style="width:'+Math.min(100,st.active/TARGET*100)+'%"></i></div><span class="stars">'+'★'.repeat(stars)+'<span style="color:var(--line)">'+'★'.repeat(3-stars)+'</span></span></div></div></button>';
+  }).join('');
+  anim(document.querySelectorAll('#h-library .gcard'), { opacity:[0,1], y:[16,0] }, { delay: stag(0.03) });
+}
+const starCount = p => p >= 85 ? 3 : p >= 60 ? 2 : p >= 30 ? 1 : 0;
+/* reset: tap once to arm, tap again within 4 seconds to confirm */
+(function(){
+  const b = document.getElementById('h-reset'); let armed = false, t;
+  b.onclick = () => {
+    if (!armed) {
+      armed = true; b.textContent = 'Tap again to confirm'; b.style.background = 'var(--bad)'; b.style.color = '#fff';
+      anim(b, { scale:[.94,1] }, { duration:0.25 });
+      t = setTimeout(() => { armed = false; b.textContent = '↺ Reset progress'; b.style.background = ''; b.style.color = ''; }, 4000);
+      return;
+    }
+    clearTimeout(t); armed = false;
+    S = { g:{}, days:[] }; save();
+    b.textContent = '↺ Reset progress'; b.style.background = ''; b.style.color = '';
+    renderHome(); window.scrollTo({ top:0, behavior: reduced() ? 'auto' : 'smooth' });
+    toast('Progress reset to 0');
+  };
+})();
+
+/* ---------- leaderboard ---------- */
+const SAMPLE = [
+  {n:'Keerthi', f:'👩🏽', p:2563, up:3}, {n:'Sai Teja', f:'🧑🏽', p:1342, up:1}, {n:'Harika', f:'👧🏽', p:746, up:2},
+  {n:'Rahul', f:'👦🏽', p:543, up:4}, {n:'Ananya', f:'👩🏻', p:463, up:12}, {n:'Varun', f:'🧔🏽', p:390, up:2},
+  {n:'Divya', f:'👩🏾', p:288, up:5}, {n:'Abhinav', f:'👨🏽', p:175, up:1}, {n:'Sneha', f:'👱🏽‍♀️', p:96, up:3}
+];
+const coin = p => '<span class="coin"><i>C</i>' + p.toLocaleString('en-IN') + ' pt</span>';
+function renderBoard(){
+  const all = SAMPLE.concat([{n:'You', f:'🧑‍🎓', p:points(), me:true}]).sort((a,b) => b.p - a.p);
+  const top = [all[1], all[0], all[2]], cls = ['','first',''], blk = ['b2','b1','b3'], num = [2,1,3];
+  $('lb-podium').innerHTML = top.map((u,i) => '<div class="pcol '+cls[i]+'"><div class="who">'+u.n+'</div><div class="face">'+u.f+'</div>'+coin(u.p)+'<div class="block '+blk[i]+'">'+num[i]+'</div></div>').join('');
+  $('lb-list').innerHTML = all.slice(3).map((u,i) => '<div class="lrow'+(u.me ? ' me' : '')+'"><span class="rk">'+(i+4)+'</span><span class="fc">'+u.f+'</span><span class="nm">'+u.n+'</span>'+(u.up ? '<span class="up">▲ '+u.up+'</span>' : '')+coin(u.p)+'</div>').join('');
+  anim(document.querySelectorAll('.block'), { scaleY:[0,1] }, { type:'spring', bounce:0.25, duration:0.7, delay: stag(0.08) });
+  anim(document.querySelectorAll('.pcol .face'), { y:[-20,0], opacity:[0,1] }, { type:'spring', bounce:0.35, duration:0.7, delay: stag(0.08) });
+  anim(document.querySelectorAll('.lrow'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.04) });
+}
+
+/* ---------- game shell: intro → countdown → play → results ---------- */
+function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c); document.documentElement.style.setProperty('--c', SKILLS[g.skill].c); }
+function showIntro(g){
+  setColor(g);
+  const st = gs(g.id);
+  const stage = $('stage');
+  stage.innerHTML = '';
+  const el = h('<div>'
+    + '<div class="intro-head"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
+    + '<div class="ic">'+svgI(g.icon, 2.2)+'</div><h1>'+g.name+'</h1><div class="meta">'+SKILLS[g.skill].name+'. Inspired by '+g.inspired+'.</div><div class="topics">💻 '+g.topics+'</div></div>'
+    + '<div class="card how"><h3>How to play</h3><ol>'+g.how.map((s,i) => '<li><span>'+(i+1)+'</span><div>'+s+'</div></li>').join('')+'</ol></div>'
+    + '<div class="intro-foot"><div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button></div>'
+    + '</div>');
+  stage.appendChild(el);
+  anim(el.querySelector('.intro-head'), { opacity:[0,1], scale:[.96,1] });
+  anim(el.querySelector('.ic'), { scale:[0,1], rotate:[-25,0] }, { type:'spring', bounce:0.45, duration:0.7, delay:0.1 });
+  anim(el.querySelector('.intro-head h1'), { opacity:[0,1], y:[12,0] }, { delay:0.15 });
+  anim(el.querySelectorAll('.orb'), { scale:[0,1] }, { delay: stag(0.08), duration:0.8 });
+  anim(el.querySelectorAll('.how li'), { opacity:[0,1], x:[-12,0] }, { delay: stag(0.07) });
+  SFX.play('whoosh');
+  $('go').onclick = () => countdown(g);
+}
+function countdown(g){
+  SFX.unlock();
+  const ov = h('<div class="count"><span class="ripple"></span><b>3</b></div>'); document.body.appendChild(ov);
+  const b = ov.querySelector('b'), rp = ov.querySelector('.ripple'); let n = 3;
+  const step = () => {
+    b.textContent = n > 0 ? n : 'GO!';
+    SFX.play(n > 0 ? 'count' : 'go');
+    anim(b, { scale:[2.2,1], opacity:[0,1], rotate: n > 0 ? [0,0] : [-10,0] }, { type:'spring', bounce:0.35, duration:0.5 });
+    anim(rp, { scale:[0.2,2.4], opacity:[0.5,0] }, { type:'tween', duration:0.6 });
+    setTimeout(() => { if (n === 0) { ov.remove(); play(g); } else { n--; step(); } }, n > 0 ? 620 : 420);
+  };
+  if (reduced()) { ov.remove(); play(g); } else step();
+}
+function play(g){
+  const stage = $('stage'); stage.innerHTML = '';
+  const root = h('<div class="play"></div>'); stage.appendChild(root);
+  anim(root, { opacity:[0,1], y:[12,0] });
+  FX.reset();
+  lastAct = Date.now();
+  const timers = [];
+  const ctx = {
+    root,
+    after(ms, fn){ const t = setTimeout(fn, ms); timers.push(t); return t; },
+    timer(secs, bar, onTick, onEnd){
+      const end = Date.now() + secs*1000; let raf, lastSec = -1;
+      const loop = () => {
+        const left = Math.max(0, end - Date.now());
+        if (bar) bar.style.transform = 'scaleX(' + (left/(secs*1000)) + ')';
+        const sec = Math.ceil(left/1000);
+        if (sec !== lastSec) { lastSec = sec; if (sec <= 5 && sec > 0) { SFX.play('urgent'); if (bar) { bar.parentNode.classList.add('urgent'); anim(bar.parentNode, { scaleY:[1.8,1] }, { duration:0.25 }); } } }
+        onTick && onTick(Math.ceil(left/1000));
+        if (left <= 0) return onEnd();
+        raf = requestAnimationFrame(loop);
+      };
+      loop();
+      const stop = () => cancelAnimationFrame(raf);
+      timers.push({ stop }); return stop;
+    },
+    end(res){ stopAll(); results(g, res); }
+  };
+  function stopAll(){ timers.forEach(t => typeof t === 'number' ? clearTimeout(t) : t.stop()); timers.length = 0; if (gameStop) gameStop(); }
+  let gameStop = null;
+  cleanup = stopAll;
+  gameStop = g.run(ctx) || null;
+}
+function results(g, res){
+  const st = gs(g.id);
+  const prevBest = st.best;
+  st.plays++; st.best = Math.max(st.best, res.score); st.bestPct = Math.max(st.bestPct, Math.round(res.pct)); save();
+  const stars = starCount(res.pct);
+  { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
+  if (FX.best >= 3) res.lines = (res.lines || []).concat(['🔥 Best combo: <b>x' + FX.best + '</b> in a row.']);
+  const tier = res.pct >= 85 ? ['Diamond','#22B8D6','💎'] : res.pct >= 60 ? ['Gold','#E0A100','🥇'] : res.pct >= 30 ? ['Silver','#8A94A8','🥈'] : ['Bronze','#C2763F','🥉'];
+  const R = 74, C = 2*Math.PI*R;
+  const stage = $('stage'); stage.innerHTML = '';
+  const el = h('<div class="card res">'
+    + '<div class="ringwrap"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="'+R+'" fill="none" stroke="var(--line)" stroke-width="14"/>'
+    + '<circle id="r-arc" cx="85" cy="85" r="'+R+'" fill="none" stroke="var(--c)" stroke-width="14" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"/></svg>'
+    + '<div class="num"><b id="r-score">0</b><span>score</span></div></div>'
+    + '<div class="starrow">'+[0,1,2].map(i => '<i class="'+(i < stars ? 'on' : '')+'">★</i>').join('')+'</div>'
+    + '<div class="tier" id="r-tier" style="--t:'+tier[1]+'">'+tier[2]+' '+tier[0]+' rank</div>'
+    + (res.score > prevBest && prevBest > 0 ? '<span class="newbest">New best</span>' : '')
+    + '<h2>'+esc(res.title || (stars === 3 ? 'Brilliant!' : stars === 2 ? 'Nice work!' : stars === 1 ? 'Good start' : 'Keep practising'))+'</h2>'
+    + '<div class="lines">'+(res.lines||[]).map(l => '<div>'+l+'</div>').join('')+'</div>'
+    + '<div class="row"><button class="btn light" data-go="home" style="flex:1">All games</button><button class="btn c" id="again" style="flex:1">Play again</button></div>'
+    + '</div>');
+  stage.appendChild(el);
+  anim(el, { opacity:[0,1], scale:[.95,1] });
+  const arc = el.querySelector('#r-arc'), off = C * (1 - Math.max(0, Math.min(100, res.pct))/100);
+  if (M && !reduced()) M.animate(arc, { strokeDashoffset:[C, off] }, { duration:1.1, ease:[.2,.8,.2,1] }); else arc.setAttribute('stroke-dashoffset', off);
+  SFX.play('whoosh');
+  if (M && !reduced() && res.score > 0) { let lastT = 0; const sc = el.querySelector('#r-score'); M.animate(0, res.score, { duration:1.1, ease:[.2,.8,.2,1], onUpdate: v => { sc.textContent = Math.round(v); const now = performance.now(); if (now - lastT > 70) { lastT = now; SFX.play('tick'); } } }); }
+  else countTo(el.querySelector('#r-score'), res.score, 1.1);
+  for (let i = 0; i < stars; i++) setTimeout(() => { SFX.play('star', i); const st2 = el.querySelectorAll('.starrow i.on')[i]; if (st2) { const r = st2.getBoundingClientRect(); sparks(r.left + r.width/2, r.top + r.height/2, '#FFB020', 8); } }, 700 + i*180);
+  setTimeout(() => { const t = el.querySelector('#r-tier'); if (!t) return; t.classList.add('show'); anim(t, { rotateX:[90,0], scale:[0.6,1.1,1] }, { type:'tween', duration:0.5 }); SFX.play('reveal'); }, 900 + stars*180);
+  setTimeout(() => { if (stars >= 2) { SFX.play('fanfare'); confetti(); } if (res.score > prevBest && prevBest > 0) SFX.play('levelup'); }, 1250 + stars*180);
+  anim(el.querySelectorAll('.starrow i.on'), { scale:[0,1.3,1], rotate:[-40,0] }, { type:'tween', duration:0.45, delay: M ? M.stagger(0.18, { startDelay:0.7 }) : 0 });
+  anim(el.querySelectorAll('.lines div'), { opacity:[0,1], y:[8,0] }, { delay: M ? M.stagger(0.06, { startDelay:0.4 }) : 0 });
+  el.querySelector('#again').onclick = () => countdown(g);
+}
+
+
+/* ================= AI judge client (calls /api/judge on Vercel) ================= */
+const AI = (() => {
+  const cache = new Map();
+  async function judge(task, payload, ms){
+    const key = task + '|' + JSON.stringify(payload);
+    if (cache.has(key)) return cache.get(key);
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms || 7000);
+    try {
+      const r = await fetch('/api/judge', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ task, payload }), signal: ctl.signal });
+      if (!r.ok) return null;
+      const j = await r.json();
+      if (!j || !j.ok) return null;
+      cache.set(key, j.result); return j.result;
+    } catch(e){ return null; } finally { clearTimeout(t); }
+  }
+  function thinking(el, on){
+    if (!el) return;
+    if (on){ el.dataset.label = el.innerHTML; el.innerHTML = '<span class="ai-dots"><i></i><i></i><i></i></span>'; el.disabled = true; }
+    else if (el.dataset.label !== undefined){ el.innerHTML = el.dataset.label; delete el.dataset.label; }
+  }
+  return { judge, thinking };
+})();
+
+/* ================= shared bits ================= */
+function hud(items){ return '<div class="hud">' + items.map(([k,l,v]) => '<div><span>'+l+'</span><b id="'+k+'">'+v+'</b></div>').join('') + '</div>'; }
+function mcq(box, opts, correct, explain, onDone, pts){
+  box.innerHTML = opts.map((o,i) => '<button class="opt" data-i="'+i+'">'+o+'</button>').join('') + '<div id="mcq-x"></div>';
+  anim(box.querySelectorAll('.opt'), { opacity:[0,1], y:[10,0] }, { delay: stag(0.05) });
+  let done = false;
+  box.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    if (done) return; done = true;
+    const i = +b.dataset.i, good = i === correct;
+    b.classList.add(good ? 'right' : 'wrong');
+    box.querySelectorAll('.opt')[correct].classList.add('right');
+    if (good) pop('+' + (pts || 10), b); else shake(b);
+    burst(good);
+    const x = box.querySelector('#mcq-x');
+    x.innerHTML = '<div class="explain">'+explain+'</div><button class="btn c full" style="margin-top:12px" id="mcq-next">Next</button>';
+    anim(x, { opacity:[0,1], y:[8,0] });
+    x.querySelector('#mcq-next').onclick = () => onDone(good);
+    x.querySelector('#mcq-next').focus();
+  });
+}
+const code = s => '<pre class="code">'+esc(s)+'</pre>';
+
+/* ================= 1. Word Spread (creativity) ================= */
+const LEX = {
+  'hardware':'cpu ram keyboard mouse monitor ssd gpu motherboard printer router laptop processor webcam speaker charger battery pendrive harddisk microphone headphones scanner usb',
+  'Python':'variable loop function list dictionary tuple string integer float set print input boolean module return python indentation comment syntax operator',
+  'web pages':'html css div flexbox grid browser website hyperlink tag tailwind margin padding border selector heading webpage form button navbar layout',
+  'Git and command line':'git commit branch merge repository terminal folder directory push pull clone staging',
+  'networks':'wifi internet server cloud email network ip bluetooth bandwidth packet',
+  'AI':'ai chatbot prompt agent model chatgpt workflow automation gemini claude',
+  'maths':'binary hexadecimal octal matrix probability modulo bit byte remainder factor percentage ratio',
+  'security':'virus firewall hacker encryption otp malware phishing antivirus',
+  'apps':'instagram whatsapp youtube upi app game spotify zomato swiggy',
+  'data':'database spreadsheet table chart dataset excel'
+};
+const LEXMAP = {}; Object.entries(LEX).forEach(([c,ws]) => ws.split(' ').forEach(w => LEXMAP[w] = c));
+const WordSpread = { id:'word-spread', name:'Word Spread', skill:'creativity', icon:'spark', inspired:'the Divergent Association Task', topics:'Python, web, Git, maths, AI',
+  how:['Type 7 tech words, one in each box. Any area of computing counts.','Make them as different from each other as you can.','“firewall” and “matrix” are far apart; “loop” and “for” are not. 90 seconds.'],
+  run(ctx){
+    ctx.root.innerHTML = '<div class="tbar"><i id="ws-t"></i></div><p class="prompt">7 tech words, as unrelated as possible.</p>'
+      + '<div class="word-list">'+[1,2,3,4,5,6,7].map(i => '<input class="field" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Word '+i+'">').join('')+'</div>'
+      + '<button class="btn c full" id="ws-done" style="margin-top:14px">I’m done</button>';
+    const ins = [...ctx.root.querySelectorAll('input')];
+    ins[0].focus();
+    ins.forEach((inp,i) => { inp.addEventListener('paste', e => e.preventDefault()); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); (ins[i+1] || $('ws-done')).focus(); } }); });
+    const finish = () => {
+      const words = ins.map(i => i.value.trim().toLowerCase()).filter(Boolean);
+      const seen = new Set(), cats = new Set(), lines = [];
+      words.forEach(w => {
+        const k = w.replace(/[^a-z0-9]/g,'');
+        if (!k || seen.has(k)) { lines.push('<b>'+esc(w)+'</b>: repeated, not counted'); return; }
+        seen.add(k);
+        const c = LEXMAP[k] || LEXMAP[k.replace(/s$/,'')];
+        const fresh = c ? !cats.has(c) : true;
+        cats.add(c || 'own:' + k);
+        lines.push('<b>'+esc(w)+'</b>: ' + (c ? c + (fresh ? '' : ' again, no extra spread') : 'not in our demo list, counted as its own area'));
+      });
+      const spread = cats.size;
+      ctx.end({ score: spread*10 + (words.length === 7 ? 10 : 0), pct: Math.round(spread/7*100), lines: ['You covered <b>'+spread+'</b> different areas of tech.'].concat(lines).concat(['Demo scoring groups words by area. The full game will score by meaning.']) });
+    };
+    ctx.timer(90, $('ws-t'), null, finish);
+    $('ws-done').onclick = finish;
+  }
+};
+
+/* ================= 2. Beat the 7 (creativity) ================= */
+const B7 = [
+  { q:'Pick a number from 1 to 10.', typical:['7'], common:['3','5','10'] },
+  { q:'Pick a letter from A to Z.', typical:['a'], common:['x','z','s','m'] },
+  { q:'A name for a loop counter variable.', typical:['i'], common:['j','x','count','n'] },
+  { q:'A name for a true/false variable in Python.', typical:['flag'], common:['isvalid','done','found','status'] },
+  { q:'A name for a Python list of fruits.', typical:['fruits'], common:['fruitlist','fruit','list1','items'] },
+  { q:'A name for a Python function that adds two numbers.', typical:['add'], common:['sum','addition','addnumbers'] },
+  { q:'Name a programming language.', typical:['python'], common:['java','c','javascript','cpp'] },
+  { q:'Your first web project idea.', typical:['todo','todolist','todoapp'], common:['portfolio','calculator','weatherapp','weather'] },
+  { q:'A website you’d clone for practice.', typical:['netflix'], common:['amazon','youtube','spotify','instagram'] },
+  { q:'A colour for a website’s main button.', typical:['blue'], common:['green','red','black','purple'] },
+  { q:'A colour for a website background.', typical:['white'], common:['black','blue','grey','gray'] },
+  { q:'A font for a website heading.', typical:['arial'], common:['roboto','poppins','timesnewroman','helvetica'] },
+  { q:'A name for a CSS class on a button.', typical:['btn','button'], common:['submit','primary','mybutton'] },
+  { q:'A fake email for testing a form.', typical:['testtestcom'], common:['abcgmailcom','testgmailcom','exampleexamplecom'] },
+  { q:'A name for a test user account.', typical:['test'], common:['testuser','user','john','abc'] },
+  { q:'An app idea for your college.', typical:['attendance','attendanceapp','attendancetracker'], common:['canteen','timetable','notes','notessharing','foodordering'] },
+  { q:'Something to build with an AI agent.', typical:['chatbot'], common:['emailassistant','studyassistant','resumebuilder'] },
+  { q:'A way to use AI in college.', typical:['assignments','assignment','homework'], common:['notes','doubts','coding','projects'] },
+  { q:'A use for a paperclip, other than holding paper.', typical:['simejector','sim','simtool','simtray'], common:['bookmark','lockpick','hook','pin'] }
+];
+const BeatSeven = { id:'beat-the-7', name:'Beat the 7', skill:'creativity', icon:'seven', inspired:'the “why AI picks 7” reel', topics:'Python, web, everyday',
+  how:['Answer quick prompts, like “a name for a loop variable”.','Most people, and most chatbots, give the same few answers.','Typical answer: 0 points. Common answer: 2. Your own idea: 5.'],
+  run(ctx){
+    const qs = shuffle(B7).slice(0,6); let i = 0, score = 0, log = [];
+    ctx.root.innerHTML = hud([['b7-q','Prompt','1/6'],['b7-s','Points','0']]) + '<div class="card"><div class="big" id="b7-text"></div>'
+      + '<div class="row" style="margin-top:14px"><input class="field" id="b7-in" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer"><button class="btn c" id="b7-go">Go</button></div><div id="b7-fb"></div></div>';
+    const inp = $('b7-in'); inp.addEventListener('paste', e => e.preventDefault());
+    const show = () => { $('b7-text').textContent = qs[i].q; $('b7-q').textContent = (i+1)+'/6'; inp.value = ''; inp.disabled = false; $('b7-go').disabled = false; $('b7-fb').innerHTML = ''; inp.focus(); anim($('b7-text'), { opacity:[0,1], x:[16,0] }); };
+    let busy = false;
+    const go = async () => {
+      const a = inp.value.trim(); if (!a || busy) return inp.focus();
+      const k = norm(a), q = qs[i];
+      let pts = q.typical.includes(k) ? 0 : q.common.map(norm).includes(k) ? 2 : 5, why = '';
+      if (pts === 5) {
+        busy = true; inp.disabled = true; AI.thinking($('b7-go'), true);
+        const r = await AI.judge('beat7', { prompt:q.q, answer:a, typical:q.typical[0], common:q.common });
+        AI.thinking($('b7-go'), false); busy = false;
+        if (r) { pts = r.category === 'typical' ? 0 : r.category === 'common' ? 2 : r.category === 'invalid' ? 0 : 5; why = r.reason || ''; }
+      }
+      score += pts; $('b7-s').textContent = score; log.push(pts);
+      inp.disabled = true; $('b7-go').disabled = true;
+      SFX.play(pts === 5 ? 'correct' : pts ? 'softok' : 'softbad', 3); if (pts === 5) edge(true);
+      pop(pts ? '+' + pts : '0', $('b7-go'), pts === 5 ? 'var(--ok)' : pts ? 'var(--c-calibration)' : 'var(--bad)');
+      $('b7-fb').innerHTML = '<div class="explain"><b>'+(pts === 5 ? 'Your own idea!' : pts ? 'A common answer.' : 'That’s the typical answer.')+'</b> '+(why ? esc(why)+' ' : '')+'Typical: “'+q.typical[0]+'”. Common: '+q.common.slice(0,3).join(', ')+'.</div><button class="btn c full" style="margin-top:12px" id="b7-next">'+(i < 5 ? 'Next prompt' : 'See results')+'</button>';
+      anim($('b7-fb'), { opacity:[0,1], y:[8,0] });
+      $('b7-next').onclick = () => { i++; if (i < 6) show(); else ctx.end({ score, pct: score/30*100, lines:['<b>'+log.filter(p => p === 5).length+' of 6</b> answers were your own.','Original ideas start where the first answer ends.','Answers are matched by meaning, so “email automation” counts the same as “email assistant”.'] }); };
+      $('b7-next').focus();
+    };
+    $('b7-go').onclick = go;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (!inp.disabled) go(); } });
+    show();
+  }
+};
+
+/* ================= 3. Missing Link (insight) ================= */
+const ML = [
+ ['key','dash','white','board','keyboard, dashboard, whiteboard',1],
+ ['data','fire','code','base','database, Firebase, codebase',1],
+ ['soft','hard','firm','ware','software, hardware, firmware',1],
+ ['lap','desk','table','top','laptop, desktop, tabletop',1],
+ ['pass','key','cross','word','password, keyword, crossword',1],
+ ['home','web','front','page','homepage, webpage, front page',1],
+ ['note','text','face','book','notebook, textbook, Facebook',1],
+ ['head','ear','micro','phone','headphone, earphone, microphone',1],
+ ['up','down','work','load','upload, download, workload',1],
+ ['inter','ether','fish','net','internet, Ethernet, fishnet',1],
+ ['screen','snap','big','shot','screenshot, snapshot, big shot',1],
+ ['book','land','bench','mark','bookmark, landmark, benchmark',1],
+ ['class','chat','bath','room','classroom, chatroom, bathroom',1],
+ ['tooth','hair','paint','brush','toothbrush, hairbrush, paintbrush',1],
+ ['for','while','infinite','loop','for loop, while loop, infinite loop',2],
+ ['syntax','type','value','error','SyntaxError, TypeError, ValueError',2],
+ ['source','pin','zip','code','source code, PIN code, zip code',2],
+ ['user','file','nick','name','username, filename, nickname',2],
+ ['dark','light','safe','mode','dark mode, light mode, safe mode',2],
+ ['check','power','end','point','checkpoint, PowerPoint, endpoint',2],
+ ['hair','short','power','cut','haircut, shortcut, power cut',2],
+ ['fire','great','pay','wall','firewall, Great Wall, paywall',2],
+ ['spread','work','bed','sheet','spreadsheet, worksheet, bedsheet',2],
+ ['flow','pie','bar','chart','flowchart, pie chart, bar chart',2],
+ ['cyber','outer','white','space','cyberspace, outer space, whitespace',2],
+ ['right','cat','carbon','copy','copyright, copycat, carbon copy',2],
+ ['birth','week','holi','day','birthday, weekday, holiday',2],
+ ['tag','punch','dead','line','tagline, punchline, deadline',2],
+ ['prime','odd','even','number','prime number, odd number, even number',2],
+ ['binary','number','decimal','system','binary system, number system, decimal system',3],
+ ['bit','clock','other','wise','bitwise, clockwise, otherwise',3],
+ ['media','search','database','query','media query, search query, database query',3],
+ ['flex','tool','shoe','box','flexbox, toolbox, shoebox',3],
+ ['grid','life','guide','line','gridline, lifeline, guideline',3],
+ ['square','cube','grass','root','square root, cube root, grassroots',3],
+ ['self','simple','compound','interest','self-interest, simple interest, compound interest',3],
+ ['quote','question','exclamation','mark','quote mark, question mark, exclamation mark',3],
+ ['blue','finger','foot','print','blueprint, fingerprint, footprint',1],
+ ['play','back','under','ground','playground, background, underground',1],
+ ['air','pass','sea','port','airport, passport, seaport',1],
+ ['sun','eye','wine','glass','sunglass, eyeglass, wineglass',1],
+ ['smart','tele','cell','phone','smartphone, telephone, cellphone',1],
+ ['water','fire','sound','proof','waterproof, fireproof, soundproof',1],
+ ['rail','high','run','way','railway, highway, runway',1],
+ ['type','screen','ghost','writer','typewriter, screenwriter, ghostwriter',2],
+ ['back','front','week','end','backend, frontend, weekend',2],
+ ['net','frame','home','work','network, framework, homework',2],
+ ['task','tool','side','bar','taskbar, toolbar, sidebar',2],
+ ['pop','set','back','up','popup, setup, backup',2],
+ ['hash','price','name','tag','hashtag, price tag, name tag',2],
+ ['loop','key','pin','hole','loophole, keyhole, pinhole',3],
+ ['mother','circuit','score','board','motherboard, circuit board, scoreboard',3],
+ ['meta','big','raw','data','metadata, big data, raw data',3],
+ ['break','turning','view','point','breakpoint, turning point, viewpoint',3],
+ ['brain','fire','snow','storm','brainstorm, firestorm, snowstorm',3]
+];
+const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', icon:'chain', inspired:'the Remote Associates Test', topics:'Python, web, maths, everyday',
+  how:['You see three words, like data, fire, code.','Type the one word that goes with all three (base: database, Firebase, codebase).','Solve as many as you can in 2 minutes. A hint costs points.'],
+  run(ctx){
+    let score = 0, solved = 0, streak = 0, best = 0, cur, hints, wrongs, t0, used = new Set();
+    ctx.root.innerHTML = '<div class="tbar"><i id="ml-t"></i></div>' + hud([['ml-sc','Score','0'],['ml-st','Streak','0'],['ml-so','Solved','0']])
+      + '<div class="ml-cues" id="ml-cues"></div><div class="big" id="ml-hint" style="text-align:center;letter-spacing:.2em;min-height:30px;color:var(--c)"></div>'
+      + '<div class="row" style="margin-top:8px"><input class="field" id="ml-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="The link word"><button class="btn c" id="ml-go">Check</button></div>'
+      + '<div class="row" style="margin-top:10px"><button class="btn light sm" id="ml-hb">💡 Hint</button><button class="btn light sm" id="ml-sk">Skip</button></div><div class="small muted" id="ml-msg" style="margin-top:10px;min-height:20px"></div>';
+    const inp = $('ml-in'); inp.addEventListener('paste', e => e.preventDefault());
+    const next = () => {
+      const lvl = streak >= 6 ? 3 : streak >= 3 ? 2 : 1;
+      let pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl && !used.has(i)); if (!pool.length) pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl);
+      const i = pick(pool); used.add(i); cur = ML[i]; hints = 0; wrongs = 0; t0 = Date.now();
+      $('ml-cues').innerHTML = cur.slice(0,3).map(w => '<div class="tile">'+w+'</div>').join('');
+      anim(document.querySelectorAll('#ml-cues .tile'), { opacity:[0,1], y:[16,0], scale:[.9,1] }, { delay: stag(0.06) });
+      $('ml-hint').textContent = ''; inp.value = ''; inp.focus();
+    };
+    const right = v => { const a = norm(cur[3]), x = norm(v); return x === a || x === a+'s'; };
+    let busy = false;
+    const accept = (note) => {
+      const base = [0,100,150,200][cur[5]]; let pts = base*(1-0.3*hints) - 10*wrongs; if ((Date.now()-t0) < 15000 && !hints) pts += base*0.25;
+      pts = Math.max(10, Math.round(pts)); score += pts; solved++; streak++; best = Math.max(best, streak);
+      $('ml-sc').textContent = score; $('ml-so').textContent = solved; $('ml-st').textContent = streak;
+      pop('+' + pts, $('ml-cues')); burst(true);
+      $('ml-msg').innerHTML = note || ('✓ <b>'+cur[3]+'</b>: '+cur[4]);
+      document.querySelectorAll('#ml-cues .tile').forEach(t => t.classList.add('ok-ring'));
+      ctx.after(note ? 1800 : 700, next);
+    };
+    const check = async () => {
+      const v = inp.value.trim(); if (!v || busy) return;
+      if (right(v)) return accept();
+      if (norm(v).length > 1) {
+        busy = true; AI.thinking($('ml-go'), true);
+        const r = await AI.judge('missinglink', { cues:cur.slice(0,3), answer:v, expected:cur[3] });
+        AI.thinking($('ml-go'), false); $('ml-go').disabled = false; busy = false;
+        if (r && r.valid === true) return accept('✓ <b>'+esc(v)+'</b> also works'+(r.forms && r.forms.length ? ': '+r.forms.slice(0,3).map(esc).join(', ') : '')+'. Our answer was <b>'+cur[3]+'</b>: '+cur[4]);
+      }
+      wrongs++; shake(inp); FX.result(false); inp.select();
+    };
+    $('ml-go').onclick = check;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); check(); } });
+    $('ml-hb').onclick = () => { if (hints >= 2) return; hints++; const a = cur[3]; $('ml-hint').textContent = hints === 1 ? a.replace(/./g,'_ ').trim() : a[0].toUpperCase() + ' ' + a.slice(1).replace(/./g,'_ ').trim(); anim($('ml-hint'), { opacity:[0,1], scale:[.8,1] }); inp.focus(); };
+    $('ml-sk').onclick = () => { streak = 0; $('ml-st').textContent = 0; $('ml-msg').innerHTML = 'It was <b>'+cur[3]+'</b>: '+cur[4]; next(); };
+    next();
+    ctx.timer(120, $('ml-t'), null, () => ctx.end({ score, pct: Math.min(100, solved*14 + best*4), lines:['Solved <b>'+solved+'</b> puzzles.','Best streak: <b>'+best+'</b>.','That sudden “aha” is insight. It gets faster with practice.'] }));
+  }
+};
+
+/* ================= 4. Link Grid (insight) ================= */
+const LG = [
+  [['Python data types',['int','float','str','bool']],['HTML tags',['div','span','img','ul']],['Git commands',['commit','push','pull','clone']],['CSS display values',['flex','grid','block','inline']]],
+  [['Number systems',['binary','octal','decimal','hexadecimal']],['Python loop words',['for','while','break','continue']],['Command line commands',['cd','ls','mkdir','pwd']],['CSS units',['px','em','rem','vh']]],
+  [['Python string methods',['upper','lower','strip','split']],['Types of numbers',['prime','even','odd','composite']],['Git words',['branch','merge','stage','repo']],['Parts of a tree',['root','leaf','trunk','bark']]],
+  [['Python list methods',['append','pop','insert','remove']],['HTML tags',['h1','p','br','a']],['CSS properties',['margin','padding','color','border']],['Web browsers',['Chrome','Firefox','Safari','Edge']]],
+  [['Types of matrix',['square','identity','zero','diagonal']],['Shapes',['circle','triangle','rectangle','hexagon']],['Probability words',['event','outcome','trial','sample']],['Python logic keywords',['and','or','not','is']]],
+  [['CSS layout properties',['justify-content','align-items','flex-wrap','gap']],['CSS position values',['static','relative','absolute','fixed']],['HTML input types',['text','email','password','checkbox']],['Tailwind classes',['p-4','text-center','rounded','shadow']]],
+  [['Ctrl shortcuts',['copy','paste','cut','undo']],['Git commands',['init','add','status','log']],['Python built-in functions',['print','input','len','type']],['Things you do to a file',['open','save','rename','delete']]],
+  [['UPI apps',['PhonePe','Paytm','GPay','BHIM']],['Social apps',['Instagram','YouTube','Snapchat','WhatsApp']],['Cloud storage',['Drive','Dropbox','OneDrive','iCloud']],['AI chatbots',['ChatGPT','Gemini','Claude','Copilot']]],
+  [['Powers of 2',['16','32','64','128']],['Perfect squares',['25','36','49','81']],['Prime numbers',['11','13','17','19']],['Multiples of 10',['20','50','70','90']]],
+  [['Tags inside <head>',['title','meta','link','style']],['Page layout tags',['header','footer','nav','section']],['Table tags',['table','tr','td','th']],['Text formatting tags',['b','i','strong','em']]]
+];
+const LGNOTE = ['Trap: “float” is also a CSS property, but it is not a display value.','Trap: “break” sounds like CSS too, but here it belongs with Python loops.','Trap: “branch” is part of a tree, but the tree group is already full without it.','Trap: “pop” and “remove” sound general, but they are list methods. “Edge” is a browser, not a CSS border.','Trap: “square” is a shape too, but the shapes group is full without it.','Trap: “text” is a Tailwind prefix, but on its own it is an input type.','Trap: “open” is a Python built-in too, but Python’s group is full. “copy” and “cut” are also file actions.','Trap: WhatsApp has payments too, but it belongs with social apps.','Trap: 16 and 64 are also perfect squares, but only the powers of 2 need them.','Trap: “link” sounds like the a tag, but it is a tag that goes inside head.'];
+const LGCOL = ['#FFD966','#A7E3A1','#A9C8FF','#D6B8FF'];
+const LinkGrid = { id:'link-grid', name:'Link Grid', skill:'insight', icon:'grid', inspired:'NYT Connections', topics:'Python, HTML/CSS, Git, maths',
+  how:['16 words hide 4 groups of 4.','Tap 4 words that belong together, then Submit.','Some words look like they fit two groups. You can make 4 mistakes.'],
+  run(ctx){
+    const pi = Math.floor(Math.random()*LG.length), P = LG[pi];
+    let words = shuffle(P.flatMap(g => g[1])), sel = [], solved = [], lives = 4;
+    const draw = () => {
+      ctx.root.innerHTML = '<p class="prompt">Find the four groups.</p><div>'+solved.map(gi => '<div class="lg-solved" style="background:'+LGCOL[gi]+'"><b>'+P[gi][0]+'</b><span>'+P[gi][1].join(', ')+'</span></div>').join('')+'</div>'
+        + '<div class="lg-grid">'+words.map(w => '<button class="'+(sel.includes(w) ? 'sel' : '')+'">'+w+'</button>').join('')+'</div>'
+        + '<div class="lives" style="margin-top:14px">Mistakes left '+[0,1,2,3].map(i => '<i class="'+(i < lives ? '' : 'off')+'"></i>').join('')+'</div>'
+        + '<div class="row" style="margin-top:12px"><button class="btn light sm" id="lg-sh">Shuffle</button><button class="btn light sm" id="lg-cl">Deselect</button><button class="btn c sm" id="lg-sub" style="flex:1"'+(sel.length === 4 ? '' : ' disabled')+'>Submit</button></div><div id="lg-msg" class="small muted" style="text-align:center;margin-top:8px;min-height:20px"></div>';
+      ctx.root.querySelectorAll('.lg-grid button').forEach(b => b.onclick = () => {
+        const w = b.textContent;
+        if (sel.includes(w)) sel = sel.filter(x => x !== w); else if (sel.length < 4) sel.push(w);
+        b.classList.toggle('sel', sel.includes(w)); anim(b, { scale:[.92,1] }, { duration:0.25 }); SFX.play('select');
+        $('lg-sub').disabled = sel.length !== 4;
+      });
+      $('lg-sh').onclick = () => { words = shuffle(words); draw(); anim(ctx.root.querySelectorAll('.lg-grid button'), { scale:[.8,1], opacity:[.3,1] }, { delay: stag(0.015) }); };
+      $('lg-cl').onclick = () => { sel = []; draw(); };
+      $('lg-sub').onclick = submit;
+    };
+    const finish = () => ctx.end({ score: solved.length*25 + lives*5, pct: Math.max(0, solved.length*25 - (4-lives)*5), lines:['Groups found: <b>'+solved.length+' of 4</b>. Mistakes: <b>'+(4-lives)+'</b>.'].concat(P.map((g,i) => '<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+LGCOL[i]+'"></span> <b>'+g[0]+'</b>: '+g[1].join(', '))).concat([LGNOTE[pi]]) });
+    const submit = () => {
+      const gi = P.findIndex(g => sel.every(w => g[1].includes(w)));
+      const btns = [...ctx.root.querySelectorAll('.lg-grid button.sel')];
+      if (gi >= 0) {
+        anim(btns, { y:[0,-10,0] }, { type:'tween', duration:0.35, delay: stag(0.06) });
+        ctx.after(450, () => {
+          solved.push(gi); words = words.filter(w => !sel.includes(w)); sel = []; draw();
+          const last = ctx.root.querySelectorAll('.lg-solved'); anim(last[last.length-1], { scale:[.85,1], opacity:[0,1] }, { type:'spring', bounce:0.35, duration:0.5 });
+          pop('+25', last[last.length-1]); FX.result(true);
+          if (solved.length === 4) ctx.after(700, finish);
+        });
+      } else {
+        const close = P.some(g => sel.filter(w => g[1].includes(w)).length === 3);
+        lives--; shake(ctx.root.querySelector('.lg-grid')); FX.result(false);
+        ctx.after(380, () => { draw(); $('lg-msg').textContent = close ? 'One away…' : 'Not a group.'; if (lives <= 0) ctx.after(600, finish); });
+      }
+    };
+    draw();
+    anim(ctx.root.querySelectorAll('.lg-grid button'), { opacity:[0,1], scale:[.7,1] }, { delay: stag(0.02) });
+  }
+};
+
+/* ================= 5. Wiki Hop (insight) ================= */
+const WIKI = {
+  'Hyderabad':'Hyderabad is the capital of [[Telangana]]. It is famous for the [[Charminar]] and for biryani. Its HITEC City area is home to many [[Software]] companies.',
+  'Telangana':'Telangana is a state in South [[India]], formed in 2014. Its capital is [[Hyderabad]]. Many students here study engineering and [[Computer science]].',
+  'Charminar':'The Charminar is a monument in [[Hyderabad]], built in 1591. Its name means “four minarets”. Photos of it are shared widely across the [[Internet]].',
+  'India':'India is the most populous country in the world. It built [[UPI]], a payment system used for billions of payments every month. Its space agency, [[ISRO]], has sent missions to the [[Moon]].',
+  'UPI':'Unified Payments Interface (UPI) lets people send money instantly from a phone. It was launched in 2016 by NPCI. Each payment travels over the [[Internet]] to a bank [[Server]], which checks it in seconds.',
+  'ISRO':'ISRO is India’s space agency, based in Bengaluru. Its Chandrayaan-3 mission landed near the [[Moon]]’s south pole in 2023. Rockets are guided by [[Software]] that must be tested very carefully.',
+  'Moon':'The Moon is Earth’s only natural satellite. Its pull causes ocean tides. Apollo 11 landed people on it in 1969, using a guidance [[Computer]] far less powerful than a modern phone.',
+  'Computer':'A computer is a machine that follows instructions. Inside, a [[CPU]] runs programs and stores everything as [[Binary]] numbers. Those instructions are called [[Software]].',
+  'CPU':'The CPU (Central Processing Unit) is the “brain” of a [[Computer]]. It carries out billions of simple steps every second. Deep down, it only understands [[Binary]].',
+  'Binary':'Binary is a number system with only two digits, 0 and 1. Each digit is called a bit. The decimal number 10 is 1010 in binary. Programmers often write binary in a shorter form called [[Hexadecimal]].',
+  'Hexadecimal':'Hexadecimal is a base-16 number system that uses 0–9 and A–F. Web designers use it for colours in [[CSS]]: #FFFFFF is white and #000000 is black.',
+  'CSS':'CSS controls how a web page looks: colours, fonts and layout. It works with [[HTML]], which gives the page its structure. Flexbox and Grid help arrange items on a [[Website]].',
+  'HTML':'HTML builds the structure of web pages, using tags like h1 and p. A [[Web browser]] reads HTML and shows it as a page. Links in HTML let you jump between pages, just like in this game.',
+  'Website':'A website is a group of web pages under one address, stored on a [[Server]]. Pages are built with [[HTML]] and [[CSS]]. Many developers keep their website code in [[Git]].',
+  'Web browser':'A web browser, like Chrome or Firefox, fetches pages from the [[Internet]] and shows them on screen. It understands [[HTML]], [[CSS]] and JavaScript.',
+  'Internet':'The Internet is a worldwide network connecting billions of devices. Data travels in small packets between devices and [[Server]]s. The web, made of [[Website]]s, is one part of it.',
+  'Server':'A server is a [[Computer]] that provides data or services to other computers. When you open a [[Website]] or make a [[UPI]] payment, a server answers your request.',
+  'Software':'Software is the set of programs that tell a [[Computer]] what to do. It is written in languages like [[Python]]. Teams track every change to their software using [[Git]].',
+  'Python':'Python is a programming language released by Guido van Rossum in 1991. It is named after the comedy group Monty Python, not the snake. It is widely used in [[Artificial intelligence]].',
+  'Git':'Git tracks changes in code. Developers save snapshots called commits and try ideas on separate branches. Linus Torvalds created Git in 2005. Code is often shared on [[GitHub]].',
+  'GitHub':'GitHub is a website where developers store and share code using [[Git]]. With GitHub Pages, you can publish a [[Website]] for free. Some [[Artificial intelligence]] coding tools learned from public code.',
+  'Artificial intelligence':'Artificial intelligence (AI) is about making computers do tasks that need human-like thinking. Chatbots like [[ChatGPT]] are one kind of AI. Much AI work is done in [[Python]].',
+  'ChatGPT':'ChatGPT is an AI chatbot released by OpenAI in November 2022. It writes by predicting likely next words, which is why it can sound sure even when it is wrong. It runs on huge [[Server]]s.',
+  'Computer science':'Computer science is the study of computers and problem solving. Students learn programming in languages like [[Python]], how a [[CPU]] works, and topics like [[Binary]] numbers.'
+};
+const WH = [];
+function bfs(a, b){ const q = [[a,0]], seen = new Set([a]); while (q.length) { const [n,d] = q.shift(); if (n === b) return d; ((WIKI[n]||'').match(/\[\[(.+?)\]\]/g)||[]).map(x => x.slice(2,-2)).forEach(m => { if (!seen.has(m)) { seen.add(m); q.push([m,d+1]); } }); } return 99; }
+Object.keys(WIKI).forEach(a => Object.keys(WIKI).forEach(b => { if (a !== b) { const d = bfs(a, b); if (d >= 4 && d <= 6) WH.push({ from:a, to:b, best:d }); } }));
+const WikiHop = { id:'wiki-hop', name:'Wiki Hop', skill:'insight', icon:'nodes', inspired:'the Wiki Game', topics:'web, hardware, number systems, Git, AI',
+  how:['You start on one page and must reach a target page.','Read the page. Tap a blue link inside the text to jump.','Plan your route: fewer clicks, higher score.'],
+  run(ctx){
+    const P = pick(WH); let at = P.from, path = [P.from], clicks = 0;
+    const draw = () => {
+      const body = WIKI[at].replace(/\[\[(.+?)\]\]/g, (m, t) => '<a href="#" class="wl" data-t="'+t+'">'+t+'</a>');
+      ctx.root.innerHTML = '<div class="wh-target">🎯 Reach: '+P.to+'</div>' + hud([['wh-c','Clicks',clicks],['wh-b','Shortest route',P.best]])
+        + '<div class="wh-path">'+path.map(p => '<span>'+p+'</span>').join(' › ')+'</div>'
+        + '<article class="card wiki"><div class="wiki-top">Wikipedia-style page</div><h2>'+at+'</h2><p>'+body+'</p></article>'
+        + '<div class="row" style="margin-top:12px"><button class="btn light sm" id="wh-back"'+(path.length > 1 ? '' : ' disabled')+'>Back one page</button><button class="btn light sm" id="wh-gu">Give up</button></div>';
+      anim(ctx.root.querySelector('.wiki'), { opacity:[0,1], x:[24,0] });
+      ctx.root.querySelectorAll('.wl').forEach(a => a.onclick = e => {
+        e.preventDefault();
+        at = a.dataset.t; path.push(at); clicks++; SFX.play('whoosh');
+        if (at === P.to) { burst(true); ctx.after(500, () => { const sc = Math.max(10, 100 - (clicks - P.best)*15); ctx.end({ score: sc, pct: sc, lines:['Reached <b>'+P.to+'</b> in <b>'+clicks+'</b> clicks. Shortest route: '+P.best+'.','Your route: '+path.join(' › ')] }); }); return; }
+        draw();
+      });
+      $('wh-back').onclick = () => { path.pop(); at = path[path.length-1]; clicks++; draw(); };
+      $('wh-gu').onclick = () => ctx.end({ score: 0, pct: 0, title:'Good try', lines:['You were on <b>'+at+'</b> after '+clicks+' clicks.','Tip: head for pages that link to many topics, like Computer or Internet.'] });
+    };
+    draw();
+  }
+};
+
+/* ================= 6. Recall Rebuild (memory) ================= */
+const RR = [
+  { kind:'text', title:'Git basics', text:'Git was created by Linus Torvalds in 2005. It saves snapshots of your code called commits. Before you commit, you add changes to the staging area. Branches let you try new ideas without breaking the main code, and GitHub Pages can publish a website straight from your repository.',
+    keys:[['linus','torvalds'],['2005'],['snapshot'],['commit'],['staging'],['branch'],['main'],['github'],['publish','website'],['repositor','repo']] },
+  { kind:'text', title:'CSS Flexbox', text:'Flexbox arranges items in a row or a column. Writing display: flex turns an element into a flex container. justify-content sets spacing along the main axis, while align-items lines items up on the cross axis. Media queries change the layout on small screens.',
+    keys:[['row'],['column'],['display'],['flex container','container'],['justify'],['main axis'],['align'],['cross axis'],['media quer'],['small screen','mobile']] },
+  { kind:'text', title:'UPI', text:'UPI was launched in 2016 by NPCI. It lets you send money using a phone number or a UPI ID. Every payment needs your secret UPI PIN, but receiving money never does. The money moves directly between bank accounts, and India now makes billions of UPI payments every month.',
+    keys:[['2016'],['npci'],['phone'],['upi id'],['pin'],['secret'],['receiv'],['bank'],['billion'],['month']] },
+  { kind:'code', title:'Python code', text:'marks = [72, 88, 95, 60]\ntotal = 0\nfor m in marks:\n    if m >= 75:\n        total = total + m\nprint(total)',
+    keys:[['marks'],['72'],['88'],['95'],['60'],['total=0'],['forminmarks'],['m>=75'],['total=total+m','total+=m'],['print(total)']],
+    labels:['marks','72','88','95','60','total = 0','for m in marks','m >= 75','total = total + m','print(total)'], output:'Bonus: this code prints <b>183</b> (88 + 95).' },
+  { kind:'text', title:'HTML page structure', text:'Every HTML page starts with <!DOCTYPE html>. The head holds the page title and links to CSS files, while the body holds everything users see. Headings go from h1 to h6, and the a tag creates links using the href attribute.',
+    keys:[['doctype'],['head'],['title'],['css'],['body'],['see','visible','user'],['h1'],['h6'],['href'],['link','anchor']] },
+  { kind:'code', title:'Python code', text:'name = "Asha"\nage = 19\nif age >= 18:\n    print(name, "can vote")\nelse:\n    print(name, "cannot vote")',
+    keys:[['name='],['asha'],['age=19'],['ifage>=18'],['print(name'],['canvote'],['else:'],['cannotvote'],['"canvote"'],['"cannotvote"']],
+    labels:['name =','"Asha"','age = 19','if age >= 18','print(name, …)','can vote','else:','cannot vote','"can vote" in quotes','"cannot vote" in quotes'], output:'It prints <b>Asha can vote</b>, because 19 >= 18.' },
+  { kind:'text', title:'Binary and hex', text:'Computers store everything in binary, using only 0s and 1s. Each digit is a bit, and 8 bits make a byte. In binary, 5 is written as 101. Hexadecimal uses 16 digits, 0 to 9 and A to F, so one hex digit stands for 4 bits.',
+    keys:[['binary'],['0s','0 and 1','zero','1s'],['bit'],['8','eight'],['byte'],['101'],['hexadecimal','hex'],['16','sixteen'],['a to f','a f'],['4 bits','four bits','4']] },
+  { kind:'code', title:'Python code', text:'fruits = ["apple", "mango"]\nfruits.append("banana")\nfor f in fruits:\n    print(f.upper())\nprint(len(fruits))',
+    keys:[['fruits=['],['apple'],['mango'],['.append('],['banana'],['forfinfruits'],['.upper()'],['print(f'],['len(fruits)'],['print(len']],
+    labels:['fruits = [','"apple"','"mango"','.append(','"banana"','for f in fruits','.upper()','print(f…)','len(fruits)','print(len…)'], output:'It prints APPLE, MANGO, BANANA on three lines, then <b>3</b>.' },
+  { kind:'text', title:'Prompting', text:'A good prompt gives the AI a role, the task, and the format you want. Adding an example of the answer, called few-shot prompting, often helps. Always check the output, because AI can sound confident and still be wrong.',
+    keys:[['role'],['task'],['format'],['example'],['few shot','fewshot'],['check'],['output'],['confident','sure'],['wrong'],['prompt']] },
+  { kind:'text', title:'Tailwind CSS', text:'Tailwind CSS lets you style elements with small utility classes written directly in HTML. For example, p-4 adds padding, text-center centres text, and bg-blue-500 sets a blue background. Prefixes like md: apply a style only on medium screens and larger.',
+    keys:[['tailwind'],['utility'],['html'],['p 4','p4'],['padding'],['text center','centre','center'],['bg blue','blue'],['md'],['medium'],['larger','bigger','above']] }
+];
+const RecallRebuild = { id:'recall-rebuild', name:'Recall Rebuild', skill:'memory', icon:'book', inspired:'the note-taking vs chatbot study', topics:'Git, CSS, Python, UPI',
+  how:['Read a short passage, or a few lines of code. You get 40 seconds.','It disappears. Write down everything you remember.','You score for each key fact or line you rebuild. No notes.'],
+  run(ctx){
+    const P = pick(RR);
+    ctx.root.innerHTML = '<div class="tbar"><i id="rr-t"></i></div><p class="prompt">Read carefully. It will disappear. <b>'+P.title+'</b></p><div class="card">'+(P.kind === 'code' ? code(P.text) : '<div class="passage">'+P.text+'</div>')+'</div><button class="btn c full" id="rr-ready" style="margin-top:14px">I’m ready</button>';
+    anim(ctx.root.querySelector('.card'), { opacity:[0,1], y:[12,0] });
+    const stop = ctx.timer(40, $('rr-t'), null, () => write());
+    $('rr-ready').onclick = () => { stop(); write(); };
+    function write(){
+      ctx.root.innerHTML = '<div class="tbar"><i id="rr-t2"></i></div><p class="prompt">'+(P.kind === 'code' ? 'Rewrite the code from memory.' : 'Write everything you remember. Short phrases are fine.')+'</p><textarea class="field'+(P.kind === 'code' ? ' mono' : '')+'" id="rr-in" spellcheck="false" placeholder="'+(P.kind === 'code' ? 'marks = ...' : 'What did it say?')+'"></textarea><button class="btn c full" id="rr-done" style="margin-top:12px">Check my recall</button>';
+      const ta = $('rr-in'); ta.addEventListener('paste', e => e.preventDefault()); ta.focus();
+      ta.addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); ta.setRangeText('    ', ta.selectionStart, ta.selectionEnd, 'end'); } });
+      anim(ta, { opacity:[0,1], scale:[.97,1] });
+      let finished = false;
+      const done = async () => {
+        if (finished) return; finished = true;
+        const raw = ta.value.toLowerCase();
+        const v = P.kind === 'code' ? raw.replace(/\s+/g,'') : ' ' + raw.replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ') + ' ';
+        const hits = P.keys.map(k => k.some(alt => v.includes(alt)));
+        const labels = P.labels || P.keys.map(k => k[0]);
+        if (P.kind === 'text' && hits.some(x => !x) && ta.value.trim().length > 10) {
+          ta.disabled = true; AI.thinking($('rr-done'), true);
+          const r = await AI.judge('recall', { passage:P.text, facts:labels, answer:ta.value.slice(0, 1500) }, 9000);
+          if (r && Array.isArray(r.hits) && r.hits.length === hits.length) r.hits.forEach((x,i) => { if (x === true) hits[i] = true; });
+        }
+        const n = hits.filter(Boolean).length;
+        ctx.end({ score: n*10, pct: n*10, lines:['You rebuilt <b>'+n+' of 10</b> key '+(P.kind === 'code' ? 'pieces of the code' : 'facts')+'.','<div class="kw">'+labels.map((l,i) => '<span class="'+(hits[i] ? 'hit' : '')+'">'+esc(l)+'</span>').join('')+'</div>', P.kind === 'code' ? P.output + ' Reading code closely is how you catch AI’s mistakes.' : 'Pulling facts back out of memory makes them stick. Re-reading, or asking AI again, does not.'] });
+      };
+      ctx.timer(90, $('rr-t2'), null, done);
+      $('rr-done').onclick = done;
+    }
+  }
+};
+
+/* ================= 7. Back Track (memory) ================= */
+const TOK = ['==','!=','<=','>=','+=','//','**','[]','{}'];
+const BackTrack = { id:'back-track', name:'Back Track', skill:'memory', icon:'back', inspired:'n-back working-memory training', topics:'Python operators',
+  how:['Python operators appear one at a time, like == or //.','Press Match (or the space bar) when the operator is the same as the one N steps back.','Score 80% or more and N goes up next time.'],
+  run(ctx){
+    const st = gs('back-track'); const N = st.level || 1, T = 20 + N;
+    const seq = []; for (let i = 0; i < T; i++) seq.push(i >= N && Math.random() < .32 ? seq[i-N] : Math.floor(Math.random()*TOK.length));
+    let i = -1, pressed = false, hits = 0, misses = 0, fa = 0, cr = 0;
+    ctx.root.innerHTML = hud([['bt-n','Level','N = '+N],['bt-i','Step','0/'+T],['bt-h','Hits','0']])
+      + '<p class="prompt" style="text-align:center">Match if it’s the same as <b>'+N+' step'+(N > 1 ? 's' : '')+' back</b>.</p>'
+      + '<div class="bt-card" id="bt-c"></div><button class="btn c full" id="bt-m" style="font-size:20px;padding:16px">Match</button>';
+    const card = $('bt-c');
+    const isTarget = k => k >= N && seq[k] === seq[k-N];
+    const press = () => { if (i < 0 || pressed) return; pressed = true; const good = isTarget(i); if (good) { hits++; $('bt-h').textContent = hits; pop('+10', $('bt-m')); } else { fa++; shake($('bt-m')); } ring(card, good); FX.result(good, true); };
+    $('bt-m').onclick = press;
+    const onKey = e => { if (e.code === 'Space') { e.preventDefault(); press(); } };
+    document.addEventListener('keydown', onKey);
+    const step = () => {
+      if (i >= 0 && !pressed) { if (isTarget(i)) misses++; else cr++; }
+      i++; pressed = false;
+      if (i >= T) {
+        const acc = Math.round((hits + cr)/T*100);
+        if (acc >= 80) st.level = N + 1; save();
+        return ctx.end({ score: hits*10 - fa*5 + cr, pct: acc, lines:['Accuracy <b>'+acc+'%</b> at N = '+N+'.','Matches caught: <b>'+hits+'</b>. Missed: '+misses+'. False alarms: '+fa+'.', acc >= 80 ? 'Level up! Next time you play N = '+(N+1)+'.' : 'Reach 80% to move up a level.'] });
+      }
+      $('bt-i').textContent = (i+1)+'/'+T;
+      card.textContent = TOK[seq[i]]; card.classList.add('on');
+      anim(card, { scale:[.85,1], opacity:[.2,1] }, { duration:0.25 });
+      ctx.after(1000, () => { card.classList.remove('on'); card.textContent = ''; });
+      ctx.after(2300, step);
+    };
+    ctx.after(500, step);
+    return () => document.removeEventListener('keydown', onKey);
+  }
+};
+
+/* ================= 8. Symbol Sprint (focus) ================= */
+const SToks = ['{ }','[ ]','( )','==','!=','<=','+=','#',':'];
+const SymbolSprint = { id:'symbol-sprint', name:'Symbol Sprint', skill:'focus', icon:'diamond', inspired:'the Symbol Digit test', topics:'Python and code symbols',
+  how:['A key pairs 9 code symbols with the numbers 1 to 9.','A symbol appears in the middle. Press its number, fast.','Careful: == and != or <= and += look alike. 45 seconds.'],
+  run(ctx){
+    let key = shuffle([0,1,2,3,4,5,6,7,8]), target = -1, c = 0, w = 0;
+    ctx.root.innerHTML = '<div class="tbar"><i id="ss-t"></i></div>' + hud([['ss-c','Correct','0'],['ss-w','Mistakes','0'],['ss-l','Seconds','45']])
+      + '<div class="ss-key">'+key.map((s,d) => '<div><code>'+esc(SToks[s])+'</code><b>'+(d+1)+'</b></div>').join('')+'</div>'
+      + '<div class="tile ss-target" id="ss-tg"></div><div class="pad" id="ss-pad">'+[1,2,3,4,5,6,7,8,9].map(d => '<button class="tile" data-d="'+d+'">'+d+'</button>').join('')+'</div>';
+    const nt = () => { let t; do { t = Math.floor(Math.random()*9); } while (t === target); target = t; $('ss-tg').innerHTML = '<code>'+esc(SToks[t])+'</code>'; anim($('ss-tg').firstChild, { scale:[.5,1], opacity:[0,1] }, { duration:0.22 }); };
+    const press = d => {
+      const b = $('ss-pad').children[d-1], good = key[d-1] === target;
+      if (good) { c++; $('ss-c').textContent = c; } else { w++; $('ss-w').textContent = w; shake($('ss-tg')); }
+      ring(b, good); ring($('ss-tg'), good); FX.result(good, true); nt();
+    };
+    $('ss-pad').addEventListener('pointerdown', e => { const b = e.target.closest('[data-d]'); if (b) { e.preventDefault(); press(+b.dataset.d); } });
+    const onKey = e => { if (/^[1-9]$/.test(e.key)) { e.preventDefault(); press(+e.key); } };
+    document.addEventListener('keydown', onKey);
+    anim(ctx.root.querySelectorAll('.pad .tile'), { opacity:[0,1], scale:[.7,1] }, { delay: stag(0.025) });
+    nt();
+    ctx.timer(45, $('ss-t'), s => $('ss-l').textContent = s, () => {
+      const acc = c + w ? Math.round(c/(c+w)*100) : 0;
+      ctx.end({ score: c, pct: Math.min(100, c/35*100) * (acc/100), lines:['Matched <b>'+c+'</b> symbols.','Accuracy <b>'+acc+'%</b> ('+w+' mistake'+(w === 1 ? '' : 's')+').'] });
+    });
+    return () => document.removeEventListener('keydown', onKey);
+  }
+};
+
+/* ================= 9. Fallacy Hunt (reasoning): learn a trick, then spot it ================= */
+const TRICKS = [
+  { id:'story', name:'One story isn’t proof', means:'Using one person’s experience as if it proves something for everyone.', spot:'Ask: is this one case, or many?',
+    ex:'“My senior got placed without learning DSA, so DSA is useless.”',
+    yes:['“My cousin used only AI for every assignment and still passed. So AI-only studying works.”','“My laptop never got a virus without antivirus, so nobody needs antivirus.”','“Rohan learnt coding only from reels and got an internship. So reels are all you need.”','“My friend never studied for the mid-sem and still got an A, so studying doesn’t matter.”'],
+    no:['“A survey of 2,000 students found that those who practised coding daily scored higher.”','“Data from five batches shows that students who submitted all assignments scored higher on average.”'] },
+  { id:'crowd', name:'Everyone’s doing it', means:'Saying something is right or best just because it’s popular.', spot:'Ask: popular, or actually better? What’s the reason?',
+    ex:'“Everyone in our class uses this AI notes app, so it must be the best.”',
+    yes:['“All the startups use Tailwind now, so it’s obviously better than plain CSS.”','“This prompt trick has a million views, so it must work.”','“This laptop is the top seller on Flipkart, so it must be the best one for coding.”','“Everyone’s skipping the Friday lab, so it can’t be important.”'],
+    no:['“Tailwind lets you style without switching files, which saves me time on small projects.”','“Most teams use Git because it lets them track and undo changes safely.”'] },
+  { id:'person', name:'Attack the person', means:'Attacking who is speaking instead of what they said.', spot:'Ask: is this about the argument, or the person?',
+    ex:'“Don’t listen to Ravi’s code review. He failed maths last semester.”',
+    yes:['“Why trust her opinion on Python? She uses a five-year-old laptop.”','“He’s from a small-town college, so his GitHub tips can’t be any good.”','“Ignore that article on AI risks. The writer isn’t even an engineer.”','“You can’t give me coding tips, you’re just a first-year.”'],
+    no:['“Don’t use that function. The documentation says it was removed in the latest version.”','“His bug fix doesn’t work. I ran the tests and three of them still fail.”'] },
+  { id:'twoways', name:'Only two options', means:'Pretending there are only two choices when there are more.', spot:'Ask: is there a third option, or a middle path?',
+    ex:'“Either you learn AI right now or your career is over.”',
+    yes:['“You either use ChatGPT for everything or you’re stuck in the past.”','“Either your code is perfect or you’re a bad programmer.”','“Either you get placed in your first interview or you’re not cut out for tech.”','“If you’re not using Tailwind, you must be writing messy CSS.”'],
+    no:['“You can use Flexbox, Grid, or both. Pick based on the layout you need.”','“We can finish the feature, test it properly, or cut it down so we can do both.”'] },
+  { id:'cause', name:'Before isn’t because', means:'Assuming that because one thing happened first, it caused the next.', spot:'Ask: could something else explain it? Was it tested?',
+    ex:'“I updated my phone and then my exam went badly. The update ruined my exam.”',
+    yes:['“I switched to dark mode and my marks went up. Dark mode makes you smarter.”','“The site went down right after Sai joined the team. He must have broken it.”','“Ever since the new canteen opened, more students are failing. The canteen is the problem.”','“I drank coffee before the exam and topped it. Coffee is the secret.”'],
+    no:['“The app crashes every time I add this line and works when I remove it, so this line is likely the bug.”','“After we compressed the images, the page loaded twice as fast across ten repeated tests.”'] },
+  { id:'twist', name:'Twisting the point', means:'Changing what someone said into a weaker, extreme version, then attacking that.', spot:'Ask: is that really what they said?',
+    ex:'Priya: “Let’s check AI answers before submitting.” Arjun: “So you want to ban AI completely? That’s so backward.”',
+    yes:['Teacher: “Add a few comments to your code.” Student: “So you want a comment on every single line? That’s ridiculous.”','Anu: “We should limit phone use in labs.” Kiran: “So you think phones are evil? Grow up.”','Sai: “Let’s use fewer AI tools in exams.” Meena: “So you want us to write on stone tablets?”','Lead: “Let’s write tests for the login page.” Dev: “So you think I write broken code all the time?”'],
+    no:['Rahul: “We should limit phones in labs.” Sneha: “Fair, but we need them for OTP logins, so let’s allow that.”','Ravi: “Let’s use Git for the project.” Asha: “Agreed, and let’s keep the setup simple since some of us are new to it.”'] }
+];
+const NOTRICK = 'No trick, fair point';
+const FallacyHunt = { id:'fallacy-hunt', name:'Fallacy Hunt', skill:'reasoning', icon:'lens', inspired:'Cranky Uncle and Bad News', topics:'tech and campus conversations',
+  how:['Learn a common thinking trick, with an example.','Straight away, spot it in 2 quick messages. Some messages have no trick.','After learning, a mixed round tests every trick you know.'],
+  run(ctx){
+    const st = gs('fallacy-hunt'); st.learned = st.learned || [];
+    const toLearn = TRICKS.filter(t => !st.learned.includes(t.id)).slice(0,2);
+    let score = 0, right = 0, total = 0;
+    const steps = [];
+    toLearn.forEach(t => { steps.push({ type:'learn', t }); shuffle([{ msg:pick(t.yes), ans:t.name }, { msg:pick(t.no), ans:NOTRICK }]).forEach(q => steps.push({ type:'check', t, q })); });
+    const known = TRICKS.filter(t => st.learned.includes(t.id) || toLearn.includes(t));
+    let pool = []; known.forEach(t => { t.yes.forEach(m => pool.push({ msg:m, ans:t.name })); });
+    const mixN = known.length >= 6 ? 8 : 4;
+    const noPool = shuffle(known.flatMap(t => t.no)); const nNo = mixN >= 8 ? 2 : 1;
+    const mixed = shuffle(pool).slice(0, mixN - nNo).concat(noPool.slice(0, nNo).map(m => ({ msg:m, ans:NOTRICK })));
+    shuffle(mixed).forEach(q => steps.push({ type:'mix', q }));
+    let s = 0;
+    const next = () => {
+      if (s >= steps.length) {
+        toLearn.forEach(t => { if (!st.learned.includes(t.id)) st.learned.push(t.id); }); save();
+        return ctx.end({ score, pct: total ? right/total*100 : 0, lines:['Spotted <b>'+right+' of '+total+'</b> correctly.','Tricks you know: <b>'+st.learned.length+' of '+TRICKS.length+'</b>.'+(st.learned.length < TRICKS.length ? ' Play again to learn the next two.' : ' You know them all. Every round is now mixed.')].concat(known.map(t => '<b>'+t.name+':</b> '+t.spot)) });
+      }
+      const step = steps[s++];
+      if (step.type === 'learn') {
+        const t = step.t;
+        ctx.root.innerHTML = '<div class="learn"><span class="pill">New trick</span><h2>'+t.name+'</h2><p>'+t.means+'</p><div class="msgcard" style="margin:12px 0"><div class="from">Example</div>'+t.ex+'</div><div class="explain">🔎 '+t.spot+'</div><button class="btn c full" id="fh-go" style="margin-top:14px">Got it, test me</button></div>';
+        anim(ctx.root.querySelector('.learn'), { opacity:[0,1], scale:[.96,1] }); SFX.play('reveal');
+        $('fh-go').onclick = next;
+        return;
+      }
+      const q = step.q, label = step.type === 'check' ? 'Quick check: '+step.t.name : 'Mixed round';
+      const opts = step.type === 'check' ? [step.t.name, NOTRICK] : known.map(t => t.name).concat([NOTRICK]);
+      ctx.root.innerHTML = hud([['fh-m','Mode',step.type === 'check' ? 'Practice' : 'Mixed'],['fh-r','Correct',right+'/'+total]]) + '<p class="prompt">'+label+'</p><div class="msgcard">'+q.msg+'</div><p class="prompt" style="margin-top:14px">'+(step.type === 'check' ? 'Is this trick being used?' : 'Which trick is this?')+'</p><div id="fh-o"></div>';
+      anim(ctx.root.querySelector('.msgcard'), { opacity:[0,1], x:[-20,0] });
+      const why = q.ans === NOTRICK ? 'No trick here. It gives a real reason or evidence.' : '<b>'+q.ans+'.</b> '+TRICKS.find(t => t.name === q.ans).means;
+      mcq($('fh-o'), opts, opts.indexOf(q.ans), why, good => { total++; if (good) { right++; score += 10; } next(); });
+    };
+    next();
+  }
+};
+
+/* ================= 10. Argue Back (reasoning) ================= */
+const AB = [
+  { claim:'Learning Python is pointless now, because AI can write the code for you.',
+    opts:[['AI-written code still has bugs, and you can’t spot them or fix them if you can’t read Python.',1,'Strong: it answers the real point with a concrete problem.'],
+          ['Python has been among the world’s most used languages for years, so it will surely stay important.',0,'Weak: popularity doesn’t answer whether you need to learn it.'],
+          ['People who say this are just lazy and want an excuse to avoid learning anything difficult.',0,'Weak: it attacks the people, not the claim.']] },
+  { claim:'This AI tool has 10 million users, so its answers must be correct.',
+    opts:[['Ten million isn’t much when you compare it with the billions of people who use the internet.',0,'Weak: it argues about the number, not about accuracy.'],
+          ['Lots of users shows it’s popular, not accurate. Check its answers against a trusted source.',1,'Strong: it separates popularity from correctness and says what to do.'],
+          ['AI tools are made by big companies who only care about money, so never trust any of them.',0,'Weak: it attacks the makers and overgeneralises.']] },
+  { claim:'We can stop learning CSS, because Tailwind does everything for us.',
+    opts:[['Tailwind is much newer than CSS, and newer tools are not always better than the older, proven ones.',0,'Weak: “newer vs older” doesn’t address whether CSS is needed.'],
+          ['Tailwind classes are just CSS rules underneath, so you need CSS to understand and debug them.',1,'Strong: it shows why the claim is wrong, using how Tailwind works.'],
+          ['CSS is a beautiful language, and it would honestly be very sad if students stopped learning it.',0,'Weak: it appeals to feelings, not reasons.']] },
+  { claim:'Exams are useless, because in a real job you can always use AI.',
+    opts:[['Exams check what you can do on your own, and that’s what lets you judge whether AI is right.',1,'Strong: it explains why your own skill still matters when AI exists.'],
+          ['My uncle works at a big MNC, and he told me that exams are extremely important for every job.',0,'Weak: one person’s opinion, used as proof.'],
+          ['Exams have been used in schools for hundreds of years, so they must be useful for students.',0,'Weak: “we’ve always done it” isn’t a reason.']] },
+  { claim:'Git is too complicated. Saving files as final_v2_final.html works fine.',
+    opts:[['Everyone in the industry uses Git, so you have to use it too if you want to be taken seriously.',0,'Weak: “everyone does it” isn’t a reason.'],
+          ['With many versions and teammates, Git shows exactly what changed and lets you undo it safely.',1,'Strong: it names what breaks with file names and how Git fixes it.'],
+          ['File names like that look unprofessional, and your faculty will definitely cut marks for them.',0,'Weak: it’s about looks and marks, not whether the method works.']] },
+  { claim:'Group projects are a waste of time. I can do everything faster alone.',
+    opts:[['Alone is faster for small tasks, but real projects are too big for one person, so teamwork is a skill.',1,'Strong: it accepts what’s true and shows where the claim breaks.'],
+          ['Teachers love group projects and have been giving them to their students for many, many years now.',0,'Weak: tradition and authority, not a reason.'],
+          ['People who like working alone are usually selfish and don’t really care about anyone else at all.',0,'Weak: it attacks people, not the claim.']] },
+  { claim:'Instagram reels are enough to learn coding. Courses are a waste.',
+    opts:[['Reels are blocked in some company offices, so you shouldn’t depend on them for anything serious.',0,'Weak: off-topic. It doesn’t address learning.'],
+          ['Reels can spark interest, but you only learn coding by writing and debugging code yourself.',1,'Strong: it names what reels can’t give you.'],
+          ['My cousin tried learning from reels and failed his exams, so reels clearly never work for anyone.',0,'Weak: one story used as proof.']] },
+  { claim:'If an answer is on the first page of Google, it must be true.',
+    opts:[['Search ranks pages by popularity and links, not truth, so check who wrote it and compare sources.',1,'Strong: it explains why the claim fails and what to do.'],
+          ['Google is a foreign company, so you should never trust anything at all that comes from it.',0,'Weak: attacks the source and overgeneralises.'],
+          ['The second page of Google usually has far better answers, so you should always read that one.',0,'Weak: a made-up rule with no evidence.']] },
+  { claim:'Attendance doesn’t matter if I can watch the recordings later.',
+    opts:[['Recordings use a lot of mobile data, and data packs in India keep getting more expensive.',0,'Weak: a side issue, not the real point.'],
+          ['Students who skip classes are lazy, and lazy people never succeed in their careers.',0,'Weak: an attack and a huge overgeneralisation.'],
+          ['Watching later is easy to put off, and in class you can ask your doubts right when they come up.',1,'Strong: it gives two concrete reasons.']] },
+  { claim:'Strong passwords are pointless, because hackers can break anything.',
+    opts:[['Long, unique passwords take far longer to crack, so most attackers give up and try easier targets.',1,'Strong: it explains why strength still matters.'],
+          ['Hackers are criminals, and the police will catch them sooner or later, so there’s nothing to worry about.',0,'Weak: wishful thinking, not a reason.'],
+          ['Banks keep telling everyone to use strong passwords, so they must be important for all of us.',0,'Weak: “someone says so” isn’t a reason.']] },
+  { claim:'Debugging is a waste of time. Just ask AI to rewrite the code.',
+    opts:[['AI uses a huge amount of electricity, which is bad for the environment, so we should avoid it.',0,'Weak: off-topic.'],
+          ['If you never find why it broke, the new code can hide the same bug, and you learn nothing.',1,'Strong: it shows the real cost of skipping debugging.'],
+          ['Real programmers never use AI for anything, so using it means you aren’t a real programmer.',0,'Weak: a false rule and a personal jab.']] },
+  { claim:'Hostel students score better, so living on campus makes you smarter.',
+    opts:[['They might differ in other ways, like study time or travel time, so the hostel may not be the cause.',1,'Strong: it points to other explanations.'],
+          ['Day scholars are just as smart as hostel students, and saying otherwise is really insulting.',0,'Weak: feelings, not a reason.'],
+          ['My roommate lives in the hostel and barely passes, so living on campus can’t help anyone.',0,'Weak: one story used as proof.']] }
+];
+const ArgueBack = { id:'argue-back', name:'Argue Back', skill:'reasoning', icon:'chat', inspired:'Kialo debates', topics:'tech claims students hear',
+  how:['Read a claim people often make about tech or college.','Pick the strongest reply. All replies are about the same length.','Strong replies answer the real point with a reason. Watch for replies that only sound smart.'],
+  run(ctx){
+    const qs = shuffle(AB).slice(0,4); let i = 0, right = 0;
+    const show = () => {
+      const q = qs[i], o = shuffle(q.opts), ci = o.findIndex(x => x[1]);
+      ctx.root.innerHTML = hud([['ab-i','Claim',(i+1)+'/4'],['ab-r','Strong picks',right]]) + '<div class="msgcard"><div class="from">Someone says</div><b>“'+q.claim+'”</b></div><p class="prompt" style="margin-top:14px">Which reply is strongest?</p><div id="ab-o"></div>';
+      anim(ctx.root.querySelector('.msgcard'), { opacity:[0,1], y:[12,0] });
+      mcq($('ab-o'), o.map(x => x[0]), ci, o.map(x => (x[1] ? '✅ ' : '✗ ') + x[2]).join('<br>'), good => { if (good) right++; i++; if (i < 4) show(); else ctx.end({ score: right*10, pct: right/4*100, lines:['You picked the strongest reply <b>'+right+' of 4</b> times.','A strong reply answers the real point with a reason, not popularity, feelings or attacks.'] }); });
+    };
+    show();
+  }
+};
+
+/* ================= 11. Trust or Check (using AI well) ================= */
+const TC = [
+  { c:"print(7 // 2)", ai:"3.5", real:"3", why:"// is floor division. It drops the decimal part." },
+  { c:"x = \"5\"\nprint(x * 3)", ai:"555", real:"555", why:"x is a string, so * 3 repeats it three times." },
+  { c:"nums = [3, 1, 2]\nnums.sort()\nprint(nums)", ai:"[1, 2, 3]", real:"[1, 2, 3]", why:"sort() changes the list itself, then we print the list." },
+  { c:"nums = [3, 1, 2]\nprint(nums.sort())", ai:"[1, 2, 3]", real:"None", why:"sort() sorts in place and returns None." },
+  { c:"print(len(\"NIAT 2026\"))", ai:"8", real:"9", why:"The space counts as a character: 4 + 1 + 4 = 9." },
+  { c:"for i in range(1, 4):\n    print(i, end=\" \")", ai:"1 2 3", real:"1 2 3", why:"range(1, 4) stops before 4." },
+  { c:"print(10 % 3)", ai:"1", real:"1", why:"% gives the remainder: 10 = 3 × 3 + 1." },
+  { c:"s = \"hello\"\nprint(s[1:3])", ai:"hel", real:"el", why:"Slicing starts at index 1 (“e”) and stops before index 3." },
+  { c:"print(bool(0))", ai:"True", real:"False", why:"0 converted to a boolean is False." },
+  { c:"d = {\"a\": 1}\nprint(d.get(\"b\", 0))", ai:"KeyError", real:"0", why:"get() returns the default (0) when the key is missing. Only d[\"b\"] raises KeyError." },
+  { c:"t = (1, 2, 3)\nprint(t[-1])", ai:"3", real:"3", why:"Index -1 is the last item." },
+  { c:"print(bin(5))", ai:"0b101", real:"0b101", why:"5 in binary is 101, and Python adds the 0b prefix." },
+  { c:"print(round(2.5))", ai:"3", real:"2", why:"Python rounds halves to the nearest even number, so round(2.5) is 2." },
+  { c:"print(5 & 3)", ai:"1", real:"1", why:"Bitwise AND: 101 & 011 = 001." },
+  { c:"print(\"3\" + \"4\")", ai:"7", real:"34", why:"These are strings, so + joins them." },
+  { c:"s = {1, 2, 2, 3}\nprint(len(s))", ai:"3", real:"3", why:"A set keeps only unique values: {1, 2, 3}." },
+  { c:"print(len([1, [2, 3], 4]))", ai:"4", real:"3", why:"The inner list [2, 3] counts as one item." },
+  { c:"x = 10\nx += 5\nprint(x)", ai:"15", real:"15", why:"x += 5 adds 5 to x." },
+  { c:"print(type(10 / 2))", ai:"<class 'int'>", real:"<class 'float'>", why:"/ always gives a float, even when the result is whole." },
+  { c:"print(9 // 2 * 2)", ai:"8", real:"8", why:"9 // 2 is 4, then 4 * 2 is 8." },
+  { c:"print(\"abc\"[::-1])", ai:"cba", real:"cba", why:"A step of -1 reverses the string." },
+  { c:"print(\"Python\"[-2])", ai:"o", real:"o", why:"-1 is “n”, so -2 is “o”." },
+  { c:"print(max([3, 9, 2]))", ai:"9", real:"9", why:"max() returns the largest value." },
+  { c:"print(sorted(\"cab\"))", ai:"abc", real:"['a', 'b', 'c']", why:"sorted() always returns a list, here of single letters." },
+  { c:"nums = [1, 2, 3]\nnums.append([4, 5])\nprint(len(nums))", ai:"5", real:"4", why:"append() adds the whole list [4, 5] as one item." },
+  { c:"print(3 == 3.0)", ai:"False", real:"True", why:"3 and 3.0 have the same value, so == is True." },
+  { c:"print(\"5\" + str(5))", ai:"10", real:"55", why:"str(5) is \"5\", so + joins two strings." },
+  { c:"print(int(3.9))", ai:"4", real:"3", why:"int() cuts off the decimal part. It does not round." },
+  { c:"d = {\"x\": 1, \"y\": 2}\nprint(len(d))", ai:"2", real:"2", why:"len() of a dictionary counts its keys." },
+  { c:"print(list(range(2, 10, 3)))", ai:"[2, 5, 8]", real:"[2, 5, 8]", why:"Start at 2, step by 3, stop before 10." },
+  { c:"s = \"a,b,c\"\nprint(s.split(\",\"))", ai:"['a', 'b', 'c']", real:"['a', 'b', 'c']", why:"split(\",\") breaks the string at each comma." },
+  { c:"print(\" hi \".strip())", ai:"hi", real:"hi", why:"strip() removes spaces from both ends." },
+  { c:"print(17 % 5)", ai:"2", real:"2", why:"17 = 5 × 3 + 2." },
+  { c:"print(2 ** 10)", ai:"1024", real:"1024", why:"2 to the power 10 is 1024." },
+  { c:"print(bin(10))", ai:"0b1010", real:"0b1010", why:"10 = 8 + 2, so binary 1010." },
+  { c:"print(6 | 3)", ai:"9", real:"7", why:"Bitwise OR: 110 | 011 = 111, which is 7. It is not addition." },
+  { c:"print(10 > 5 and 3 > 7)", ai:"True", real:"False", why:"and needs both sides True. 3 > 7 is False." },
+  { c:"a = [1, 2]\nb = a\nb.append(3)\nprint(a)", ai:"[1, 2]", real:"[1, 2, 3]", why:"b = a doesn’t copy the list. Both names point to the same list." },
+  { c:"t = (1, 2)\nprint(t * 2)", ai:"(2, 4)", real:"(1, 2, 1, 2)", why:"* repeats a tuple; it doesn’t multiply each item." },
+  { c:"print(\"NIAT\".lower())", ai:"niat", real:"niat", why:"lower() makes every letter lowercase." },
+  { c:"x = 5\nif x > 3:\n    x = x * 2\nprint(x)", ai:"10", real:"10", why:"5 > 3 is True, so x becomes 10." },
+  { c:"count = 0\nfor i in range(5):\n    count += i\nprint(count)", ai:"15", real:"10", why:"range(5) is 0 to 4: 0 + 1 + 2 + 3 + 4 = 10." },
+  { c:"print(round(3.14159, 2))", ai:"3.14", real:"3.14", why:"Round to 2 decimal places." },
+  { c:"s = {3, 1, 2}\nprint(3 in s)", ai:"True", real:"True", why:"in checks whether 3 is in the set." },
+  { c:"print(abs(-7))", ai:"7", real:"7", why:"abs() gives the distance from zero." },
+  { c:"print(hex(255))", ai:"0xff", real:"0xff", why:"255 = 15 × 16 + 15, so ff in hexadecimal." }
+];
+const TrustCheck = { id:'trust-or-check', name:'Trust or Check', skill:'ai', icon:'eye', inspired:'The Decision Lab on automation bias', topics:'Python (operators, strings, lists, dicts, sets)',
+  how:['An AI tells you what a piece of Python code prints. It always sounds sure.','Work it out yourself, then choose: is the AI right or wrong?','Say how sure you are. Sure and right scores most; sure and wrong costs you.'],
+  run(ctx){
+    const qs = shuffle(TC).slice(0,6); let i = 0, score = 0, right = 0, caught = 0, wrongAI = 0;
+    const show = () => {
+      const q = qs[i]; let verdict = null, sure = null;
+      ctx.root.innerHTML = hud([['tc-i','Snippet',(i+1)+'/6'],['tc-s','Points',score]]) + '<div class="card">'+code(q.c)
+        + '<div class="botmsg"><div class="bot">🤖</div><div class="txt">The output is <b><code>'+esc(q.ai)+'</code></b>.</div></div>'
+        + '<p class="prompt" style="margin:14px 0 8px">Is the AI right?</p><div class="slider" id="tc-v"><button data-v="1">AI is right</button><button data-v="0">AI is wrong</button></div>'
+        + '<p class="prompt" style="margin:12px 0 8px">How sure are you?</p><div class="slider" id="tc-s2"><button data-s="1">Sure</button><button data-s="0">Not sure</button></div>'
+        + '<button class="btn c full" id="tc-go" style="margin-top:14px" disabled>Lock it in</button><div id="tc-x"></div></div>';
+      anim(ctx.root.querySelector('.card'), { opacity:[0,1], y:[12,0] });
+      const upd = () => $('tc-go').disabled = verdict === null || sure === null;
+      ctx.root.querySelectorAll('#tc-v button').forEach(b => b.onclick = () => { verdict = +b.dataset.v; ctx.root.querySelectorAll('#tc-v button').forEach(x => x.classList.toggle('sel', x === b)); upd(); });
+      ctx.root.querySelectorAll('#tc-s2 button').forEach(b => b.onclick = () => { sure = +b.dataset.s; ctx.root.querySelectorAll('#tc-s2 button').forEach(x => x.classList.toggle('sel', x === b)); upd(); });
+      $('tc-go').onclick = () => {
+        const aiRight = q.ai === q.real, good = (verdict === 1) === aiRight;
+        const pts = good ? (sure ? 10 : 6) : (sure ? -5 : 0);
+        score += pts; if (good) right++; if (!aiRight) { wrongAI++; if (good) caught++; }
+        $('tc-s').textContent = score;
+        ctx.root.querySelectorAll('.slider button').forEach(x => x.disabled = true); $('tc-go').hidden = true;
+        burst(good); pop((pts >= 0 ? '+' : '') + pts, $('tc-x'), good ? 'var(--ok)' : 'var(--bad)');
+        $('tc-x').innerHTML = '<div class="explain"><b>Real output: <code>'+esc(q.real)+'</code></b>. '+(aiRight ? 'The AI was right.' : 'The AI was wrong.')+' '+q.why+'</div><button class="btn c full" style="margin-top:12px" id="tc-n">'+(i < 5 ? 'Next snippet' : 'See results')+'</button>';
+        anim($('tc-x'), { opacity:[0,1], y:[8,0] });
+        $('tc-n').onclick = () => { i++; if (i < 6) show(); else ctx.end({ score: Math.max(0, score), pct: Math.max(0, score)/60*100, lines:['Correct calls: <b>'+right+' of 6</b>.','The AI was wrong '+wrongAI+' time'+(wrongAI === 1 ? '' : 's')+'. You caught <b>'+caught+'</b>.','It sounded equally sure every time. Its confidence tells you nothing; your own check does.'] }); };
+      };
+    };
+    show();
+  }
+};
+
+/* ================= 12. Source Check (using AI well) ================= */
+const SC = [
+  { src:'Python docs', text:'list.sort() sorts the list in place and returns None. The built-in sorted() returns a new sorted list and leaves the original unchanged. Both accept reverse=True to sort in descending order.',
+    sum:['sort() changes the original list.','sorted() gives you a new list and keeps the original as it is.','sort() returns the sorted list, so you can print it directly.','Both can sort in descending order with reverse=True.'], bad:2, why:'The source says sort() returns None.' },
+  { src:'Git guide', text:'git add moves your changes to the staging area. git commit saves the staged changes as a snapshot, with a message. git push uploads your commits to a remote repository such as GitHub.',
+    sum:['git add puts your changes in the staging area.','git commit saves a snapshot of the staged changes.','git commit also uploads your work to GitHub.','git push sends your commits to a remote repository.'], bad:2, why:'Only git push uploads. Commit saves locally.' },
+  { src:'CSS notes', text:'Every element is a box made of content, padding, border and margin. Padding is the space inside the border, around the content. Margin is the space outside the border. With box-sizing: border-box, the width includes padding and border.',
+    sum:['Each element has content, padding, border and margin.','Padding adds space outside the border.','Margin is the space outside the border.','border-box makes the width include padding and border.'], bad:1, why:'Padding is inside the border. Margin is outside.' },
+  { src:'Library notice', text:'The college library will stay open until 10 pm during exam weeks, starting 1 December. Students must show their ID card at the entrance. Food is not allowed inside, but water bottles are.',
+    sum:['The library stays open until 10 pm in exam weeks.','The late timings start on 1 December.','You need your ID card to enter.','Food and drinks, including water, are not allowed inside.'], bad:3, why:'Water bottles are allowed. The summary added a rule that isn’t there.' },
+  { src:'GenAI reading', text:'Large language models generate text by predicting the next word, based on patterns in their training data. They do not look facts up unless they are connected to a search tool. This is why they can give confident answers that are wrong.',
+    sum:['LLMs write by predicting the next word.','They rely on patterns learned from training data.','They always search the internet before answering.','They can sound confident even when they are wrong.'], bad:2, why:'The source says they don’t look things up unless connected to a search tool.' },
+  { src:'Bank SMS', text:'Your UPI PIN is secret. Banks and NPCI will never ask for your PIN on a call or message. You never need to enter your PIN to receive money; you enter it only to pay.',
+    sum:['Keep your UPI PIN secret.','Your bank will not ask for your PIN on a call.','To receive money, you must enter your PIN to confirm.','You enter your PIN only when you pay.'], bad:2, why:'The source says you never need your PIN to receive money. That exact twist is a common scam.' },
+  { src:'Python docs', text:'d.get(key, default) returns the value for key if it exists. If the key is missing, it returns default, which is None if you don’t give one. Unlike d[key], it never raises a KeyError.',
+    sum:['get() returns the value if the key exists.','If the key is missing and there’s no default, get() returns None.','get() raises a KeyError when the key is missing.','You can pass a default value as the second argument.'], bad:2, why:'The source says get() never raises a KeyError.' },
+  { src:'Git guide', text:'A branch lets you work on a feature without changing the main branch. When the feature is ready, you merge it back into main. Deleting a branch after merging does not delete its commits.',
+    sum:['Branches let you build features without touching main.','You merge a finished feature back into main.','Deleting a branch after merging also deletes its commits.','Main stays unchanged while you work on a branch.'], bad:2, why:'The commits stay. Only the branch name is removed.' },
+  { src:'CSS notes', text:'justify-content controls spacing along the main axis. In a row, that means left to right. align-items controls alignment on the cross axis, which is top to bottom in a row.',
+    sum:['justify-content works on the main axis.','In a row, the main axis runs left to right.','align-items also works on the main axis.','In a row, the cross axis runs top to bottom.'], bad:2, why:'align-items works on the cross axis.' },
+  { src:'Exam notice', text:'The mid-semester exam is on 14 November at 10 am in Block C. It covers Units 1 to 3. Calculators are allowed, but phones must be switched off and kept in your bag.',
+    sum:['The mid-sem is on 14 November at 10 am.','It will be held in Block C.','It covers Units 1 to 4.','Calculators are allowed; phones must be off.'], bad:2, why:'The notice says Units 1 to 3. One wrong number can cost you a whole unit of study.' },
+  { src:'GenAI reading', text:'An AI agent can plan steps and use tools, like a search or a calculator, to finish a task. Unlike a plain chatbot, it can take actions. Agents still make mistakes, so important actions should be checked by a person.',
+    sum:['Agents can plan steps and use tools.','They can take actions, not just chat.','Because they use tools, agents don’t make mistakes.','A person should check important actions.'], bad:2, why:'The source says agents still make mistakes.' },
+  { src:'HTML guide', text:'The alt attribute on an img tag describes the image in words. Screen readers read it aloud for people who cannot see the image. It is also shown if the image fails to load.',
+    sum:['alt describes an image in words.','Screen readers read alt text aloud.','alt text is shown if the image doesn’t load.','alt text makes the image load faster.'], bad:3, why:'The source says nothing about speed. The summary made that up.' },
+  { src:'Bank SMS', text:'Your bank will never send a link asking you to update KYC by SMS. If you get such a message, don’t click the link. Call the number printed on your bank card instead.',
+    sum:['Banks don’t send KYC update links by SMS.','Don’t click links in such messages.','Call the number printed on your bank card.','You can reply to the SMS to check if it’s real.'], bad:3, why:'The source never says to reply. Replying to a scam confirms your number is active.' },
+  { src:'Python docs', text:'range(start, stop) gives numbers from start up to, but not including, stop. range(5) gives 0, 1, 2, 3 and 4. A third argument, step, sets the gap between numbers.',
+    sum:['range(5) gives 0 to 4.','The stop value is not included.','range(1, 5) gives 1, 2, 3, 4 and 5.','A third argument sets the step.'], bad:2, why:'Stop is not included, so range(1, 5) ends at 4.' }
+];
+const SourceCheck = { id:'source-check', name:'Source Check', skill:'ai', icon:'lens', inspired:'checking AI summaries against the source', topics:'Python, Git, CSS, GenAI, UPI',
+  how:['You get a short source text and an AI summary of it.','One sentence in the summary says something the source doesn’t.','Compare them and tap the wrong sentence. You don’t need to know the topic.'],
+  run(ctx){
+    const qs = shuffle(SC).slice(0,4); let i = 0, right = 0;
+    const show = () => {
+      const q = qs[i], order = shuffle([0,1,2,3]);
+      ctx.root.innerHTML = hud([['sc-i','Summary',(i+1)+'/4'],['sc-r','Caught',right]]) + '<div class="card source"><div class="small muted">Source: '+q.src+'</div><p style="margin:6px 0 0">'+q.text+'</p></div>'
+        + '<div class="botmsg"><div class="bot">🤖</div><div class="txt">Here’s my summary:</div></div><p class="prompt" style="margin-top:12px">Tap the sentence the source doesn’t support.</p><div id="sc-o"></div>';
+      anim(ctx.root.querySelector('.source'), { opacity:[0,1], y:[12,0] });
+      mcq($('sc-o'), order.map(k => q.sum[k]), order.indexOf(q.bad), '<b>Caught it?</b> '+q.why, good => { if (good) right++; i++; if (i < 4) show(); else ctx.end({ score: right*10, pct: right/4*100, lines:['You caught <b>'+right+' of 4</b> twisted sentences.','You didn’t need to know the facts. You just needed to check the source. Do this every time AI summarises your notes.'] }); });
+    };
+    show();
+  }
+};
+
+/* ================= 13. Taste Test (using AI well) ================= */
+const FLAWS = ['Too vague','Too long','Breaks the code','Describes looks, not purpose','Hands over the thinking'];
+const TS = [
+  { brief:'A Python variable name for a student’s total marks.', opts:[['total_marks',null],['tm','Too vague'],['x','Too vague'],['total_marks_of_the_student_in_all_subjects','Too long'],['Total Marks','Breaks the code'],['2total','Breaks the code']], note:'Python names can’t contain spaces or start with a number. Good names say what they hold, briefly.' },
+  { brief:'A Git commit message for fixing the login button colour.', opts:[['Fix login button colour on mobile',null],['changes','Too vague'],['fixed stuff lol','Too vague'],['Fixed the bug where the login button on the home page showed the wrong colour on small mobile screens in dark mode','Too long'],['update','Too vague'],['asdf','Too vague']], note:'A good commit message says what changed, in a few words. Your future self will read it.' },
+  { brief:'A CSS class name for the main navigation bar.', opts:[['main-nav',null],['blue-box','Describes looks, not purpose'],['div1','Too vague'],['the-navigation-bar-at-the-top-of-the-page','Too long'],['nav bar','Breaks the code'],['big-blue-strip','Describes looks, not purpose']], note:'Name classes by what they are for. If the bar turns green later, “blue-box” becomes wrong. A space makes two classes.' },
+  { brief:'A prompt to get AI feedback on your HTML page.', opts:[['Review my HTML for semantic tags and accessibility. List 3 fixes with reasons.',null],['make it better','Too vague'],['check','Too vague'],['Write the whole website for me so I can submit it','Hands over the thinking'],['Hi, hope you are well, I was wondering if you could maybe possibly look at my page and tell me anything at all you think','Too long'],['Rewrite all my code without explaining anything','Hands over the thinking']], note:'Good prompts are specific and keep you learning: ask for feedback and reasons, not a finished answer.' },
+  { brief:'A Python function name that checks if a number is even.', opts:[['is_even',null],['check','Too vague'],['f1','Too vague'],['function_that_checks_whether_the_given_number_is_even','Too long'],['is even','Breaks the code'],['2even','Breaks the code']], note:'Function names should say what they do. is_even reads like a yes/no question, which suits a function that returns True or False.' },
+  { brief:'A Git commit message after adding a contact form.', opts:[['Add contact form to homepage',null],['stuff','Too vague'],['final','Too vague'],['Added a new contact form with name, email and message fields plus validation and styling on the homepage today','Too long'],['wip','Too vague'],['form','Too vague']], note:'Say what changed and where, in a few words. “final” is never final.' },
+  { brief:'A CSS class name for a red error message.', opts:[['error-message',null],['red-text','Describes looks, not purpose'],['big-red-bold','Describes looks, not purpose'],['text1','Too vague'],['error message','Breaks the code'],['the-message-that-shows-when-the-form-has-an-error','Too long']], note:'If the design changes the colour to orange, “red-text” becomes a lie. Name it by its job.' },
+  { brief:'A prompt to understand a Python error you got.', opts:[['I got a TypeError on line 4 (code below). Explain why in simple words, but don’t fix it for me.',null],['error help','Too vague'],['fix','Too vague'],['Just give me working code, I don’t care why','Hands over the thinking'],['Hello, I really hope you can help me, I have been trying for a long time and something somewhere in my code is wrong I think','Too long'],['Do my assignment','Hands over the thinking']], note:'The best prompt gives context and asks to understand, so next time you can fix it yourself.' },
+  { brief:'A Python variable name for a list of student names.', opts:[['student_names',null],['s','Too vague'],['list1','Too vague'],['Student Names','Breaks the code'],['1students','Breaks the code'],['list_of_all_the_names_of_students_in_the_class','Too long']], note:'Plural names like student_names tell the reader it holds many items.' },
+  { brief:'A prompt to use AI while revising for an exam.', opts:[['Quiz me with 5 questions on Python lists, one at a time, and tell me what I got wrong.',null],['python','Too vague'],['Write all my exam answers so I can memorise them','Hands over the thinking'],['teach','Too vague'],['Give me last year’s answers so I don’t need to study','Hands over the thinking'],['Hi, I have an exam soon and I am a bit worried, could you maybe help me study or something, anything is fine really','Too long']], note:'Using AI to test yourself builds memory. Using it to hand you answers doesn’t.' }
+];
+const TasteTest = { id:'taste-test', name:'Taste Test', skill:'ai', icon:'star', inspired:'Aashish Pahwa’s “AI ideas feel familiar” post', topics:'Python names, Git, CSS, prompting',
+  how:['An AI gives you 6 options for a small task.','First, pick the best one.','Then say exactly what’s wrong with 3 of the others. That’s the real skill.'],
+  run(ctx){
+    const B = pick(TS); const opts = shuffle(B.opts); let score = 0, flawRight = 0;
+    ctx.root.innerHTML = '<div class="botmsg"><div class="bot">🤖</div><div class="txt"><div class="small muted">Task</div><b>'+B.brief+'</b><br>Here are 6 options:</div></div><p class="prompt" style="margin-top:12px">Step 1: tap the best option.</p><div id="ts-o">'
+      + opts.map((o,n) => '<button class="opt idea" data-n="'+n+'"><span class="rk">'+(n+1)+'</span><span>'+esc(o[0])+'</span></button>').join('') + '</div><div id="ts-2"></div>';
+    anim(ctx.root.querySelectorAll('.idea'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.04) });
+    let picked = false;
+    ctx.root.querySelectorAll('.idea').forEach(b => b.onclick = () => {
+      if (picked) return; picked = true;
+      const n = +b.dataset.n, good = opts[n][1] === null, bi = opts.findIndex(o => o[1] === null);
+      b.classList.add(good ? 'right' : 'wrong'); ctx.root.querySelectorAll('.idea')[bi].classList.add('right');
+      burst(good); if (good) { score += 40; pop('+40', b); }
+      const flawed = shuffle(opts.map((o,k) => k).filter(k => opts[k][1] !== null)).slice(0,3);
+      let f = 0;
+      const ask = () => {
+        if (f >= 3) return ctx.after(400, () => ctx.end({ score, pct: score, lines:['Best option: <b>'+esc(opts[bi][0])+'</b>'+(good ? ', and you picked it.' : '.'),'You named the right flaw <b>'+flawRight+' of 3</b> times.', B.note] }));
+        const k = flawed[f];
+        $('ts-2').innerHTML = '<div class="card" style="margin-top:12px"><p class="prompt" style="margin:0 0 8px">Step 2 ('+(f+1)+'/3): what’s wrong with this one?</p><div class="msgcard" style="margin-bottom:10px"><code>'+esc(opts[k][0])+'</code></div><div class="chips">'+FLAWS.map(fl => '<button class="chipb">'+fl+'</button>').join('')+'</div><div id="ts-x"></div></div>';
+        anim($('ts-2').firstChild, { opacity:[0,1], y:[10,0] }); $('ts-2').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block:'center' });
+        $('ts-2').querySelectorAll('.chipb').forEach(c => c.onclick = () => {
+          const ok = c.textContent === opts[k][1];
+          $('ts-2').querySelectorAll('.chipb').forEach(x => { x.disabled = true; if (x.textContent === opts[k][1]) x.classList.add('chip-right'); });
+          if (ok) { flawRight++; score += 20; pop('+20', c); } else { c.classList.add('chip-wrong'); shake(c); } FX.result(ok);
+          ctx.after(900, () => { f++; ask(); });
+        });
+      };
+      ctx.after(700, ask);
+    });
+  }
+};
+
+/* ================= registry ================= */
+
+/* ================= 14. Rule Switch (flexibility) ================= */
+// [shown, isString, isNumber (int or float), isBoolean]  (checked in Python with type())
+const RS_VALS = [['7',0,1,0],['"7"',1,0,0],['7.0',0,1,0],['0',0,1,0],['""',1,0,0],['[]',0,0,0],['[1, 2]',0,0,0],['"hi"',1,0,0],['-3',0,1,0],['None',0,0,0],['"False"',1,0,0],['"True"',1,0,0],['True',0,0,1],['False',0,0,1],['True',0,0,1],['False',0,0,1],['3.14',0,1,0],['10',0,1,0],['"10"',1,0,0],['0.5',0,1,0],['["a"]',0,0,0],['"None"',1,0,0],['"3.14"',1,0,0]];
+const RS_RULES = [{ q:'Is it a string?', k:1, col:'#7B61FF' }, { q:'Is it a number?', k:2, col:'#FF7A2F' }, { q:'Is it a boolean?', k:3, col:'#0B9BD6' }];
+const RuleSwitch = { id:'rule-switch', name:'Rule Switch', skill:'flexibility', icon:'switch', inspired:'Lumosity’s task-switching games', topics:'Python data types: str, int, float, bool',
+  how:['A Python value appears, like 7 or "7". A rule sits above it.','Answer Yes or No, fast. Use the buttons or the ← → keys.','The rule changes without warning. Notice it and switch. 60 seconds.'],
+  run(ctx){
+    let rule = pick(RS_RULES), left = 3 + Math.floor(Math.random()*3), card, justSwitched = false;
+    let c = 0, w = 0, sw = 0, swRight = 0, score = 0, streak = 0;
+    ctx.root.innerHTML = '<div class="tbar"><i id="rs-t"></i></div>' + hud([['rs-s','Score','0'],['rs-c','Correct','0'],['rs-l','Seconds','60']])
+      + '<div class="rs-rule" id="rs-r"></div><div class="rs-card" id="rs-v"></div>'
+      + '<div class="row"><button class="btn rs-no" id="rs-n">← No</button><button class="btn rs-yes" id="rs-y">Yes →</button></div><p class="small muted" id="rs-m" style="text-align:center;min-height:20px;margin-top:10px"></p>';
+    const showRule = () => { const r = $('rs-r'); r.textContent = rule.q; r.style.background = rule.col; anim(r, { rotateX:[90,0], opacity:[0,1] }, { type:'spring', bounce:0.3, duration:0.5 }); };
+    const nextCard = () => {
+      left--;
+      if (left < 0) { let r2; do { r2 = pick(RS_RULES); } while (r2 === rule); rule = r2; left = 2 + Math.floor(Math.random()*4); justSwitched = true; showRule(); } else justSwitched = false;
+      let v; do { v = pick(RS_VALS); } while (card && v === card); card = v;
+      $('rs-v').innerHTML = '<code>'+esc(card[0])+'</code>';
+      anim($('rs-v'), { opacity:[0,1], y:[14,0], scale:[.92,1] }, { duration:0.25 });
+    };
+    const answer = yes => {
+      const truth = !!card[rule.k], good = yes === truth;
+      if (justSwitched) { sw++; if (good) swRight++; }
+      if (good) { c++; streak++; const pts = 10 + (justSwitched ? 5 : 0) + Math.min(10, streak); score += pts; pop('+' + pts, $('rs-v')); $('rs-m').textContent = ''; }
+      else { w++; streak = 0; shake($('rs-v')); $('rs-m').innerHTML = '<code>'+esc(card[0])+'</code> → '+rule.q.replace('Is it ','').replace('?','')+': <b>'+(truth ? 'Yes' : 'No')+'</b>'; }
+      ring($('rs-v'), good); FX.result(good, true);
+      $('rs-s').textContent = score; $('rs-c').textContent = c;
+      nextCard();
+    };
+    $('rs-y').onclick = () => answer(true); $('rs-n').onclick = () => answer(false);
+    const onKey = e => { if (e.key === 'ArrowRight') { e.preventDefault(); answer(true); } if (e.key === 'ArrowLeft') { e.preventDefault(); answer(false); } };
+    document.addEventListener('keydown', onKey);
+    showRule(); left++; nextCard();
+    ctx.timer(60, $('rs-t'), s => $('rs-l').textContent = s, () => {
+      const acc = c + w ? Math.round(c/(c+w)*100) : 0, sacc = sw ? Math.round(swRight/sw*100) : 0;
+      ctx.end({ score, pct: Math.min(100, c/40*100) * (acc/100), lines:['Correct: <b>'+c+'</b>. Accuracy <b>'+acc+'%</b>.','Right after a rule change: <b>'+swRight+' of '+sw+'</b> ('+sacc+'%).', sw && sacc < acc ? 'You slow down or slip right after a switch. That’s the “switch cost”, and practice shrinks it.' : 'You handled the switches well.','Traps to remember: "7" and "True" have quotes, so they are strings. True and False without quotes are booleans. None and lists are none of the three.'] });
+    });
+    return () => document.removeEventListener('keydown', onKey);
+  }
+};
+
+/* ================= 15. Robot Path (planning) ================= */
+const RP_ALL = [
+  ['.....','S...G','.....','.....','.....'],
+  ['..#..','S.#.#','..#..','#...#','G.#..'],
+  ['....G','..#..','S.#..','..#..','.....'],
+  ['..#G.','.##..','....#','S#...','.#.#.'],
+  ['.....','.###.','S#G#.','.#.#.','...#.'],
+  ['S..#.','.#...','.#.##','.#...','...#G'],
+  ['G#...','.#.#.','...#.','##.#.','S....'],
+  ['S#...','.#.#.','.#.#.','...#G','.....'],
+  ['.#..G','.#.#.','S#.#.','...#.','.#...'],
+  ['S.#..','.##..','....#','#.#..','...#G'],
+  ['#..#G','S.##.','.#...','...#.','.#...'],
+  ['S....','####.','.....','.####','....G']
+];
+const DIRS = [[0,1],[1,0],[0,-1],[-1,0]]; // E S W N
+let RP_LEVELS = [];
+function rpParse(L){ let s, g; L.forEach((row,r) => [...row].forEach((ch,c) => { if (ch === 'S') s = [r,c]; if (ch === 'G') g = [r,c]; })); return { s, g, wall:(r,c) => r < 0 || c < 0 || r > 4 || c > 4 || L[r][c] === '#' }; }
+function rpBest(L){ const P = rpParse(L); const key = (r,c,d) => r+','+c+','+d; const q = [[P.s[0],P.s[1],0,0]], seen = new Set([key(P.s[0],P.s[1],0)]);
+  while (q.length) { const [r,c,d,n] = q.shift(); if (r === P.g[0] && c === P.g[1]) return n;
+    const nx = [[r+DIRS[d][0], c+DIRS[d][1], d], [r,c,(d+3)%4], [r,c,(d+1)%4]];
+    nx.forEach(([a,b,e]) => { if (!P.wall(a,b) && !seen.has(key(a,b,e))) { seen.add(key(a,b,e)); q.push([a,b,e,n+1]); } }); }
+  return 99; }
+/* top-down robot, front faces right (east) at 0° */
+const ROBOT_SVG = '<svg viewBox="8 2 88 96" aria-hidden="true">'
+  + '<ellipse cx="52" cy="56" rx="38" ry="36" fill="rgba(17,24,39,.18)"/>'
+  + '<g class="tread tread-l"><rect x="14" y="8" width="66" height="18" rx="9" fill="#2B3445"/><path class="tr" d="M18 17 H76" stroke="#5A6478" stroke-width="12" stroke-dasharray="4 5"/></g>'
+  + '<g class="tread tread-r"><rect x="14" y="74" width="66" height="18" rx="9" fill="#2B3445"/><path class="tr" d="M18 83 H76" stroke="#5A6478" stroke-width="12" stroke-dasharray="4 5"/></g>'
+  + '<rect x="20" y="20" width="60" height="60" rx="16" fill="var(--c)"/>'
+  + '<rect x="20" y="20" width="60" height="22" rx="16" fill="rgba(255,255,255,.18)"/>'
+  + '<rect x="26" y="40" width="14" height="20" rx="4" fill="rgba(0,0,0,.15)"/>'
+  + '<circle cx="33" cy="50" r="3" class="led" fill="#7CF29A"/>'
+  + '<rect x="50" y="28" width="34" height="44" rx="12" fill="#1F2A37"/>'
+  + '<g class="eyes"><rect x="68" y="35" width="10" height="12" rx="5" fill="#8FE9FF"/><rect x="68" y="53" width="10" height="12" rx="5" fill="#8FE9FF"/></g>'
+  + '<g class="xeyes" opacity="0"><path d="M68 36l10 10M78 36l-10 10M68 54l10 10M78 54l-10 10" stroke="#FF6B6B" stroke-width="3.5" stroke-linecap="round"/></g>'
+  + '<line x1="40" y1="50" x2="40" y2="50" stroke="none"/><circle cx="56" cy="50" r="3.5" fill="#FFD84D" class="ant"/>'
+  + '</svg>';
+const RobotPath = { id:'robot-path', name:'Robot Path', skill:'planning', icon:'robot', inspired:'coding puzzle games like Lightbot', topics:'sequencing and functions, like pseudocode',
+  how:['Guide the robot to the star. It starts facing right (see its eyes).','Plan your whole program first with forward(), turn_left() and turn_right().','Press Run. Hitting a wall means rewrite and try again. Fewer commands and fewer runs score more.'],
+  run(ctx){
+    { const sorted = RP_ALL.slice().sort((a,b) => rpBest(a) - rpBest(b)); RP_LEVELS = [0,1,2,3,4].map(k => pick(sorted.slice(Math.floor(k*sorted.length/5), Math.floor((k+1)*sorted.length/5)))); }
+    let lv = 0, prog = [], runs = 0, total = 0, running = false, log = [], angle = 0;
+    const NAME = { F:'forward()', L:'turn_left()', R:'turn_right()' };
+    const cells = () => [...$('rp-g').querySelectorAll('.cell')];
+    const draw = () => {
+      const L = RP_LEVELS[lv], P = rpParse(L);
+      angle = 0;
+      ctx.root.innerHTML = hud([['rp-l','Level',(lv+1)+'/5'],['rp-b','Best possible',rpBest(L)+' cmds'],['rp-s','Points',total]])
+        + '<div class="rp-grid" id="rp-g">'+L.map((row,r) => [...row].map((ch,c) => '<div class="cell'+(ch === '#' ? ' wall' : '')+(ch === 'G' ? ' goal' : '')+'">'+(ch === 'G' ? '<span class="star">⭐</span>' : '')+'</div>').join('')).join('')
+        + '<div class="rp-bot" id="rp-bot"><div class="rp-body" id="rp-body">'+ROBOT_SVG+'</div></div></div>'
+        + '<div class="rp-prog" id="rp-p"></div>'
+        + '<div class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn light sm" data-cmd="F">forward()</button><button class="btn light sm" data-cmd="L">turn_left()</button><button class="btn light sm" data-cmd="R">turn_right()</button></div>'
+        + '<div class="row" style="margin-top:10px"><button class="btn light sm" id="rp-u">Undo</button><button class="btn light sm" id="rp-x">Clear</button><button class="btn c" id="rp-run" style="flex:1">▶ Run</button></div><p class="small muted" id="rp-m" style="min-height:20px;margin-top:8px"></p>';
+      place(P.s[0], P.s[1]);
+      setAngle(0, false);
+      renderProg();
+      ctx.root.querySelectorAll('[data-cmd]').forEach(b => b.onclick = () => { if (running || prog.length >= 24) return; prog.push(b.dataset.cmd); renderProg(); });
+      $('rp-u').onclick = () => { if (!running) { prog.pop(); renderProg(); } };
+      $('rp-x').onclick = () => { if (!running) { prog = []; renderProg(); } };
+      $('rp-run').onclick = run;
+      anim(ctx.root.querySelectorAll('.rp-grid .cell'), { opacity:[0,1], scale:[.8,1] }, { delay: stag(0.008) });
+      anim($('rp-body'), { scale:[0,1.15,1], rotate:[-90,0] }, { type:'tween', duration:0.55, delay:0.25 });
+    };
+    const renderProg = (hi) => { $('rp-p').innerHTML = prog.length ? prog.map((p,i) => '<span class="'+(i === hi ? 'hi' : i < hi ? 'done' : '')+'">'+(i+1)+'. '+NAME[p]+'</span>').join('') : '<span class="muted">Your program is empty. Add commands below.</span>'; };
+    const geo = () => { const cs = cells(), a = cs[0], b2 = cs[6]; return { x0:a.offsetLeft, y0:a.offsetTop, w:a.offsetWidth, h:a.offsetHeight, sx:b2.offsetLeft - a.offsetLeft, sy:b2.offsetTop - a.offsetTop }; };
+    const xy = (r, c) => { const g = geo(); return { x: g.x0 + c*g.sx, y: g.y0 + r*g.sy }; };
+    const size = () => { const g = geo(), b = $('rp-bot'); b.style.width = g.w + 'px'; b.style.height = g.h + 'px'; };
+    const place = (r, c) => { size(); const p = xy(r, c), b = $('rp-bot'); if (M) M.animate(b, { x:p.x, y:p.y }, { duration:0 }); else b.style.transform = 'translate('+p.x+'px,'+p.y+'px)'; };
+    const glide = (r, c, ms) => {
+      const p = xy(r, c), b = $('rp-bot');
+      if (M && !reduced()) return M.animate(b, { x:p.x, y:p.y }, { duration: ms/1000, ease:[.45,0,.25,1] });
+      place(r, c); return null;
+    };
+    const setAngle = (a, animate) => {
+      angle = a;
+      const body = $('rp-body');
+      if (M) M.animate(body, { rotate: a }, animate && !reduced() ? { type:'spring', bounce:0.25, duration:0.45 } : { duration:0 });
+      else body.style.transform = 'rotate('+a+'deg)';
+    };
+    const moving = on => $('rp-bot').classList.toggle('moving', on);
+    const trail = (r, c) => { const cell = cells()[r*5 + c]; if (cell && !cell.classList.contains('goal')) cell.classList.add('trail'); };
+    function run(){
+      if (running || !prog.length) return;
+      running = true; runs++;
+      const L = RP_LEVELS[lv], P = rpParse(L); let r = P.s[0], c = P.s[1], d = 0, i = 0;
+      cells().forEach(x => x.classList.remove('trail'));
+      const bot = $('rp-bot'); bot.classList.remove('crashed','won');
+      place(r, c); setAngle(0, false); trail(r, c);
+      $('rp-m').textContent = '';
+      const tick = () => {
+        if (i >= prog.length) { running = false; renderProg(prog.length); return done(r === P.g[0] && c === P.g[1]); }
+        renderProg(i);
+        const cmd = prog[i++];
+        if (cmd === 'L' || cmd === 'R') {
+          d = cmd === 'L' ? (d+3)%4 : (d+1)%4;
+          setAngle(angle + (cmd === 'L' ? -90 : 90), true); SFX.play('turn');
+          ctx.after(480, tick); return;
+        }
+        const nr = r + DIRS[d][0], nc = c + DIRS[d][1];
+        if (P.wall(nr, nc)) { crash(r, c, d, i); return; }
+        moving(true); SFX.play('move');
+        glide(nr, nc, 420);
+        r = nr; c = nc;
+        ctx.after(430, () => { moving(false); trail(r, c); tick(); });
+      };
+      ctx.after(250, tick);
+    }
+    function crash(r, c, d, step){
+      const bot = $('rp-bot');
+      moving(true);
+      const dx = DIRS[d][1]*5, dy = DIRS[d][0]*5;
+      glide(r + DIRS[d][0]*0.28, c + DIRS[d][1]*0.28, 180);
+      ctx.after(190, () => {
+        moving(false); bot.classList.add('crashed'); SFX.play('bump'); vib(40);
+        if (M && !reduced()) M.animate($('rp-body'), { rotate:[angle, angle-12, angle+10, angle-6, angle] }, { duration:0.45 });
+        glide(r, c, 260);
+        burst(false);
+      });
+      ctx.after(700, () => { running = false; $('rp-m').textContent = 'Bump! Step '+step+' runs into a wall or the edge. Edit and run again.'; });
+    }
+    function done(atGoal){
+      const bot = $('rp-bot');
+      if (!atGoal) { bot.classList.add('crashed'); $('rp-m').textContent = 'The program finished, but the robot isn’t on the star.'; shake(bot); ctx.after(900, () => bot.classList.remove('crashed')); return; }
+      bot.classList.add('won'); SFX.play('combo');
+      if (M && !reduced()) { M.animate($('rp-body'), { rotate:[angle, angle+360], scale:[1,1.25,1] }, { duration:0.7, ease:'easeInOut' }); M.animate($('rp-body'), { y:[0,-14,0] }, { duration:0.5, ease:'easeOut' }); }
+      const star = ctx.root.querySelector('.goal .star'); if (star) anim(star, { scale:[1,1.8,0], opacity:[1,1,0] }, { type:'tween', duration:0.6 });
+      const best = rpBest(RP_LEVELS[lv]), extra = prog.length - best;
+      const pts = Math.max(5, 30 - 4*Math.max(0, extra) - 5*(runs-1));
+      total += pts; log.push('Level '+(lv+1)+': '+prog.length+' commands (best '+best+'), '+runs+' run'+(runs === 1 ? '' : 's')+'. +'+pts);
+      burst(true); pop('+' + pts, $('rp-g'));
+      ctx.after(1200, () => { lv++; prog = []; runs = 0; if (lv < RP_LEVELS.length) draw(); else ctx.end({ score: total, pct: total/150*100, lines: log.concat(['Planning the whole path before running is exactly how you write good code: think first, then type.']) }); });
+    }
+    draw();
+  }
+};
+
+/* ================= registry ================= */
+const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest];
+route();
+</script>
+</body>
+</html>

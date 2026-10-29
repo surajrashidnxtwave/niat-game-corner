@@ -1,0 +1,13 @@
+{
+  "name": "game-corner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Game Corner: 15 cognitive games for 1st-year B.Tech students, with an AI judge for open-ended answers.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "vercel dev",
+    "models": "node --env-file=.env.local scripts/cheapest-models.mjs",
+    "test:judge": "node --env-file=.env.local scripts/test-judge.mjs"
+  }
+}

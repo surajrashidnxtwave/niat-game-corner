@@ -1,0 +1,3 @@
+{
+  "functions": { "api/judge.js": { "maxDuration": 15 } }
+}
