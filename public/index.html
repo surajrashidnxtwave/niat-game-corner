@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Game Corner</title>
+<title>Brain Gym</title>
+<meta name="theme-color" content="#141B34">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <style>
 :root{
@@ -15,8 +16,9 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
   --font:'Nunito','Trebuchet MS',system-ui,sans-serif;
-  --bg:#F6F7FB; --card:#FFFFFF; --chip:#F1F3F8; --line:#E5E7EF;
-  --ink:#1F2A37; --soft:#6B7280; --ok:#16A36F; --bad:#EF4444; --gold:#FFB020;
+  --bg:#F3F3FA; --card:#FFFFFF; --chip:#F0F0F7; --line:#E3E3EF;
+  --ink:#141B34;
+  --gym:linear-gradient(135deg,#5B4BFF,#9B3BF5 55%,#FF4D8D); --gym-dark:#141B34; --energy:#C6F432; --soft:#6B7280; --ok:#16A36F; --bad:#EF4444; --gold:#FFB020;
   --c-creativity:#F0457A; --c-insight:#7B61FF; --c-memory:#0F9F8F; --c-focus:#FF7A2F;
   --c-reasoning:#2F7BF0; --c-flex:#20A35A; --c-calibration:#E09A00; --c-ai:#0B9BD6;
   --shadow:0 1px 2px rgba(17,24,39,.05),0 8px 24px rgba(17,24,39,.07);
@@ -49,12 +51,91 @@ input.field:focus{border-color:var(--c);outline:none}
 /* home */
 .top{display:flex;align-items:center;gap:12px}
 .avatar{width:52px;height:52px;border-radius:50%;background:var(--c-insight);display:grid;place-items:center;font-size:26px;flex:none}
-.top h2{font-size:20px}
+.top h2{font-size:22px}
+.logo{width:52px;height:52px;border-radius:16px;background:var(--gym);display:grid;place-items:center;flex:none;color:#fff;box-shadow:0 8px 20px rgba(91,75,255,.35)}
+.logo svg{width:30px;height:30px}
+.musc{flex:none;font-weight:800;font-size:13px;padding:9px 12px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);white-space:nowrap}
+.top h2{white-space:nowrap}
+@media (max-width:380px){.musc .lg{display:none}}
+/* brain muscles */
+.scan{position:relative;overflow:hidden;padding:16px 14px 10px;background-color:#FBFAFF;background-image:linear-gradient(rgba(91,75,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(91,75,255,.06) 1px,transparent 1px);background-size:20px 20px}
+.scan .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.scan .kick{display:inline-block;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--ink);border-radius:999px;padding:2px 10px}
+.scan .sub{font-size:12.5px;color:var(--soft);margin-top:4px}
+.scan .total{text-align:right;line-height:1}
+.scan .total b{font-size:34px;font-weight:900;font-variant-numeric:tabular-nums}
+.scan .total span{font-size:15px;font-weight:900;margin-left:2px}
+.scan .total small{display:block;font-size:11.5px;color:var(--soft);margin-top:4px}
+.scan svg{width:100%;height:auto;display:block;margin-top:4px;-webkit-tap-highlight-color:transparent}
+.scan .cap{text-align:center;font-size:12.5px;color:var(--soft);margin:2px 0 4px}
+.scanline{position:absolute;left:0;right:0;top:0;height:70px;transform:translateY(-80px);background:linear-gradient(180deg,transparent,rgba(91,75,255,.22) 70%,rgba(91,75,255,.5) 72%,transparent 74%);pointer-events:none}
+.scan.run .scanline{animation:scanl 1.5s cubic-bezier(.4,0,.2,1) 1}
+@keyframes scanl{to{transform:translateY(460px)}}
+.mz{cursor:pointer;transition:opacity .2s}
+svg.has-sel path.mz:not(.sel){opacity:.45}
+.mlab{cursor:pointer}
+.mlab text{font:900 13px var(--font);fill:var(--ink)}
+.mcall{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mcall .card{padding:12px;display:flex;flex-direction:column;gap:2px;text-align:left}
+.mcall .lb{font-size:11.5px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+.mcall .nm{font-size:16px;font-weight:900;display:flex;align-items:center;gap:6px}
+.mcall .nm i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.mdetail{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.mdetail .hd{display:flex;align-items:center;gap:12px}
+.mdetail .ic{width:48px;height:48px;border-radius:15px;background:var(--c);color:#fff;display:grid;place-items:center;flex:none}
+.mdetail .ic svg{width:26px;height:26px}
+.mdetail h3{font-size:20px}
+.mdetail .kg{margin-left:auto;text-align:right;line-height:1}
+.mdetail .kg b{font-size:30px;font-weight:900;font-variant-numeric:tabular-nums}
+.mdetail .kg small{display:block;font-size:11px;color:var(--soft);margin-top:3px}
+.mdetail .bb{display:flex;justify-content:center;background:var(--bg);border-radius:16px;padding:10px 0}
+.mdetail .bb svg{width:100%;max-width:280px;height:auto}
+.mdetail p{margin:0;font-size:14px}
+.scan .today{display:inline-block;margin-top:6px;font-size:12px;font-weight:900;color:var(--ink);background:var(--energy);border-radius:999px;padding:2px 9px}
+.mdetail .rank{display:flex;flex-direction:column;gap:6px}
+.mdetail .rank .bar{height:10px}
+.mdetail .rank .bar i{background:var(--c)}
+.mdetail .bb{flex-direction:column;align-items:center;gap:2px}
+.mdetail .pb{font-size:12px;color:var(--soft);display:flex;gap:6px;align-items:baseline}
+.mdetail .pb b{font-size:15px;color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--chip)}
+.chip svg{width:13px;height:13px}
+.chip.lk{color:var(--soft)}
+.mtier{display:inline-block;font-size:11px;font-weight:900;border-radius:999px;padding:1px 8px;background:var(--chip);color:var(--ink);white-space:nowrap}
+.mtier.t4{background:var(--ink);color:#fff}
+.mlist{padding:6px}
+.mrow{display:grid;grid-template-columns:34px 1fr 96px 48px;align-items:center;gap:8px;width:100%;padding:8px;border-radius:14px;text-align:left}
+.mrow.sel{background:var(--chip)}
+.mrow .dot{width:34px;height:34px;border-radius:11px;background:var(--c);color:#fff;display:grid;place-items:center}
+.mrow .dot svg{width:19px;height:19px}
+.mrow .nm{font-weight:800;font-size:14px;line-height:1.2;min-width:0}
+.mrow .nm .mtier{margin-top:2px}
+.mrow .v{text-align:right;font-weight:900;font-variant-numeric:tabular-nums;font-size:15px}
+.mrow .v small{font-size:11px;color:var(--soft);margin-left:1px}
+.mrow svg.bbs{width:96px;height:auto}
+.plan{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.ptile{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border-radius:18px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);color:#fff;text-align:center}
+.ptile .ic{width:48px;height:48px;border-radius:15px;background:var(--c);display:grid;place-items:center;box-shadow:0 6px 16px color-mix(in srgb,var(--c) 45%,transparent)}
+.ptile .ic svg{width:26px;height:26px;color:#fff}
+.ptile .nm{font-size:13px;font-weight:800;line-height:1.2;min-height:2.4em;display:grid;place-items:center}
+.ptile .tm{font-size:11.5px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums}
+.ptile .bar{width:100%;height:6px}
+.ptile.done{box-shadow:inset 0 0 0 2px var(--energy)}
+.ptile.done::after{content:"✓";position:absolute;right:6px;top:6px;width:20px;height:20px;border-radius:50%;background:var(--energy);color:var(--gym-dark);font-size:12px;font-weight:900;display:grid;place-items:center}
 .coin{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;background:var(--card);border-radius:999px;padding:2px 10px 2px 3px;box-shadow:inset 0 0 0 1.5px var(--line)}
 .coin i{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#FFE9A6,var(--gold) 65%);display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:900;color:#8A5A00}
 .hero{margin-top:18px}
+.hero{position:relative;overflow:hidden;color:#fff;background:radial-gradient(circle at 100% 0,rgba(255,77,141,.45),transparent 55%),linear-gradient(160deg,#2A1F7A,var(--gym-dark) 70%)}
+.hero::after{content:"";position:absolute;width:150px;height:150px;border-radius:50%;border:18px solid rgba(198,244,50,.12);right:-50px;bottom:-60px;pointer-events:none}
+.hero .kicker{display:inline-block;font-size:11.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gym-dark);background:var(--energy);border-radius:999px;padding:2px 10px;margin-bottom:8px}
 .hero h1{font-size:28px}
 .hero p{margin:4px 0 12px}
+.hero .muted{color:rgba(255,255,255,.72)}
+.hero .bar{background:rgba(255,255,255,.14)}
+.hero .bar i{background:var(--energy)}
+.hero .check .box{background:rgba(255,255,255,.14)}
+.hero .check.done .box{background:var(--energy);color:var(--gym-dark)}
 .bar{height:12px;border-radius:999px;background:var(--chip);overflow:hidden}
 .bar i{display:block;height:100%;width:0;border-radius:999px;background:var(--ok);transition:width .6s cubic-bezier(.2,.8,.2,1)}
 .checks{display:grid;gap:8px;margin-top:12px}
@@ -82,6 +163,30 @@ input.field:focus{border-color:var(--c);outline:none}
 .gcard .mini{display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:6px;font-size:11.5px;color:var(--soft)}
 .gcard .mini .bar{flex:1;height:6px}
 .gcard .stars{font-size:12px;letter-spacing:1px;color:var(--gold)}
+/* locked workouts */
+.gcard.locked .art{background:linear-gradient(150deg,#2E3452,var(--gym-dark))}
+.gcard.locked .art svg{opacity:.35}
+.gcard.locked .sk-l{color:var(--soft)}
+.gcard.locked.next .art{background:radial-gradient(circle at 80% 10%,color-mix(in srgb,var(--c) 55%,transparent),transparent 60%),linear-gradient(150deg,#2E3452,var(--gym-dark))}
+.gcard.locked.next .art svg{opacity:.7}
+.lockb{position:absolute;right:8px;top:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.16);color:#fff;font-size:11px;font-weight:900;border-radius:999px;padding:1px 8px}
+.gcard .art .lockb svg{width:12px;height:12px;opacity:1!important}
+.gcard .need{font-size:11.5px;color:var(--soft);font-weight:700}
+.gcard.locked.next .mini .bar i{background:var(--energy)}
+.nextup{margin-top:12px;display:flex;flex-direction:column;gap:10px;border:2px dashed color-mix(in srgb,#5B4BFF 35%,var(--line))}
+.nextup .hd{display:flex;align-items:center;gap:10px}
+.nextup .hd .lk{width:40px;height:40px;border-radius:12px;background:var(--c,#5B4BFF);color:#fff;display:grid;place-items:center;flex:none}
+.nextup .hd .lk svg{width:22px;height:22px}
+.nextup .hd h3{font-size:16.5px}
+.nextup .teas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.nextup .teas button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:16px;background:linear-gradient(150deg,#2E3452,var(--gym-dark));color:#fff;font-size:12px;font-weight:800;text-align:center;line-height:1.2}
+.nextup .teas svg{width:26px;height:26px;color:var(--c)}
+.nextup .bar i{background:var(--energy)}
+.nextup.alldone{border-style:solid}
+.lockcta{background:var(--gym-dark)!important}
+.lbhead.empty{height:96px}
+.lb-empty{text-align:center;padding:28px 16px}
+.lb-empty .big{font-size:44px}
 .tagnew{position:absolute;left:8px;top:8px;z-index:2;background:#fff;color:var(--c);font-size:11px;font-weight:900;border-radius:999px;padding:1px 8px}
 
 /* game shell */
@@ -159,6 +264,191 @@ button.tile:active{transform:scale(.95)}
 .res h2{font-size:24px;margin-top:4px}
 .res .lines{margin:12px 0 16px;display:grid;gap:6px;text-align:left}
 .res .lines div{background:var(--chip);border-radius:12px;padding:8px 12px;font-size:14px}
+/* join, feedback */
+.joining .tabbar{display:none}
+.joinhero{position:relative;overflow:hidden;color:#fff;border-radius:26px;padding:24px 20px;margin-bottom:12px;background:radial-gradient(circle at 100% 0,rgba(255,77,141,.45),transparent 55%),linear-gradient(160deg,#2A1F7A,var(--gym-dark) 70%)}
+.joinhero h1{font-size:28px;margin-top:14px}
+.joinhero p{margin:6px 0 0;color:rgba(255,255,255,.78)}
+.joinform{display:grid;gap:12px}
+.joinform label{display:grid;gap:4px;font-size:13px;font-weight:800;color:var(--soft)}
+.jerr{margin:0;color:var(--bad);font-weight:800;font-size:14px}
+.hfoot{margin-top:24px;text-align:center;display:grid;gap:8px}
+.hfoot p{margin:0}
+.linkbtn{color:var(--soft);text-decoration:underline;font-weight:800;font-size:13px}
+.fbcard{display:grid;gap:12px;text-align:left}
+.fbcard h3{font-size:17px}
+.faces{display:flex;justify-content:space-between;gap:6px}
+.faces button{flex:1;font-size:28px;padding:8px 0;border-radius:14px;background:var(--chip);transition:transform .1s,background .15s,box-shadow .15s}
+.faces button[aria-pressed="true"]{background:#fff;box-shadow:inset 0 0 0 3px var(--ink);transform:scale(1.06)}
+.diff{display:flex;gap:6px}
+.diff button{flex:1;font-size:13.5px;font-weight:800;padding:9px 4px;border-radius:999px;background:var(--chip)}
+.diff button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.fbcard textarea.field{min-height:80px}
+.fbdone{text-align:center;font-weight:900;color:var(--ok);padding:6px 0}
+.vfb{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:800;color:var(--soft)}
+.vfb button{font-size:15px;padding:3px 10px;border-radius:999px;background:var(--chip)}
+.vfb button[aria-pressed="true"]{background:var(--ink);color:#fff}
+/* ================= daily workout: ring, streak, quests, rival, chests ================= */
+.dash{display:grid;gap:12px;margin-top:16px}
+.dash + .hero{margin-top:12px}
+.today{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;position:relative;overflow:hidden}
+.dring{position:relative;width:128px;height:128px;flex:none}
+.dring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.dring .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1}
+.dring .c b{font:italic 800 34px/1 var(--display)}
+.dring .c span{font-size:11.5px;color:var(--soft);font-weight:800;margin-top:4px}
+.dring.done .c b{color:var(--ok)}
+.today .info{display:grid;gap:8px;min-width:0}
+.streakline{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px}
+.streakline .fl{font-size:26px;line-height:1}
+.streakline.cold .fl{filter:grayscale(1);opacity:.5}
+.today .sub{font-size:13.5px;color:var(--soft)}
+.today .cta{background:var(--gym);color:#fff;box-shadow:0 10px 24px rgba(155,59,245,.35);animation:ctapulse 2.6s ease-in-out infinite}
+@keyframes ctapulse{0%,100%{transform:none}50%{transform:scale(1.025)}}
+.today .badgeline{font-size:13px;font-weight:800;color:var(--soft);justify-self:start;padding:0;text-decoration:none}
+@media (max-width:639px){
+  .today{gap:10px 14px}
+  .dring{width:112px;height:112px;grid-row:1/3}
+  .dring .c b{font-size:30px}
+  .today .info{display:contents}
+  .today .streakline{align-self:end}
+  .today .sub{align-self:start}
+  .today .cta,.today .badgeline{grid-column:1/-1}
+  .today .badgeline{justify-self:center}
+}
+.week{grid-column:1/-1;display:flex;justify-content:space-between;gap:4px;border-top:1px solid var(--line);padding-top:12px}
+.week div{display:grid;justify-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--soft);flex:1}
+.week i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--chip);font-size:16px}
+.week i.done{background:var(--energy)}
+.week i.rest{background:#E3EEFF}
+.week i.now{background:#fff;box-shadow:inset 0 0 0 2.5px var(--ink)}
+.duo{display:grid;gap:12px}
+.quests,.rival{display:grid;gap:4px;align-content:start}
+.quests h3,.rival h3{font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.quests h3 span,.rival h3 span{font-size:12px;color:var(--soft);font-weight:800}
+.qrow{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:9px 0 3px;border-top:1px solid var(--line);text-align:left}
+.qrow .ck{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--line);display:grid;place-items:center;font-size:13px;font-weight:900}
+.qrow.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.qrow.done .qt{text-decoration:line-through;color:var(--soft)}
+.qrow .qt{font-size:14px;font-weight:800;line-height:1.3}
+.qrow .bar{height:5px;margin-top:6px}
+.qrow .bar i{background:var(--ok)}
+.qrow .kg{font-size:12px;font-weight:900;background:var(--chip);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.live{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px}
+.live i{width:10px;height:10px;border-radius:50%;background:#22C55E;flex:none;animation:livepulse 1.8s infinite}
+@keyframes livepulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.55)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.rival p{margin:6px 0 0;font-size:14.5px}
+.rival .gap{display:flex;align-items:center;gap:10px;margin-top:6px}
+.rival .gap .bar{flex:1;height:8px}
+.rival .gap .bar i{background:var(--gym)}
+.autonext{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--ink);color:#fff;border-radius:18px;padding:12px 14px;margin:0 0 14px;text-align:left}
+.autonext small{display:block;color:rgba(255,255,255,.7);font-size:12.5px}
+.autonext button.go{background:var(--energy);color:var(--ink);border-radius:999px;padding:10px 16px;font-weight:900;font-size:14px;transition:transform 160ms var(--ease-out)}
+.autonext button.go:active{transform:scale(.97)}
+.chest{line-height:0;justify-self:center;background:none;transition:transform 160ms var(--ease-out)}
+.chest:active{transform:scale(.97)}
+.chest.shake{animation:chestshake .5s ease-in-out 2}
+@keyframes chestshake{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg) scale(1.05)}40%{transform:rotate(10deg)}60%{transform:rotate(-8deg) scale(1.08)}80%{transform:rotate(6deg)}}
+.reward{text-align:center;display:grid;gap:6px;justify-items:center}
+.reward .big{font-size:72px;line-height:1.1}
+.reward h3{font-size:22px}
+.reward p{margin:0}
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badges div{display:grid;justify-items:center;gap:2px;padding:10px 4px;border-radius:14px;background:var(--chip);font-size:11.5px;font-weight:800;text-align:center;line-height:1.2}
+.badges div b{font-size:28px;line-height:1}
+.badges div.no{color:var(--soft)}
+.badges div.no b{filter:grayscale(1);opacity:.3}
+.goalwin{text-align:center;display:grid;gap:8px;justify-items:center}
+.i3d{display:block;height:auto;max-width:100%;filter:drop-shadow(0 8px 10px rgba(20,27,52,.18))}
+.fl .i3d{width:30px;height:30px;filter:drop-shadow(0 3px 4px rgba(255,90,60,.3))}
+.streakline.cold .fl .i3d{filter:grayscale(1);opacity:.45}
+.pop3d{width:150px;height:auto;margin:-14px 0 -18px;animation:pop3d 520ms var(--ease-out) both}
+@keyframes pop3d{from{opacity:0;transform:translateY(12px) scale(.9)}}
+.chest3d{width:168px;height:auto;display:block;filter:drop-shadow(0 14px 16px rgba(91,75,255,.28))}
+.shead{display:flex;align-items:center;gap:10px}
+.shead .i3d{width:52px;height:52px;margin:-6px 0 -6px -4px}
+.lb-empty .i3d{width:112px;margin:0 auto}
+.joinhero > :not(.hero3d){position:relative;z-index:1}
+.hero3d{z-index:0;position:absolute;right:-18px;top:-10px;width:150px;height:auto;pointer-events:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.25));animation:float3d 5s ease-in-out infinite}
+@keyframes float3d{50%{transform:translateY(-6px) rotate(-3deg)}}
+@media (min-width:960px){.hero3d{width:250px;right:-6px;top:6px}}
+@media (prefers-reduced-motion:reduce){.pop3d,.hero3d{animation:none}}
+.goalwin .big{font:italic 800 64px/1 var(--display);color:var(--ok)}
+@media (prefers-reduced-motion:reduce){.today .cta,.live i{animation:none}}
+
+/* end-of-session "11-star" ladder: every level is visible with its meaning, 11 at the top.
+   One pill slides to the chosen rung (transform only); stars up to the choice turn gold. */
+.ladder{position:relative;display:grid;gap:6px}
+.ladder .zone{display:grid;gap:2px;border-radius:18px;padding:6px}
+.ladder .zone small{display:block;padding:2px 8px 4px;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.ladder .zone.hi{background:linear-gradient(160deg,rgba(255,176,32,.14),rgba(255,77,141,.14));box-shadow:inset 0 0 0 1.5px rgba(255,140,60,.35)}
+.ladder .zone.hi small{color:#C2410C}
+.ladder .zone.mid{background:var(--chip)}
+.rung{position:relative;z-index:1;display:grid;grid-template-columns:46px 1fr;align-items:center;gap:8px;width:100%;padding:8px 10px;border-radius:12px;text-align:left;transition:transform 160ms var(--ease-out),color 160ms ease}
+.rung:active{transform:scale(.98)}
+.rung .n{display:flex;align-items:baseline;gap:3px;font:italic 800 21px/1 var(--display)}
+.rung .n i{font-style:normal;font-size:13px;color:var(--line);transition:color 160ms ease}
+.rung.lit .n i{color:var(--gold)}
+.rung .t{font-size:14.5px;font-weight:700;line-height:1.25}
+.rung.on{color:#fff}
+.rung.on .n i{color:#fff}
+.pick{position:absolute;left:0;top:0;width:100%;border-radius:12px;background:var(--ink);opacity:0;pointer-events:none;transition:transform 260ms var(--ease-out),opacity 150ms ease,background-color 200ms ease}
+.pick.shown{opacity:1}
+.pick.hi{background:linear-gradient(120deg,#FF8A2A,#FF4D8D)}
+.smore.in > *{animation:rise 280ms var(--ease-out) both}
+.smore.in > *:nth-child(2){animation-delay:40ms}
+.smore.in > *:nth-child(3){animation-delay:80ms}
+.smore.in > *:nth-child(4){animation-delay:120ms}
+.smore.in > *:nth-child(5){animation-delay:160ms}
+.smore.in > *:nth-child(6){animation-delay:200ms}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.reward{animation:popin 260ms var(--ease-out) both}
+@keyframes popin{from{opacity:0;transform:scale(.96)}}
+.btn.busy{opacity:.75;filter:blur(.4px)}
+.ssum{display:flex;flex-wrap:wrap;gap:6px}
+.ssum span{background:var(--chip);border-radius:999px;padding:5px 12px;font-size:13.5px;font-weight:700}
+.smore{display:grid;gap:10px}
+.smore h4{margin:0;font-size:16px;line-height:1.3}
+.chips2{display:flex;flex-wrap:wrap;gap:6px}
+.chips2 button{font-size:13px;font-weight:800;padding:7px 12px;border-radius:999px;background:var(--chip);transition:transform 160ms var(--ease-out),background-color 150ms ease,color 150ms ease}
+.chips2 button:active{transform:scale(.97)}
+.chips2 button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+/* pop-up sheet (mood check-in, problem report) */
+:root{--ease-out:cubic-bezier(.23,1,.32,1);--ease-drawer:cubic-bezier(.32,.72,0,1)}
+.modal{position:fixed;inset:0;z-index:70;display:flex;align-items:flex-end;justify-content:center;background:rgba(20,27,52,0);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));transition:background-color 300ms ease}
+.modal.open{background:rgba(20,27,52,.45)}
+.modal.closing{transition-duration:200ms}
+.modal .mbox{position:relative;width:100%;max-width:428px;display:grid;gap:12px;max-height:88vh;overflow:auto;padding-top:24px;transform:translateY(110%);transition:transform 420ms var(--ease-drawer)}
+.modal.open .mbox{transform:none}
+.modal .mbox:focus{outline:none}
+.modal.closing .mbox{transition-duration:200ms;transition-timing-function:var(--ease-out)}
+.modal .mbox::before{content:"";position:absolute;top:9px;left:50%;width:40px;height:5px;margin-left:-20px;border-radius:999px;background:var(--line)}
+@media (min-width:960px){
+  .modal{align-items:center}
+  .modal .mbox{max-width:480px;padding-top:18px;transform:scale(.96);opacity:0;transition:transform 220ms var(--ease-out),opacity 220ms var(--ease-out)}
+  .modal.open .mbox{transform:none;opacity:1}
+  .modal.closing .mbox{transition-duration:150ms}
+  .modal .mbox::before{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .modal .mbox,.modal.open .mbox{transform:none}
+  .modal .mbox{opacity:0;transition:opacity 200ms ease}
+  .modal.open .mbox{opacity:1}
+  .smore.in > *,.reward{animation:none}
+}
+.modal h3{font-size:20px}
+.mclose{justify-self:center;color:var(--soft);font-weight:800;font-size:14px;padding:4px 12px}
+.moods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.moods button,.feel button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 4px 12px;border-radius:18px;background:var(--chip);font-weight:900;font-size:13.5px;transition:transform .1s,background .15s}
+.moods button span,.feel button span{font-size:34px;line-height:1}
+.moods button:active,.feel button:active{transform:scale(.95)}
+.feel{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.feel button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.cats{display:flex;flex-wrap:wrap;gap:6px}
+.cats button{font-size:13px;font-weight:800;padding:7px 12px;border-radius:999px;background:var(--chip)}
+.cats button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.lbme{position:sticky;top:0;z-index:2;text-align:center;font-weight:900;font-size:14px;background:var(--ink);color:#fff;border-radius:999px;padding:7px 14px;margin-bottom:10px}
 .res .newbest{display:inline-block;background:var(--gold);color:#fff;font-weight:900;font-size:13px;border-radius:999px;padding:2px 12px;margin-top:6px}
 
 /* game-specific */
@@ -211,7 +501,7 @@ textarea.field:focus{border-color:var(--c);outline:none}
 .cal-plot i{width:100%;border-radius:8px 8px 4px 4px;background:var(--c)}
 
 /* leaderboard */
-.lbhead{position:relative;height:330px;margin:0 -16px;overflow:hidden;background:linear-gradient(180deg,#EEF0FF,#F6F7FB)}
+.lbhead{position:relative;height:330px;margin:0 -16px;overflow:hidden;background:linear-gradient(180deg,#E9E5FF,var(--bg))}
 .lbhead h1{position:absolute;left:20px;top:22px;font-size:34px}
 .podium{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:center;align-items:flex-end;gap:8px;padding:0 24px}
 .pcol{flex:1;max-width:110px;text-align:center}
@@ -316,6 +606,106 @@ textarea.field.mono{font:600 15px/1.55 ui-monospace,Menlo,Consolas,monospace}
 .ai-dots i{width:6px;height:6px;border-radius:50%;background:currentColor;animation:aid 1s infinite ease-in-out}
 .ai-dots i:nth-child(2){animation-delay:.15s}.ai-dots i:nth-child(3){animation-delay:.3s}
 @keyframes aid{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+/* ================= display type: condensed "scoreboard" face for headlines and big numbers ================= */
+:root{--display:'Barlow Condensed','Nunito',sans-serif}
+h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
+.hero h1,.intro-head h1{font-size:36px}
+.lbhead h1{font-size:40px}
+.joinhero h1{font-size:36px}
+.scan .total b,.mdetail .kg b,.res .num b,.count b,.ptile .tm{font-family:var(--display);font-style:italic;font-weight:800}
+.res .num b{font-size:54px}
+
+/* ================= responsive ================= */
+.tabbar .side-only,.d-only{display:none}
+@media (hover:hover){
+  .gcard{transition:transform .18s ease,box-shadow .18s ease}
+  .gcard:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(17,24,39,.06),0 18px 34px rgba(17,24,39,.13)}
+  .ptile{transition:background .15s}
+  .ptile:hover{background:rgba(255,255,255,.15)}
+  .btn:hover{filter:brightness(1.08)}
+}
+/* tablets: one wider column, bottom tab bar stays */
+@media (min-width:640px) and (max-width:959px){
+  .app{max-width:720px}
+  .library{grid-template-columns:repeat(3,1fr)}
+  .tabbar .inner{max-width:480px}
+  .hero h1{font-size:42px}
+  .scan svg{max-width:460px;margin-inline:auto}
+}
+/* laptops: sidebar navigation and wider layouts */
+@media (min-width:960px){
+  body{padding-bottom:0;padding-left:264px}
+  body.joining{padding-left:0}
+  .app{max-width:1120px;padding:28px 36px 48px}
+
+  .tabbar{top:16px;bottom:16px;left:16px;right:auto;width:232px;padding:0}
+  .tabbar .inner{height:100%;max-width:none;margin:0;flex-direction:column;align-items:stretch;gap:4px;border-radius:26px;padding:16px 12px}
+  .tab{flex:none;justify-content:flex-start;gap:10px;padding:11px 14px;font-size:15px}
+  .tabbar .side-only{display:flex}
+  .tab:not([aria-current="page"]):hover{background:var(--chip);color:var(--ink)}
+  .side-brand{align-items:center;gap:10px;padding:4px 6px 18px}
+  .side-brand .logo{width:42px;height:42px;border-radius:13px}
+  .side-brand .logo svg{width:24px;height:24px}
+  .side-brand b{display:block;font:800 24px/1 var(--display)}
+  .side-brand small{display:block;margin-top:2px;color:var(--soft);font-size:12px;font-weight:700}
+  .tabbar .side-foot{margin-top:auto}
+  .toast{left:calc(50% + 132px);bottom:32px}
+  .combo{left:calc(50% + 132px)}
+
+  .m-only{display:none}
+  .d-only{display:inline}
+  .top .logo,.top .musc{display:none}
+  .top h2{font:800 32px/1.1 var(--display)}
+
+  .hero{padding:28px 32px 30px}
+  .hero h1{font-size:54px;line-height:1}
+  .hero p{font-size:16px}
+  .plan{gap:14px;margin-top:22px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .ptile{padding:20px 12px 16px;gap:10px}
+  .ptile .ic{width:68px;height:68px;border-radius:21px}
+  .ptile .ic svg{width:36px;height:36px}
+  .ptile .nm{font-size:17px}
+  .ptile .tm{font-size:15px}
+  .library{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+  .gcard .art{height:108px}
+  .sect h2{font-size:22px}
+  .hfoot{grid-template-columns:1fr 1fr;align-items:center}
+  .hfoot p{grid-column:1/-1}
+
+  /* games, leaderboard and feedback read best at a focused width */
+  #view-game,#view-leaderboard,#view-feedback{max-width:720px;margin:0 auto}
+  .lbhead{margin:0;border-radius:26px 26px 0 0}
+  .sheet{margin:0;border-radius:0 0 26px 26px}
+
+  /* brain muscles: scan stays in view on the left while details scroll on the right */
+  .mgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+  .mleft{position:sticky;top:20px}
+  .mgrid .mdetail{margin-top:0}
+  .scan .total b{font-size:46px}
+
+  #view-join.on{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:stretch;max-width:980px;margin:7vh auto 0}
+  .joinhero{margin:0;padding:44px 40px;display:flex;flex-direction:column;justify-content:flex-end;min-height:460px}
+  .joinhero .logo{width:64px;height:64px;border-radius:20px}
+  .joinhero .logo svg{width:36px;height:36px}
+  .joinhero h1{font-size:64px;line-height:.95}
+  .joinhero p{font-size:17px;max-width:34ch;margin-top:16px}
+  .joinform{align-content:center;padding:32px}
+
+  .modal{align-items:center}
+}
+@media (min-width:640px){
+  .duo{grid-template-columns:1fr 1fr}
+  .dring{width:150px;height:150px}
+  .dring .c b{font-size:40px}
+}
+@media (min-width:960px){
+  .dash{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:stretch}
+  .duo{grid-template-columns:1fr}
+  .today{padding:22px 24px;gap:22px}
+  .dring{width:168px;height:168px}
+  .dring .c b{font-size:46px}
+  .streakline{font-size:18px}
+}
 @media (prefers-reduced-motion:reduce){.tier{visibility:visible}*{transition:none!important}.rp-body svg,.rp-body .eyes,.rp-body .led,.star,.tr{animation:none!important}}
 </style>
 </head>
@@ -323,34 +713,96 @@ textarea.field.mono{font:600 15px/1.55 ui-monospace,Menlo,Consolas,monospace}
 <div class="app">
 <section class="view" id="view-home">
   <div class="top">
-    <div class="avatar" aria-hidden="true">🧑‍🎓</div>
-    <div style="flex:1"><h2>Your training</h2><span class="coin"><i>C</i><span id="h-points">0</span> pt</span></div>
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
+    <div style="flex:1;min-width:0"><h2><span class="m-only">Brain Gym</span><span class="d-only" id="h-hi">Welcome back</span></h2><span class="coin"><i>C</i><span id="h-points">0</span> pt</span></div>
+    <button class="musc press" data-go="muscles">💪 <span class="lg">Brain </span>muscles</button>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
 
-  <div class="card hero">
-    <h1>Fortnight 1</h1>
-    <p class="muted">Play each game for 10 minutes. Keep going to climb the leaderboard.</p>
-    <div class="bar"><i id="h-fort"></i></div>
-    <div class="row small muted" style="justify-content:space-between;margin-top:6px"><span id="h-fort-text"></span><span id="h-fort-min"></span></div>
-    <div class="checks" id="h-checks"></div>
+  <div class="dash">
+    <div class="card today" id="h-today"></div>
+    <div class="duo">
+      <div class="card quests" id="h-quests"></div>
+      <div class="card rival" id="h-rival"></div>
+    </div>
   </div>
 
-  <div class="sect"><h2>Your skills</h2><span class="small muted">best score, out of 100</span></div>
-  <div class="card skills" id="h-skills"></div>
+  <div class="card hero">
+    <span class="kicker">Today’s workout plan</span>
+    <h1 id="h-level">Level 1</h1>
+    <p class="muted">One short round of each, switching games every set. Then keep going with bonus sets.</p>
+    <div class="bar"><i id="h-fort"></i></div>
+    <div class="row small muted" style="justify-content:space-between;margin-top:6px"><span id="h-fort-text"></span><span id="h-fort-min"></span></div>
+    <div class="plan" id="h-checks"></div>
+  </div>
 
-  <div class="sect"><h2>All games</h2><span class="small muted">Demo: all 15 unlocked</span></div>
-  <div class="library" id="h-library"></div>
-  <div class="card" style="margin-top:24px;text-align:center">
-    <p class="small muted" style="margin:0 0 10px">Start over: clears all minutes, scores, stars, levels and tricks learned.</p>
-    <button class="btn light sm" id="h-reset">↺ Reset progress</button>
+  <div class="card nextup" id="h-next" hidden></div>
+
+  <div id="h-donewrap" hidden>
+    <div class="sect"><h2>Your workouts</h2><span class="small muted">play any one, any time</span></div>
+    <div class="library" id="h-done"></div>
+  </div>
+
+  <div id="h-lockwrap">
+    <div class="sect"><h2>🔒 Coming soon</h2><span class="small muted" id="h-unlocked"></span></div>
+    <div class="library" id="h-library"></div>
+  </div>
+
+  <div class="card hfoot">
+    <button class="btn c full" data-go="feedback" style="--c:var(--ink)">💬 Tell us what you think</button>
+    <button class="btn light full" data-report>🐞 Report a problem</button>
+    <p class="small muted" id="h-who"></p>
+  </div>
+</section>
+
+<section class="view" id="view-join">
+  <div class="joinhero">
+    <img class="hero3d" src="assets/3d/dumbbell.webp" width="512" height="512" alt="" decoding="async">
+    <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
+    <h1>Welcome to Brain Gym</h1>
+    <p>Short daily workouts for your brain. Log in to save your progress and climb your batch leaderboard.</p>
+  </div>
+  <form class="card joinform" id="join-form" novalidate>
+    <label>NIAT ID<input class="field" id="j-roll" autocomplete="username" autocapitalize="characters" spellcheck="false" maxlength="30" placeholder="Your NIAT ID" required></label>
+    <label>First name<input class="field" id="j-name" autocomplete="given-name" maxlength="40" placeholder="e.g. Keerthi" required></label>
+    <p class="jerr" id="j-err" role="alert" hidden></p>
+    <button class="btn c full" id="j-go" style="--c:var(--ink)">Log in</button>
+    <p class="small muted" style="margin:0">We save your scores, time played and feedback to run this pilot and improve Brain Gym. Classmates see only your first name and initial on the leaderboard.</p>
+  </form>
+</section>
+
+<section class="view" id="view-feedback">
+  <div class="gtop">
+    <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
+    <h1 style="flex:1;font-size:24px">Your feedback</h1>
+  </div>
+  <div class="card fbcard" id="gf-card"></div>
+</section>
+
+<section class="view" id="view-muscles">
+  <div class="gtop">
+    <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
+    <h1 style="flex:1;font-size:24px">Brain muscles</h1>
+    <button class="round press mute" aria-label="Turn sound off">🔊</button>
+  </div>
+  <div class="mgrid">
+    <div class="mcol mleft">
+      <div class="card scan" id="m-scan"></div>
+      <div class="mcall" id="m-call"></div>
+    </div>
+    <div class="mcol">
+      <div class="card mdetail" id="m-detail"></div>
+      <div class="sect"><h2>All 8 muscles</h2><span class="small muted">plates = personal best</span></div>
+      <div class="card mlist" id="m-list"></div>
+    </div>
   </div>
 </section>
 
 <section class="view" id="view-game">
   <div class="gtop">
-    <button class="round press" data-go="home" aria-label="Back to games">←</button>
+    <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
     <div class="goal" id="g-goal"><span aria-hidden="true">⏱</span><div class="bar"><i id="g-gbar"></i></div><span class="t" id="g-time">0:00</span></div>
+    <button class="round press" data-report aria-label="Report a problem">🐞</button>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
   <div class="combo" id="combo" aria-live="polite">🔥 <b>x3</b> combo</div>
@@ -364,18 +816,23 @@ textarea.field.mono{font:600 15px/1.55 ui-monospace,Menlo,Consolas,monospace}
   </div>
   <div class="sheet">
     <div id="lb-list"></div>
-    <p class="small muted" style="text-align:center">Classmates here are sample data for this preview. Real rankings will come from the portal.</p>
+
   </div>
 </section>
 </div>
 
 <nav class="tabbar" aria-label="Main">
   <div class="inner">
-    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Games</button>
+    <div class="side-brand side-only"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></span><span><b>Brain Gym</b><small>Train your mind daily</small></span></div>
+    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Workouts</button>
     <button class="tab" data-go="leaderboard" id="tab-lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>Leaderboard</button>
+    <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>Brain muscles</button>
+    <button class="tab side-only" data-go="feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Feedback</button>
+    <button class="tab side-only side-foot" data-report>🐞 Report a problem</button>
   </div>
 </nav>
 <div class="toast" id="toast" role="status"></div>
+<div class="modal" id="modal" hidden><div class="card mbox" id="mbox" role="dialog" aria-modal="true" aria-labelledby="mtitle" tabindex="-1"></div></div>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -422,18 +879,32 @@ const ICON = {
   bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
   switch:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
-  star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>'
+  star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
 };
 const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
 
 /* ---------- storage ---------- */
-const KEY = 'gc_demo_v5';
-try { localStorage.removeItem('gc_demo_v4'); } catch(e){}
+const KEY = 'bg_v1';
+try { ['gc_demo_v4','gc_demo_v5'].forEach(k => localStorage.removeItem(k)); } catch(e){}
 let S; try { S = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){ S = {}; }
 S.g = S.g || {}; S.days = S.days || [];
-const gs = id => (S.g[id] = S.g[id] || { active:0, best:0, bestPct:0, plays:0, hit:false });
-function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
-const TARGET = 600;
+const gs = id => (S.g[id] = S.g[id] || { active:0, best:0, bestPct:0, plays:0, hit:false, vol:0 });
+/* daily workout state: S.hist = active seconds per day (YYYY-MM-DD), S.td = today's rounds, quests and chests */
+const DAY_GOAL = 900;   // daily goal: 15 active minutes
+const GOAL_MIN = DAY_GOAL / 60;
+S.hist = S.hist || {}; S.badges = S.badges || [];
+const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const todaySecs = () => S.hist[iso(new Date())] || 0;
+function todayState(){
+  const d = iso(new Date());
+  if (!S.td || S.td.d !== d) S.td = { d, rounds:{}, best:{}, qdone:[], chests:0, goal:false };
+  return S.td;
+}
+/* vol = total kg lifted: every play adds its % score (min 5). Older saves get an estimate. */
+Object.values(S.g).forEach(g => { if (g.vol == null) g.vol = g.bestPct * g.plays; });
+let syncDirty = false;   // set on every change; the sync loop sends totals to the server
+function save(){ syncDirty = true; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
 const points = () => Object.values(S.g).reduce((a,g) => a + Math.floor(g.active/6) + g.plays*10, 0);
 
 function toast(msg){
@@ -581,19 +1052,28 @@ document.addEventListener('click', e => { const b = e.target.closest('.mute'); i
 /* ---------- routing ---------- */
 let view = null, curGame = null, cleanup = null;
 function route(){
-  const hs = location.hash.slice(1);
+  const hs = location.hash.slice(1), prev = view;
   let next = 'home', gid = null;
-  if (hs === 'leaderboard') next = 'leaderboard';
+  if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback') next = hs;
   else if (hs.startsWith('g-') && GAMES.find(g => g.id === hs.slice(2))) { next = 'game'; gid = hs.slice(2); }
+  if (!ME) { next = 'join'; gid = null; }
+  if (next !== 'game') CIRCUIT = false;
   if (cleanup) { cleanup(); cleanup = null; }
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   view = next; curGame = gid;
+  document.body.classList.toggle('joining', view === 'join');
+  if (view === 'feedback') renderGeneralFeedback();
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'view-' + view));
-  $('tab-home').setAttribute('aria-current', view === 'leaderboard' ? 'false' : 'page');
-  $('tab-lb').setAttribute('aria-current', view === 'leaderboard' ? 'page' : 'false');
+  document.querySelectorAll('.tab[data-go]').forEach(t => t.setAttribute('aria-current', t.dataset.go === view || (t.dataset.go === 'home' && view === 'game') ? 'page' : 'false'));
   lastAct = Date.now();
-  if (view === 'home') renderHome();
+  if (view === 'home') {
+    renderHome();
+    /* a session left open last time (tab closed) gets rated first; the mood check waits until next time */
+    if (pendingRate && ME) setTimeout(() => { if (view === 'home' && !modalOpen() && pendingRate) endSession('last'); }, 450);
+    else moodCheck();
+  }
   if (view === 'leaderboard') renderBoard();
+  if (view === 'muscles') renderMuscles();
   if (view === 'game') showIntro(GAMES.find(g => g.id === gid));
   window.scrollTo(0,0); syncMute();
   anim($('view-' + view), { opacity:[0,1], y:[10,0] });
@@ -601,7 +1081,8 @@ function route(){
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-go]');
-  if (b) location.hash = b.dataset.go === 'home' ? '' : b.dataset.go;
+  if (!b) return;
+  if (b.dataset.go !== 'home' || !leaveNudge()) location.hash = b.dataset.go === 'home' ? '' : b.dataset.go;
 });
 window.addEventListener('hashchange', route);
 
@@ -611,109 +1092,322 @@ let lastAct = Date.now(), playing = false;
 const isActive = () => curGame && !document.hidden && (Date.now() - lastAct) < 40000;
 const dayKey = d => d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
 setInterval(() => {
-  if (!curGame) return;
+  if (!curGame || isLocked(curGame)) return;
   if (isActive()) {
     const g = gs(curGame); g.active++;
     const k = dayKey(new Date()); if (!S.days.includes(k)) S.days.push(k);
-    if (g.active >= TARGET && !g.hit) { g.hit = true; toast('🎉 10 minutes done on this game'); }
+    SESS.secs++; SESS.last = Date.now();
+    const t =(S.hist[iso(new Date())] = todaySecs() + 1), msg = milestone(t);
+    if (msg) { toast(msg); if (t === DAY_GOAL) SFX.play('levelup'); }
     save();
   }
   renderGoal();
 }, 1000);
 function renderGoal(){
   if (!curGame) return;
-  const g = gs(curGame), on = isActive();
-  $('g-gbar').style.width = Math.min(100, g.active/TARGET*100) + '%';
-  $('g-time').textContent = on ? fmt(g.active) + ' / 10:00' : 'Paused';
+  const on = isActive(), locked = isLocked(curGame), t = todaySecs();
+  $('g-gbar').style.width = Math.min(100, t/DAY_GOAL*100) + '%';
+  $('g-time').textContent = locked ? 'Locked' : !on ? 'Paused' : t >= DAY_GOAL ? '✓ ' + fmt(t) + ' today' : 'Today ' + fmt(t) + ' / ' + fmt(DAY_GOAL);
   $('g-goal').classList.toggle('paused', !on);
 }
 
-/* ---------- home ---------- */
-const FORTNIGHT = ['word-spread','missing-link','symbol-sprint'];
-function renderHome(){
-  countTo($('h-points'), points(), 0.6);
-  let mins = 0, done = 0;
-  $('h-checks').innerHTML = FORTNIGHT.map(id => {
-    const g = GAMES.find(x => x.id === id), st = gs(id), d = st.active >= TARGET;
-    mins += Math.min(st.active, TARGET); done += d;
-    return '<button class="check press'+(d ? ' done' : '')+'" data-go="g-'+id+'"><span class="box"></span><span class="nm">'+g.name+'</span><span class="small muted">'+fmt(Math.min(st.active,TARGET))+' / 10:00</span></button>';
-  }).join('');
-  $('h-fort').style.width = (mins / (TARGET*FORTNIGHT.length) * 100) + '%';
-  $('h-fort-text').textContent = done + ' of ' + FORTNIGHT.length + ' games done';
-  $('h-fort-min').textContent = Math.floor(mins/60) + ' of ' + (FORTNIGHT.length*10) + ' min';
-  $('h-skills').innerHTML = Object.entries(SKILLS).map(([k,s]) => {
-    const v = Math.max(0, ...GAMES.filter(g => g.skill === k).map(g => gs(g.id).bestPct));
-    return '<div class="sk"><span>'+s.name+'</span><div class="bar"><i style="background:'+s.c+'" data-w="'+v+'"></i></div><b>'+v+'</b></div>';
-  }).join('');
-  requestAnimationFrame(() => document.querySelectorAll('#h-skills i').forEach(i => i.style.width = i.dataset.w + '%'));
-  $('h-library').innerHTML = GAMES.map(g => {
-    const st = gs(g.id), stars = st.plays ? starCount(st.bestPct) : 0;
-    return '<button class="gcard press" data-go="g-'+g.id+'" style="--c:'+SKILLS[g.skill].c+'">'
-      + '<div class="art">'+(FORTNIGHT.includes(g.id) ? '<span class="tagnew">This fortnight</span>' : '')+svgI(g.icon)+'</div>'
-      + '<div class="body"><span class="sk-l">'+SKILLS[g.skill].name+'</span><h3>'+g.name+'</h3>'
-      + '<div class="mini"><div class="bar"><i style="width:'+Math.min(100,st.active/TARGET*100)+'%"></i></div><span class="stars">'+'★'.repeat(stars)+'<span style="color:var(--line)">'+'★'.repeat(3-stars)+'</span></span></div></div></button>';
-  }).join('');
-  anim(document.querySelectorAll('#h-library .gcard'), { opacity:[0,1], y:[16,0] }, { delay: stag(0.03) });
-}
-const starCount = p => p >= 85 ? 3 : p >= 60 ? 2 : p >= 30 ? 1 : 0;
-/* reset: tap once to arm, tap again within 4 seconds to confirm */
-(function(){
-  const b = document.getElementById('h-reset'); let armed = false, t;
-  b.onclick = () => {
-    if (!armed) {
-      armed = true; b.textContent = 'Tap again to confirm'; b.style.background = 'var(--bad)'; b.style.color = '#fff';
-      anim(b, { scale:[.94,1] }, { duration:0.25 });
-      t = setTimeout(() => { armed = false; b.textContent = '↺ Reset progress'; b.style.background = ''; b.style.color = ''; }, 4000);
-      return;
-    }
-    clearTimeout(t); armed = false;
-    S = { g:{}, days:[] }; save();
-    b.textContent = '↺ Reset progress'; b.style.background = ''; b.style.color = '';
-    renderHome(); window.scrollTo({ top:0, behavior: reduced() ? 'auto' : 'smooth' });
-    toast('Progress reset to 0');
-  };
-})();
+/* ---------- unlocks: 5 games to start (one per skill), then 1 new game for each day the daily goal is met ---------- */
+const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
+  'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
+const START_GAMES = 5;
+const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
+const unlockedCount = () => Math.min(UNLOCK_ORDER.length, START_GAMES + goalDays());
+const unlockRank = id => UNLOCK_ORDER.indexOf(id);
+const isLocked = id => unlockRank(id) >= unlockedCount();
+const unlockedGames = () => UNLOCK_ORDER.slice(0, unlockedCount()).map(id => GAMES.find(g => g.id === id));
+const nextUnlock = () => unlockedCount() < UNLOCK_ORDER.length ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount()]) : null;
+const daysToUnlock = id => unlockRank(id) - unlockedCount() + 1;
 
-/* ---------- leaderboard ---------- */
-const SAMPLE = [
-  {n:'Keerthi', f:'👩🏽', p:2563, up:3}, {n:'Sai Teja', f:'🧑🏽', p:1342, up:1}, {n:'Harika', f:'👧🏽', p:746, up:2},
-  {n:'Rahul', f:'👦🏽', p:543, up:4}, {n:'Ananya', f:'👩🏻', p:463, up:12}, {n:'Varun', f:'🧔🏽', p:390, up:2},
-  {n:'Divya', f:'👩🏾', p:288, up:5}, {n:'Abhinav', f:'👨🏽', p:175, up:1}, {n:'Sneha', f:'👱🏽‍♀️', p:96, up:3}
-];
-const coin = p => '<span class="coin"><i>C</i>' + p.toLocaleString('en-IN') + ' pt</span>';
-function renderBoard(){
-  const all = SAMPLE.concat([{n:'You', f:'🧑‍🎓', p:points(), me:true}]).sort((a,b) => b.p - a.p);
-  const top = [all[1], all[0], all[2]], cls = ['','first',''], blk = ['b2','b1','b3'], num = [2,1,3];
-  $('lb-podium').innerHTML = top.map((u,i) => '<div class="pcol '+cls[i]+'"><div class="who">'+u.n+'</div><div class="face">'+u.f+'</div>'+coin(u.p)+'<div class="block '+blk[i]+'">'+num[i]+'</div></div>').join('');
-  $('lb-list').innerHTML = all.slice(3).map((u,i) => '<div class="lrow'+(u.me ? ' me' : '')+'"><span class="rk">'+(i+4)+'</span><span class="fc">'+u.f+'</span><span class="nm">'+u.n+'</span>'+(u.up ? '<span class="up">▲ '+u.up+'</span>' : '')+coin(u.p)+'</div>').join('');
-  anim(document.querySelectorAll('.block'), { scaleY:[0,1] }, { type:'spring', bounce:0.25, duration:0.7, delay: stag(0.08) });
-  anim(document.querySelectorAll('.pcol .face'), { y:[-20,0], opacity:[0,1] }, { type:'spring', bounce:0.35, duration:0.7, delay: stag(0.08) });
-  anim(document.querySelectorAll('.lrow'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.04) });
+/* ---------- per-game difficulty: Lv 1-5, up after a round of 80%+, down after one under 40% ----------
+   Each value list is what that game uses at Lv 1..5 (time limits, targets, lives, route length).
+   Back Track, Fallacy Hunt and Robot Path already get harder on their own. */
+const LADDER = {
+  'word-spread':[90,80,70,60,50], 'missing-link':[120,110,100,90,80], 'recall-rebuild':[40,35,30,26,22],
+  'symbol-sprint':[35,40,45,50,55], 'rule-switch':[40,44,48,52,56], 'link-grid':[4,4,3,3,2], 'wiki-hop':[4,4,5,5,6]
+};
+const LV_HINT = { 'word-spread':'less time', 'missing-link':'less time', 'recall-rebuild':'less time to read',
+  'symbol-sprint':'a higher target', 'rule-switch':'a higher target', 'link-grid':'fewer mistakes allowed', 'wiki-hop':'longer routes' };
+const lvOf = id => Math.min(5, Math.max(1, gs(id).lv || 1));
+const lvVal = id => LADDER[id][lvOf(id) - 1];
+/* "How to play" lines that quote a number the level changes */
+function howText(id, line){
+  if (!LADDER[id]) return line;
+  const v = lvVal(id);
+  return line.replace(/\b90 seconds\b/, v + ' seconds').replace(/in 2 minutes/, 'in ' + fmt(v) + ' minutes')
+    .replace(/You can make 4 mistakes/, 'You can make ' + v + ' mistake' + (v === 1 ? '' : 's')).replace(/You get 40 seconds/, 'You get ' + v + ' seconds');
 }
+const lvTag = id => LADDER[id] ? 'Lv ' + lvOf(id) : id === 'back-track' ? 'N = ' + (gs(id).level || 1) : '';
+
+/* ---------- home ---------- */
+function libCard(g){
+  const st = gs(g.id), locked = isLocked(g.id), isNext = locked && unlockRank(g.id) === unlockedCount(), stars = st.plays ? starCount(st.bestPct) : 0;
+  const tag = locked ? '<span class="lockb">'+svgI('lock', 2.6)+(isNext ? 'Next' : 'Locked')+'</span>'
+    : lvTag(g.id) ? '<span class="tagnew">'+lvTag(g.id)+'</span>' : '';
+  const n = daysToUnlock(g.id);
+  const foot = locked
+    ? '<div class="mini"><span class="need">'+(isNext ? 'Unlocks when you finish a daily workout' : 'Unlocks after '+n+' more workout days')+'</span></div>'
+    : '<div class="mini"><span class="need">'+(st.plays ? st.plays+' round'+(st.plays === 1 ? '' : 's')+' · best '+st.bestPct+'%' : 'New! Not played yet')+'</span>'
+      + '<span class="stars">'+'★'.repeat(stars)+'<span style="color:var(--line)">'+'★'.repeat(3-stars)+'</span></span></div>';
+  return '<button class="gcard press'+(locked ? ' locked' : '')+(isNext ? ' next' : '')+'" data-go="g-'+g.id+'" style="--c:'+SKILLS[g.skill].c+'">'
+    + '<div class="art">'+tag+svgI(g.icon)+'</div>'
+    + '<div class="body"><span class="sk-l">'+SKILLS[g.skill].name+'</span><h3>'+g.name+'</h3>'+foot+'</div></button>';
+}
+function renderHome(){
+  renderWho();
+  renderDash();
+  countTo($('h-points'), points(), 0.6);
+
+  /* today's plan: 5 short sets across different skills, then bonus sets */
+  const td = todayState(), plan = todayPlan(), t = todaySecs();
+  const doneSets = plan.filter(id => td.rounds[id]).length;
+  $('h-level').textContent = doneSets >= plan.length ? 'Plan done! Bonus sets' : plan.length + ' sets · about ' + Math.round(DAY_GOAL / 60) + ' min';
+  $('h-checks').innerHTML = plan.map(id => {
+    const g = GAMES.find(x => x.id === id), d = !!td.rounds[id];
+    return '<button class="ptile press'+(d ? ' done' : '')+'" data-go="g-'+id+'" style="--c:'+SKILLS[g.skill].c+'">'
+      + '<span class="ic">'+svgI(g.icon)+'</span><span class="nm">'+g.name+'</span>'
+      + '<span class="tm">'+(lvTag(id) || SKILLS[g.skill].name)+'</span></button>';
+  }).join('');
+  $('h-fort').style.width = Math.min(100, t / DAY_GOAL * 100) + '%';
+  $('h-fort-text').textContent = doneSets + ' of ' + plan.length + ' sets done';
+  $('h-fort-min').textContent = Math.floor(Math.min(t, DAY_GOAL) / 60) + ' of ' + Math.round(DAY_GOAL / 60) + ' min';
+
+  /* unlock teaser */
+  const nx = nextUnlock(), box = $('h-next');
+  box.hidden = !nx;
+  if (nx) {
+    const left = Math.ceil((DAY_GOAL - t) / 60), doneToday = t >= DAY_GOAL;
+    box.innerHTML = '<div class="hd"><div class="lk" style="--c:'+SKILLS[nx.skill].c+'">'+svgI(nx.icon, 2.4)+'</div><div><h3>Next unlock: '+nx.name+'</h3>'
+      + '<div class="small muted">'+(doneToday ? 'Unlocks when you finish tomorrow’s workout.' : left + ' more minute' + (left === 1 ? '' : 's') + ' today to unlock this new '+SKILLS[nx.skill].name+' workout.')+'</div></div></div>'
+      + (doneToday ? '' : '<div class="bar"><i style="width:'+Math.min(100, t / DAY_GOAL * 100)+'%"></i></div>');
+  }
+
+  const open = unlockedGames();
+  $('h-donewrap').hidden = !open.length;
+  $('h-done').innerHTML = open.map(libCard).join('');
+  const locked = GAMES.filter(g => isLocked(g.id)).sort((a,b) => unlockRank(a.id) - unlockRank(b.id));
+  $('h-lockwrap').hidden = !locked.length;
+  $('h-unlocked').textContent = locked.length + ' to unlock · 1 new each workout day';
+  $('h-library').innerHTML = locked.map(libCard).join('');
+  anim(document.querySelectorAll('#h-checks .ptile, #view-home .gcard'), { opacity:[0,1], y:[16,0] }, { delay: stag(0.03) });
+}
+/* today's plan: up to 5 different games, one per skill where possible, always including a new unplayed game.
+   Fixed for the day, so the home screen and the circuit agree. */
+function todayPlan(){
+  const td = todayState();
+  if (td.plan && td.plan.every(id => !isLocked(id))) return td.plan;
+  const rnd = seeded(td.d + ':plan:' + (ME ? ME.id : 0));
+  const mix = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const open = unlockedGames(), out = [];
+  const add = g => { if (g && !out.includes(g.id) && out.length < 5) out.push(g.id); };
+  add(open.filter(g => !gs(g.id).plays).pop());
+  const seen = new Set(out.map(id => GAMES.find(g => g.id === id).skill));
+  mix(open).forEach(g => { if (!seen.has(g.skill)) { seen.add(g.skill); add(g); } });
+  mix(open).forEach(add);
+  td.plan = mix(out);
+  save();
+  return td.plan;
+}
+/* ---------- brain muscles: best score per skill, shown as a brain scan + barbells ---------- */
+const MUSCLE = {
+  creativity:{ icon:'spark', what:'Coming up with many different ideas.' },
+  insight:{ icon:'bulb', what:'Spotting the hidden link that solves a puzzle.' },
+  memory:{ icon:'book', what:'Holding facts in your head and using them.' },
+  focus:{ icon:'eye', what:'Staying quick and accurate when time is short.' },
+  reasoning:{ icon:'lens', what:'Telling a strong argument from a weak one.' },
+  flexibility:{ icon:'switch', what:'Switching rules without getting stuck.' },
+  planning:{ icon:'gauge', what:'Thinking a few steps ahead before you move.' },
+  ai:{ icon:'robot', what:'Knowing when to trust AI and when to check it.' }
+};
+const MKEYS = Object.keys(SKILLS);
+const MDEMO = /[?&]demo\b/.test(location.search);   // preview only: ?demo shows sample numbers, never saved
+const MDEMO_D = {
+  creativity:{ vol:1240, best:72, today:64 }, insight:{ vol:610, best:48, today:0 }, memory:{ vol:2460, best:88, today:150 },
+  focus:{ vol:880, best:63, today:41 }, reasoning:{ vol:150, best:30, today:0 }, flexibility:{ vol:420, best:55, today:0 },
+  planning:{ vol:0, best:0, today:0 }, ai:{ vol:90, best:41, today:20 }
+};
+/* per muscle: vol = total kg lifted (always grows), best = personal best % (max lift), today = kg lifted today */
+function muscleStats(k){
+  if (MDEMO) return MDEMO_D[k];
+  const gl = GAMES.filter(g => g.skill === k).map(g => gs(g.id));
+  const t = S.kday && S.kday.d === dayKey(new Date()) ? (S.kday.kg[k] || 0) : 0;
+  return { vol: gl.reduce((a,s) => a + (s.vol || 0), 0), best: Math.max(0, ...gl.map(s => s.bestPct)), today: t };
+}
+const kg = n => n.toLocaleString('en-IN');
+/* rank and slice size follow total lifted, so they grow with every session */
+const FULL_KG = 3000;
+const TIERS = ['Untrained','Rookie','Lifter','Athlete','Beast'], TIER_AT = [0,1,300,1000,2000];
+const tierIx = v => v >= 2000 ? 4 : v >= 1000 ? 3 : v >= 300 ? 2 : v > 0 ? 1 : 0;
+const tierTag = v => '<span class="mtier t'+tierIx(v)+'">'+TIERS[tierIx(v)]+'</span>';
+const sliceR = v => v > 0 ? Math.max(12, BRMAX*Math.sqrt(Math.min(1, v/FULL_KG))) : 0;
+
+/* barbell: one plate per 20 kg of personal best on each side, biggest plate next to the collar */
+function barbell(v, c, big){
+  const W = big ? 240 : 120, H = big ? 56 : 30, pw = big ? 9 : 5, gap = 2, n = v <= 0 ? 0 : Math.min(5, Math.ceil(v/20));
+  const cl = W*0.27, cr = W - cl, mid = H/2, hs = [1,.86,.72,.6,.5];
+  let s = '<line x1="4" y1="'+mid+'" x2="'+(W-4)+'" y2="'+mid+'" stroke="#A3A8BC" stroke-width="'+(big?4:3)+'" stroke-linecap="round"/>'
+    + '<rect x="'+(cl-2)+'" y="'+(mid-H*.18)+'" width="'+(big?6:4)+'" height="'+(H*.36)+'" rx="1.5" fill="#7D839A"/>'
+    + '<rect x="'+(cr-(big?4:2))+'" y="'+(mid-H*.18)+'" width="'+(big?6:4)+'" height="'+(H*.36)+'" rx="1.5" fill="#7D839A"/>';
+  for (let j = 0; j < n; j++) {
+    const ph = H*hs[j], y = mid - ph/2;
+    s += '<rect class="pl" x="'+(cl-2-(j+1)*(pw+gap))+'" y="'+y+'" width="'+pw+'" height="'+ph+'" rx="2" fill="'+c+'"/>'
+      +  '<rect class="pl" x="'+(cr+(big?4:2)+gap+j*(pw+gap))+'" y="'+y+'" width="'+pw+'" height="'+ph+'" rx="2" fill="'+c+'"/>';
+  }
+  return '<svg class="'+(big ? 'bbb' : 'bbs')+'" viewBox="0 0 '+W+' '+H+'" aria-hidden="true">'+s+'</svg>';
+}
+
+/* brain silhouette = union of circles (side view, front on the left) */
+const BCX = 170, BCY = 146, BRMAX = 124;
+const BRAIN = [[-62,-40,44],[-15,-62,46],[35,-55,44],[72,-20,38],[-80,8,40],[0,-5,62],[66,22,40],[-50,45,40],[10,52,42],[55,50,32],[66,64,24]];
+const GYRI = ['M-95 -20c15-12 30 8 45-6s30-14 40 0','M-40 -78c12 10 26-6 38 4s26 4 34-6','M20 -40c14 10 28-8 44 2','M-100 30c18 4 26-14 44-6s24 16 40 6','M-20 20c12-12 30-4 36 8s24 10 38-2','M-40 70c16-8 32 6 48-2','M70 0c-8 14 6 26 0 40','M-8 -100c4 30-10 50 4 80s-4 40 6 70'];
+const pol = (deg, r) => [BCX + r*Math.cos(deg*Math.PI/180), BCY + r*Math.sin(deg*Math.PI/180)];
+function wedgePath(i, r){
+  const a0 = -90 + i*45, a1 = a0 + 45, p0 = pol(a0, r), p1 = pol(a1, r);
+  return 'M'+BCX+' '+BCY+'L'+p0[0].toFixed(1)+' '+p0[1].toFixed(1)+'A'+r+' '+r+' 0 0 1 '+p1[0].toFixed(1)+' '+p1[1].toFixed(1)+'Z';
+}
+let mSel = null;
+function allStats(){ const o = {}; MKEYS.forEach(k => o[k] = muscleStats(k)); return o; }
+function renderMuscles(){
+  const st = allStats();
+  const total = MKEYS.reduce((a,k) => a + st[k].vol, 0), todayKg = MKEYS.reduce((a,k) => a + st[k].today, 0);
+  const trained = MKEYS.filter(k => st[k].vol > 0);
+  if (!mSel || !SKILLS[mSel]) mSel = trained.length ? trained.reduce((a,k) => st[k].vol > st[a].vol ? k : a, trained[0]) : MKEYS[0];
+
+  /* brain scan: polar-area chart clipped to a brain. Slice area grows with total lifted; full at FULL_KG. */
+  const circles = BRAIN.map(([x,y,r]) => '<circle cx="'+(BCX+x)+'" cy="'+(BCY+y)+'" r="'+r+'"/>').join('');
+  const stem = '<rect x="'+(BCX+18)+'" y="'+(BCY+60)+'" width="22" height="44" rx="10"/>';
+  let svg = '<svg viewBox="0 0 340 318" role="img" aria-label="Brain scan, total kg lifted per muscle. '+MKEYS.map(k => SKILLS[k].name+' '+st[k].vol+' kg').join(', ')+'.">'
+    + '<defs><clipPath id="bclip">'+circles+stem+'</clipPath></defs>'
+    + '<g fill="#fff" stroke="#CFC8FF" stroke-width="7">'+circles+stem+'</g><g fill="#fff">'+circles+stem+'</g>'
+    + '<g clip-path="url(#bclip)">'
+    +   MKEYS.map((k,i) => '<path d="'+wedgePath(i, BRMAX)+'" fill="'+SKILLS[k].c+'" opacity=".09"/>').join('')
+    +   MKEYS.map((k,i) => '<path class="mz'+(k === mSel ? ' sel' : '')+'" data-k="'+k+'" data-i="'+i+'" d="'+wedgePath(i, sliceR(st[k].vol))+'" fill="'+SKILLS[k].c+'"/>').join('')
+    +   '<g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".55" transform="translate('+BCX+' '+BCY+')">'+GYRI.map(d => '<path d="'+d+'"/>').join('')+'</g>'
+    +   MKEYS.map((k,i) => { const p = pol(-90 + i*45, BRMAX+10); return '<line x1="'+BCX+'" y1="'+BCY+'" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#fff" stroke-width="2.5"/>'; }).join('')
+    + '</g>'
+    + MKEYS.map((k,i) => {
+        const a = -90 + i*45 + 22.5, p = pol(a, 138), sel = k === mSel;
+        return '<g class="mlab mz'+(sel ? ' sel' : '')+'" data-k="'+k+'" transform="translate('+p[0].toFixed(1)+' '+p[1].toFixed(1)+')">'
+          + '<circle r="22" fill="transparent"/>'
+          + '<circle r="14" fill="'+SKILLS[k].c+'"'+(sel ? ' stroke="#141B34" stroke-width="3"' : '')+'/>'
+          + '<g transform="translate(-8 -8) scale(.667)" color="#fff">'+svgI(MUSCLE[k].icon, 2.8).replace('<svg ','<svg width="24" height="24" ')+'</g>'
+          + '<text y="29" text-anchor="middle">'+kg(st[k].vol)+'</text></g>';
+      }).join('')
+    + '</svg>';
+  const scan = $('m-scan');
+  scan.innerHTML = '<span class="scanline"></span><div class="hd"><div><span class="kick">Brain scan</span><div class="sub">'+(MDEMO ? 'Sample numbers (preview)' : trained.length+' of 8 muscles trained')+'</div>'
+    + (todayKg ? '<span class="today">+'+kg(todayKg)+' kg today</span>' : '')+'</div>'
+    + '<div class="total"><b id="m-total">0</b><span>kg</span><small>total lifted</small></div></div>'
+    + svg
+    + '<div class="cap">'+(trained.length ? 'Every workout adds weight and grows a slice. A full slice is '+kg(FULL_KG)+' kg.' : 'Your brain is ready. Finish a workout to grow your first muscle.')+'</div>';
+  if (M && !reduced()) M.animate(0, total, { duration:1.2, ease:[.2,.8,.2,1], onUpdate: v => $('m-total').textContent = kg(Math.round(v)) });
+  else $('m-total').textContent = kg(total);
+  scan.classList.remove('run'); void scan.offsetWidth; if (!reduced()) scan.classList.add('run');
+  const svgEl = scan.querySelector('svg');
+  /* grow the slices from the centre */
+  if (M && !reduced()) svgEl.querySelectorAll('path.mz').forEach(p => {
+    const i = +p.dataset.i, r = sliceR(st[p.dataset.k].vol);
+    if (r) M.animate(0, r, { duration:0.9, delay:0.25 + i*0.06, ease:[.2,.8,.2,1], onUpdate: v => p.setAttribute('d', wedgePath(i, v)) });
+  });
+
+  /* call-outs: biggest muscle, and the one that needs work */
+  const call = $('m-call');
+  if (trained.length) {
+    const strong = trained.reduce((a,k) => st[k].vol > st[a].vol ? k : a, trained[0]);
+    const weak = MKEYS.reduce((a,k) => st[k].vol < st[a].vol ? k : a, MKEYS[0]);
+    call.hidden = false;
+    call.innerHTML = '<button class="card press" data-k="'+strong+'" style="--c:'+SKILLS[strong].c+'"><span class="lb">💪 Strongest</span><span class="nm"><i></i>'+SKILLS[strong].name+'</span><span class="small muted">'+kg(st[strong].vol)+' kg · '+TIERS[tierIx(st[strong].vol)]+'</span></button>'
+      + '<button class="card press" data-k="'+weak+'" style="--c:'+SKILLS[weak].c+'"><span class="lb">🦵 Don’t skip brain day</span><span class="nm"><i></i>'+SKILLS[weak].name+'</span><span class="small muted">'+(st[weak].vol ? kg(st[weak].vol)+' kg. Needs work' : 'Not trained yet')+'</span></button>';
+  } else call.hidden = true;
+
+  renderMuscleDetail(st);
+
+  $('m-list').innerHTML = MKEYS.map(k => '<button class="mrow press'+(k === mSel ? ' sel' : '')+'" data-k="'+k+'" style="--c:'+SKILLS[k].c+'">'
+    + '<span class="dot">'+svgI(MUSCLE[k].icon)+'</span>'
+    + '<span class="nm">'+SKILLS[k].name+'<br>'+tierTag(st[k].vol)+'</span>'
+    + barbell(st[k].best, SKILLS[k].c, false)
+    + '<span class="v">'+kg(st[k].vol)+'<small>kg</small></span></button>').join('');
+  anim(document.querySelectorAll('#m-list .mrow'), { opacity:[0,1], x:[-10,0] }, { delay: stag(0.04) });
+}
+function renderMuscleDetail(st){
+  const k = mSel, m = st[k], s = SKILLS[k], ti = tierIx(m.vol);
+  const games = GAMES.filter(g => g.skill === k);
+  const open = games.filter(g => !isLocked(g.id));
+  const best = open.slice().sort((a,b) => gs(a.id).bestPct - gs(b.id).bestPct)[0];
+  const soonest = Math.min(...games.map(g => daysToUnlock(g.id)));
+  const nextAt = TIER_AT[ti+1], from = TIER_AT[ti];
+  const prog = ti >= 4 ? 100 : (m.vol - from) / (nextAt - from) * 100;
+  const d = $('m-detail');
+  d.style.setProperty('--c', s.c);
+  d.innerHTML = '<div class="hd"><span class="ic">'+svgI(MUSCLE[k].icon)+'</span><div><h3>'+s.name+'</h3>'+tierTag(m.vol)+'</div>'
+    + '<div class="kg"><b>'+kg(m.vol)+'</b> kg<small>total lifted'+(m.today ? ' · +'+kg(m.today)+' today' : '')+'</small></div></div>'
+    + '<div class="rank"><div class="bar"><i style="width:'+prog+'%"></i></div><div class="small muted">'
+    + (ti === 0 ? 'Finish one workout to become a <b>Rookie</b>.' : ti >= 4 ? (m.vol >= FULL_KG ? 'Full size. Legend status!' : kg(FULL_KG - m.vol)+' kg more for a full-size muscle.') : kg(nextAt - m.vol)+' kg more to reach <b>'+TIERS[ti+1]+'</b>.')+'</div></div>'
+    + '<div class="bb">'+barbell(m.best, s.c, true)+'<div class="pb"><b>'+m.best+' kg</b><span>personal best</span></div></div>'
+    + '<p>'+MUSCLE[k].what+(m.best >= 100 ? ' You maxed your personal best. Now build volume!' : '')+'</p>'
+    + '<div><div class="small muted" style="margin-bottom:6px">Trained by</div><div class="chips">'
+    + games.map(g => isLocked(g.id)
+        ? '<span class="chip lk">'+svgI('lock', 2.6)+g.name+' · in '+daysToUnlock(g.id)+' workout day'+(daysToUnlock(g.id) === 1 ? '' : 's')+'</span>'
+        : '<button class="chip press" data-go="g-'+g.id+'">'+svgI(g.icon, 2.6)+g.name+'</button>').join('')
+    + '</div></div>'
+    + (best ? '<button class="btn c full" data-go="g-'+best.id+'">Train with '+best.name+'</button>'
+            : '<button class="btn full lockcta" disabled>'+svgI('lock', 2.4).replace('<svg ','<svg style="width:18px;height:18px" ')+' Unlocks in '+soonest+' workout day'+(soonest === 1 ? '' : 's')+'</button>');
+  anim(d.querySelector('.bbb'), { scale:[.9,1], opacity:[0,1] });
+  requestAnimationFrame(() => { const i = d.querySelector('.rank i'); if (i) { const w = i.style.width; i.style.width = '0'; requestAnimationFrame(() => i.style.width = w); } });
+  if (M && !reduced()) anim(d.querySelectorAll('.pl'), { scaleY:[0.3,1], opacity:[0,1] }, { delay: stag(0.03), type:'spring', bounce:0.4, duration:0.5 });
+}
+document.addEventListener('click', e => {
+  if (view !== 'muscles') return;
+  const t = e.target.closest('#view-muscles [data-k]');
+  if (!t) return;
+  mSel = t.dataset.k; SFX.play('select');
+  const svgEl = document.querySelector('#m-scan svg');
+  svgEl.classList.add('has-sel');
+  svgEl.querySelectorAll('.mz').forEach(z => z.classList.toggle('sel', z.dataset.k === mSel));
+  svgEl.querySelectorAll('.mlab').forEach(z => { const c = z.querySelectorAll('circle')[1]; if (z.dataset.k === mSel) { c.setAttribute('stroke','#141B34'); c.setAttribute('stroke-width','3'); } else c.removeAttribute('stroke'); });
+  document.querySelectorAll('#m-list .mrow').forEach(r => r.classList.toggle('sel', r.dataset.k === mSel));
+  renderMuscleDetail(allStats());
+  if (!t.closest('#m-detail') && !t.closest('#m-list')) $('m-detail').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block:'nearest' });
+});
+const starCount = p => p >= 85 ? 3 : p >= 60 ? 2 : p >= 30 ? 1 : 0;
 
 /* ---------- game shell: intro → countdown → play → results ---------- */
 function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c); document.documentElement.style.setProperty('--c', SKILLS[g.skill].c); }
 function showIntro(g){
   setColor(g);
-  const st = gs(g.id);
+  const st = gs(g.id), locked = isLocked(g.id), n = daysToUnlock(g.id), left = Math.ceil((DAY_GOAL - todaySecs()) / 60);
+  const foot = locked
+    ? '<div class="bestline">'+(n === 1 && todaySecs() < DAY_GOAL ? 'Only '+left+' more minute'+(left === 1 ? '' : 's')+' of training today to unlock it!' : 'Unlocks after '+n+' more workout day'+(n === 1 ? '' : 's')+'.')+'</div><button class="btn lockcta" data-go="home">'+svgI('lock', 2.4).replace('<svg ','<svg style="width:18px;height:18px" ')+' Locked</button>'
+    : '<div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button>';
   const stage = $('stage');
   stage.innerHTML = '';
   const el = h('<div>'
     + '<div class="intro-head"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
     + '<div class="ic">'+svgI(g.icon, 2.2)+'</div><h1>'+g.name+'</h1><div class="meta">'+SKILLS[g.skill].name+'. Inspired by '+g.inspired+'.</div><div class="topics">💻 '+g.topics+'</div></div>'
-    + '<div class="card how"><h3>How to play</h3><ol>'+g.how.map((s,i) => '<li><span>'+(i+1)+'</span><div>'+s+'</div></li>').join('')+'</ol></div>'
-    + '<div class="intro-foot"><div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button></div>'
+    + '<div class="card how"><h3>How to play'+(lvTag(g.id) ? ' <span class="mtier">'+lvTag(g.id)+'</span>' : '')+'</h3><ol>'+g.how.map((s,i) => '<li><span>'+(i+1)+'</span><div>'+howText(g.id, s)+'</div></li>').join('')+'</ol>'+(LADDER[g.id] ? '<p class="small muted" style="margin:10px 0 0">Score 80%+ to level up ('+LV_HINT[g.id]+'). Under 40% drops a level.</p>' : '')+'</div>'
+    + '<div class="intro-foot">'+foot+'</div>'
     + '</div>');
   stage.appendChild(el);
   anim(el.querySelector('.intro-head'), { opacity:[0,1], scale:[.96,1] });
-  anim(el.querySelector('.ic'), { scale:[0,1], rotate:[-25,0] }, { type:'spring', bounce:0.45, duration:0.7, delay:0.1 });
+  anim(el.querySelector('.ic'), { scale:[0.8,1], opacity:[0,1], rotate:[-12,0] }, { type:'spring', bounce:0.3, duration:0.5, delay:0.08 });
   anim(el.querySelector('.intro-head h1'), { opacity:[0,1], y:[12,0] }, { delay:0.15 });
-  anim(el.querySelectorAll('.orb'), { scale:[0,1] }, { delay: stag(0.08), duration:0.8 });
+  anim(el.querySelectorAll('.orb'), { scale:[0.85,1], opacity:[0,1] }, { delay: stag(0.06), duration:0.5 });
   anim(el.querySelectorAll('.how li'), { opacity:[0,1], x:[-12,0] }, { delay: stag(0.07) });
   SFX.play('whoosh');
+  if (locked) return;
   $('go').onclick = () => countdown(g);
+  /* in a guided workout, show where they are; the countdown still waits for Play so they can read the rules */
+  if (AUTOSTART === g.id) {
+    AUTOSTART = null;
+    el.querySelector('.bestline').innerHTML = '<b>Set '+(todayRoundsTotal()+1)+' of today’s workout.</b> Read the rules, then tap Play.';
+  }
 }
 function countdown(g){
+  if (isLocked(g.id)) { location.hash = ''; return; }
   SFX.unlock();
   const ov = h('<div class="count"><span class="ripple"></span><b>3</b></div>'); document.body.appendChild(ov);
   const b = ov.querySelector('b'), rp = ov.querySelector('.ripple'); let n = 3;
@@ -760,8 +1454,36 @@ function play(g){
 }
 function results(g, res){
   const st = gs(g.id);
-  const prevBest = st.best;
-  st.plays++; st.best = Math.max(st.best, res.score); st.bestPct = Math.max(st.bestPct, Math.round(res.pct)); save();
+  const prevBest = st.best, ptsBefore = points();
+  const pct = Math.max(0, Math.min(100, Math.round(res.pct) || 0));
+  const td = todayState();
+  td.rounds[g.id] = (td.rounds[g.id] || 0) + 1;
+  SESS.rounds++; SESS.last = Date.now(); if (!SESS.games.includes(g.id)) SESS.games.push(g.id);
+  td.best[g.id] = Math.max(td.best[g.id] || 0, pct);
+  st.plays++; st.best = Math.max(st.best, Math.round(res.score) || 0); st.bestPct = Math.max(st.bestPct, pct);
+  const lift = Math.max(5, pct), today = dayKey(new Date());
+  st.vol = (st.vol || 0) + lift;
+  SESS.kg += lift;
+  if (!S.kday || S.kday.d !== today) S.kday = { d:today, kg:{} };
+  S.kday.kg[g.skill] = (S.kday.kg[g.skill] || 0) + lift;
+  queuePlay(g.id, Math.max(0, Math.round(res.score) || 0), pct, lift);
+  save(); syncNow();
+  res.lines = (res.lines || []).concat(['💪 <b>+' + lift + ' kg</b> lifted for your ' + SKILLS[g.skill].name + ' muscle.']);
+  if (LADDER[g.id]) {
+    const before = lvOf(g.id);
+    st.lv = pct >= 80 ? Math.min(5, before + 1) : pct < 40 ? Math.max(1, before - 1) : before;
+    if (st.lv > before) res.lines.push('⬆️ <b>Level up!</b> ' + g.name + ' is now Lv ' + st.lv + ': ' + LV_HINT[g.id] + '.');
+    else if (st.lv < before) res.lines.push('↘️ Back to Lv ' + st.lv + ' next time. You’ve got this.');
+    else if (before < 5) res.lines.push('🎚️ Lv ' + before + '. Score 80%+ to level up.');
+  }
+  const won = checkQuests(g);
+  won.forEach(q => res.lines.push('✅ Quest done: ' + questText(q) + ' <b>+' + q.kg + ' kg</b>'));
+  const goalJustDone = !td.goal && todaySecs() >= DAY_GOAL;
+  if (goalJustDone) td.goal = true;
+  res.lines.push(todaySecs() >= DAY_GOAL ? '🎯 Today’s ' + GOAL_MIN + ' minutes: <b>done</b> (' + fmt(todaySecs()) + ' trained).' : '⏱ <b>' + fmt(todaySecs()) + '</b> of today’s ' + GOAL_MIN + ' minutes. <b>' + Math.ceil((DAY_GOAL - todaySecs()) / 60) + ' min</b> to go.');
+  const passed = passedRivals(ptsBefore, points());
+  if (passed.length) res.lines.push('🏁 You passed <b>' + passed.map(esc).join(', ') + '</b> on the leaderboard!');
+  save();
   const stars = starCount(res.pct);
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   if (FX.best >= 3) res.lines = (res.lines || []).concat(['🔥 Best combo: <b>x' + FX.best + '</b> in a row.']);
@@ -777,7 +1499,10 @@ function results(g, res){
     + (res.score > prevBest && prevBest > 0 ? '<span class="newbest">New best</span>' : '')
     + '<h2>'+esc(res.title || (stars === 3 ? 'Brilliant!' : stars === 2 ? 'Nice work!' : stars === 1 ? 'Good start' : 'Keep practising'))+'</h2>'
     + '<div class="lines">'+(res.lines||[]).map(l => '<div>'+l+'</div>').join('')+'</div>'
-    + '<div class="row"><button class="btn light" data-go="home" style="flex:1">All games</button><button class="btn c" id="again" style="flex:1">Play again</button></div>'
+    + '<div id="r-next"></div>'
+    + '<div class="row"><button class="btn light" data-go="home" style="flex:1">All workouts</button><button class="btn c" id="again" style="flex:1">Play again</button></div>'
+    + '<button type="button" class="btn light full" data-endsess style="margin-top:10px">⏹ End session</button>'
+    + '<div class="fbcard" id="r-fb" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)"></div>'
     + '</div>');
   stage.appendChild(el);
   anim(el, { opacity:[0,1], scale:[.95,1] });
@@ -789,9 +1514,11 @@ function results(g, res){
   for (let i = 0; i < stars; i++) setTimeout(() => { SFX.play('star', i); const st2 = el.querySelectorAll('.starrow i.on')[i]; if (st2) { const r = st2.getBoundingClientRect(); sparks(r.left + r.width/2, r.top + r.height/2, '#FFB020', 8); } }, 700 + i*180);
   setTimeout(() => { const t = el.querySelector('#r-tier'); if (!t) return; t.classList.add('show'); anim(t, { rotateX:[90,0], scale:[0.6,1.1,1] }, { type:'tween', duration:0.5 }); SFX.play('reveal'); }, 900 + stars*180);
   setTimeout(() => { if (stars >= 2) { SFX.play('fanfare'); confetti(); } if (res.score > prevBest && prevBest > 0) SFX.play('levelup'); }, 1250 + stars*180);
-  anim(el.querySelectorAll('.starrow i.on'), { scale:[0,1.3,1], rotate:[-40,0] }, { type:'tween', duration:0.45, delay: M ? M.stagger(0.18, { startDelay:0.7 }) : 0 });
+  anim(el.querySelectorAll('.starrow i.on'), { scale:[0.5,1.25,1], opacity:[0,1,1], rotate:[-30,0] }, { type:'tween', duration:0.45, delay: M ? M.stagger(0.18, { startDelay:0.7 }) : 0 });
   anim(el.querySelectorAll('.lines div'), { opacity:[0,1], y:[8,0] }, { delay: M ? M.stagger(0.06, { startDelay:0.4 }) : 0 });
   el.querySelector('#again').onclick = () => countdown(g);
+  feelForm(el.querySelector('#r-fb'), g);
+  afterRound(g, el, goalJustDone);
 }
 
 
@@ -855,7 +1582,7 @@ const LEX = {
 };
 const LEXMAP = {}; Object.entries(LEX).forEach(([c,ws]) => ws.split(' ').forEach(w => LEXMAP[w] = c));
 const WordSpread = { id:'word-spread', name:'Word Spread', skill:'creativity', icon:'spark', inspired:'the Divergent Association Task', topics:'Python, web, Git, maths, AI',
-  how:['Type 7 tech words, one in each box. Any area of computing counts.','Make them as different from each other as you can.','“firewall” and “matrix” are far apart; “loop” and “for” are not. 90 seconds.'],
+  how:['Type 7 tech words, one in each box. Any area of computing counts.','Make them as different from each other as you can. An AI checks by meaning: close words like “loop”, “for” and “while” count as one area.','“firewall” and “matrix” are far apart; “loop” and “for” are not. 90 seconds.'],
   run(ctx){
     ctx.root.innerHTML = '<div class="tbar"><i id="ws-t"></i></div><p class="prompt">7 tech words, as unrelated as possible.</p>'
       + '<div class="word-list">'+[1,2,3,4,5,6,7].map(i => '<input class="field" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Word '+i+'">').join('')+'</div>'
@@ -863,22 +1590,49 @@ const WordSpread = { id:'word-spread', name:'Word Spread', skill:'creativity', i
     const ins = [...ctx.root.querySelectorAll('input')];
     ins[0].focus();
     ins.forEach((inp,i) => { inp.addEventListener('paste', e => e.preventDefault()); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); (ins[i+1] || $('ws-done')).focus(); } }); });
-    const finish = () => {
+    let finished = false;
+    const finish = async () => {
+      if (finished) return; finished = true; stop();
       const words = ins.map(i => i.value.trim().toLowerCase()).filter(Boolean);
-      const seen = new Set(), cats = new Set(), lines = [];
-      words.forEach(w => {
-        const k = w.replace(/[^a-z0-9]/g,'');
-        if (!k || seen.has(k)) { lines.push('<b>'+esc(w)+'</b>: repeated, not counted'); return; }
-        seen.add(k);
-        const c = LEXMAP[k] || LEXMAP[k.replace(/s$/,'')];
-        const fresh = c ? !cats.has(c) : true;
-        cats.add(c || 'own:' + k);
-        lines.push('<b>'+esc(w)+'</b>: ' + (c ? c + (fresh ? '' : ' again, no extra spread') : 'not in our demo list, counted as its own area'));
-      });
-      const spread = cats.size;
-      ctx.end({ score: spread*10 + (words.length === 7 ? 10 : 0), pct: Math.round(spread/7*100), lines: ['You covered <b>'+spread+'</b> different areas of tech.'].concat(lines).concat(['Demo scoring groups words by area. The full game will score by meaning.']) });
+      /* exact repeats (and plurals) never count; the rest go to the AI judge */
+      const seen = new Set(), uniq = [], rep = [];
+      words.forEach(w => { const k = w.replace(/[^a-z0-9]/g,'').replace(/s$/,''); if (!k || seen.has(k)) rep.push(w); else { seen.add(k); uniq.push(w); } });
+      let r = null, vfb = '';
+      if (uniq.length) {
+        ins.forEach(i => i.disabled = true); AI.thinking($('ws-done'), true);
+        const jp = { words: uniq };
+        r = await AI.judge('wordspread', jp, 12000);
+        if (!ctx.root.isConnected) return;
+        if (r && Array.isArray(r.words) && r.words.length === uniq.length) vfb = verdictFb('word-spread', 'wordspread', jp, r); else r = null;
+      }
+      const first = {}, lines = [];
+      let spread;
+      if (r) {
+        /* AI groups words by meaning: close words share a group and add no spread */
+        uniq.forEach((w, i) => {
+          const x = r.words[i];
+          if (!x.valid) { lines.push('<b>'+esc(w)+'</b>: not a tech word, not counted'); return; }
+          const area = x.area ? esc(x.area) : 'tech';
+          if (first[x.group]) lines.push('<b>'+esc(w)+'</b>: '+area+'. Too close to <b>'+esc(first[x.group])+'</b>, no extra spread');
+          else { first[x.group] = w; lines.push('<b>'+esc(w)+'</b>: '+area); }
+        });
+        spread = Object.keys(first).length;
+      } else {
+        /* AI is offline: fall back to our word list, and only listed words count */
+        uniq.forEach(w => {
+          const k = w.replace(/[^a-z0-9]/g,''), c = LEXMAP[k] || LEXMAP[k.replace(/s$/,'')];
+          if (!c) { lines.push('<b>'+esc(w)+'</b>: not in our word list, not counted'); return; }
+          if (first[c]) lines.push('<b>'+esc(w)+'</b>: '+c+' again, no extra spread');
+          else { first[c] = w; lines.push('<b>'+esc(w)+'</b>: '+c); }
+        });
+        spread = Object.keys(first).length;
+      }
+      rep.forEach(w => lines.push('<b>'+esc(w)+'</b>: repeated, not counted'));
+      const tail = r ? (r.feedback ? ['🤖 '+esc(r.feedback)] : []).concat(['The AI grouped your words by meaning. '+vfb])
+        : ['The AI check is offline right now, so only words in our list counted.'];
+      ctx.end({ score: spread*10 + (spread === 7 ? 10 : 0), pct: Math.round(spread/7*100), lines: ['You covered <b>'+spread+' of 7</b> different areas of tech.'].concat(lines, tail) });
     };
-    ctx.timer(90, $('ws-t'), null, finish);
+    const stop = ctx.timer(lvVal('word-spread'), $('ws-t'), null, finish);
     $('ws-done').onclick = finish;
   }
 };
@@ -917,18 +1671,19 @@ const BeatSeven = { id:'beat-the-7', name:'Beat the 7', skill:'creativity', icon
     const go = async () => {
       const a = inp.value.trim(); if (!a || busy) return inp.focus();
       const k = norm(a), q = qs[i];
-      let pts = q.typical.includes(k) ? 0 : q.common.map(norm).includes(k) ? 2 : 5, why = '';
+      let pts = q.typical.includes(k) ? 0 : q.common.map(norm).includes(k) ? 2 : 5, why = '', vfb = '';
       if (pts === 5) {
         busy = true; inp.disabled = true; AI.thinking($('b7-go'), true);
-        const r = await AI.judge('beat7', { prompt:q.q, answer:a, typical:q.typical[0], common:q.common });
+        const jp = { prompt:q.q, answer:a, typical:q.typical[0], common:q.common };
+        const r = await AI.judge('beat7', jp);
         AI.thinking($('b7-go'), false); busy = false;
-        if (r) { pts = r.category === 'typical' ? 0 : r.category === 'common' ? 2 : r.category === 'invalid' ? 0 : 5; why = r.reason || ''; }
+        if (r) { pts = r.category === 'typical' ? 0 : r.category === 'common' ? 2 : r.category === 'invalid' ? 0 : 5; why = r.reason || ''; vfb = verdictFb('beat-the-7', 'beat7', jp, r); }
       }
       score += pts; $('b7-s').textContent = score; log.push(pts);
       inp.disabled = true; $('b7-go').disabled = true;
       SFX.play(pts === 5 ? 'correct' : pts ? 'softok' : 'softbad', 3); if (pts === 5) edge(true);
       pop(pts ? '+' + pts : '0', $('b7-go'), pts === 5 ? 'var(--ok)' : pts ? 'var(--c-calibration)' : 'var(--bad)');
-      $('b7-fb').innerHTML = '<div class="explain"><b>'+(pts === 5 ? 'Your own idea!' : pts ? 'A common answer.' : 'That’s the typical answer.')+'</b> '+(why ? esc(why)+' ' : '')+'Typical: “'+q.typical[0]+'”. Common: '+q.common.slice(0,3).join(', ')+'.</div><button class="btn c full" style="margin-top:12px" id="b7-next">'+(i < 5 ? 'Next prompt' : 'See results')+'</button>';
+      $('b7-fb').innerHTML = '<div class="explain"><b>'+(pts === 5 ? 'Your own idea!' : pts ? 'A common answer.' : 'That’s the typical answer.')+'</b> '+(why ? esc(why)+' ' : '')+'Typical: “'+q.typical[0]+'”. Common: '+q.common.slice(0,3).join(', ')+'.'+(vfb ? '<br>'+vfb : '')+'</div><button class="btn c full" style="margin-top:12px" id="b7-next">'+(i < 5 ? 'Next prompt' : 'See results')+'</button>';
       anim($('b7-fb'), { opacity:[0,1], y:[8,0] });
       $('b7-next').onclick = () => { i++; if (i < 6) show(); else ctx.end({ score, pct: score/30*100, lines:['<b>'+log.filter(p => p === 5).length+' of 6</b> answers were your own.','Original ideas start where the first answer ends.','Answers are matched by meaning, so “email automation” counts the same as “email assistant”.'] }); };
       $('b7-next').focus();
@@ -1030,9 +1785,11 @@ const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', i
       if (right(v)) return accept();
       if (norm(v).length > 1) {
         busy = true; AI.thinking($('ml-go'), true);
-        const r = await AI.judge('missinglink', { cues:cur.slice(0,3), answer:v, expected:cur[3] });
+        const jp = { cues:cur.slice(0,3), answer:v, expected:cur[3] };
+        const r = await AI.judge('missinglink', jp);
         AI.thinking($('ml-go'), false); $('ml-go').disabled = false; busy = false;
-        if (r && r.valid === true) return accept('✓ <b>'+esc(v)+'</b> also works'+(r.forms && r.forms.length ? ': '+r.forms.slice(0,3).map(esc).join(', ') : '')+'. Our answer was <b>'+cur[3]+'</b>: '+cur[4]);
+        if (r && r.valid === true) return accept('✓ <b>'+esc(v)+'</b> also works'+(r.forms && r.forms.length ? ': '+r.forms.slice(0,3).map(esc).join(', ') : '')+'. Our answer was <b>'+cur[3]+'</b>: '+cur[4]+'<br>'+verdictFb('missing-link', 'missinglink', jp, r));
+        if (r && r.valid === false) $('ml-msg').innerHTML = '“'+esc(v)+'” doesn’t fit all three. '+verdictFb('missing-link', 'missinglink', jp, r);
       }
       wrongs++; shake(inp); FX.result(false); inp.select();
     };
@@ -1041,7 +1798,7 @@ const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', i
     $('ml-hb').onclick = () => { if (hints >= 2) return; hints++; const a = cur[3]; $('ml-hint').textContent = hints === 1 ? a.replace(/./g,'_ ').trim() : a[0].toUpperCase() + ' ' + a.slice(1).replace(/./g,'_ ').trim(); anim($('ml-hint'), { opacity:[0,1], scale:[.8,1] }); inp.focus(); };
     $('ml-sk').onclick = () => { streak = 0; $('ml-st').textContent = 0; $('ml-msg').innerHTML = 'It was <b>'+cur[3]+'</b>: '+cur[4]; next(); };
     next();
-    ctx.timer(120, $('ml-t'), null, () => ctx.end({ score, pct: Math.min(100, solved*14 + best*4), lines:['Solved <b>'+solved+'</b> puzzles.','Best streak: <b>'+best+'</b>.','That sudden “aha” is insight. It gets faster with practice.'] }));
+    ctx.timer(lvVal('missing-link'), $('ml-t'), null, () => ctx.end({ score, pct: Math.min(100, solved*14 + best*4), lines:['Solved <b>'+solved+'</b> puzzles.','Best streak: <b>'+best+'</b>.','That sudden “aha” is insight. It gets faster with practice.'] }));
   }
 };
 
@@ -1064,11 +1821,11 @@ const LinkGrid = { id:'link-grid', name:'Link Grid', skill:'insight', icon:'grid
   how:['16 words hide 4 groups of 4.','Tap 4 words that belong together, then Submit.','Some words look like they fit two groups. You can make 4 mistakes.'],
   run(ctx){
     const pi = Math.floor(Math.random()*LG.length), P = LG[pi];
-    let words = shuffle(P.flatMap(g => g[1])), sel = [], solved = [], lives = 4;
+    let words = shuffle(P.flatMap(g => g[1])), sel = [], solved = [], lives = lvVal('link-grid'), startLives = lives;
     const draw = () => {
       ctx.root.innerHTML = '<p class="prompt">Find the four groups.</p><div>'+solved.map(gi => '<div class="lg-solved" style="background:'+LGCOL[gi]+'"><b>'+P[gi][0]+'</b><span>'+P[gi][1].join(', ')+'</span></div>').join('')+'</div>'
         + '<div class="lg-grid">'+words.map(w => '<button class="'+(sel.includes(w) ? 'sel' : '')+'">'+w+'</button>').join('')+'</div>'
-        + '<div class="lives" style="margin-top:14px">Mistakes left '+[0,1,2,3].map(i => '<i class="'+(i < lives ? '' : 'off')+'"></i>').join('')+'</div>'
+        + '<div class="lives" style="margin-top:14px">Mistakes left '+Array.from({ length: startLives }, (_, i) => i).map(i => '<i class="'+(i < lives ? '' : 'off')+'"></i>').join('')+'</div>'
         + '<div class="row" style="margin-top:12px"><button class="btn light sm" id="lg-sh">Shuffle</button><button class="btn light sm" id="lg-cl">Deselect</button><button class="btn c sm" id="lg-sub" style="flex:1"'+(sel.length === 4 ? '' : ' disabled')+'>Submit</button></div><div id="lg-msg" class="small muted" style="text-align:center;margin-top:8px;min-height:20px"></div>';
       ctx.root.querySelectorAll('.lg-grid button').forEach(b => b.onclick = () => {
         const w = b.textContent;
@@ -1080,7 +1837,7 @@ const LinkGrid = { id:'link-grid', name:'Link Grid', skill:'insight', icon:'grid
       $('lg-cl').onclick = () => { sel = []; draw(); };
       $('lg-sub').onclick = submit;
     };
-    const finish = () => ctx.end({ score: solved.length*25 + lives*5, pct: Math.max(0, solved.length*25 - (4-lives)*5), lines:['Groups found: <b>'+solved.length+' of 4</b>. Mistakes: <b>'+(4-lives)+'</b>.'].concat(P.map((g,i) => '<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+LGCOL[i]+'"></span> <b>'+g[0]+'</b>: '+g[1].join(', '))).concat([LGNOTE[pi]]) });
+    const finish = () => ctx.end({ score: solved.length*25 + lives*5, pct: Math.max(0, solved.length*25 - (startLives-lives)*5), lines:['Groups found: <b>'+solved.length+' of 4</b>. Mistakes: <b>'+(startLives-lives)+'</b>.'].concat(P.map((g,i) => '<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+LGCOL[i]+'"></span> <b>'+g[0]+'</b>: '+g[1].join(', '))).concat([LGNOTE[pi]]) });
     const submit = () => {
       const gi = P.findIndex(g => sel.every(w => g[1].includes(w)));
       const btns = [...ctx.root.querySelectorAll('.lg-grid button.sel')];
@@ -1136,7 +1893,7 @@ Object.keys(WIKI).forEach(a => Object.keys(WIKI).forEach(b => { if (a !== b) { c
 const WikiHop = { id:'wiki-hop', name:'Wiki Hop', skill:'insight', icon:'nodes', inspired:'the Wiki Game', topics:'web, hardware, number systems, Git, AI',
   how:['You start on one page and must reach a target page.','Read the page. Tap a blue link inside the text to jump.','Plan your route: fewer clicks, higher score.'],
   run(ctx){
-    const P = pick(WH); let at = P.from, path = [P.from], clicks = 0;
+    const near = WH.filter(x => x.best === lvVal('wiki-hop')), P = pick(near.length ? near : WH); let at = P.from, path = [P.from], clicks = 0;
     const draw = () => {
       const body = WIKI[at].replace(/\[\[(.+?)\]\]/g, (m, t) => '<a href="#" class="wl" data-t="'+t+'">'+t+'</a>');
       ctx.root.innerHTML = '<div class="wh-target">🎯 Reach: '+P.to+'</div>' + hud([['wh-c','Clicks',clicks],['wh-b','Shortest route',P.best]])
@@ -1189,7 +1946,7 @@ const RecallRebuild = { id:'recall-rebuild', name:'Recall Rebuild', skill:'memor
     const P = pick(RR);
     ctx.root.innerHTML = '<div class="tbar"><i id="rr-t"></i></div><p class="prompt">Read carefully. It will disappear. <b>'+P.title+'</b></p><div class="card">'+(P.kind === 'code' ? code(P.text) : '<div class="passage">'+P.text+'</div>')+'</div><button class="btn c full" id="rr-ready" style="margin-top:14px">I’m ready</button>';
     anim(ctx.root.querySelector('.card'), { opacity:[0,1], y:[12,0] });
-    const stop = ctx.timer(40, $('rr-t'), null, () => write());
+    const stop = ctx.timer(lvVal('recall-rebuild'), $('rr-t'), null, () => write());
     $('rr-ready').onclick = () => { stop(); write(); };
     function write(){
       ctx.root.innerHTML = '<div class="tbar"><i id="rr-t2"></i></div><p class="prompt">'+(P.kind === 'code' ? 'Rewrite the code from memory.' : 'Write everything you remember. Short phrases are fine.')+'</p><textarea class="field'+(P.kind === 'code' ? ' mono' : '')+'" id="rr-in" spellcheck="false" placeholder="'+(P.kind === 'code' ? 'marks = ...' : 'What did it say?')+'"></textarea><button class="btn c full" id="rr-done" style="margin-top:12px">Check my recall</button>';
@@ -1203,13 +1960,15 @@ const RecallRebuild = { id:'recall-rebuild', name:'Recall Rebuild', skill:'memor
         const v = P.kind === 'code' ? raw.replace(/\s+/g,'') : ' ' + raw.replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ') + ' ';
         const hits = P.keys.map(k => k.some(alt => v.includes(alt)));
         const labels = P.labels || P.keys.map(k => k[0]);
+        let vfb = '';
         if (P.kind === 'text' && hits.some(x => !x) && ta.value.trim().length > 10) {
           ta.disabled = true; AI.thinking($('rr-done'), true);
-          const r = await AI.judge('recall', { passage:P.text, facts:labels, answer:ta.value.slice(0, 1500) }, 9000);
-          if (r && Array.isArray(r.hits) && r.hits.length === hits.length) r.hits.forEach((x,i) => { if (x === true) hits[i] = true; });
+          const jp = { passage:P.text, facts:labels, answer:ta.value.slice(0, 1500) };
+          const r = await AI.judge('recall', jp, 9000);
+          if (r && Array.isArray(r.hits) && r.hits.length === hits.length) { r.hits.forEach((x,i) => { if (x === true) hits[i] = true; }); vfb = verdictFb('recall-rebuild', 'recall', jp, r); }
         }
         const n = hits.filter(Boolean).length;
-        ctx.end({ score: n*10, pct: n*10, lines:['You rebuilt <b>'+n+' of 10</b> key '+(P.kind === 'code' ? 'pieces of the code' : 'facts')+'.','<div class="kw">'+labels.map((l,i) => '<span class="'+(hits[i] ? 'hit' : '')+'">'+esc(l)+'</span>').join('')+'</div>', P.kind === 'code' ? P.output + ' Reading code closely is how you catch AI’s mistakes.' : 'Pulling facts back out of memory makes them stick. Re-reading, or asking AI again, does not.'] });
+        ctx.end({ score: n*10, pct: n*10, lines:['You rebuilt <b>'+n+' of 10</b> key '+(P.kind === 'code' ? 'pieces of the code' : 'facts')+'.','<div class="kw">'+labels.map((l,i) => '<span class="'+(hits[i] ? 'hit' : '')+'">'+esc(l)+'</span>').join('')+'</div>', P.kind === 'code' ? P.output + ' Reading code closely is how you catch AI’s mistakes.' : 'Pulling facts back out of memory makes them stick. Re-reading, or asking AI again, does not.'].concat(vfb ? ['The AI checked your answer by meaning. '+vfb] : []) });
       };
       ctx.timer(90, $('rr-t2'), null, done);
       $('rr-done').onclick = done;
@@ -1275,7 +2034,7 @@ const SymbolSprint = { id:'symbol-sprint', name:'Symbol Sprint', skill:'focus', 
     nt();
     ctx.timer(45, $('ss-t'), s => $('ss-l').textContent = s, () => {
       const acc = c + w ? Math.round(c/(c+w)*100) : 0;
-      ctx.end({ score: c, pct: Math.min(100, c/35*100) * (acc/100), lines:['Matched <b>'+c+'</b> symbols.','Accuracy <b>'+acc+'%</b> ('+w+' mistake'+(w === 1 ? '' : 's')+').'] });
+      ctx.end({ score: c, pct: Math.min(100, c/lvVal('symbol-sprint')*100) * (acc/100), lines:['Matched <b>'+c+'</b> symbols.','Accuracy <b>'+acc+'%</b> ('+w+' mistake'+(w === 1 ? '' : 's')+').'] });
     });
     return () => document.removeEventListener('keydown', onKey);
   }
@@ -1622,7 +2381,7 @@ const RuleSwitch = { id:'rule-switch', name:'Rule Switch', skill:'flexibility', 
     showRule(); left++; nextCard();
     ctx.timer(60, $('rs-t'), s => $('rs-l').textContent = s, () => {
       const acc = c + w ? Math.round(c/(c+w)*100) : 0, sacc = sw ? Math.round(swRight/sw*100) : 0;
-      ctx.end({ score, pct: Math.min(100, c/40*100) * (acc/100), lines:['Correct: <b>'+c+'</b>. Accuracy <b>'+acc+'%</b>.','Right after a rule change: <b>'+swRight+' of '+sw+'</b> ('+sacc+'%).', sw && sacc < acc ? 'You slow down or slip right after a switch. That’s the “switch cost”, and practice shrinks it.' : 'You handled the switches well.','Traps to remember: "7" and "True" have quotes, so they are strings. True and False without quotes are booleans. None and lists are none of the three.'] });
+      ctx.end({ score, pct: Math.min(100, c/lvVal('rule-switch')*100) * (acc/100), lines:['Correct: <b>'+c+'</b>. Accuracy <b>'+acc+'%</b>.','Right after a rule change: <b>'+swRight+' of '+sw+'</b> ('+sacc+'%).', sw && sacc < acc ? 'You slow down or slip right after a switch. That’s the “switch cost”, and practice shrinks it.' : 'You handled the switches well.','Traps to remember: "7" and "True" have quotes, so they are strings. True and False without quotes are booleans. None and lists are none of the three.'] });
     });
     return () => document.removeEventListener('keydown', onKey);
   }
@@ -1689,7 +2448,7 @@ const RobotPath = { id:'robot-path', name:'Robot Path', skill:'planning', icon:'
       $('rp-x').onclick = () => { if (!running) { prog = []; renderProg(); } };
       $('rp-run').onclick = run;
       anim(ctx.root.querySelectorAll('.rp-grid .cell'), { opacity:[0,1], scale:[.8,1] }, { delay: stag(0.008) });
-      anim($('rp-body'), { scale:[0,1.15,1], rotate:[-90,0] }, { type:'tween', duration:0.55, delay:0.25 });
+      anim($('rp-body'), { scale:[0.6,1.1,1], opacity:[0,1,1], rotate:[-45,0] }, { type:'tween', duration:0.55, delay:0.25 });
     };
     const renderProg = (hi) => { $('rp-p').innerHTML = prog.length ? prog.map((p,i) => '<span class="'+(i === hi ? 'hi' : i < hi ? 'done' : '')+'">'+(i+1)+'. '+NAME[p]+'</span>').join('') : '<span class="muted">Your program is empty. Add commands below.</span>'; };
     const geo = () => { const cs = cells(), a = cs[0], b2 = cs[6]; return { x0:a.offsetLeft, y0:a.offsetTop, w:a.offsetWidth, h:a.offsetHeight, sx:b2.offsetLeft - a.offsetLeft, sy:b2.offsetTop - a.offsetTop }; };
@@ -1764,9 +2523,691 @@ const RobotPath = { id:'robot-path', name:'Robot Path', skill:'planning', icon:'
   }
 };
 
+
+/* ================= account + sync =================
+   The page keeps working from local storage; the server is the saved copy.
+   Totals only go up on the server, so syncing from any device is safe. */
+const AUTH_KEY = 'bg_auth';
+let ME = null; try { ME = JSON.parse(localStorage.getItem(AUTH_KEY)) || null; } catch(e){}
+async function api(path, body, ms){
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms || 8000);
+  try {
+    const r = await fetch(path, body ? { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body), signal: ctl.signal } : { signal: ctl.signal });
+    let j = null; try { j = await r.json(); } catch(e){}
+    return { status: r.status, j: j || {} };
+  } catch(e){ return { status: 0, j: {} }; } finally { clearTimeout(t); }
+}
+const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+function queuePlay(game, score, pct, lift){ (S.pq = S.pq || []).push({ cid: rid(), game, score, pct, lift, at: Date.now() }); }
+function syncBody(){
+  const games = {};
+  for (const [id, v] of Object.entries(S.g)) games[id] = { active: Math.floor(v.active || 0), best: Math.floor(v.best || 0), bestPct: Math.floor(v.bestPct || 0), plays: v.plays || 0, vol: Math.floor(v.vol || 0) };
+  const hist = {}, cut = iso(new Date(Date.now() - 14 * 86400000));
+  for (const [d, a] of Object.entries(S.hist || {})) if (d >= cut) hist[d] = Math.min(86400, Math.floor(a));
+  return { action:'sync', token: ME.token, games, plays: (S.pq || []).slice(0, 50), hist, badges: S.badges || [] };
+}
+let syncing = false;
+async function syncNow(){
+  if (!ME || syncing) return;
+  syncing = true;
+  const body = syncBody(), sent = new Set(body.plays.map(p => p.cid));
+  syncDirty = false;
+  const r = await api('/api/student', body);
+  syncing = false;
+  if (r.status === 200 && r.j.ok) {
+    lastSyncOk = Date.now();
+    S.pq = (S.pq || []).filter(p => !sent.has(p.cid));
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
+  } else {
+    syncDirty = true;
+    if (r.status === 401) signOut(true);
+  }
+}
+setInterval(() => { if (ME && (syncDirty || (S.pq && S.pq.length))) syncNow(); }, 120000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'hidden' || !ME || !(syncDirty || (S.pq && S.pq.length))) return;
+  try { if (navigator.sendBeacon('/api/student', new Blob([JSON.stringify(syncBody())], { type:'application/json' }))) syncDirty = false; } catch(e){}
+});
+/* pull saved progress and keep the larger of each number */
+async function pullMe(){
+  if (!ME) return;
+  const r = await api('/api/student', { action:'me', token: ME.token });
+  if (r.status === 401) return signOut(true);
+  if (r.status !== 200 || !r.j.ok) return;
+  lastSyncOk = Date.now();   // the server just marked me as seen, so "training now" already counts me
+  for (const [id, v] of Object.entries(r.j.progress || {})) {
+    const st = gs(id);
+    st.active = Math.max(st.active, v.active); st.best = Math.max(st.best, v.best); st.bestPct = Math.max(st.bestPct, v.bestPct);
+    st.plays = Math.max(st.plays, v.plays); st.vol = Math.max(st.vol || 0, v.vol);
+  }
+  for (const [d, a] of Object.entries(r.j.hist || {})) S.hist[d] = Math.max(S.hist[d] || 0, a);
+  S.badges = [...new Set([...(S.badges || []), ...(r.j.badges || [])])];
+  save();
+  if (view === 'home') renderHome(); else if (view === 'muscles') renderMuscles();
+  syncNow();
+}
+function signOut(expired){
+  ME = null; BOARD = null; CIRCUIT = false; SESS = newSess(); pendingRate = null;
+  try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(KEY); } catch(e){}
+  S = { g:{}, days:[], hist:{}, badges:[], sess: SESS };
+  location.hash = '';
+  route();
+  if (expired) { $('j-err').textContent = 'Please log in again to keep saving your progress.'; $('j-err').hidden = false; }
+}
+$('join-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('j-err'), go = $('j-go');
+  const name = $('j-name').value.trim(), roll = $('j-roll').value.trim();
+  err.hidden = true;
+  if (!name || !roll) { err.textContent = 'Please enter your NIAT ID and first name.'; err.hidden = false; return; }
+  go.disabled = true; go.textContent = 'Logging in…';
+  const r = await api('/api/student', { action:'join', name, roll });
+  go.disabled = false; go.textContent = 'Log in';
+  if (r.status !== 200 || !r.j.ok) {
+    err.textContent = r.j.error || 'Could not reach Brain Gym. Check your internet and try again.';
+    err.hidden = false; return;
+  }
+  ME = Object.assign({ token: r.j.token }, r.j.student);
+  try { localStorage.setItem(AUTH_KEY, JSON.stringify(ME)); } catch(e){}
+  SFX.unlock(); SFX.play('levelup');
+  location.hash = ''; route();
+  toast('Welcome, ' + ME.name.split(' ')[0] + '! 💪');
+  pullMe();
+});
+
+/* ---------- leaderboard: shared list for the batch, refreshed at most once a minute ---------- */
+let BOARD = null, boardAt = 0, boardBusy = false;
+async function loadBoard(){
+  if (!ME || boardBusy) return;
+  boardBusy = true;
+  const r = await api('/api/leaderboard?pilot=' + encodeURIComponent(ME.pilot));
+  boardBusy = false;
+  if (r.status === 200 && r.j.ok) { BOARD = r.j.rows; LIVE = r.j.live || 0; boardAt = Date.now(); if (view === 'leaderboard') renderBoard(); if (view === 'home') renderRival(); }
+  else if (!BOARD && view === 'leaderboard') $('lb-list').innerHTML = '<div class="lb-empty"><div class="big">📡</div><h3>Can’t load the leaderboard</h3><p class="muted">Check your internet and open this tab again.</p></div>';
+}
+const coin = p => '<span class="coin"><i>C</i>' + p.toLocaleString('en-IN') + ' pt</span>';
+const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+function renderBoard(){
+  if (Date.now() - boardAt > 60000) loadBoard();
+  const head = document.querySelector('.lbhead');
+  if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+img3d('trophy', 112)+'<p class="muted">Loading your batch…</p></div>'; return; }
+  /* my own row uses my live points, so it moves the moment I finish a round */
+  const all = BOARD.map(u => u.id === ME.id ? { n: u.n, p: Math.max(u.p, points()), me: true } : { n: u.n, p: u.p });
+  if (!all.some(u => u.me)) all.push({ n: ME.name.split(' ')[0], p: points(), me: true });
+  all.sort((a,b) => b.p - a.p);
+  const myRank = all.findIndex(u => u.me) + 1;
+  const face = u => '<span style="font-size:.62em;font-weight:900">'+esc(initials(u.n))+'</span>';
+  const row = (u, rk) => '<div class="lrow'+(u.me ? ' me' : '')+'"><span class="rk">'+rk+'</span><span class="fc">'+face(u)+'</span><span class="nm">'+esc(u.n)+(u.me ? ' (you)' : '')+'</span>'+coin(u.p)+'</div>';
+  const meLine = '<div class="lbme">You are #'+myRank+' of '+all.length+(ME.pilot && ME.pilot !== 'ALL' ? ' in '+esc(ME.pilot) : '')+'</div>';
+  if (all.length < 3) {
+    head.classList.add('empty'); $('lb-podium').innerHTML = '';
+    $('lb-list').innerHTML = meLine + all.map((u,i) => row(u, i+1)).join('') + '<p class="small muted" style="text-align:center">Classmates appear here once they log in.</p>';
+    return;
+  }
+  head.classList.remove('empty');
+  const top = [all[1], all[0], all[2]], cls = ['','first',''], blk = ['b2','b1','b3'], num = [2,1,3];
+  $('lb-podium').innerHTML = top.map((u,i) => '<div class="pcol '+cls[i]+'"><div class="who">'+esc(u.n)+'</div><div class="face">'+face(u)+'</div>'+coin(u.p)+'<div class="block '+blk[i]+'">'+num[i]+'</div></div>').join('');
+  $('lb-list').innerHTML = meLine + all.slice(3).map((u,i) => row(u, i+4)).join('');
+  anim(document.querySelectorAll('.block'), { scaleY:[0.2,1], opacity:[0,1] }, { type:'spring', bounce:0.25, duration:0.7, delay: stag(0.08) });
+  anim(document.querySelectorAll('.pcol .face'), { y:[-20,0], opacity:[0,1] }, { type:'spring', bounce:0.35, duration:0.7, delay: stag(0.08) });
+  anim(document.querySelectorAll('.lrow'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.02) });
+}
+
+/* ---------- feedback: after every game, on AI verdicts, and from the home screen ---------- */
+const FACES = ['😫','🙁','😐','🙂','🤩'], FACE_TXT = ['Hated it','Didn’t like it','It was okay','Liked it','Loved it'];
+async function sendFeedback(body){
+  if (!ME) return false;
+  const r = await api('/api/feedback', Object.assign({ token: ME.token }, body));
+  return r.status === 200 && r.j.ok;
+}
+function feedbackForm(box, o){
+  let rating = null, diff = null;
+  box.innerHTML = '<h3>'+esc(o.title)+'</h3>'
+    + '<div class="faces">'+FACES.map((f,i) => '<button type="button" class="press" data-r="'+(i+1)+'" aria-pressed="false" aria-label="'+FACE_TXT[i]+'">'+f+'</button>').join('')+'</div>'
+    + (o.diff ? '<div class="diff"><button type="button" data-d="easy" aria-pressed="false">Too easy</button><button type="button" data-d="right" aria-pressed="false">Just right</button><button type="button" data-d="hard" aria-pressed="false">Too hard</button></div>' : '')
+    + '<textarea class="field" maxlength="500" placeholder="'+(o.placeholder || 'Anything to tell us? (optional)')+'"></textarea>'
+    + '<button type="button" class="btn full fbsend" style="--c:var(--ink)" disabled>Send feedback</button>';
+  const ta = box.querySelector('textarea'), send = box.querySelector('.fbsend');
+  const ready = () => send.disabled = !(rating || diff || ta.value.trim());
+  box.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rating = +b.dataset.r; box.querySelectorAll('[data-r]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
+  box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { diff = b.dataset.d; box.querySelectorAll('[data-d]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
+  ta.oninput = ready;
+  send.onclick = async () => {
+    send.disabled = true; send.textContent = 'Sending…';
+    const ok = await sendFeedback({ kind: o.kind, game: o.game || null, rating, difficulty: diff, comment: ta.value.trim() || null });
+    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Brain Gym. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
+    else { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; }
+  };
+}
+function renderGeneralFeedback(){
+  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Brain Gym so far?', placeholder:'What do you like? What should we change or add?' });
+}
+
+/* pop-up sheet shared by the mood check-in and the problem report */
+let modalBack = null, modalDone = null, modalHideT = null;
+const modalOpen = () => $('modal').classList.contains('open');
+function openModal(html){
+  if (modalDone) { const d = modalDone; modalDone = null; d(); }
+  clearTimeout(modalHideT);
+  const m = $('modal');
+  modalBack = document.activeElement;
+  $('mbox').innerHTML = html; $('mbox').scrollTop = 0;
+  if (m.hidden) { m.hidden = false; void m.offsetWidth; }   // start from the closed position so the entrance runs
+  m.classList.remove('closing'); m.classList.add('open');
+  /* focus the sheet, not its first button: a focus ring on a rating option looks like a choice */
+  $('mbox').focus({ preventScroll: true });
+  return new Promise(r => { modalDone = r; });
+}
+function closeModal(){
+  const m = $('modal');
+  m.classList.remove('open'); m.classList.add('closing');
+  clearTimeout(modalHideT);
+  modalHideT = setTimeout(() => { m.hidden = true; m.classList.remove('closing'); $('mbox').innerHTML = ''; }, reduced() ? 0 : 210);
+  if (modalBack && modalBack.focus) modalBack.focus({ preventScroll: true });
+  if (modalDone) { const d = modalDone; modalDone = null; d(); }
+}
+$('modal').addEventListener('click', e => { if (e.target === $('modal') || e.target.closest('.mclose')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalOpen()) closeModal(); });
+
+/* A: one tap after each round, then an optional emoji rating */
+function feelForm(box, g){
+  const FEEL = [['easy','🪶','Too light'],['right','🔥','Good burn'],['hard','🏋️','Too heavy']];
+  box.innerHTML = '<h3>How did that set feel?</h3><div class="feel">'
+    + FEEL.map(f => '<button type="button" data-d="'+f[0]+'" aria-pressed="false"><span>'+f[1]+'</span>'+f[2]+'</button>').join('') + '</div>';
+  box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
+    box.querySelectorAll('[data-d]').forEach(x => { x.setAttribute('aria-pressed', x === b); x.disabled = true; });
+    SFX.play('select');
+    sendFeedback({ kind:'game', game:g.id, difficulty:b.dataset.d });
+    setTimeout(() => {
+      box.innerHTML = '<h3>Got it! Rate '+esc(g.name)+' too? <span class="small muted">(optional)</span></h3>'
+        + '<div class="faces">'+FACES.map((f,i) => '<button type="button" class="press" data-r="'+(i+1)+'" aria-label="'+FACE_TXT[i]+'">'+f+'</button>').join('')+'</div>'
+        + '<button type="button" class="linkbtn" data-report>Something off in this game? Tell us</button>';
+      anim(box, { opacity:[0,1], y:[6,0] });
+      box.querySelectorAll('[data-r]').forEach(r => r.onclick = () => {
+        sendFeedback({ kind:'game', game:g.id, rating:+r.dataset.r });
+        SFX.play('select');
+        box.innerHTML = '<div class="fbdone">Thanks! '+FACES[r.dataset.r-1]+' noted.</div>';
+      });
+    }, 350);
+  });
+}
+
+/* B: "How's your brain today?" once a day, on the home screen */
+function moodCheck(){
+  const today = dayKey(new Date());
+  if (!ME || S.moodDay === today || modalOpen()) return;
+  S.moodDay = today; save();
+  const M3 = [['tired','😴','Tired'],['okay','🙂','Okay'],['sharp','⚡','Sharp']];
+  const MSG = { tired:'Light session today. Even 10 minutes counts 💪', okay:'Let’s get some reps in! 🔥', sharp:'Beast mode! Go for a new best ⚡' };
+  openModal('<h3 id="mtitle">How’s your brain today?</h3><p class="small muted" style="margin:0">Quick check-in before you train.</p>'
+    + '<div class="moods">'+M3.map(m => '<button type="button" data-m="'+m[0]+'"><span>'+m[1]+'</span>'+m[2]+'</button>').join('')+'</div>'
+    + '<button type="button" class="mclose">Skip</button>');
+  $('mbox').querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+    SFX.play('select');
+    sendFeedback({ kind:'mood', meta:{ mood:b.dataset.m } });
+    closeModal(); toast(MSG[b.dataset.m]);
+  });
+}
+
+/* E: "Something's off?" with a plain-text description; the screen and device are attached */
+function openReport(){
+  const CATS = [['wrong','Marked my answer wrong'],['broke','Something broke'],['confusing','Confusing'],['slow','Slow or stuck'],['other','Other']];
+  const gid = curGame, where = gid ? GAMES.find(g => g.id === gid).name : view === 'home' ? 'the home screen' : 'this screen';
+  const screen = (($('view-' + view) || document.body).textContent || '').replace(/\s+/g, ' ').trim().slice(0, 600);
+  let cat = null;
+  openModal('<h3 id="mtitle">Something off? 🐞</h3><p class="small muted" style="margin:0">About '+esc(where)+'. We’ll attach what’s on your screen so we can fix it.</p>'
+    + '<div class="cats">'+CATS.map(c => '<button type="button" data-c="'+c[0]+'" aria-pressed="false">'+c[1]+'</button>').join('')+'</div>'
+    + '<textarea class="field" id="rp-text" maxlength="1000" placeholder="Tell us what happened, in your own words"></textarea>'
+    + '<p class="jerr" id="rp-err" hidden></p>'
+    + '<button type="button" class="btn full" id="rp-send" style="--c:var(--ink)" disabled>Send report</button>'
+    + '<button type="button" class="mclose">Cancel</button>');
+  const ta = $('rp-text'), send = $('rp-send');
+  ta.oninput = () => send.disabled = ta.value.trim().length < 3;
+  $('mbox').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { cat = b.dataset.c; $('mbox').querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); ta.focus(); });
+  ta.focus();
+  send.onclick = async () => {
+    send.disabled = true; send.textContent = 'Sending…';
+    const ok = await sendFeedback({ kind:'bug', game: gid || null, comment: ta.value.trim(),
+      meta:{ category: cat, view, screen, ua: navigator.userAgent.slice(0, 200), vp: innerWidth + 'x' + innerHeight, at: new Date().toISOString() } });
+    if (ok) { $('mbox').innerHTML = '<div class="fbdone" style="padding:14px 0">Thanks! We’ll look into it. 🛠️</div>'; setTimeout(closeModal, 1600); }
+    else { $('rp-err').textContent = 'Couldn’t send. Check your internet and try again.'; $('rp-err').hidden = false; send.disabled = false; send.textContent = 'Send report'; }
+  };
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-report]')) openReport(); });
+
+/* ================= end-of-session "11-star" feedback =================
+   Inspired by Airbnb's 11-star exercise: 5 means "it worked", 6-11 describe what exceptional looks like,
+   and the follow-up asks what would push it higher.
+   A session starts with the first round and ends when the student taps "End session", picks "Done for today"
+   at the daily goal, or taps "Leave anyway". Ending always asks for the rating (stars required, text optional).
+   If a student just closes the tab, the open session is rated the next time they come back (with a Skip). */
+const SESS_IDLE = 30 * 60 * 1000;
+const newSess = () => ({ rounds:0, secs:0, games:[], kg:0, start:Date.now(), last:Date.now() });
+let SESS = newSess(), pendingRate = null;
+{ const old = S.sess;
+  if (old && old.rounds && Date.now() - (old.last || 0) >= SESS_IDLE) pendingRate = old;   // left without ending: ask on return
+  else if (old && old.rounds) SESS = old;                                                  // came back soon: same session
+  S.sess = SESS; }
+const STAR_TXT = ['Waste of time','Didn’t enjoy it','Meh','Okay, but forgettable','It worked. Nothing special',
+  'Better than I expected','I’ll be back tomorrow','I’d tell my friends about it','I’d pick this over scrolling reels',
+  'It made me sharper in class','It changed how I learn'];
+const STAR_ASK = {
+  low:{ q:'What got in the way?', ph:'Tell us what to fix (optional)',
+        chips:['Boring or repetitive','Too hard','Too easy','Rules were confusing','Bugs or slow','Not useful for my studies'] },
+  mid:{ q:'What one change would make it a 7, so you can’t wait for tomorrow?', ph:'Your idea (optional)',
+        chips:['More new games','Harder challenges','Compete with friends','Better rewards','Shorter sets','Connect it to my classes'] },
+  high:{ q:'What would make Brain Gym an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
+};
+/* 11 at the top: climbing is better. Grouped so the baseline (5) and "beyond 5" are obvious. */
+function ladderHtml(){
+  const rung = n => '<button type="button" class="rung" role="radio" aria-checked="false" data-s="'+n+'"><span class="n">'+n+'<i>★</i></span><span class="t">'+STAR_TXT[n-1]+'</span></button>';
+  return '<div class="ladder" role="radiogroup" aria-label="Session rating, 1 to 11 stars"><span class="pick" aria-hidden="true"></span>'
+    + '<div class="zone hi"><small>Beyond 5 ✨ What great looks like</small>'+[11,10,9,8,7,6].map(rung).join('')+'</div>'
+    + '<div class="zone mid"><small>The baseline</small>'+rung(5)+'</div>'
+    + '<div class="zone lo"><small>Not there yet</small>'+[4,3,2,1].map(rung).join('')+'</div></div>';
+}
+function pickRung(box, b){
+  const n = +b.dataset.s, lad = box.querySelector('.ladder'), pick = lad.querySelector('.pick');
+  lad.querySelectorAll('.rung').forEach(r => {
+    const v = +r.dataset.s;
+    r.classList.toggle('on', v === n); r.classList.toggle('lit', v <= n); r.setAttribute('aria-checked', v === n);
+  });
+  const L = lad.getBoundingClientRect(), R = b.getBoundingClientRect();
+  if (!pick.classList.contains('shown')) pick.style.transition = 'none';   // first pick: appear in place, then slide on later picks
+  pick.style.height = R.height + 'px';
+  pick.style.transform = 'translateY(' + (R.top - L.top) + 'px)';
+  pick.classList.toggle('hi', n >= 6);
+  void pick.offsetWidth; pick.style.transition = ''; pick.classList.add('shown');
+}
+function endSession(phase){
+  const s = phase === 'last' ? pendingRate : SESS;
+  if (!ME || !s) return Promise.resolve();
+  if (!s.rounds) { toast('Play a round first. Then end your session and rate it.'); return Promise.resolve(); }
+  let stars = 0, why = [], fav = null, sent = false;
+  const sum = '<div class="ssum"><span>🎯 <b>'+s.rounds+'</b> set'+(s.rounds === 1 ? '' : 's')+'</span><span>⏱ <b>'+fmt(s.secs)+'</b></span><span>🏋️ <b>+'+s.kg+'</b> kg</span></div>';
+  const head = phase === 'last'
+    ? '<h3 id="mtitle">Rate your last session</h3><p class="small muted" style="margin:0">You left before ending it on '+new Date(s.last).toLocaleDateString('en-IN', { weekday:'long' })+'.</p>'
+    : '<div class="shead">'+img3d('star', 64)+'<h3 id="mtitle">Session complete</h3></div>';
+  const p = openModal(head + sum
+    + '<div><p style="margin:0;font-weight:900;font-size:17px">How high does this session go?</p>'
+    + '<p class="small muted" style="margin:2px 0 0">Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you.</p></div>'
+    + ladderHtml()
+    + '<div class="smore" id="s-more"></div>'
+    + '<button type="button" class="mclose">'+(phase === 'last' ? 'Skip' : 'Back to training')+'</button>');
+  const box = $('mbox');
+  const follow = () => {
+    const band = stars >= 7 ? 'high' : stars >= 5 ? 'mid' : 'low', a = STAR_ASK[band], more = $('s-more');
+    if (more.dataset.band === band) return;
+    more.dataset.band = band; why = []; fav = null;
+    const games = s.games.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
+    more.innerHTML = '<h4>'+a.q+'</h4>'
+      + (a.chips.length ? '<div class="chips2" data-k="why">'+a.chips.map(c => '<button type="button" aria-pressed="false">'+c+'</button>').join('')+'</div>' : '')
+      + '<textarea class="field" id="s-text" maxlength="500" placeholder="'+a.ph+'"></textarea>'
+      + (band === 'high' && games.length ? '<h4>Favourite workout this session</h4><div class="chips2" data-k="fav">'+games.map(g => '<button type="button" aria-pressed="false" data-g="'+g.id+'">'+g.name+'</button>').join('')+'</div>' : '')
+      + '<button type="button" class="btn full" id="s-send" style="background:var(--gym);color:#fff">'+(phase === 'last' ? 'Send' : 'Send and end session')+'</button>';
+    more.querySelectorAll('[data-k="why"] button').forEach(b => b.onclick = () => {
+      const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on);
+      why = on ? why.concat(b.textContent) : why.filter(x => x !== b.textContent);
+    });
+    more.querySelectorAll('[data-k="fav"] button').forEach(b => b.onclick = () => {
+      fav = fav === b.dataset.g ? null : b.dataset.g;
+      more.querySelectorAll('[data-k="fav"] button').forEach(x => x.setAttribute('aria-pressed', x.dataset.g === fav));
+    });
+    $('s-send').onclick = async () => {
+      const send = $('s-send'); send.disabled = true; send.classList.add('busy'); send.textContent = 'Sending…';
+      const ok = await sendFeedback({ kind:'session', rating: stars, comment: $('s-text').value.trim() || null,
+        meta:{ phase, why, fav, rounds: s.rounds, secs: s.secs, kg: s.kg, games: s.games.slice(0, 20) } });
+      if (!ok) { send.disabled = false; send.classList.remove('busy'); send.textContent = 'Couldn’t send. Try again'; return; }
+      sent = true;
+      box.innerHTML = '<div class="reward"><div class="big">'+(stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️')+'</div><h3>Thank you!</h3>'
+        + '<p class="muted">Every answer is read by the Brain Gym team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
+      setTimeout(closeModal, 1700);
+    };
+    more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
+  };
+  box.querySelectorAll('.rung').forEach(b => b.onclick = () => {
+    stars = +b.dataset.s;
+    pickRung(box, b);
+    SFX.play(stars >= 8 ? 'correct' : 'select');
+    if (stars >= 10 && !reduced()) confetti();
+    const first = !$('s-more').dataset.band;
+    follow();
+    if (first && box.scrollTo) setTimeout(() => box.scrollTo({ top: $('s-more').offsetTop - 16, behavior: reduced() ? 'auto' : 'smooth' }), 120);
+  });
+  return p.then(() => {
+    if (phase === 'last') { pendingRate = null; return; }   // rated or skipped: never ask about it again
+    if (!sent) return;                                       // "Back to training": the session goes on
+    SESS = newSess(); S.sess = SESS; CIRCUIT = false; save();
+    if (view === 'home') renderHome(); else location.hash = '';
+    toast(todaySecs() >= DAY_GOAL ? 'Session saved. See you tomorrow! 👋' : 'Session saved. Come back later to finish today’s ' + GOAL_MIN + ' minutes 💪');
+  });
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-endsess]')) endSession('end'); });
+
+/* ================= daily workout (DAY_GOAL minutes) =================
+   One button starts a guided circuit of the current level's games. After each round the next set
+   starts by itself (any tap pauses it). Streaks, quests, chests and a rival give reasons to finish
+   today and come back tomorrow. Leaving is always one tap away. */
+function milestone(t){
+  const left = Math.round((DAY_GOAL - t) / 60), nx = nextUnlock();
+  if (t === DAY_GOAL) {
+    /* today's goal has just counted, so the newest unlocked game is the one this day earned */
+    const got = goalDays() <= UNLOCK_ORDER.length - START_GAMES ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount() - 1]) : null;
+    return '🎯 ' + GOAL_MIN + ' minutes done!' + (got ? ' 🔓 ' + got.name + ' unlocked!' : '') + ' Finish this round to celebrate';
+  }
+  if (t === Math.round(DAY_GOAL / 2)) return nx ? '🔓 Halfway! ' + left + ' more minutes to unlock ' + nx.name : '🔥 Halfway! ' + left + ' minutes to go';
+  if (t < DAY_GOAL && t % 300 === 0) return '💪 ' + (t / 60) + ' minutes! ' + left + ' to go. 🎁 Chest after this round';
+  if (t > DAY_GOAL && t % 300 === 0 && t <= 1200) return '🎁 Bonus chest after this round';
+  return '';
+}
+let CIRCUIT = false, AUTOSTART = null, nudged = false, LIVE = 0, lastSyncOk = 0;
+const bgWait = ms => new Promise(r => setTimeout(r, ms));
+const img3d = (name, size, cls) => '<img class="'+(cls || 'i3d')+'" src="assets/3d/'+name+'.webp" width="'+size+'" height="'+size+'" alt="" decoding="async">';
+const gameName = id => GAMES.find(g => g.id === id).name;
+const todayRoundsTotal = () => Object.values(todayState().rounds).reduce((a,b) => a + b, 0);
+function addKg(g, kg){
+  gs(g.id).vol += kg;
+  const today = dayKey(new Date());
+  if (!S.kday || S.kday.d !== today) S.kday = { d:today, kg:{} };
+  S.kday.kg[g.skill] = (S.kday.kg[g.skill] || 0) + kg;
+}
+
+/* streak: days with 20+ minutes in a row. One missed day is forgiven once a week (a rest day). */
+function streakInfo(){
+  const done = d => (S.hist[iso(d)] || 0) >= DAY_GOAL;
+  const d = new Date(); d.setHours(12, 0, 0, 0);
+  const todayDone = done(d);
+  if (!todayDone) d.setDate(d.getDate() - 1);
+  let count = 0, lastRest = -99;
+  const rest = new Set();
+  for (let i = 0; i < 400; i++) {
+    const prev = new Date(d); prev.setDate(prev.getDate() - 1);
+    if (done(d)) count++;
+    else if (i - lastRest >= 7 && done(prev)) { rest.add(iso(d)); lastRest = i; }
+    else break;
+    d.setDate(d.getDate() - 1);
+  }
+  return { count, rest, todayDone };
+}
+function weekStrip(sk){
+  const L = ['S','M','T','W','T','F','S'], out = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
+    const k = iso(d), done = (S.hist[k] || 0) >= DAY_GOAL;
+    const cls = done ? 'done' : sk.rest.has(k) ? 'rest' : i === 0 ? 'now' : '';
+    out.push('<div><i class="'+cls+'" title="'+k+'">'+(done ? '🔥' : sk.rest.has(k) ? '❄️' : '')+'</i>'+(i === 0 ? 'Today' : L[d.getDay()])+'</div>');
+  }
+  return out.join('');
+}
+
+/* quests: 3 per day, same for the whole day, picked from the games the student can play */
+function seeded(str){
+  let h = 2166136261;
+  for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+}
+function quests(){
+  const td = todayState();
+  if (td.q) return td.q;
+  const rnd = seeded(td.d + ':' + (ME ? ME.id : 0));
+  const lv = todayPlan();
+  const a = lv[Math.floor(rnd() * lv.length)], others = lv.filter(x => x !== a);
+  const b = others.length ? others[Math.floor(rnd() * others.length)] : a;
+  const p = Math.max(40, Math.min(80, Math.round((gs(b).bestPct || 30) / 10) * 10 + 10));
+  td.q = [{ id:'rounds', g:a, n:2, kg:30 }, { id:'score', g:b, p, kg:40 },
+          rnd() < .5 ? { id:'variety', n:Math.min(3, lv.length), kg:40 } : { id:'minutes', n:Math.round(DAY_GOAL / 120), kg:30 }];
+  save();
+  return td.q;
+}
+function questText(q){
+  return q.id === 'rounds' ? 'Play 2 rounds of ' + gameName(q.g)
+    : q.id === 'score' ? 'Score ' + q.p + '%+ in ' + gameName(q.g)
+    : q.id === 'variety' ? 'Play ' + q.n + ' different workouts'
+    : 'Train for ' + q.n + ' minutes';
+}
+function questProg(q){
+  const td = todayState();
+  if (q.id === 'rounds') return [Math.min(td.rounds[q.g] || 0, q.n), q.n];
+  if (q.id === 'score') return [(td.best[q.g] || 0) >= q.p ? 1 : 0, 1];
+  if (q.id === 'variety') return [Math.min(Object.keys(td.rounds).length, q.n), q.n];
+  return [Math.min(Math.floor(todaySecs() / 60), q.n), q.n];
+}
+function checkQuests(g){
+  const td = todayState(), won = [];
+  for (const q of quests()) {
+    if (td.qdone.includes(q.id)) continue;
+    const [a, b] = questProg(q);
+    if (a >= b) { td.qdone.push(q.id); addKg(g, q.kg); won.push(q); }
+  }
+  if (won.length) setTimeout(() => SFX.play('levelup'), 700);
+  return won;
+}
+
+/* rival and live presence, from the batch leaderboard */
+function boardSorted(){
+  if (!BOARD || !ME) return null;
+  const all = BOARD.map(u => u.id === ME.id ? { n:u.n, p:Math.max(u.p, points()), me:true } : { n:u.n, p:u.p });
+  if (!all.some(u => u.me)) all.push({ n: ME.name.split(' ')[0], p: points(), me: true });
+  return all.sort((a,b) => b.p - a.p);
+}
+function passedRivals(before, after){
+  const all = boardSorted();
+  return all ? all.filter(u => !u.me && u.p >= before && u.p < after).map(u => u.n) : [];
+}
+
+/* the guided circuit */
+function nextGame(prevId){
+  const td = todayState();
+  const todo = todayPlan().filter(id => !td.rounds[id] && id !== prevId && !isLocked(id));
+  if (todo.length) return GAMES.find(g => g.id === todo[0]);
+  const open = unlockedGames().map(g => g.id);
+  let pool = open.filter(id => id !== prevId);
+  if (!pool.length) pool = open;
+  pool.sort((a,b) => ((td.rounds[a] || 0) - (td.rounds[b] || 0)) || (gs(a).active - gs(b).active));
+  return GAMES.find(g => g.id === pool[0]);
+}
+function startCircuit(){
+  CIRCUIT = true; nudged = false;
+  const g = nextGame(null);
+  AUTOSTART = g.id;
+  if (location.hash === '#g-' + g.id) route(); else location.hash = 'g-' + g.id;
+}
+function goNext(nx){
+  CIRCUIT = true;
+  if (curGame === nx.id) countdown(nx);
+  else { AUTOSTART = nx.id; location.hash = 'g-' + nx.id; }
+}
+/* the next game never starts by itself: students read their results, then tap */
+function nextCard(g, el){
+  const box = el.querySelector('#r-next'); if (!box) return;
+  const nx = nextGame(g.id);
+  box.innerHTML = '<div class="autonext"><div><b>Up next: '+esc(nx.name)+'</b><small>'
+    + (todaySecs() >= DAY_GOAL ? 'Bonus training. Every set adds kg.' : Math.ceil((DAY_GOAL - todaySecs()) / 60) + ' min left in today’s workout')
+    + '</small></div><button type="button" class="go">▶ Play next game</button></div>';
+  box.querySelector('.go').onclick = () => goNext(nx);
+}
+async function afterRound(g, el, goalJustDone){
+  const here = () => view === 'game' && curGame === g.id && el.isConnected;
+  await bgWait(1500);
+  if (!here()) return;
+  if (goalJustDone) {
+    const choice = await goalModal(); if (!here()) return;
+    if (choice === 'done') { await endSession('goal'); if (!here()) return; }
+  }
+  while (chestsLeft() > 0 && here()) await openChest(g);
+  if (!here()) return;
+  nextCard(g, el);
+}
+function leaveNudge(){
+  if (view !== 'game' || !CIRCUIT || nudged || !ME || todaySecs() >= DAY_GOAL) return false;
+  nudged = true;
+  const left = Math.ceil((DAY_GOAL - todaySecs()) / 60), sk = streakInfo();
+  openModal('<h3 id="mtitle">Only '+left+' min left today</h3>'
+    + '<p style="margin:0">'+(sk.count ? 'Finish today’s '+GOAL_MIN+' minutes to keep your 🔥 <b>'+sk.count+'-day streak</b>.' : 'Finish today’s '+GOAL_MIN+' minutes to start a 🔥 streak.')+' You also earn a 🎁 chest every 5 minutes.</p>'
+    + '<button type="button" class="btn full" id="nd-stay" style="background:var(--gym);color:#fff">Keep training</button>'
+    + '<button type="button" class="mclose" id="nd-go">Leave anyway</button>');
+  $('nd-stay').onclick = () => {
+    closeModal();
+    const res = document.querySelector('#stage .res');
+    if (res && curGame) nextCard(GAMES.find(x => x.id === curGame), res);
+  };
+  /* leaving is ending the session: ask for the rating (closing the sheet keeps them in the game) */
+  $('nd-go').onclick = () => { CIRCUIT = false; setTimeout(() => endSession('leave'), 60); };
+  return true;
+}
+function goalModal(){
+  const sk = streakInfo(), gotNew = unlockedCount() > START_GAMES && goalDays() <= UNLOCK_ORDER.length - START_GAMES
+    ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount() - 1]) : null, nx = nextUnlock();
+  if (!reduced()) confetti();
+  SFX.play('fanfare');
+  const p = openModal('<div class="goalwin">'+img3d('trophy', 150, 'pop3d')+'<div class="big">'+fmt(DAY_GOAL)+' ✓</div><h3 id="mtitle">Today’s workout done!</h3>'
+    + '<p class="streakline" style="margin:0"><span class="fl">'+img3d('flame', 34)+'</span><b>'+sk.count+'-day streak</b></p>'
+    + '<p class="muted" style="margin:0">Come back tomorrow for new quests and to grow your streak. '
+    + (nx ? 'Tomorrow’s unlock: <b>'+nx.name+'</b>.' : 'Every workout is unlocked. Go for new bests!')+'</p>'
+    + (gotNew ? '<p class="streakline" style="margin:0"><span class="fl">🔓</span><span>New workout unlocked: <b>'+gotNew.name+'</b></span></p>' : '')+'</div>'
+    + '<button type="button" class="btn full" id="gw-more" style="background:var(--gym);color:#fff">Keep training (bonus kg)</button>'
+    + '<button type="button" class="mclose" id="gw-done">Done for today</button>');
+  let choice = null;
+  $('gw-more').onclick = () => { choice = 'more'; CIRCUIT = true; closeModal(); };
+  $('gw-done').onclick = () => { choice = 'done'; CIRCUIT = false; };
+  return p.then(() => choice);
+}
+
+/* reward chests: one per 5 active minutes today (up to 4), opened between rounds */
+const BADGES = [['big-brain','🧠','Big Brain'],['iron-mind','🦾','Iron Mind'],['quick-draw','⚡','Quick Draw'],['night-owl','🦉','Night Owl'],
+  ['code-ninja','🥷','Code Ninja'],['bug-hunter','🐞','Bug Hunter'],['flame-keeper','🔥','Flame Keeper'],['deep-focus','🎯','Deep Focus'],
+  ['pattern-pro','🧩','Pattern Pro'],['memory-vault','🗝️','Memory Vault'],['ai-whisperer','🤖','AI Whisperer'],['launch-ready','🚀','Launch Ready']];
+const FACTS = [
+  'Python is named after the comedy group Monty Python, not the snake.',
+  'In Python, <code>7 // 2</code> gives 3 and <code>7 % 2</code> gives 1.',
+  'In Python, <code>0.1 + 0.2</code> prints 0.30000000000000004, because computers store most decimals as close approximations.',
+  'Binary 1010 is 10 in decimal: 8 + 2.',
+  'In Python, <code>5 &amp; 3</code> is 1, <code>5 | 3</code> is 7 and <code>5 ^ 3</code> is 6.',
+  '<code>2 ** 10</code> is 1024. That is why a kilobyte is sometimes counted as 1024 bytes.',
+  'Git was created in 2005 by Linus Torvalds, who also started Linux.',
+  'The first logged computer “bug”, in 1947, was a real moth stuck inside the Harvard Mark II computer.',
+  'Flexbox lays items out in one direction at a time. Grid handles rows and columns together.',
+  'Pulling something back out of memory makes it stick better than re-reading it. This is called the testing effect.',
+  'Large language models write one token at a time, predicting the next piece of text at each step.',
+  'UPI crossed 10 billion transactions in a single month for the first time in August 2023.'
+];
+const chestsLeft = () => Math.min(4, Math.floor(todaySecs() / 300)) - todayState().chests;
+function rollReward(g){
+  const r = Math.random(), owned = new Set(S.badges), free = BADGES.filter(b => !owned.has(b[0]));
+  if (r < 0.3 && free.length) {
+    const b = free[Math.floor(Math.random() * free.length)];
+    S.badges.push(b[0]);
+    return '<div class="big">'+b[1]+'</div><h3>New badge: '+b[2]+'</h3><p class="muted">'+S.badges.length+' of '+BADGES.length+' badges collected.</p>';
+  }
+  if (r < 0.75) {
+    const kg = 15 + 5 * Math.floor(Math.random() * 6);
+    addKg(g, kg);
+    return '<div class="big">🏋️</div><h3>+'+kg+' kg bonus</h3><p class="muted">Added to your '+SKILLS[g.skill].name+' muscle.</p>';
+  }
+  addKg(g, 10);
+  return '<div class="big">💡</div><h3>Did you know?</h3><p>'+FACTS[Math.floor(Math.random() * FACTS.length)]+'</p><p class="muted">+10 kg for learning something new.</p>';
+}
+function openChest(g){
+  const p = openModal('<h3 id="mtitle" style="text-align:center">🎁 Reward chest!</h3>'
+    + '<p class="small muted" style="margin:0;text-align:center">You earned it with 5 minutes of training. Tap to open.</p>'
+    + '<button type="button" class="chest" id="ch-open" aria-label="Open the chest">'+img3d('chest', 168, 'chest3d')+'</button>');
+  $('ch-open').onclick = () => {
+    const b = $('ch-open'); b.disabled = true; b.classList.add('shake'); SFX.play('reveal');
+    setTimeout(() => {
+      todayState().chests++;
+      const html = rollReward(g);
+      save(); syncNow();
+      $('mbox').innerHTML = '<div class="reward">'+html+'</div><button type="button" class="btn full" style="--c:var(--ink)" id="ch-ok">Nice!</button>';
+      if (!reduced()) confetti();
+      SFX.play('correct');
+      $('ch-ok').onclick = closeModal; $('ch-ok').focus();
+    }, reduced() ? 0 : 1000);
+  };
+  return p;
+}
+function openBadges(){
+  const owned = new Set(S.badges);
+  openModal('<h3 id="mtitle">Your badges</h3><p class="small muted" style="margin:0">Win them from 🎁 chests. You get a chest every 5 minutes of training.</p>'
+    + '<div class="badges">'+BADGES.map(b => owned.has(b[0]) ? '<div><b>'+b[1]+'</b>'+b[2]+'</div>' : '<div class="no"><b>'+b[1]+'</b>???</div>').join('')+'</div>'
+    + '<button type="button" class="mclose">Close</button>');
+}
+
+/* home dashboard */
+function renderDash(){
+  if (!ME) return;
+  renderToday(); renderQuests(); renderRival();
+  if (Date.now() - boardAt > 60000) loadBoard();
+}
+function renderToday(){
+  const t = todaySecs(), done = t >= DAY_GOAL, sk = streakInfo(), R = 54, C = 2 * Math.PI * R, off = C * (1 - Math.min(1, t / DAY_GOAL));
+  const nx = nextGame(null), left = Math.ceil((DAY_GOAL - t) / 60);
+  $('h-today').innerHTML = '<div class="dring'+(done ? ' done' : '')+'"><svg viewBox="0 0 128 128" aria-hidden="true"><defs><linearGradient id="ringgrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B4BFF"/><stop offset=".55" stop-color="#9B3BF5"/><stop offset="1" stop-color="#FF4D8D"/></linearGradient></defs>'
+    + '<circle cx="64" cy="64" r="'+R+'" fill="none" stroke="var(--chip)" stroke-width="12"/>'
+    + '<circle id="h-ring" cx="64" cy="64" r="'+R+'" fill="none" stroke="'+(done ? 'var(--ok)' : 'url(#ringgrad)')+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"/></svg>'
+    + '<div class="c"><b>'+(done ? '✓' : fmt(Math.min(t, DAY_GOAL)))+'</b><span>'+(done ? fmt(t) + ' today' : 'of '+fmt(DAY_GOAL)+' today')+'</span></div></div>'
+    + '<div class="info"><div class="streakline'+(sk.count ? '' : ' cold')+'"><span class="fl">'+img3d('flame', 34)+'</span><span>'+(sk.count ? '<b>'+sk.count+'-day streak</b>' : 'No streak yet')+'</span></div>'
+    + '<div class="sub">'+(done ? 'Today’s goal done. Bonus sets still add kg and points.' : (t ? left + ' min left today. ' : 'Your '+GOAL_MIN+'-minute brain workout. ') + 'Next up: <b>'+esc(nx.name)+'</b>.')
+    + (sk.count && !sk.todayDone ? ' Train today to keep your streak.' : '')+'</div>'
+    + '<button type="button" class="btn full cta" id="h-start">▶ '+(done ? 'Bonus workout' : t ? 'Continue today’s workout' : 'Start today’s workout')+'</button>'
+    + (SESS.rounds ? '<button type="button" class="linkbtn badgeline" data-endsess>⏹ End this session ('+SESS.rounds+' set'+(SESS.rounds === 1 ? '' : 's')+') and rate it</button>' : '')
+    + '<button type="button" class="linkbtn badgeline" id="h-badges">🏅 '+S.badges.length+' of '+BADGES.length+' badges · 🎁 a chest every 5 min</button></div>'
+    + '<div class="week" aria-label="This week">'+weekStrip(sk)+'</div>';
+  $('h-start').onclick = startCircuit;
+  $('h-badges').onclick = openBadges;
+  const ring = $('h-ring');
+  if (M && !reduced() && ring) M.animate(ring, { strokeDashoffset:[C, off] }, { duration:1, ease:[.2,.8,.2,1] });
+}
+function renderQuests(){
+  const qs = quests(), td = todayState(), n = qs.filter(q => td.qdone.includes(q.id)).length;
+  $('h-quests').innerHTML = '<h3>Today’s quests <span>'+n+' of 3 done · new ones tomorrow</span></h3>'
+    + qs.map(q => {
+        const [a, b] = questProg(q), d = td.qdone.includes(q.id);
+        return '<div class="qrow'+(d ? ' done' : '')+'"><span class="ck">'+(d ? '✓' : '')+'</span><div><div class="qt">'+questText(q)+'</div>'
+          + (d ? '' : '<div class="bar"><i style="width:'+(a / b * 100)+'%"></i></div>')+'</div><span class="kg">+'+q.kg+' kg</span></div>';
+      }).join('');
+}
+function renderRival(){
+  const box = $('h-rival'); if (!box || !ME) return;
+  const all = boardSorted(), others = Math.max(0, LIVE - (Date.now() - lastSyncOk < 300000 ? 1 : 0));
+  const live = '<div class="live"><i></i>'+(others ? others + ' classmate' + (others === 1 ? '' : 's') + ' training now' : 'Nobody else is training right now. Get ahead!')+'</div>';
+  if (!all) { box.innerHTML = '<h3>Your rival</h3>' + live + '<p class="muted">Loading your batch…</p>'; return; }
+  const me = all.findIndex(u => u.me), my = all[me];
+  let body;
+  if (all.length < 2) body = '<p>You’re the first in your batch on the board. Classmates appear here as they log in.</p>';
+  else if (me > 0) {
+    const r = all[me - 1], gap = r.p - my.p + 1, sets = Math.max(1, Math.ceil(gap / 25));
+    body = '<p>🏁 <b>'+esc(r.n)+'</b> is <b>'+gap+' pts</b> ahead of you. About <b>'+sets+' set'+(sets === 1 ? '' : 's')+'</b> to pass.</p>'
+      + '<div class="gap"><b>#'+(me + 1)+'</b><div class="bar"><i style="width:'+Math.max(6, Math.min(100, my.p / Math.max(1, r.p) * 100))+'%"></i></div><b>#'+me+'</b></div>';
+  } else body = '<p>👑 You’re <b>#1</b> in your batch. <b>'+esc(all[1].n)+'</b> is '+(my.p - all[1].p)+' pts behind you.</p>';
+  box.innerHTML = '<h3>Your rival <span>#'+(me + 1)+' of '+all.length+'</span></h3>' + live + body;
+}
+/* thumbs on an AI verdict; a thumbs-down lands in the admin report for the judge's test set */
+const VERDICTS = new Map();
+function verdictFb(gameId, task, payload, result){
+  const id = rid();
+  VERDICTS.set(id, { game: gameId, meta: { task, payload, result } });
+  return '<span class="vfb" data-v="'+id+'">AI check fair? <button type="button" data-f="1" aria-label="Yes, fair">👍</button><button type="button" data-f="0" aria-label="No, not fair">👎</button></span>';
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('.vfb button'); if (!b) return;
+  const box = b.closest('.vfb'), v = VERDICTS.get(box.dataset.v); if (!v) return;
+  const fair = b.dataset.f === '1';
+  box.querySelectorAll('button').forEach(x => { x.setAttribute('aria-pressed', x === b); x.disabled = true; });
+  const ok = await sendFeedback({ kind:'verdict', game: v.game, fair, meta: v.meta });
+  box.firstChild.textContent = ok ? (fair ? 'Thanks! ' : 'Thanks, we’ll check it. ') : 'Couldn’t send. ';
+  if (!ok) box.querySelectorAll('button').forEach(x => x.disabled = false);
+});
+function renderWho(){
+  const w = $('h-who'); if (!w || !ME) return;
+  $('h-hi').textContent = 'Welcome back, ' + ME.name.split(' ')[0] + ' 👋';
+  w.innerHTML = 'Logged in as <b>'+esc(ME.name)+'</b> · '+esc(ME.roll)+(ME.pilot && ME.pilot !== 'ALL' ? ' · '+esc(ME.pilot) : '')+'. <button class="linkbtn" id="h-out">Not you?</button>';
+  $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
+}
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest];
 route();
+pullMe();
 </script>
 </body>
 </html>

@@ -1,3 +1,4 @@
 {
+  "regions": ["sin1"],
   "functions": { "api/judge.js": { "maxDuration": 15 } }
 }

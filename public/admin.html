@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Brain Gym Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F3FA;--card:#fff;--chip:#F0F0F7;--line:#E3E3EF;--ink:#141B34;--soft:#6B7280;--ok:#16A36F;--bad:#EF4444;--brand:#5B4BFF;--font:'Nunito',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 14px/1.45 var(--font)}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:24px;margin:0}
+h2{font-size:17px;margin:0 0 10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 1px 2px rgba(17,24,39,.05),0 8px 24px rgba(17,24,39,.06);margin-bottom:14px;overflow:hidden}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--card);border-radius:18px;padding:14px 16px;box-shadow:0 1px 2px rgba(17,24,39,.05)}
+.tile b{display:block;font-size:30px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{color:var(--soft);font-size:12.5px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+td.wrap{white-space:normal;min-width:240px}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft);position:sticky;top:0;background:var(--card)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.btn{font:800 13.5px var(--font);border:0;border-radius:999px;padding:9px 16px;background:var(--ink);color:#fff;cursor:pointer}
+.btn.light{background:var(--chip);color:var(--ink)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input{font:700 15px var(--font);padding:10px 14px;border-radius:12px;border:2px solid var(--line);min-width:240px}
+input[type=file]{min-width:0;border:0;padding:6px 0;font-size:13px}
+textarea{width:100%;margin-top:8px;font:600 13px ui-monospace,Menlo,Consolas,monospace;padding:10px;border-radius:12px;border:2px solid var(--line)}
+.err{color:var(--bad);font-weight:800}
+.muted{color:var(--soft)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:8px}
+.bars div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--soft)}
+.bars i{display:block;width:100%;max-width:34px;background:var(--brand);border-radius:4px 4px 0 0;min-height:2px}
+.bars b{color:var(--ink);font-size:11.5px}
+pre{white-space:pre-wrap;margin:0;font:12px ui-monospace,Menlo,Consolas,monospace;max-width:520px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Brain Gym pilot report</h1>
+    <div class="row" id="actions" hidden>
+      <span class="muted" id="stamp"></span>
+      <button class="btn light" id="refresh">Refresh</button>
+      <button class="btn light" data-csv="students">Students CSV</button>
+      <button class="btn light" data-csv="plays">Rounds CSV</button>
+      <button class="btn light" data-csv="feedback">Feedback CSV</button>
+      <button class="btn light" data-csv="progress">Progress CSV</button>
+      <button class="btn light" id="logout">Lock</button>
+    </div>
+  </div>
+
+  <form class="card" id="login">
+    <h2>Admin key</h2>
+    <p class="muted">Enter the ADMIN_KEY set in Vercel. It is kept only in this browser tab.</p>
+    <div class="row"><input type="password" id="key" autocomplete="off" placeholder="Admin key"><button class="btn">Open report</button></div>
+    <p class="err" id="err" hidden></p>
+  </form>
+
+  <div id="report" hidden>
+    <div class="card">
+      <h2>Student list</h2>
+      <p class="muted">Upload a CSV with columns <b>NIAT ID</b>, <b>Name</b> and optional <b>Batch</b> (batch groups the leaderboard). Students log in with their NIAT ID and first name. Uploading again updates names and batches; nobody's progress is lost.</p>
+      <div class="row"><input type="file" id="r-file" accept=".csv,text/csv"><span class="muted">or paste below</span></div>
+      <textarea id="r-text" rows="5" placeholder="NIAT ID,Name,Batch&#10;N25A0001,Keerthi Reddy,CSE-A&#10;N25A0002,Sai Teja,CSE-A"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn" id="r-up" disabled>Upload</button><span class="muted" id="r-msg"></span></div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card"><h2>🎯 Daily 15-minute goal (last 14 days)</h2><p class="muted">Trained = played at least a little that day. Hit goal = reached 15 active minutes.</p><div class="scroll"><table id="goal"></table></div></div>
+    <div class="card">
+      <h2>⭐ Session ratings (11-star scale)</h2>
+      <p class="muted">Asked at the end of every session. 5 = “it worked, nothing special”. 7 = “I’ll be back tomorrow”. 8 = “I’d tell my friends”. 11 = “it changed how I learn”.</p>
+      <div class="tiles" id="s-tiles" style="margin-bottom:8px"></div>
+      <div class="bars" id="s-bars"></div>
+    </div>
+    <div class="card"><h2>💡 What would make it an 11 (latest 200)</h2><p class="muted">Students rating 7+ were asked what would make it an 11. 5–6 were asked what would make it a 7. 1–4 were asked what got in the way.</p><div class="scroll"><table id="ideas"></table></div></div>
+    <div class="card"><h2>Rounds played per day (last 14 days, IST)</h2><div class="bars" id="daily"></div></div>
+    <div class="card"><h2>🐞 Problems reported (latest 200)</h2><div class="scroll"><table id="bugs"></table></div></div>
+    <div class="card"><h2>How students felt before training (last 14 days)</h2><div class="scroll"><table id="moods"></table></div></div>
+    <div class="card"><h2>Games</h2><div class="scroll"><table id="games"></table></div></div>
+    <div class="card"><h2>Comments (latest 200)</h2><div class="scroll"><table id="comments"></table></div></div>
+    <div class="card"><h2>AI verdicts marked unfair</h2><p class="muted">Add real mistakes to scripts/gold.mjs, then adjust the prompt and re-run npm run test:judge.</p><div class="scroll"><table id="unfair"></table></div></div>
+    <div class="card"><h2>Students</h2><div class="scroll"><table id="students"></table></div></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const when = t => t ? new Date(t).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', dateStyle:'medium', timeStyle:'short' }) : '';
+const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-link':'Missing Link','link-grid':'Link Grid','wiki-hop':'Wiki Hop','recall-rebuild':'Recall Rebuild','back-track':'Back Track','symbol-sprint':'Symbol Sprint','rule-switch':'Rule Switch','robot-path':'Robot Path','fallacy-hunt':'Fallacy Hunt','argue-back':'Argue Back','trust-or-check':'Trust or Check','source-check':'Source Check','taste-test':'Taste Test' };
+const gname = id => id ? (NAMES[id] || id) : 'General';
+const DIFF = { easy:'Too easy', right:'Just right', hard:'Too hard' };
+let KEY = ''; try { KEY = sessionStorage.getItem('bg_admin') || ''; } catch(e){}
+
+function table(el, cols, rows){
+  el.innerHTML = '<thead><tr>'+cols.map(c => '<th>'+c[0]+'</th>').join('')+'</tr></thead><tbody>'
+    + (rows.length ? rows.map(r => '<tr>'+cols.map(c => { const v = c[1](r); return '<td'+(c[2] ? ' class="'+c[2]+'"' : '')+'>'+v+'</td>'; }).join('')+'</tr>').join('')
+                   : '<tr><td colspan="'+cols.length+'" class="muted">Nothing yet.</td></tr>')
+    + '</tbody>';
+}
+async function load(){
+  $('err').hidden = true;
+  const r = await fetch('/api/admin?view=summary', { headers:{ 'x-admin-key': KEY } }).catch(() => null);
+  if (!r || r.status === 401) { $('err').textContent = r ? 'That key is not right.' : 'Could not reach the server.'; $('err').hidden = false; lock(); return; }
+  const d = await r.json();
+  if (!d.ok) { $('err').textContent = 'Server error. Try again in a minute.'; $('err').hidden = false; return; }
+  try { sessionStorage.setItem('bg_admin', KEY); } catch(e){}
+  $('login').hidden = true; $('report').hidden = false; $('actions').hidden = false;
+  $('stamp').textContent = 'Updated ' + when(Date.now());
+
+  const roster = d.pilots.reduce((a,p) => a + p.on_roster, 0), joined = d.pilots.reduce((a,p) => a + p.joined, 0), a7 = d.pilots.reduce((a,p) => a + p.active7, 0), a1 = d.pilots.reduce((a,p) => a + p.active1, 0);
+  const mins = d.games.reduce((a,g) => a + (g.minutes || 0), 0), rounds = d.games.reduce((a,g) => a + (g.rounds || 0), 0);
+  const rated = d.games.filter(g => g.ratings), avgRating = rated.length ? (rated.reduce((a,g) => a + g.rating*g.ratings, 0) / rated.reduce((a,g) => a + g.ratings, 0)).toFixed(1) : '–';
+  const g0 = (d.goal || [])[0], today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' });
+  const gToday = g0 && g0.day === today ? g0 : { trained:0, hit_goal:0, avg_min:0 };
+  table($('goal'), [
+    ['Day', g => esc(g.day)], ['Trained', g => g.trained, 'n'], ['Hit 15 min', g => g.hit_goal, 'n'],
+    ['Hit rate', g => g.trained ? Math.round(g.hit_goal / g.trained * 100) + '%' : '–', 'n'], ['Avg minutes', g => g.avg_min ?? '–', 'n']
+  ], d.goal || []);
+
+  /* 11-star session ratings */
+  const st = d.stars || [], total = st.reduce((a, r) => a + r.n, 0);
+  const share = min => total ? Math.round(st.filter(r => r.stars >= min).reduce((a, r) => a + r.n, 0) / total * 100) + '%' : '–';
+  const avg = total ? (st.reduce((a, r) => a + r.stars * r.n, 0) / total).toFixed(1) : '–';
+  $('s-tiles').innerHTML = [[total, 'sessions rated'], [avg, 'average stars (out of 11)'], [share(7), 'rated 7+ (“I’ll be back tomorrow”)'], [share(8), 'rated 8+ (“I’d tell my friends”)']]
+    .map(t => '<div class="tile"><b>'+esc(t[0])+'</b><span>'+t[1]+'</span></div>').join('');
+  const byStar = Array.from({ length: 11 }, (_, i) => (st.find(r => r.stars === i + 1) || { n: 0 }).n), maxS = Math.max(1, ...byStar);
+  $('s-bars').innerHTML = byStar.map((n, i) => '<div title="'+n+' sessions"><b>'+n+'</b><i style="height:'+Math.round(n / maxS * 90)+'px;background:'+(i >= 5 ? 'linear-gradient(#FFB020,#FF4D8D)' : 'var(--brand)')+'"></i>'+(i + 1)+'★</div>').join('');
+  const ASK = s => s >= 7 ? 'Make it an 11' : s >= 5 ? 'Make it a 7' : 'What got in the way';
+  table($('ideas'), [
+    ['When', r => esc(when(r.created_at))], ['Student', r => esc(r.name) + ' <span class="muted">' + esc(r.niat_id) + '</span>'],
+    ['Stars', r => r.stars + '★', 'n'], ['Asked', r => esc(ASK(r.stars))], ['Picked', r => esc((r.meta?.why || []).join(', '))],
+    ['What they said', r => esc(r.comment || ''), 'wrap'], ['Favourite today', r => esc(r.meta?.fav ? gname(r.meta.fav) : '')],
+    ['Session', r => esc((r.meta?.rounds || 0) + ' rounds · ' + Math.round((r.meta?.secs || 0) / 60) + ' min')]
+  ], d.ideas || []);
+  const tiles = [[gToday.hit_goal + ' / ' + gToday.trained,'hit 15 minutes today'],[gToday.avg_min || 0,'avg minutes today (students who trained)'],[roster,'students on the list'],[joined,'have logged in'],[a1,'active today'],[a7,'active in last 7 days'],[rounds.toLocaleString('en-IN'),'rounds played'],[mins.toLocaleString('en-IN'),'minutes trained'],[avgRating,'average game rating (out of 5)']];
+  $('tiles').innerHTML = tiles.map(t => '<div class="tile"><b>'+esc(t[0])+'</b><span>'+t[1]+'</span></div>').join('')
+    + d.pilots.map(p => '<div class="tile"><b>'+p.joined+' / '+p.on_roster+'</b><span>logged in, batch '+esc(p.pilot)+'</span></div>').join('');
+
+  const max = Math.max(1, ...d.daily.map(x => x.rounds));
+  $('daily').innerHTML = d.daily.length ? d.daily.map(x => '<div title="'+x.students+' students"><b>'+x.rounds+'</b><i style="height:'+Math.round(x.rounds/max*90)+'px"></i>'+x.day.slice(5)+'</div>').join('') : '<p class="muted">No rounds yet.</p>';
+
+  table($('games'), [
+    ['Game', g => esc(gname(g.game_id))], ['Players', g => g.players ?? 0, 'n'], ['Rounds', g => g.rounds ?? 0, 'n'], ['Minutes', g => g.minutes ?? 0, 'n'],
+    ['Avg best %', g => g.avg_best ?? '–', 'n'], ['Rating', g => g.ratings ? g.rating + ' (' + g.ratings + ')' : '–', 'n'],
+    ['Too easy', g => g.easy || 0, 'n'], ['Just right', g => g.just_right || 0, 'n'], ['Too hard', g => g.hard || 0, 'n'], ['AI unfair', g => g.unfair || 0, 'n']
+  ], d.games);
+  table($('comments'), [
+    ['When', c => esc(when(c.created_at))], ['Student', c => esc(c.name) + ' <span class="muted">' + esc(c.niat_id) + '</span>'], ['Where', c => esc(gname(c.game_id))],
+    ['Rating', c => c.rating ? ['😫','🙁','😐','🙂','🤩'][c.rating-1] : ''], ['Difficulty', c => esc(DIFF[c.difficulty] || '')], ['Comment', c => esc(c.comment), 'wrap']
+  ], d.comments);
+  table($('unfair'), [
+    ['When', u => esc(when(u.created_at))], ['Student', u => esc(u.name)], ['Game', u => esc(gname(u.game_id))],
+    ['Answer and AI result', u => '<pre>'+esc(JSON.stringify({ answer: u.meta?.payload?.answer, expected: u.meta?.payload?.expected, result: u.meta?.result }, null, 1))+'</pre>', 'wrap']
+  ], d.unfair);
+  const CAT = { wrong:'Marked my answer wrong', broke:'Something broke', confusing:'Confusing', slow:'Slow or stuck', other:'Other' };
+  table($('bugs'), [
+    ['When', b => esc(when(b.created_at))], ['Student', b => esc(b.name) + ' <span class="muted">' + esc(b.niat_id) + '</span>'],
+    ['Where', b => esc(b.game_id ? gname(b.game_id) : (b.meta?.view || ''))], ['Type', b => esc(CAT[b.meta?.category] || '')],
+    ['What they said', b => esc(b.comment), 'wrap'],
+    ['Screen and device', b => '<details><summary class="muted">show</summary><pre>'+esc((b.meta?.screen || '') + '\n\n' + (b.meta?.vp || '') + ' · ' + (b.meta?.ua || ''))+'</pre></details>', 'wrap']
+  ], d.bugs);
+  table($('moods'), [
+    ['Day', m => esc(m.day)], ['😴 Tired', m => m.tired, 'n'], ['🙂 Okay', m => m.okay, 'n'], ['⚡ Sharp', m => m.sharp, 'n'],
+    ['Share tired', m => { const t = m.tired + m.okay + m.sharp; return t ? Math.round(m.tired / t * 100) + '%' : '–'; }, 'n']
+  ], d.moods);
+  table($('students'), [
+    ['Name', s => esc(s.name)], ['NIAT ID', s => esc(s.niat_id)], ['Batch', s => esc(s.batch)], ['First login', s => s.joined_at ? esc(when(s.joined_at)) : '<span class="muted">not yet</span>'], ['Last seen', s => esc(when(s.last_seen))],
+    ['Minutes', s => s.minutes, 'n'], ['Rounds', s => s.rounds, 'n'], ['kg lifted', s => Number(s.kg_lifted).toLocaleString('en-IN'), 'n'], ['Points', s => Number(s.points).toLocaleString('en-IN'), 'n']
+  ], d.students);
+}
+async function csv(t){
+  const r = await fetch('/api/admin?view=csv&table=' + t, { headers:{ 'x-admin-key': KEY } }).catch(() => null);
+  if (!r || !r.ok) return alert('Could not download. Refresh and try again.');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(await r.blob()); a.download = 'brain-gym-' + t + '.csv';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+function lock(){ KEY = ''; try { sessionStorage.removeItem('bg_admin'); } catch(e){} $('login').hidden = false; $('report').hidden = true; $('actions').hidden = true; }
+$('login').onsubmit = e => { e.preventDefault(); KEY = $('key').value.trim(); if (KEY) load(); };
+$('refresh').onclick = load;
+$('logout').onclick = lock;
+document.querySelectorAll('[data-csv]').forEach(b => b.onclick = () => csv(b.dataset.csv));
+if (KEY) load();
+
+/* ---------- roster upload ---------- */
+function parseCsv(t){
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"' && t[i+1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ',' || c === '\t') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && t[i+1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); rows.push(row); }
+  return rows.map(r => r.map(x => x.trim())).filter(r => r.some(Boolean));
+}
+function rosterRows(text){
+  const all = parseCsv(text.replace(/^\uFEFF/, ''));
+  if (!all.length) return [];
+  const h = all[0].map(x => x.toLowerCase());
+  const find = re => h.findIndex(x => re.test(x));
+  let id = find(/niat|roll|^id$|student id/), nm = find(/name/), bt = find(/batch|section|class|group/), start = 1;
+  if (id < 0 || nm < 0) { id = 0; nm = 1; bt = all[0].length > 2 ? 2 : -1; start = 0; }   // no header: NIAT ID, Name, Batch
+  return all.slice(start).map((r, i) => ({ line: i + start + 1, roll: r[id] || '', name: r[nm] || '', batch: bt >= 0 ? (r[bt] || '') : '' }));
+}
+let ROSTER = [];
+function preview(){
+  ROSTER = rosterRows($('r-text').value);
+  $('r-up').disabled = !ROSTER.length;
+  $('r-msg').textContent = ROSTER.length ? ROSTER.length + ' students ready. First: ' + ROSTER[0].roll + ', ' + ROSTER[0].name + (ROSTER[0].batch ? ', ' + ROSTER[0].batch : '') : '';
+}
+$('r-text').oninput = preview;
+$('r-file').onchange = async e => { const f = e.target.files[0]; if (f) { $('r-text').value = await f.text(); preview(); } };
+$('r-up').onclick = async () => {
+  $('r-up').disabled = true; $('r-msg').textContent = 'Uploading…';
+  let added = 0, updated = 0, skipped = 0, bad = [];
+  for (let i = 0; i < ROSTER.length; i += 5000) {
+    const r = await fetch('/api/admin', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-key': KEY }, body: JSON.stringify({ action:'roster', rows: ROSTER.slice(i, i + 5000) }) }).catch(() => null);
+    const j = r ? await r.json().catch(() => ({})) : {};
+    if (!r || !r.ok || !j.ok) { $('r-msg').textContent = 'Upload failed: ' + (j.error || 'server not reachable') + '. Nothing after row ' + (i + 1) + ' was saved.'; $('r-up').disabled = false; return; }
+    added += j.added; updated += j.updated; skipped += j.skipped; bad = bad.concat(j.badLines);
+  }
+  $('r-msg').textContent = 'Done: ' + added + ' added, ' + updated + ' updated' + (skipped ? ', ' + skipped + ' skipped (check lines ' + bad.slice(0, 15).join(', ') + ')' : '') + '.';
+  $('r-up').disabled = false; load();
+};
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Notes for Claude Code
 
 ## What this is
-A single-page game app (`public/index.html`) plus one Vercel serverless function (`api/judge.js`) that calls OpenRouter to judge open-ended answers in three games: Beat the 7, Recall Rebuild, Missing Link.
+A single-page game app (`public/index.html`) plus one Vercel serverless function (`api/judge.js`) that calls OpenRouter to judge open-ended answers in four games: Word Spread, Beat the 7, Recall Rebuild, Missing Link.
 
 Users are 1st-year B.Tech students in India. All game content must stay within their Sem 1 syllabus: Python basics up to dictionaries, HTML/CSS (Flexbox, Grid, Tailwind), Git and command line, number systems and bitwise, quantitative aptitude, GenAI basics. No DSA.
 

@@ -15,6 +15,12 @@ function score(c, result) {
   if (c.task === 'beat7') return c.expect.includes(result.category) ? 1 : 0;
   if (c.task === 'missinglink') return result.valid === c.expect[0] ? 1 : 0;
   if (c.task === 'recall') { const e = c.expect[0]; return e.filter((v, i) => v === result.hits[i]).length / e.length; }
+  if (c.task === 'wordspread') {
+    const [min, max, bad] = c.expect;
+    const groups = new Set(result.words.filter(w => w.valid).map(w => w.group)).size;
+    const invalid = result.words.map((w, i) => w.valid ? -1 : i).filter(i => i >= 0);
+    return groups >= min && groups <= max && invalid.join() === bad.join() ? 1 : 0;
+  }
   return 0;
 }
 
@@ -29,7 +35,7 @@ for (const model of models) {
     const ms = Date.now() - t0; times.push(ms);
     const s = score(c, out?.result); total += s; if (!out?.result) failures++;
     if (out?.usage && price[model]) cost += out.usage.prompt_tokens * price[model].in + out.usage.completion_tokens * price[model].out;
-    const label = c.task === 'recall' ? 'recall' : `${c.task}: ${c.payload.answer}`;
+    const label = c.task === 'recall' ? 'recall' : `${c.task}: ${c.payload.answer || c.payload.words.join(' ')}`;
     console.log(`  ${s === 1 ? 'PASS' : s > 0 ? 'PART' : 'FAIL'}  ${ms}ms  ${label.slice(0, 60)}  -> ${JSON.stringify(out?.result)}`);
   }
   times.sort((a, b) => a - b);

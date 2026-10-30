@@ -1,4 +1,4 @@
-// POST /api/judge  { task: "beat7" | "recall" | "missinglink", payload: {...} }
+// POST /api/judge  { task: "beat7" | "recall" | "missinglink" | "wordspread", payload: {...} }
 // Returns { ok: true, result } or { ok: false }. The game falls back to its own matching when ok is false.
 import { TASKS, validatePayload, judgeTask } from './_lib/judge-core.js';
 

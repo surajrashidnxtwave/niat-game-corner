@@ -1,8 +1,13 @@
 // Shared judging logic, used by the Vercel function (api/judge.js) and the test script.
 import { PROMPTS, buildUser } from './prompts.js';
 
-export const TASKS = ['beat7', 'recall', 'missinglink'];
+export const TASKS = ['beat7', 'recall', 'missinglink', 'wordspread'];
 const str = (v, max) => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
+// one short word or term per line: no line breaks or angle brackets that could break out of the tags
+const word = v => str(v, 30) && !/[\r\n<>]/.test(v);
+// wordspread returns one item per word, so it needs more room and time than the other tasks
+const MAX_TOKENS = { wordspread: 550 };
+const TIMEOUT_MS = { wordspread: 10000 };
 
 // ---- input validation: reject anything unexpected before it reaches the model ----
 export function validatePayload(task, p) {
@@ -10,6 +15,7 @@ export function validatePayload(task, p) {
   if (task === 'beat7') return str(p.prompt, 200) && str(p.answer, 60) && str(p.typical, 60) && Array.isArray(p.common) && p.common.length <= 8 && p.common.every(c => str(c, 60));
   if (task === 'recall') return str(p.passage, 1200) && str(p.answer, 1500) && Array.isArray(p.facts) && p.facts.length > 0 && p.facts.length <= 12 && p.facts.every(f => str(f, 80));
   if (task === 'missinglink') return Array.isArray(p.cues) && p.cues.length === 3 && p.cues.every(c => str(c, 30)) && str(p.answer, 30) && str(p.expected, 30);
+  if (task === 'wordspread') return Array.isArray(p.words) && p.words.length > 0 && p.words.length <= 7 && p.words.every(word);
   return false;
 }
 
@@ -29,6 +35,15 @@ export function validateResult(task, r, p) {
     const forms = Array.isArray(r.forms) ? r.forms.filter(f => typeof f === 'string').slice(0, 3).map(f => f.slice(0, 40)) : [];
     return { valid: r.valid, forms: r.valid ? forms : [] };
   }
+  if (task === 'wordspread') {
+    const ws = r.words;
+    if (!Array.isArray(ws) || ws.length !== p.words.length) return null;
+    if (!ws.every(w => w && typeof w.valid === 'boolean' && Number.isInteger(w.group) && w.group >= 0 && w.group <= 7)) return null;
+    return {
+      words: ws.map(w => ({ valid: w.valid && w.group > 0, group: w.valid ? w.group : 0, area: typeof w.area === 'string' ? w.area.slice(0, 30) : '' })),
+      feedback: typeof r.feedback === 'string' ? r.feedback.slice(0, 220) : ''
+    };
+  }
   return null;
 }
 
@@ -40,11 +55,11 @@ function extractJson(text) {
 }
 
 // ---- call OpenRouter ----
-async function callModel(model, system, user, { jsonMode = true, timeoutMs = 8000 } = {}) {
+async function callModel(model, system, user, { jsonMode = true, timeoutMs = 8000, maxTokens = 200 } = {}) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
-    const body = { model, temperature: 0, max_tokens: 200, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] };
+    const body = { model, temperature: 0, max_tokens: maxTokens, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] };
     if (jsonMode) body.response_format = { type: 'json_object' };
     const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -60,7 +75,7 @@ async function callModel(model, system, user, { jsonMode = true, timeoutMs = 800
     if (!r.ok) {
       const err = await r.text();
       // some models reject response_format; retry once without it
-      if (jsonMode && r.status === 400) return callModel(model, system, user, { jsonMode: false, timeoutMs });
+      if (jsonMode && r.status === 400) return callModel(model, system, user, { jsonMode: false, timeoutMs, maxTokens });
       throw new Error(`OpenRouter ${r.status}: ${err.slice(0, 200)}`);
     }
     const j = await r.json();
@@ -72,7 +87,7 @@ export async function judgeTask(task, payload, { model } = {}) {
   const useModel = model || process.env.OPENROUTER_MODEL;
   if (!process.env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY is not set');
   if (!useModel) throw new Error('OPENROUTER_MODEL is not set');
-  const { text, usage } = await callModel(useModel, PROMPTS[task], buildUser(task, payload));
+  const { text, usage } = await callModel(useModel, PROMPTS[task], buildUser(task, payload), { maxTokens: MAX_TOKENS[task] || 200, timeoutMs: TIMEOUT_MS[task] || 8000 });
   const result = validateResult(task, extractJson(text), payload);
   return { result, usage, raw: text };
 }

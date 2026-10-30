@@ -4,10 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Game Corner: 15 cognitive games for 1st-year B.Tech students, with an AI judge for open-ended answers.",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vercel dev",
     "models": "node --env-file=.env.local scripts/cheapest-models.mjs",
-    "test:judge": "node --env-file=.env.local scripts/test-judge.mjs"
+    "test:judge": "node --env-file=.env.local scripts/test-judge.mjs",
+    "db:setup": "node --env-file=.env.local scripts/db-setup.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
   }
 }
