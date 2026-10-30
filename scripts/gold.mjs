@@ -21,6 +21,7 @@ export const GOLD = [
   { task: 'missinglink', payload: { cues: ['sun', 'head', 'moon'], answer: 'lights', expected: 'light' }, expect: [true] },
   // ---- Word Spread: expect = [min groups, max groups, indexes that must be invalid] ----
   { task: 'wordspread', payload: { words: ['loop', 'for', 'while', 'iteration', 'range', 'loops', 'iterate'] }, expect: [1, 2, []] },
+  { task: 'wordspread', payload: { words: ['loop', 'for', 'while', 'iteration', 'range', 'iterate', 'break'] }, expect: [1, 2, []] },
   { task: 'wordspread', payload: { words: ['cpu', 'firewall', 'dictionary', 'flexbox', 'binary', 'commit', 'chatbot'] }, expect: [6, 7, []] },
   { task: 'wordspread', payload: { words: ['cpu', 'processor', 'ram', 'memory', 'keyboard', 'mouse', 'monitor'] }, expect: [1, 4, []] },
   { task: 'wordspread', payload: { words: ['html', 'css', 'div', 'webpage', 'website', 'tailwind', 'flexbox'] }, expect: [1, 2, []] },

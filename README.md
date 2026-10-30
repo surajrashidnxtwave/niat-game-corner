@@ -19,12 +19,13 @@ Every other game uses fixed answers, checked in code.
 
 ```
 public/index.html          the whole game app (single page, no build step)
+public/world3d.js          the optional 3D world (three.js), loaded only when 3D is on
 api/judge.js               Vercel serverless endpoint: POST /api/judge
 api/_lib/prompts.js        instructions for each judged task
 api/_lib/judge-core.js     input/output validation + OpenRouter call
 scripts/cheapest-models.mjs   lists the cheapest OpenRouter models
 scripts/test-judge.mjs        compares models on accuracy, speed and cost
-scripts/gold.mjs              25 test cases with the correct verdicts
+scripts/gold.mjs              26 test cases with the correct verdicts
 ```
 
 ## Run it locally
@@ -95,9 +96,30 @@ Needs Node 20.6 or newer.
   - the `daily` table stores active seconds per day; `/admin.html` shows how many students hit 15 minutes each day
 - **Demo login:** NIAT ID `1234`, first name `Suraj` (batch `DEMO`, so it has its own leaderboard). Remove it before launch if you don't want it in the report.
 
+## 3D world
+
+When the device supports WebGL, Brain Gym runs as a 3D world (`public/world3d.js`, using three.js 0.169 from jsDelivr):
+
+- a pastel sky with low-poly models (brains, dumbbells, bulbs, gears, chips…) floating at different depths; they follow the mouse and drift as you scroll
+- each game countdown is a warp jump: the page fades, stars stretch into streaks in the game's colour, then the game appears
+- live 3D models you can drag to spin: the login dumbbell, the brain on the workout plan, each game's skill model on its rules screen, a trophy or medal in the rank colour on results, the goal trophy, the session star and the leaderboard trophy
+- 3D confetti, frosted-glass panels, tiles that lean toward the mouse, and buttons that press down
+
+The models are one 232 KB file, `public/assets/3d/world.glb` (about 7,500 vertices in total), made by `scripts/models-glb.py`:
+
+```
+blender -b --factory-startup -P scripts/models-glb.py -- public/assets/3d/world.glb
+```
+
+**Keeping it light:** the background draws at 30 fps (full speed only during a warp), without anti-aliasing and at no more than 1× pixel density. Models in the page are drawn by one small shared WebGL canvas and copied into each slot, so the cost follows the model's size, not the screen's. On an Intel Iris Xe laptop a frame costs about 3 ms of CPU. If frames stay slow for about 4 seconds, the world drops to a lighter mode, and then turns the background off. People who ask their device for reduced motion get still 3D with no warp or confetti.
+
+**Turning it off:**
+- *Per device:* the "🌌 3D world: On/Off" button at the bottom of the home screen (and in the laptop sidebar). With 3D off, or without WebGL, the page is exactly the flat version.
+- *For everyone:* the 2D version is the git tag `v-2d` (branch `brain-gym-theme`). The 3D version is on branch `3d-experience`.
+
 ## 3D images
 
-`public/assets/3d/` holds five small transparent WebP renders (trophy, star, chest, dumbbell, flame; about 60 KB in total) used on the login screen, streaks, goal celebration, reward chests, session rating and leaderboard. They are made from simple shapes by `scripts/models3d.py`, using Blender 5.2 in headless mode:
+`public/assets/3d/` also holds five small transparent WebP renders, shown when 3D is off (trophy, star, chest, dumbbell, flame; about 60 KB in total) used on the login screen, streaks, goal celebration, reward chests, session rating and leaderboard. They are made from simple shapes by `scripts/models3d.py`, using Blender 5.2 in headless mode:
 
 ```
 blender -b --factory-startup -P scripts/models3d.py -- public/assets/3d [trophy star chest dumbbell flame]

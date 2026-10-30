@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
 :root{
   color-scheme:light;
@@ -707,6 +708,49 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
   .streakline{font-size:18px}
 }
 @media (prefers-reduced-motion:reduce){.tier{visibility:visible}*{transition:none!important}.rp-body svg,.rp-body .eyes,.rp-body .led,.star,.tr{animation:none!important}}
+
+/* ================= 3D world (world3d.js). html.w3d = 3D wanted, html.w3d-ready = models loaded ================= */
+.w3d-slot{position:relative;touch-action:pan-y;-webkit-tap-highlight-color:transparent}
+.w3d-slot.w3d-opt{display:none}
+.w3d-slot > img{width:100%;height:auto;display:block;pointer-events:none}
+html.w3d-ready .w3d-slot.w3d-opt{display:block}
+html.w3d-ready .w3d-slot > img{visibility:hidden}
+html.w3d-ready .w3d-slot{cursor:grab}
+/* where live models replace the flat icons */
+.joinslot{width:132px;height:104px;margin:-18px 0 -8px -22px}
+html.w3d-ready .joinhero .logo,html.w3d-ready .joinhero .hero3d{display:none}
+.heroslot{float:right;width:96px;height:96px;margin:-8px -8px 0 6px}
+.introslot{width:128px;height:118px;margin:-22px 0 -18px -26px}
+html.w3d-ready .intro-head .ic{display:none}
+.resslot{position:absolute;right:-72px;bottom:-18px;width:100px;height:100px}
+.lbslot{position:absolute;right:6px;top:4px;width:132px;height:132px}
+.goalslot{width:170px;height:150px;margin:-14px 0 -18px}
+.shead .w3d-slot{width:58px;height:58px;flex:none;margin:-8px -2px -8px -6px}
+.lb-empty .w3d-slot{width:112px;height:112px;margin:0 auto}
+/* the sky shows through around the cards */
+html.w3d{background:radial-gradient(1100px 700px at 88% -10%,#FFDCEC,transparent 62%),radial-gradient(900px 640px at -5% 105%,#D9D3FF,transparent 60%),#F0EDFC;background-attachment:fixed}
+html.w3d body{background:transparent}
+html.w3d .lbhead{background:linear-gradient(180deg,rgba(233,229,255,.55),transparent)}
+/* the dark panels become frosted glass, so the floating world moves behind them */
+html.w3d-ready .hero,html.w3d-ready .joinhero{background:radial-gradient(circle at 100% 0,rgba(255,77,141,.38),transparent 55%),linear-gradient(160deg,rgba(42,31,122,.84),rgba(20,27,52,.9) 70%);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)}
+html.w3d-ready .intro-head{background:color-mix(in srgb,var(--c) 84%,transparent);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)}
+html.w3d-lite .hero,html.w3d-lite .joinhero,html.w3d-lite .intro-head{backdrop-filter:none;-webkit-backdrop-filter:none}
+/* tactile buttons: a slab under each button that presses down */
+html.w3d .btn{box-shadow:0 4px 0 rgba(20,27,52,.2),0 10px 20px -8px rgba(20,27,52,.3);transition:transform 120ms var(--ease-out),box-shadow 120ms var(--ease-out)}
+html.w3d .btn:active{transform:translateY(3px) scale(.99);box-shadow:0 1px 0 rgba(20,27,52,.2),0 4px 10px -6px rgba(20,27,52,.3)}
+/* cards lean toward the mouse */
+html.w3d .gcard,html.w3d .hero .check{transition:transform 180ms var(--ease-out),box-shadow 180ms var(--ease-out);transform-style:preserve-3d;will-change:transform}
+html.w3d .gcard.tilt,html.w3d .hero .check.tilt{box-shadow:0 18px 40px -12px rgba(43,31,122,.35)}
+html.w3d .gcard .art{background-image:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.35),transparent 55%)}
+/* the countdown is a warp jump: the page fades out, the stars stretch, the number glows */
+html.w3d-ready .app,html.w3d-ready .tabbar{transition:opacity 260ms var(--ease-out),filter 260ms var(--ease-out)}
+html.warping .app,html.warping .tabbar{opacity:0;filter:blur(6px)}
+html.w3d-ready .count{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+html.w3d-ready .count b{color:#fff;text-shadow:0 0 28px var(--c),0 0 70px var(--c)}
+html.w3d-ready .count .ripple{border-color:#fff}
+.t3d b{color:var(--c-insight)}
+.lbhead.empty .lbslot{display:none!important}
+@media (prefers-reduced-motion:reduce){html.w3d .gcard,html.w3d .hero .check{transition:none}}
 </style>
 </head>
 <body>
@@ -728,6 +772,7 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
   </div>
 
   <div class="card hero">
+    <div class="w3d-slot w3d-opt heroslot" data-model="brain" aria-hidden="true"></div>
     <span class="kicker">Today’s workout plan</span>
     <h1 id="h-level">Level 1</h1>
     <p class="muted">One short round of each, switching games every set. Then keep going with bonus sets.</p>
@@ -751,6 +796,7 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
   <div class="card hfoot">
     <button class="btn c full" data-go="feedback" style="--c:var(--ink)">💬 Tell us what you think</button>
     <button class="btn light full" data-report>🐞 Report a problem</button>
+    <button class="btn light full t3d" data-t3d hidden></button>
     <p class="small muted" id="h-who"></p>
   </div>
 </section>
@@ -758,6 +804,7 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
 <section class="view" id="view-join">
   <div class="joinhero">
     <img class="hero3d" src="assets/3d/dumbbell.webp" width="512" height="512" alt="" decoding="async">
+    <div class="w3d-slot w3d-opt joinslot" data-model="dumbbell" aria-hidden="true"></div>
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
     <h1>Welcome to Brain Gym</h1>
     <p>Short daily workouts for your brain. Log in to save your progress and climb your batch leaderboard.</p>
@@ -811,6 +858,7 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
 
 <section class="view" id="view-leaderboard">
   <div class="lbhead">
+    <div class="w3d-slot w3d-opt lbslot" data-model="trophy" data-tier="gold" aria-hidden="true"></div>
     <h1>Leaderboard</h1>
     <div class="podium" id="lb-podium"></div>
   </div>
@@ -829,6 +877,7 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
     <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>Brain muscles</button>
     <button class="tab side-only" data-go="feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Feedback</button>
     <button class="tab side-only side-foot" data-report>🐞 Report a problem</button>
+    <button class="tab side-only t3d" data-t3d hidden></button>
   </div>
 </nav>
 <div class="toast" id="toast" role="status"></div>
@@ -837,6 +886,48 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
 /* ================= core ================= */
 const M = window.Motion || null;
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================= 3D world switch (the world itself is public/world3d.js) =================
+   On by default where WebGL works. Each device remembers the choice; off = the flat 2D look. */
+const W3 = (fn, ...a) => window.World3D && window.World3D[fn] ? window.World3D[fn](...a) : false;
+const SKILL_MODEL = { creativity:'star', insight:'bulb', memory:'brain', focus:'flame', reasoning:'gear', flex:'dumbbell', calibration:'target', ai:'chip' };
+const W3D = (() => {
+  let loads = 0;
+  const can = (() => { try { if (!window.WebGLRenderingContext) return false; const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch(e){ return false; } })();
+  const wanted = () => { try { return localStorage.getItem('bg_3d') !== 'off'; } catch(e){ return true; } };
+  const on = () => document.documentElement.classList.contains('w3d');
+  function start(){
+    if (!can || on()) return;
+    document.documentElement.classList.add('w3d');
+    import('./world3d.js?v=' + (loads++)).catch(() => document.documentElement.classList.remove('w3d'));
+  }
+  function label(){
+    document.querySelectorAll('[data-t3d]').forEach(b => { b.hidden = !can; b.innerHTML = '🌌 3D world: <b>' + (on() ? 'On' : 'Off') + '</b>'; b.setAttribute('aria-pressed', on()); });
+  }
+  function toggle(){
+    const next = !on();
+    try { localStorage.setItem('bg_3d', next ? 'on' : 'off'); } catch(e){}
+    if (next) start(); else if (window.World3D) window.World3D.dispose(); else document.documentElement.classList.remove('w3d');
+    label();
+    toast(next ? '3D world on 🌌' : '3D world off. Tap the button to bring it back.');
+  }
+  document.addEventListener('click', e => { if (e.target.closest('[data-t3d]')) toggle(); });
+  /* game tiles lean toward the mouse, with a soft glare */
+  let tilted = null;
+  document.addEventListener('pointermove', e => {
+    if (e.pointerType !== 'mouse' || !on() || reduced()) return;
+    const c = e.target.closest && e.target.closest('.gcard,.hero .check');
+    if (tilted && tilted !== c) { tilted.style.transform = ''; tilted.classList.remove('tilt'); tilted = null; }
+    if (!c) return;
+    const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    c.style.transform = 'perspective(700px) rotateX(' + (-y * 9).toFixed(2) + 'deg) rotateY(' + (x * 11).toFixed(2) + 'deg) translateZ(6px)';
+    c.style.setProperty('--gx', Math.round((x + 0.5) * 100) + '%'); c.style.setProperty('--gy', Math.round((y + 0.5) * 100) + '%');
+    c.classList.add('tilt'); tilted = c;
+  });
+  if (wanted()) start();
+  label(); addEventListener('w3d-change', label);
+  return { label };
+})();
 const SPRING = { type:'spring', bounce:0, duration:0.4 };
 const stag = d => M ? M.stagger(d) : 0;
 function anim(t, kf, o){ if (!M || reduced() || !t) return null; try { return M.animate(t, kf, Object.assign({}, SPRING, o||{})); } catch(e){ return null; } }
@@ -1008,6 +1099,7 @@ function sparks(x, y, color, n){
   }
 }
 function confetti(){
+  if (W3('confetti')) return;
   if (!M || reduced()) return;
   const cols = ['#7B61FF','#FF7A2F','#0F9F8F','#F0457A','#FFB020','#2F7BF0','#20A35A'];
   for (let i = 0; i < 46; i++){
@@ -1057,7 +1149,7 @@ function route(){
   if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback') next = hs;
   else if (hs.startsWith('g-') && GAMES.find(g => g.id === hs.slice(2))) { next = 'game'; gid = hs.slice(2); }
   if (!ME) { next = 'join'; gid = null; }
-  if (next !== 'game') CIRCUIT = false;
+  if (next !== 'game') { CIRCUIT = false; W3('tint', '#7B61FF'); }
   if (cleanup) { cleanup(); cleanup = null; }
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   view = next; curGame = gid;
@@ -1376,7 +1468,7 @@ document.addEventListener('click', e => {
 const starCount = p => p >= 85 ? 3 : p >= 60 ? 2 : p >= 30 ? 1 : 0;
 
 /* ---------- game shell: intro → countdown → play → results ---------- */
-function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c); document.documentElement.style.setProperty('--c', SKILLS[g.skill].c); }
+function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c); document.documentElement.style.setProperty('--c', SKILLS[g.skill].c); W3('tint', SKILLS[g.skill].c); }
 function showIntro(g){
   setColor(g);
   const st = gs(g.id), locked = isLocked(g.id), n = daysToUnlock(g.id), left = Math.ceil((DAY_GOAL - todaySecs()) / 60);
@@ -1387,7 +1479,7 @@ function showIntro(g){
   stage.innerHTML = '';
   const el = h('<div>'
     + '<div class="intro-head"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
-    + '<div class="ic">'+svgI(g.icon, 2.2)+'</div><h1>'+g.name+'</h1><div class="meta">'+SKILLS[g.skill].name+'. Inspired by '+g.inspired+'.</div><div class="topics">💻 '+g.topics+'</div></div>'
+    + slot3d(SKILL_MODEL[g.skill], 'w3d-opt introslot') + '<div class="ic">'+svgI(g.icon, 2.2)+'</div><h1>'+g.name+'</h1><div class="meta">'+SKILLS[g.skill].name+'. Inspired by '+g.inspired+'.</div><div class="topics">💻 '+g.topics+'</div></div>'
     + '<div class="card how"><h3>How to play'+(lvTag(g.id) ? ' <span class="mtier">'+lvTag(g.id)+'</span>' : '')+'</h3><ol>'+g.how.map((s,i) => '<li><span>'+(i+1)+'</span><div>'+howText(g.id, s)+'</div></li>').join('')+'</ol>'+(LADDER[g.id] ? '<p class="small muted" style="margin:10px 0 0">Score 80%+ to level up ('+LV_HINT[g.id]+'). Under 40% drops a level.</p>' : '')+'</div>'
     + '<div class="intro-foot">'+foot+'</div>'
     + '</div>');
@@ -1410,15 +1502,17 @@ function countdown(g){
   if (isLocked(g.id)) { location.hash = ''; return; }
   SFX.unlock();
   const ov = h('<div class="count"><span class="ripple"></span><b>3</b></div>'); document.body.appendChild(ov);
+  if (window.World3D && !reduced()) { W3('warp', SKILLS[g.skill].c, 2300); document.documentElement.classList.add('warping'); }
+  const go = () => { ov.remove(); document.documentElement.classList.remove('warping'); play(g); };
   const b = ov.querySelector('b'), rp = ov.querySelector('.ripple'); let n = 3;
   const step = () => {
     b.textContent = n > 0 ? n : 'GO!';
     SFX.play(n > 0 ? 'count' : 'go');
     anim(b, { scale:[2.2,1], opacity:[0,1], rotate: n > 0 ? [0,0] : [-10,0] }, { type:'spring', bounce:0.35, duration:0.5 });
     anim(rp, { scale:[0.2,2.4], opacity:[0.5,0] }, { type:'tween', duration:0.6 });
-    setTimeout(() => { if (n === 0) { ov.remove(); play(g); } else { n--; step(); } }, n > 0 ? 620 : 420);
+    setTimeout(() => { if (n === 0) go(); else { n--; step(); } }, n > 0 ? 620 : 420);
   };
-  if (reduced()) { ov.remove(); play(g); } else step();
+  if (reduced()) go(); else step();
 }
 function play(g){
   const stage = $('stage'); stage.innerHTML = '';
@@ -1493,7 +1587,7 @@ function results(g, res){
   const el = h('<div class="card res">'
     + '<div class="ringwrap"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="'+R+'" fill="none" stroke="var(--line)" stroke-width="14"/>'
     + '<circle id="r-arc" cx="85" cy="85" r="'+R+'" fill="none" stroke="var(--c)" stroke-width="14" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'"/></svg>'
-    + '<div class="num"><b id="r-score">0</b><span>score</span></div></div>'
+    + '<div class="num"><b id="r-score">0</b><span>score</span></div>'+slot3d(res.pct >= 60 ? 'trophy' : 'medal', 'w3d-opt resslot', '', tier[0].toLowerCase())+'</div>'
     + '<div class="starrow">'+[0,1,2].map(i => '<i class="'+(i < stars ? 'on' : '')+'">★</i>').join('')+'</div>'
     + '<div class="tier" id="r-tier" style="--t:'+tier[1]+'">'+tier[2]+' '+tier[0]+' rank</div>'
     + (res.score > prevBest && prevBest > 0 ? '<span class="newbest">New best</span>' : '')
@@ -1509,6 +1603,7 @@ function results(g, res){
   const arc = el.querySelector('#r-arc'), off = C * (1 - Math.max(0, Math.min(100, res.pct))/100);
   if (M && !reduced()) M.animate(arc, { strokeDashoffset:[C, off] }, { duration:1.1, ease:[.2,.8,.2,1] }); else arc.setAttribute('stroke-dashoffset', off);
   SFX.play('whoosh');
+  if (stars) W3('celebrate', tier[1]);
   if (M && !reduced() && res.score > 0) { let lastT = 0; const sc = el.querySelector('#r-score'); M.animate(0, res.score, { duration:1.1, ease:[.2,.8,.2,1], onUpdate: v => { sc.textContent = Math.round(v); const now = performance.now(); if (now - lastT > 70) { lastT = now; SFX.play('tick'); } } }); }
   else countTo(el.querySelector('#r-score'), res.score, 1.1);
   for (let i = 0; i < stars; i++) setTimeout(() => { SFX.play('star', i); const st2 = el.querySelectorAll('.starrow i.on')[i]; if (st2) { const r = st2.getBoundingClientRect(); sparks(r.left + r.width/2, r.top + r.height/2, '#FFB020', 8); } }, 700 + i*180);
@@ -1608,13 +1703,17 @@ const WordSpread = { id:'word-spread', name:'Word Spread', skill:'creativity', i
       const first = {}, lines = [];
       let spread;
       if (r) {
-        /* AI groups words by meaning: close words share a group and add no spread */
+        /* AI groups words by meaning: close words share a group and add no spread.
+           Words the AI gave the same area name also count as one area, even if it numbered them apart. */
+        const byArea = {};
         uniq.forEach((w, i) => {
           const x = r.words[i];
           if (!x.valid) { lines.push('<b>'+esc(w)+'</b>: not a tech word, not counted'); return; }
-          const area = x.area ? esc(x.area) : 'tech';
-          if (first[x.group]) lines.push('<b>'+esc(w)+'</b>: '+area+'. Too close to <b>'+esc(first[x.group])+'</b>, no extra spread');
+          const area = x.area ? esc(x.area) : 'tech', ak = (x.area || '').trim().toLowerCase();
+          const near = first[x.group] || (ak && byArea[ak]);
+          if (near) lines.push('<b>'+esc(w)+'</b>: '+area+'. Too close to <b>'+esc(near)+'</b>, no extra spread');
           else { first[x.group] = w; lines.push('<b>'+esc(w)+'</b>: '+area); }
+          if (ak && !byArea[ak]) byArea[ak] = near || w;
         });
         spread = Object.keys(first).length;
       } else {
@@ -2630,7 +2729,7 @@ const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCa
 function renderBoard(){
   if (Date.now() - boardAt > 60000) loadBoard();
   const head = document.querySelector('.lbhead');
-  if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+img3d('trophy', 112)+'<p class="muted">Loading your batch…</p></div>'; return; }
+  if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+slot3d('trophy', '', img3d('trophy', 112), 'gold')+'<p class="muted">Loading your batch…</p></div>'; return; }
   /* my own row uses my live points, so it moves the moment I finish a round */
   const all = BOARD.map(u => u.id === ME.id ? { n: u.n, p: Math.max(u.p, points()), me: true } : { n: u.n, p: u.p });
   if (!all.some(u => u.me)) all.push({ n: ME.name.split(' ')[0], p: points(), me: true });
@@ -2827,7 +2926,7 @@ function endSession(phase){
   const sum = '<div class="ssum"><span>🎯 <b>'+s.rounds+'</b> set'+(s.rounds === 1 ? '' : 's')+'</span><span>⏱ <b>'+fmt(s.secs)+'</b></span><span>🏋️ <b>+'+s.kg+'</b> kg</span></div>';
   const head = phase === 'last'
     ? '<h3 id="mtitle">Rate your last session</h3><p class="small muted" style="margin:0">You left before ending it on '+new Date(s.last).toLocaleDateString('en-IN', { weekday:'long' })+'.</p>'
-    : '<div class="shead">'+img3d('star', 64)+'<h3 id="mtitle">Session complete</h3></div>';
+    : '<div class="shead">'+slot3d('star', '', img3d('star', 64))+'<h3 id="mtitle">Session complete</h3></div>';
   const p = openModal(head + sum
     + '<div><p style="margin:0;font-weight:900;font-size:17px">How high does this session go?</p>'
     + '<p class="small muted" style="margin:2px 0 0">Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you.</p></div>'
@@ -2902,6 +3001,7 @@ function milestone(t){
 }
 let CIRCUIT = false, AUTOSTART = null, nudged = false, LIVE = 0, lastSyncOk = 0;
 const bgWait = ms => new Promise(r => setTimeout(r, ms));
+const slot3d = (m, cls, inner, tier) => '<div class="w3d-slot '+cls+'" data-model="'+m+'"'+(tier ? ' data-tier="'+tier+'"' : '')+' aria-hidden="true">'+(inner || '')+'</div>';
 const img3d = (name, size, cls) => '<img class="'+(cls || 'i3d')+'" src="assets/3d/'+name+'.webp" width="'+size+'" height="'+size+'" alt="" decoding="async">';
 const gameName = id => GAMES.find(g => g.id === id).name;
 const todayRoundsTotal = () => Object.values(todayState().rounds).reduce((a,b) => a + b, 0);
@@ -3060,7 +3160,7 @@ function goalModal(){
     ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount() - 1]) : null, nx = nextUnlock();
   if (!reduced()) confetti();
   SFX.play('fanfare');
-  const p = openModal('<div class="goalwin">'+img3d('trophy', 150, 'pop3d')+'<div class="big">'+fmt(DAY_GOAL)+' ✓</div><h3 id="mtitle">Today’s workout done!</h3>'
+  const p = openModal('<div class="goalwin">'+slot3d('trophy', 'goalslot', img3d('trophy', 150, 'pop3d'), 'gold')+'<div class="big">'+fmt(DAY_GOAL)+' ✓</div><h3 id="mtitle">Today’s workout done!</h3>'
     + '<p class="streakline" style="margin:0"><span class="fl">'+img3d('flame', 34)+'</span><b>'+sk.count+'-day streak</b></p>'
     + '<p class="muted" style="margin:0">Come back tomorrow for new quests and to grow your streak. '
     + (nx ? 'Tomorrow’s unlock: <b>'+nx.name+'</b>.' : 'Every workout is unlocked. Go for new bests!')+'</p>'
