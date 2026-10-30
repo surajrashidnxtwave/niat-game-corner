@@ -3,12 +3,12 @@
 //   { action: "me", token }                          -> { ok, student, progress }
 //   { action: "sync", token, games: {...}, plays: [...] } -> { ok }
 // Progress values only ever go up, so a stale device can't erase newer progress.
-import { db, GAME_IDS, newToken, hashToken, studentFor, limited, ipOf, int, text, dbReady } from './_lib/db.js';
+import { db, GAME_IDS, newToken, hashToken, studentFor, limited, ipOf, int, text, dbReady, nameParts, callName } from './_lib/db.js';
 
 const NAME_RE = /^[A-Za-z][A-Za-z .'-]{0,39}$/;
 const ROLL_RE = /^[A-Za-z0-9_/-]{3,30}$/;
 const squash = s => s.trim().replace(/\s+/g, ' ');
-const pub = s => ({ id: s.id, name: s.name, roll: s.roll, pilot: s.pilot });
+const pub = s => ({ id: s.id, name: s.name, call: callName(s.name), roll: s.roll, pilot: s.pilot });
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST only' });
@@ -40,15 +40,20 @@ async function join(req, res, b) {
   const sql = db();
   const s = (await sql`SELECT id, name, roll, pilot FROM students WHERE roll = ${roll}`)[0];
   if (!s) return res.status(404).json({ ok: false, error: 'We couldn’t find that NIAT ID. Check it, or ask your mentor.' });
-  if (firstName(s.name) !== firstName(first)) return res.status(401).json({ ok: false, error: 'That name doesn’t match this NIAT ID. Use your first name as in college records.' });
+  if (!nameMatches(s.name, first)) return res.status(401).json({ ok: false, error: 'That name doesn’t match this NIAT ID. Type your first name (or any one part of your name) as in college records.' });
 
   const token = newToken();
   await sql`INSERT INTO sessions (token_hash, student_id) VALUES (${hashToken(token)}, ${s.id})`;
   await sql`UPDATE students SET joined_at = COALESCE(joined_at, now()), last_seen = now() WHERE id = ${s.id}`;
   return res.status(200).json({ ok: true, token, student: pub(s) });
 }
-// first word, lower case, letters only: "  Sai Teja " and "SAI" both give "sai"
-const firstName = n => (String(n).trim().split(/\s+/)[0] || '').toLowerCase().replace(/[^a-z]/g, '');
+// The typed name matches if any part of it (2+ letters) is a part of the roster name,
+// so "Prajwal" works for "B S Prajwal", and "Abuzar" or "M.Abuzar" for "M.Abuzar".
+function nameMatches(roster, typed) {
+  const have = new Set(nameParts(roster).filter(w => w.length >= 2));
+  const glued = s => (String(s).trim().split(/\s+/)[0] || '').toLowerCase().replace(/[^a-z]/g, '');
+  return nameParts(typed).some(w => w.length >= 2 && have.has(w)) || (glued(typed) !== '' && glued(typed) === glued(roster));
+}
 
 async function getMe(res, me) {
   const sql = db();

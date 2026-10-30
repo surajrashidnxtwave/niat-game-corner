@@ -72,8 +72,9 @@ Needs Node 20.6 or newer.
 
 ## Students, progress and feedback
 
-- **Student list:** open `/admin.html`, enter `ADMIN_KEY`, and upload a CSV with columns `NIAT ID, Name, Batch` (batch is optional and groups the leaderboard). Uploading again updates names and batches without touching progress.
-- **Login:** students enter their NIAT ID and first name. Only students on the list can log in.
+- **Student list:** open `/admin.html`, enter `ADMIN_KEY`, and upload a CSV with columns `NIAT ID, Name, Batch` (batch is optional and groups the leaderboard). Uploading again updates names and batches without touching progress. Rows whose NIAT ID has no digit (`N/A`, `NA`) are skipped, and symbols in names (emoji, brackets, `_`) are removed. If two rows share a NIAT ID, the later row wins.
+- **Loaded so far:** S-VYASA, batch `SVYASA`, 427 students.
+- **Login:** students enter their NIAT ID and their first name. Any one part of the name on the list works, in any case: for "Yedam Venkat Ganesh Reddy", "yedam", "Ganesh" or "REDDY" all work. Only students on the list can log in. The app calls students by their first real name ("B S Prajwal" → "Prajwal"), and the leaderboard shows "Prajwal S.".
 - **Progress** (minutes, scores, kg lifted, rounds) saves at the end of each round, every 2 minutes, and when the tab closes. Totals only go up on the server.
 - **Feedback** is stored in the `feedback` table, by `kind`:
   - `session`: end-of-session rating on an 11-star scale, inspired by Airbnb's 11-star exercise. 1–5 are normal stars, and a glowing "beyond 5" row holds 6–11 (7 = "I'll be back tomorrow", 8 = "I'd tell my friends", 11 = "It changed how I learn"). The follow-up question depends on the rating: 1–4 "What got in the way?", 5–6 "What would make it a 7?", 7+ "What would make it an 11?" plus their favourite game. A session ends when the student taps "⏹ End session" (on every results screen, and on home once a session has started), picks "Done for today" at the daily goal, or taps "Leave anyway". Ending always shows a session summary and asks for the rating: stars are required and the text is optional, and "Back to training" cancels. If a student closes the tab without ending, the open session is rated the next time they come back (30+ minutes later), with a Skip.

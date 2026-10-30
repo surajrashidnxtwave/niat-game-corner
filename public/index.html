@@ -1811,7 +1811,7 @@ const ML = [
  ['tooth','hair','paint','brush','toothbrush, hairbrush, paintbrush',1],
  ['for','while','infinite','loop','for loop, while loop, infinite loop',2],
  ['syntax','type','value','error','SyntaxError, TypeError, ValueError',2],
- ['source','pin','zip','code','source code, PIN code, zip code',2],
+ ['source','pin','area','code','source code, PIN code, area code',2],
  ['user','file','nick','name','username, filename, nickname',2],
  ['dark','light','safe','mode','dark mode, light mode, safe mode',2],
  ['check','power','end','point','checkpoint, PowerPoint, endpoint',2],
@@ -1907,14 +1907,14 @@ const LG = [
   [['Number systems',['binary','octal','decimal','hexadecimal']],['Python loop words',['for','while','break','continue']],['Command line commands',['cd','ls','mkdir','pwd']],['CSS units',['px','em','rem','vh']]],
   [['Python string methods',['upper','lower','strip','split']],['Types of numbers',['prime','even','odd','composite']],['Git words',['branch','merge','stage','repo']],['Parts of a tree',['root','leaf','trunk','bark']]],
   [['Python list methods',['append','pop','insert','remove']],['HTML tags',['h1','p','br','a']],['CSS properties',['margin','padding','color','border']],['Web browsers',['Chrome','Firefox','Safari','Edge']]],
-  [['Types of matrix',['square','identity','zero','diagonal']],['Shapes',['circle','triangle','rectangle','hexagon']],['Probability words',['event','outcome','trial','sample']],['Python logic keywords',['and','or','not','is']]],
+  [['Units of data',['bit','byte','kilobyte','megabyte']],['Shapes',['circle','triangle','rectangle','hexagon']],['Probability words',['event','outcome','trial','sample']],['Python words in conditions',['and','or','not','in']]],
   [['CSS layout properties',['justify-content','align-items','flex-wrap','gap']],['CSS position values',['static','relative','absolute','fixed']],['HTML input types',['text','email','password','checkbox']],['Tailwind classes',['p-4','text-center','rounded','shadow']]],
-  [['Ctrl shortcuts',['copy','paste','cut','undo']],['Git commands',['init','add','status','log']],['Python built-in functions',['print','input','len','type']],['Things you do to a file',['open','save','rename','delete']]],
+  [['Ctrl shortcuts while typing',['undo','redo','find','bold']],['Git commands',['init','add','status','log']],['Python built-in functions',['print','input','len','type']],['Things you do to a file',['rename','delete','move','upload']]],
   [['UPI apps',['PhonePe','Paytm','GPay','BHIM']],['Social apps',['Instagram','YouTube','Snapchat','WhatsApp']],['Cloud storage',['Drive','Dropbox','OneDrive','iCloud']],['AI chatbots',['ChatGPT','Gemini','Claude','Copilot']]],
   [['Powers of 2',['16','32','64','128']],['Perfect squares',['25','36','49','81']],['Prime numbers',['11','13','17','19']],['Multiples of 10',['20','50','70','90']]],
   [['Tags inside <head>',['title','meta','link','style']],['Page layout tags',['header','footer','nav','section']],['Table tags',['table','tr','td','th']],['Text formatting tags',['b','i','strong','em']]]
 ];
-const LGNOTE = ['Trap: “float” is also a CSS property, but it is not a display value.','Trap: “break” sounds like CSS too, but here it belongs with Python loops.','Trap: “branch” is part of a tree, but the tree group is already full without it.','Trap: “pop” and “remove” sound general, but they are list methods. “Edge” is a browser, not a CSS border.','Trap: “square” is a shape too, but the shapes group is full without it.','Trap: “text” is a Tailwind prefix, but on its own it is an input type.','Trap: “open” is a Python built-in too, but Python’s group is full. “copy” and “cut” are also file actions.','Trap: WhatsApp has payments too, but it belongs with social apps.','Trap: 16 and 64 are also perfect squares, but only the powers of 2 need them.','Trap: “link” sounds like the a tag, but it is a tag that goes inside head.'];
+const LGNOTE = ['Trap: “float” is also a CSS property, but it is not a display value.','Trap: “break” sounds like CSS too, but here it belongs with Python loops.','Trap: “branch” is part of a tree, but the tree group is already full without it.','Trap: “pop” and “remove” sound general, but they are list methods. “Edge” sounds like a border, but it is a browser.','Trap: “sample” sounds like data, but here it is a probability word. “bit” and “byte” are units of data.','Trap: “text” is a Tailwind prefix, but on its own it is an input type.','Trap: “add” and “status” sound general, but they are Git commands. “find” is Ctrl+F.','Trap: WhatsApp has payments too, but it belongs with social apps.','Trap: 16 and 64 are also perfect squares, but only the powers of 2 need them.','Trap: “link” sounds like the a tag, but it is a tag that goes inside head.'];
 const LGCOL = ['#FFD966','#A7E3A1','#A9C8FF','#D6B8FF'];
 const LinkGrid = { id:'link-grid', name:'Link Grid', skill:'insight', icon:'grid', inspired:'NYT Connections', topics:'Python, HTML/CSS, Git, maths',
   how:['16 words hide 4 groups of 4.','Tap 4 words that belong together, then Submit.','Some words look like they fit two groups. You can make 4 mistakes.'],
@@ -2077,8 +2077,8 @@ const RecallRebuild = { id:'recall-rebuild', name:'Recall Rebuild', skill:'memor
 
 /* ================= 7. Back Track (memory) ================= */
 const TOK = ['==','!=','<=','>=','+=','//','**','[]','{}'];
-const BackTrack = { id:'back-track', name:'Back Track', skill:'memory', icon:'back', inspired:'n-back working-memory training', topics:'Python operators',
-  how:['Python operators appear one at a time, like == or //.','Press Match (or the space bar) when the operator is the same as the one N steps back.','Score 80% or more and N goes up next time.'],
+const BackTrack = { id:'back-track', name:'Back Track', skill:'memory', icon:'back', inspired:'n-back working-memory training', topics:'Python symbols',
+  how:['Python symbols appear one at a time, like == or //.','Press Match (or the space bar) when the symbol is the same as the one N steps back.','Score 80% or more and N goes up next time.'],
   run(ctx){
     const st = gs('back-track'); const N = st.level || 1, T = 20 + N;
     const seq = []; for (let i = 0; i < T; i++) seq.push(i >= N && Math.random() < .32 ? seq[i-N] : Math.floor(Math.random()*TOK.length));
@@ -2156,7 +2156,7 @@ const TRICKS = [
   { id:'twoways', name:'Only two options', means:'Pretending there are only two choices when there are more.', spot:'Ask: is there a third option, or a middle path?',
     ex:'“Either you learn AI right now or your career is over.”',
     yes:['“You either use ChatGPT for everything or you’re stuck in the past.”','“Either your code is perfect or you’re a bad programmer.”','“Either you get placed in your first interview or you’re not cut out for tech.”','“If you’re not using Tailwind, you must be writing messy CSS.”'],
-    no:['“You can use Flexbox, Grid, or both. Pick based on the layout you need.”','“We can finish the feature, test it properly, or cut it down so we can do both.”'] },
+    no:['“You can use Flexbox, Grid, or both. Pick based on the layout you need.”','“We can ship on Friday, or cut one small feature so we have time to test. Let’s pick.”'] },
   { id:'cause', name:'Before isn’t because', means:'Assuming that because one thing happened first, it caused the next.', spot:'Ask: could something else explain it? Was it tested?',
     ex:'“I updated my phone and then my exam went badly. The update ruined my exam.”',
     yes:['“I switched to dark mode and my marks went up. Dark mode makes you smarter.”','“The site went down right after Sai joined the team. He must have broken it.”','“Ever since the new canteen opened, more students are failing. The canteen is the problem.”','“I drank coffee before the exam and topped it. Coffee is the secret.”'],
@@ -2403,13 +2403,13 @@ const TS = [
   { brief:'A Python variable name for a student’s total marks.', opts:[['total_marks',null],['tm','Too vague'],['x','Too vague'],['total_marks_of_the_student_in_all_subjects','Too long'],['Total Marks','Breaks the code'],['2total','Breaks the code']], note:'Python names can’t contain spaces or start with a number. Good names say what they hold, briefly.' },
   { brief:'A Git commit message for fixing the login button colour.', opts:[['Fix login button colour on mobile',null],['changes','Too vague'],['fixed stuff lol','Too vague'],['Fixed the bug where the login button on the home page showed the wrong colour on small mobile screens in dark mode','Too long'],['update','Too vague'],['asdf','Too vague']], note:'A good commit message says what changed, in a few words. Your future self will read it.' },
   { brief:'A CSS class name for the main navigation bar.', opts:[['main-nav',null],['blue-box','Describes looks, not purpose'],['div1','Too vague'],['the-navigation-bar-at-the-top-of-the-page','Too long'],['nav bar','Breaks the code'],['big-blue-strip','Describes looks, not purpose']], note:'Name classes by what they are for. If the bar turns green later, “blue-box” becomes wrong. A space makes two classes.' },
-  { brief:'A prompt to get AI feedback on your HTML page.', opts:[['Review my HTML for semantic tags and accessibility. List 3 fixes with reasons.',null],['make it better','Too vague'],['check','Too vague'],['Write the whole website for me so I can submit it','Hands over the thinking'],['Hi, hope you are well, I was wondering if you could maybe possibly look at my page and tell me anything at all you think','Too long'],['Rewrite all my code without explaining anything','Hands over the thinking']], note:'Good prompts are specific and keep you learning: ask for feedback and reasons, not a finished answer.' },
+  { brief:'A prompt to get AI feedback on your HTML page.', opts:[['Review my HTML for semantic tags and accessibility. List 3 fixes with reasons.',null],['make it better','Too vague'],['check','Too vague'],['Write the whole website for me so I can submit it','Hands over the thinking'],['Hi, hope you are well! I was wondering if you could please kindly review my HTML for semantic tags and accessibility and list 3 fixes with reasons, thank you so much','Too long'],['Rewrite all my code without explaining anything','Hands over the thinking']], note:'Good prompts are specific and keep you learning: ask for feedback and reasons, not a finished answer.' },
   { brief:'A Python function name that checks if a number is even.', opts:[['is_even',null],['check','Too vague'],['f1','Too vague'],['function_that_checks_whether_the_given_number_is_even','Too long'],['is even','Breaks the code'],['2even','Breaks the code']], note:'Function names should say what they do. is_even reads like a yes/no question, which suits a function that returns True or False.' },
   { brief:'A Git commit message after adding a contact form.', opts:[['Add contact form to homepage',null],['stuff','Too vague'],['final','Too vague'],['Added a new contact form with name, email and message fields plus validation and styling on the homepage today','Too long'],['wip','Too vague'],['form','Too vague']], note:'Say what changed and where, in a few words. “final” is never final.' },
   { brief:'A CSS class name for a red error message.', opts:[['error-message',null],['red-text','Describes looks, not purpose'],['big-red-bold','Describes looks, not purpose'],['text1','Too vague'],['error message','Breaks the code'],['the-message-that-shows-when-the-form-has-an-error','Too long']], note:'If the design changes the colour to orange, “red-text” becomes a lie. Name it by its job.' },
-  { brief:'A prompt to understand a Python error you got.', opts:[['I got a TypeError on line 4 (code below). Explain why in simple words, but don’t fix it for me.',null],['error help','Too vague'],['fix','Too vague'],['Just give me working code, I don’t care why','Hands over the thinking'],['Hello, I really hope you can help me, I have been trying for a long time and something somewhere in my code is wrong I think','Too long'],['Do my assignment','Hands over the thinking']], note:'The best prompt gives context and asks to understand, so next time you can fix it yourself.' },
+  { brief:'A prompt to understand a Python error you got.', opts:[['I got a TypeError on line 4 (code below). Explain why in simple words, but don’t fix it for me.',null],['error help','Too vague'],['fix','Too vague'],['Just give me working code, I don’t care why','Hands over the thinking'],['Hello, I really hope you can help me, I have been trying for a long time and I got a TypeError on line 4 (code below), please explain why in simple words but don’t fix it','Too long'],['Do my assignment','Hands over the thinking']], note:'The best prompt gives context and asks to understand, so next time you can fix it yourself.' },
   { brief:'A Python variable name for a list of student names.', opts:[['student_names',null],['s','Too vague'],['list1','Too vague'],['Student Names','Breaks the code'],['1students','Breaks the code'],['list_of_all_the_names_of_students_in_the_class','Too long']], note:'Plural names like student_names tell the reader it holds many items.' },
-  { brief:'A prompt to use AI while revising for an exam.', opts:[['Quiz me with 5 questions on Python lists, one at a time, and tell me what I got wrong.',null],['python','Too vague'],['Write all my exam answers so I can memorise them','Hands over the thinking'],['teach','Too vague'],['Give me last year’s answers so I don’t need to study','Hands over the thinking'],['Hi, I have an exam soon and I am a bit worried, could you maybe help me study or something, anything is fine really','Too long']], note:'Using AI to test yourself builds memory. Using it to hand you answers doesn’t.' }
+  { brief:'A prompt to use AI while revising for an exam.', opts:[['Quiz me with 5 questions on Python lists, one at a time, and tell me what I got wrong.',null],['python','Too vague'],['Write all my exam answers so I can memorise them','Hands over the thinking'],['teach','Too vague'],['Give me last year’s answers so I don’t need to study','Hands over the thinking'],['Hi, I have an exam soon and I am a bit worried, so could you please quiz me with 5 questions on Python lists, one at a time, and tell me what I got wrong','Too long']], note:'Using AI to test yourself builds memory. Using it to hand you answers doesn’t.' }
 ];
 const TasteTest = { id:'taste-test', name:'Taste Test', skill:'ai', icon:'star', inspired:'Aashish Pahwa’s “AI ideas feel familiar” post', topics:'Python names, Git, CSS, prompting',
   how:['An AI gives you 6 options for a small task.','First, pick the best one.','Then say exactly what’s wrong with 3 of the others. That’s the real skill.'],
@@ -2710,7 +2710,7 @@ $('join-form').addEventListener('submit', async e => {
   try { localStorage.setItem(AUTH_KEY, JSON.stringify(ME)); } catch(e){}
   SFX.unlock(); SFX.play('levelup');
   location.hash = ''; route();
-  toast('Welcome, ' + ME.name.split(' ')[0] + '! 💪');
+  toast('Welcome, ' + (ME.call || ME.name.split(' ')[0]) + '! 💪');
   pullMe();
 });
 
@@ -2732,7 +2732,7 @@ function renderBoard(){
   if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+slot3d('trophy', '', img3d('trophy', 112), 'gold')+'<p class="muted">Loading your batch…</p></div>'; return; }
   /* my own row uses my live points, so it moves the moment I finish a round */
   const all = BOARD.map(u => u.id === ME.id ? { n: u.n, p: Math.max(u.p, points()), me: true } : { n: u.n, p: u.p });
-  if (!all.some(u => u.me)) all.push({ n: ME.name.split(' ')[0], p: points(), me: true });
+  if (!all.some(u => u.me)) all.push({ n: (ME.call || ME.name.split(' ')[0]), p: points(), me: true });
   all.sort((a,b) => b.p - a.p);
   const myRank = all.findIndex(u => u.me) + 1;
   const face = u => '<span style="font-size:.62em;font-weight:900">'+esc(initials(u.n))+'</span>';
@@ -3087,7 +3087,7 @@ function checkQuests(g){
 function boardSorted(){
   if (!BOARD || !ME) return null;
   const all = BOARD.map(u => u.id === ME.id ? { n:u.n, p:Math.max(u.p, points()), me:true } : { n:u.n, p:u.p });
-  if (!all.some(u => u.me)) all.push({ n: ME.name.split(' ')[0], p: points(), me: true });
+  if (!all.some(u => u.me)) all.push({ n: (ME.call || ME.name.split(' ')[0]), p: points(), me: true });
   return all.sort((a,b) => b.p - a.p);
 }
 function passedRivals(before, after){
@@ -3299,7 +3299,7 @@ document.addEventListener('click', async e => {
 });
 function renderWho(){
   const w = $('h-who'); if (!w || !ME) return;
-  $('h-hi').textContent = 'Welcome back, ' + ME.name.split(' ')[0] + ' 👋';
+  $('h-hi').textContent = 'Welcome back, ' + (ME.call || ME.name.split(' ')[0]) + ' 👋';
   w.innerHTML = 'Logged in as <b>'+esc(ME.name)+'</b> · '+esc(ME.roll)+(ME.pilot && ME.pilot !== 'ALL' ? ' · '+esc(ME.pilot) : '')+'. <button class="linkbtn" id="h-out">Not you?</button>';
   $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
 }

@@ -15,7 +15,24 @@ export const GAME_IDS = ['word-spread', 'beat-the-7', 'missing-link', 'link-grid
 // batch (stored in students.pilot) groups the leaderboard; roster rows without one go in ALL
 export const BATCH_RE = /^[A-Z0-9 _-]{1,30}$/;
 
-export const newToken = () => randomBytes(24).toString('hex');
+// Roster names come in many shapes: "B S Prajwal", "M.Abuzar", "K P PRATYUSHAA .", "Md Sameer Shaik".
+// parts: letters-only pieces, lower case
+export const nameParts = n => String(n).toLowerCase().split(/[^a-z]+/).filter(Boolean);
+const title = w => w[0].toUpperCase() + w.slice(1);
+// the name to call a student by: first part that is not an initial ("B S Prajwal" -> "Prajwal")
+export function callName(n) {
+  const p = nameParts(n);
+  return p.length ? title(p.find(w => w.length >= 3) || p[0]) : '';
+}
+// leaderboard name: "Prajwal P." (call name + initial of the last other part)
+export function shortName(n) {
+  const p = nameParts(n), c = callName(n).toLowerCase(), rest = p.filter(w => w !== c);
+  return callName(n) + (rest.length ? ' ' + rest[rest.length - 1][0].toUpperCase() + '.' : '');
+}
+// clean a roster name: drop emoji, brackets, underscores and other symbols
+export const cleanName = n => String(n).replace(/[^A-Za-z .'-]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/^[^A-Za-z]+/, '').replace(/[ .'-]+$/, '');
+
+export const newToken =() => randomBytes(24).toString('hex');
 export const hashToken = t => createHash('sha256').update(t).digest('hex');
 const TOKEN_RE = /^[a-f0-9]{48}$/;
 

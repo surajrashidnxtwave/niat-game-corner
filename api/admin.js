@@ -2,7 +2,7 @@
 // GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress)
 // POST /api/admin { action: "roster", rows: [{ line, roll, name, batch }] } -> adds or updates students
 // Needs header  x-admin-key: <ADMIN_KEY>.
-import { db, sameSecret, limited, ipOf, dbReady, BATCH_RE } from './_lib/db.js';
+import { db, sameSecret, limited, ipOf, dbReady, BATCH_RE, cleanName } from './_lib/db.js';
 
 const ROLL_RE = /^[A-Z0-9_/-]{3,30}$/, FULL_RE = /^[A-Za-z][A-Za-z .'-]{0,59}$/;
 
@@ -101,13 +101,14 @@ export default async function handler(req, res) {
 }
 
 // Add or update roster rows. NIAT ID is the key; a later row with the same ID wins.
+// IDs without a digit ("N/A", "NA") are placeholders and are skipped.
 async function roster(res, sql, b) {
   if (b.action !== 'roster' || !Array.isArray(b.rows) || b.rows.length > 5000) return res.status(400).json({ ok: false, error: 'Send up to 5,000 rows at a time.' });
   const bad = [], keep = new Map();
   for (const r of b.rows) {
-    const roll = String(r?.roll || '').trim().toUpperCase(), name = String(r?.name || '').trim().replace(/\s+/g, ' ');
+    const roll = String(r?.roll || '').trim().toUpperCase(), name = cleanName(r?.name || '');
     const batch = String(r?.batch || '').trim().toUpperCase() || 'ALL';
-    if (!ROLL_RE.test(roll) || !FULL_RE.test(name) || !BATCH_RE.test(batch)) { bad.push(r?.line ?? '?'); continue; }
+    if (!ROLL_RE.test(roll) || !/\d/.test(roll) || !FULL_RE.test(name) || !BATCH_RE.test(batch)) { bad.push(r?.line ?? '?'); continue; }
     keep.set(roll, { roll, name, batch });
   }
   const rows = [...keep.values()];
