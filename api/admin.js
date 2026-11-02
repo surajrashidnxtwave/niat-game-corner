@@ -1,10 +1,24 @@
 // GET /api/admin?view=summary           -> pilot report as JSON
 // GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress)
-// POST /api/admin { action: "roster", rows: [{ line, roll, name, batch }] } -> adds or updates students
-// Needs header  x-admin-key: <ADMIN_KEY>.
-import { db, sameSecret, limited, ipOf, dbReady, BATCH_RE, cleanName } from './_lib/db.js';
+// Needs header  x-admin-key: <ADMIN_KEY>. Read-only: the roster is loaded directly into the database.
+import { db, sameSecret, limited, ipOf, dbReady } from './_lib/db.js';
 
-const ROLL_RE = /^[A-Z0-9_/-]{3,30}$/, FULL_RE = /^[A-Za-z][A-Za-z .'-]{0,59}$/;
+// Batch name (students.pilot) -> university, longest prefix first. Used to group the report by university.
+const UNIS = [
+  ['YENEPOYA BA', 'Yenepoya University, Bangalore'], ['YENEPOYA KA', 'Yenepoya University, Mangalore'],
+  ['MALLA REDDY TIRUPATI', 'Malla Reddy Tirupati'], ['SPIHER BENGALURU', 'SPIHER University, Bengaluru'], ['SPIHER CHENNAI', 'SPIHER University, Chennai'],
+  ['NIAT CHEVELLA', 'NIAT Chevella'], ['ADYPU', 'A Dy Patil University'], ['ALARD', 'Alard University'], ['AMET', 'AMET University'],
+  ['ANNAMACHARYA', 'Annamacharya University'], ['AURORA', 'Aurora University'], ['BEST', 'BEST University'], ['BHARATH', 'Bharath University'],
+  ['CDU', 'Chaitanya Deemed-to-be University'], ['CITY', 'Chalapathy (CITY)'], ['CRESCENT', 'Crescent University'], ['GEETA', 'Geeta University'],
+  ['GMRIT', 'GMRIT'], ['JOY', 'Joy University'], ['KKH', 'NIAT KKH (Nxtwave Institute of Advanced Technologies)'], ['LIMAT', 'LIMAT'],
+  ['LINGAYAS', "Lingaya's Vidyapeeth"], ['MRU', 'Malla Reddy University'], ['MVR', 'MVR College of Engineering'], ['NIU', 'Noida International University'],
+  ['NRI', 'NRI Institute'], ['NSRIT', 'NSRIT University'], ['P K DAS', 'P K Das University'], ['SANDIP', 'Sandip University'],
+  ['SANSKRITI', 'Sanskriti University'], ['SGSU', 'Scope Global Skills University'], ['SGU', 'Sanjay Ghodawat University'], ['SMRU', 'SMR University'],
+  ['SNS', 'SNS College of Technology'], ['SRI SRI', 'Sri Sri University'], ['SUBHARTI', 'Subharti University'], ['SUSHANT', 'Sushant University'],
+  ['SVYASA', 'S-VYASA'], ['TAKSHASILA', 'Takshasila University'], ['TS MISHRA', 'T S Mishra University'], ['VGU', 'Vivekananda Global University'],
+  ['DEMO', 'Demo']
+].sort((a, b) => b[0].length - a[0].length);
+const uniOf = pilot => (UNIS.find(([p]) => pilot.startsWith(p)) || [, 'Other'])[1];
 
 const CSV = {
   students: `SELECT s.id, s.name, s.roll AS niat_id, s.pilot AS batch, s.joined_at, s.last_seen,
@@ -27,7 +41,7 @@ const cell = v => {
 };
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ ok: false, error: 'GET or POST only' });
+  if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'GET only' });
   if (limited('a:' + ipOf(req), 30)) return res.status(429).json({ ok: false, error: 'slow down' });
   if (!sameSecret(req.headers['x-admin-key'], process.env.ADMIN_KEY)) return res.status(401).json({ ok: false, error: 'wrong key' });
   if (!dbReady(res)) return;
@@ -35,7 +49,6 @@ export default async function handler(req, res) {
   const q = new URL(req.url, 'http://x').searchParams;
   const sql = db();
   try {
-    if (req.method === 'POST') return await roster(res, sql, req.body || {});
     if (q.get('view') === 'csv') {
       const t = q.get('table');
       if (!CSV[t]) return res.status(400).json({ ok: false, error: 'bad table' });
@@ -48,10 +61,12 @@ export default async function handler(req, res) {
     }
 
     const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas] = await Promise.all([
-      sql`SELECT pilot, COUNT(*)::int AS on_roster, COUNT(joined_at)::int AS joined,
-                 COUNT(*) FILTER (WHERE last_seen > now() - interval '7 days')::int AS active7,
-                 COUNT(*) FILTER (WHERE last_seen > now() - interval '1 day')::int AS active1
-          FROM students GROUP BY pilot ORDER BY pilot`,
+      sql`WITH pr AS (SELECT student_id, SUM(active)::int AS active, SUM(plays)::int AS plays FROM progress GROUP BY student_id)
+          SELECT s.pilot, COUNT(*)::int AS on_roster, COUNT(s.joined_at)::int AS joined,
+                 COUNT(*) FILTER (WHERE s.last_seen > now() - interval '7 days')::int AS active7,
+                 COUNT(*) FILTER (WHERE s.last_seen > now() - interval '1 day')::int AS active1,
+                 (COALESCE(SUM(pr.active), 0) / 60)::int AS minutes, COALESCE(SUM(pr.plays), 0)::int AS rounds
+          FROM students s LEFT JOIN pr ON pr.student_id = s.id GROUP BY s.pilot ORDER BY s.pilot`,
       sql`WITH pr AS (SELECT game_id, COUNT(*) FILTER (WHERE plays > 0)::int AS players, SUM(plays)::int AS rounds,
                              (SUM(active) / 60)::int AS minutes, ROUND(AVG(best_pct) FILTER (WHERE plays > 0))::int AS avg_best
                       FROM progress GROUP BY game_id),
@@ -72,7 +87,7 @@ export default async function handler(req, res) {
       sql`SELECT f.created_at, s.name, f.game_id, f.meta, f.comment
           FROM feedback f JOIN students s ON s.id = f.student_id
           WHERE f.kind = 'verdict' AND f.fair = false ORDER BY f.created_at DESC LIMIT 100`,
-      sql.query(CSV.students),
+      sql.query(CSV.students.replace('GROUP BY s.id', 'WHERE s.joined_at IS NOT NULL GROUP BY s.id') + ' LIMIT 3000'),
       sql`SELECT to_char(created_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') AS day,
                  COUNT(*) FILTER (WHERE meta->>'mood' = 'tired')::int AS tired, COUNT(*) FILTER (WHERE meta->>'mood' = 'okay')::int AS okay,
                  COUNT(*) FILTER (WHERE meta->>'mood' = 'sharp')::int AS sharp
@@ -93,33 +108,11 @@ export default async function handler(req, res) {
           WHERE f.kind = 'session' AND (f.comment IS NOT NULL OR jsonb_array_length(COALESCE(f.meta->'why', '[]'::jsonb)) > 0)
           ORDER BY f.created_at DESC LIMIT 200`
     ]);
+    for (const p of pilots) p.uni = uniOf(p.pilot);
+    for (const st of students) st.uni = uniOf(st.batch);
     return res.status(200).json({ ok: true, pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas });
   } catch (e) {
     console.error('[admin]', e.message);
     return res.status(500).json({ ok: false, error: 'server error' });
   }
-}
-
-// Add or update roster rows. NIAT ID is the key; a later row with the same ID wins.
-// IDs without a digit ("N/A", "NA") are placeholders and are skipped.
-async function roster(res, sql, b) {
-  if (b.action !== 'roster' || !Array.isArray(b.rows) || b.rows.length > 5000) return res.status(400).json({ ok: false, error: 'Send up to 5,000 rows at a time.' });
-  const bad = [], keep = new Map();
-  for (const r of b.rows) {
-    const roll = String(r?.roll || '').trim().toUpperCase(), name = cleanName(r?.name || '');
-    const batch = String(r?.batch || '').trim().toUpperCase() || 'ALL';
-    if (!ROLL_RE.test(roll) || !/\d/.test(roll) || !FULL_RE.test(name) || !BATCH_RE.test(batch)) { bad.push(r?.line ?? '?'); continue; }
-    keep.set(roll, { roll, name, batch });
-  }
-  const rows = [...keep.values()];
-  let added = 0, updated = 0;
-  if (rows.length) {
-    const out = await sql.query(
-      `INSERT INTO students (roll, name, pilot) SELECT * FROM unnest($1::text[], $2::text[], $3::text[])
-       ON CONFLICT (roll) DO UPDATE SET name = EXCLUDED.name, pilot = EXCLUDED.pilot
-       RETURNING (xmax = 0) AS inserted`,
-      [rows.map(r => r.roll), rows.map(r => r.name), rows.map(r => r.batch)]);
-    added = out.filter(r => r.inserted).length; updated = out.length - added;
-  }
-  return res.status(200).json({ ok: true, added, updated, skipped: bad.length, badLines: bad.slice(0, 50) });
 }
