@@ -803,6 +803,11 @@ body.ingame{padding-left:0;padding-bottom:16px}
 body.ingame .toast,body.ingame .combo{left:50%}
 body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
 #g-fs svg{display:block;margin:auto}
+/* Ship or Test */
+.st-code{margin:0;font:600 14px/1.55 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;white-space:pre;overflow-x:auto;color:var(--ink)}
+.st-test{margin-top:10px;background:var(--chip);border-radius:12px;padding:10px 12px;display:grid;gap:4px;font-size:14px}
+.st-test code,.st-test b{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace}
+.st-test b.ok{color:var(--ok)}.st-test b.no{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -1038,6 +1043,7 @@ const ICON = {
   robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
   star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
   split:'<circle cx="8" cy="12" r="4.5"/><rect x="13.5" y="7.5" width="8" height="9" rx="2.5"/><path d="M17.5 5v2.5M16 12h.01M19 12h.01"/>',
+  ship:'<path d="M4 15l2 4h12l2-4z"/><path d="M12 3v12M12 3l5 6h-5"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
@@ -1283,7 +1289,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker'];
+const NEW_ORDER = ['bug-tracker','ship-or-test'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -4285,9 +4291,140 @@ const YouOrAI = { id:'you-or-ai', name:'You or AI?', skill:'ai', icon:'split', i
   }
 };
 
+/*ST-START*/
+/* ================= AI-written code generator (Ship or Test) =================
+   Each template: a task, a correct and a buggy version of the "AI's" function, and a test that shows the bug.
+   gen(buggy) returns { task, code, call, want, got, bug (what was wrong) }. want/got are what Python prints. */
+/* JS and Python share the same floats and both print the shortest form, so a float computed in the same order prints the same.
+   pyF formats a float result the way Python does (90 -> 90.0). */
+const pyF = x => Number.isInteger(x) ? x + '.0' : String(x);
+const ST = [
+  { id:'total', gen(b){ const n = ri(4, 9); return { task:`Add up all whole numbers from 1 to n.`,
+    code:`def total(n):\n    s = 0\n    for i in range(1, ${b ? 'n' : 'n + 1'}):\n        s += i\n    return s`, call:`total(${n})`, want:String(n * (n + 1) / 2), got:String(b ? n * (n - 1) / 2 : n * (n + 1) / 2),
+    bug:'range(1, n) stops before n, so n itself is never added.' }; } },
+  { id:'even', gen(b){ const n = pick([4, 6, 8, 10, 12, 14]); return { task:'Return True if a number is even.',
+    code:`def is_even(n):\n    return n % 2 == ${b ? 1 : 0}`, call:`is_even(${n})`, want:'True', got:b ? 'False' : 'True',
+    bug:'n % 2 == 1 is true for odd numbers, the opposite of what was asked.' }; } },
+  { id:'largest', gen(b){ const v = shuffle([-3, -7, -12, -5, -9]).slice(0, 4); const m = Math.max(...v); return { task:'Return the largest number in a list.',
+    code:`def largest(nums):\n    best = ${b ? '0' : 'nums[0]'}\n    for n in nums:\n        if n > best:\n            best = n\n    return best`, call:`largest(${pyList(v)})`, want:String(m), got:String(b ? 0 : m),
+    bug:'Starting best at 0 breaks when every number is negative: 0 is never beaten.' }; } },
+  { id:'average', gen(b){ let v; do { v = shuffle([3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 4); } while (v.reduce((a, c) => a + c) % 4 === 0 || (v.reduce((a, c) => a + c) / 4) % 0.25); const s = v.reduce((a, c) => a + c);
+    return { task:'Return the average of a list of marks.', code:`def average(marks):\n    return sum(marks) ${b ? '//' : '/'} len(marks)`, call:`average(${pyList(v)})`, want:String(s / 4), got:b ? String(Math.floor(s / 4)) : String(s / 4),
+    bug:'// is floor division, so the decimal part of the average is lost.' }; } },
+  { id:'last', gen(b){ const v = shuffle([2, 4, 6, 8, 10, 12]).slice(0, ri(3, 5)); return { task:'Return the last item of a list.',
+    code:`def last_item(items):\n    return items[${b ? 'len(items)' : '-1'}]`, call:`last_item(${pyList(v)})`, want:String(v[v.length - 1]), got:b ? 'IndexError' : String(v[v.length - 1]),
+    bug:'Indexes go up to len(items) - 1, so items[len(items)] is past the end.' }; } },
+  { id:'vowels', gen(b){ const w = pick(['India','Asha','Engineer','Orange','Umbrella']); const c = [...w].filter(ch => 'aeiou'.includes(ch.toLowerCase())).length, lc = [...w].filter(ch => 'aeiou'.includes(ch)).length;
+    return { task:'Count the vowels in a word, capital or small.', code:`def count_vowels(word):\n    count = 0\n    for ch in word:\n        if ${b ? "ch in 'aeiou'" : "ch.lower() in 'aeiou'"}:\n            count += 1\n    return count`, call:`count_vowels("${w}")`, want:String(c), got:String(b ? lc : c),
+    bug:"Capital vowels like 'A' are not in 'aeiou', so they are missed." }; } },
+  { id:'factorial', gen(b){ const n = ri(4, 7); const f = k => k <= 1 ? 1 : k * f(k - 1); return { task:'Return n factorial (1 × 2 × ... × n).',
+    code:`def factorial(n):\n    result = 1\n    for i in range(1, ${b ? 'n' : 'n + 1'}):\n        result *= i\n    return result`, call:`factorial(${n})`, want:String(f(n)), got:String(b ? f(n - 1) : f(n)),
+    bug:'range(1, n) leaves out n, so the last multiplication is missing.' }; } },
+  { id:'ctof', gen(b){ const c = pick([10, 20, 25, 30, 35, 40]); return { task:'Convert Celsius to Fahrenheit.',
+    code:`def to_fahrenheit(c):\n    return c * ${b ? '5 / 9' : '9 / 5'} + 32`, call:`to_fahrenheit(${c})`, want:pyF(c * 9 / 5 + 32), got:pyF(b ? c * 5 / 9 + 32 : c * 9 / 5 + 32),
+    bug:'The formula is C × 9/5 + 32. The fraction is upside down.' }; } },
+  { id:'discount', gen(b){ const p = pick([200, 400, 500, 800, 1000]), d = pick([10, 20, 25, 30, 40]); return { task:'Return the price after a discount of pct percent.',
+    code:`def final_price(price, pct):\n    return ${b ? 'price * pct / 100' : 'price - price * pct / 100'}`, call:`final_price(${p}, ${d})`, want:pyF(p - p * d / 100), got:pyF(b ? p * d / 100 : p - p * d / 100),
+    bug:'It returns the discount amount, not the price after the discount.' }; } },
+  { id:'adult', gen(b){ return { task:'Return True if someone is 18 or older.',
+    code:`def is_adult(age):\n    return age ${b ? '>' : '>='} 18`, call:'is_adult(18)', want:'True', got:b ? 'False' : 'True',
+    bug:'> 18 leaves out people who are exactly 18.' }; } },
+  { id:'reverse', gen(b){ const w = pick(WORDS); return { task:'Return a word written backwards.',
+    code:`def backwards(word):\n    return word[${b ? '-1:0:-1' : '::-1'}]`, call:`backwards("${w}")`, want:"'" + [...w].reverse().join('') + "'", got:"'" + (b ? [...w].reverse().join('').slice(0, -1) : [...w].reverse().join('')) + "'",
+    bug:'Stopping at index 0 leaves out the first letter.' }; } },
+  { id:'wordcount', gen(b){ const w = pick(['code','git','data','loop']); return { task:'Count how many times each word appears.',
+    code:`def word_counts(text):\n    counts = {}\n    for w in text.split():\n        ${b ? 'counts[w] = 1' : 'counts[w] = counts.get(w, 0) + 1'}\n    return counts`, call:`word_counts("${w} and ${w}")`, want:`{'${w}': 2, 'and': 1}`, got:b ? `{'${w}': 1, 'and': 1}` : `{'${w}': 2, 'and': 1}`,
+    bug:'counts[w] = 1 resets the count every time the word appears again.' }; } },
+  { id:'percent', gen(b){ const [m, t] = pick([[45, 50], [36, 40], [18, 20], [72, 80], [27, 30]]); return { task:'Return marks as a percentage of the total.',
+    code:`def percentage(marks, total):\n    return ${b ? 'marks / 100 * total' : 'marks / total * 100'}`, call:`percentage(${m}, ${t})`, want:pyF(m / t * 100), got:pyF(b ? m / 100 * t : m / t * 100),
+    bug:'It should divide by the total first: marks / total × 100.' }; } },
+  { id:'sumlist', gen(b){ const v = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, ri(3, 5)); const s = v.reduce((a, c) => a + c); return { task:'Add up all the numbers in a list.',
+    code:`def add_all(nums):\n    s = 0\n    for i in range(${b ? 'len(nums) - 1' : 'len(nums)'}):\n        s += nums[i]\n    return s`, call:`add_all(${pyList(v)})`, want:String(s), got:String(b ? s - v[v.length - 1] : s),
+    bug:'range(len(nums) - 1) skips the last number.' }; } },
+  { id:'contains', gen(b){ const v = shuffle([3, 5, 7, 9, 11]).slice(0, 3); return { task:'Return True if x is in the list, else False.',
+    code:`def has(nums, x):\n    ${b ? 'return nums.index(x) >= 0' : 'return x in nums'}`, call:`has(${pyList(v)}, 4)`, want:'False', got:b ? 'ValueError' : 'False',
+    bug:'index() raises an error when x is missing instead of returning False.' }; } },
+  { id:'passfail', gen(b){ return { task:'Return "Pass" for marks of 40 or more, else "Fail".',
+    code:`def result(marks):\n    if marks ${b ? '>' : '>='} 40:\n        return "Pass"\n    return "Fail"`, call:'result(40)', want:"'Pass'", got:b ? "'Fail'" : "'Pass'",
+    bug:'> 40 fails a student who scored exactly 40.' }; } },
+  { id:'counteven', gen(b){ const v = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, 5); const e = v.filter(x => x % 2 === 0).length; return { task:'Count the even numbers in a list.',
+    code:`def count_even(nums):\n    c = 0\n    for n in nums:\n        if n % 2${b ? '' : ' == 0'}:\n            c += 1\n    return c`, call:`count_even(${pyList(v)})`, want:String(e), got:String(b ? 5 - e : e),
+    bug:'if n % 2: is true when there IS a remainder, which counts odd numbers.' }; } },
+  { id:'smaller', gen(b){ let a, c; do { a = ri(2, 30); c = ri(2, 30); } while (a === c); return { task:'Return the bigger of two numbers.',
+    code:`def bigger(a, b):\n    return a if a ${b ? '<' : '>'} b else b`, call:`bigger(${a}, ${c})`, want:String(Math.max(a, c)), got:String(b ? Math.min(a, c) : Math.max(a, c)),
+    bug:'The comparison is the wrong way round, so it returns the smaller number.' }; } },
+  { id:'initials', gen(b){ const [f, l] = pick([['Ravi','Kumar'],['Asha','Rao'],['Imran','Khan'],['Divya','Iyer'],['Sai','Teja']]); return { task:'Return the initials of a name, like "R.K.".',
+    code:`def initials(first, last):\n    return ${b ? 'first[1] + "." + last[1] + "."' : 'first[0] + "." + last[0] + "."'}`, call:`initials("${f}", "${l}")`, want:`'${f[0]}.${l[0]}.'`, got:b ? `'${f[1]}.${l[1]}.'` : `'${f[0]}.${l[0]}.'`,
+    bug:'Strings start at index 0, so [1] takes the second letter.' }; } },
+  { id:'area', gen(b){ const r = pick([1, 3, 5, 10]); return { task:'Return the area of a circle of radius r (use 3.14).',
+    code:`def area(r):\n    return 3.14 * ${b ? 'r * 2' : 'r * r'}`, call:`area(${r})`, want:pyF(3.14 * r * r), got:pyF(b ? 3.14 * r * 2 : 3.14 * r * r),
+    bug:'Area needs r squared (r * r), not r * 2.' }; } }
+];
+/*ST-END*/
+
+/* ================= 20. Ship or Test (using AI well): an AI wrote the code. Ship it, test it, or send it back ================= */
+const ST_N = 6, ST_SECS = 120;
+const ShipOrTest = { id:'ship-or-test', name:'Ship or Test', skill:'ai', icon:'ship', inspired:'code review of AI-written code', topics:'Python functions up to dictionaries',
+  how:['An AI wrote a small Python function for each task. Some have a bug.','<b>Ship it</b> (+3, but −4 if it has a bug), <b>Run a test</b> (−1, shows what it returns), or <b>Send back</b> (+2 if buggy, −1 if it was fine).','6 functions in 2 minutes.'],
+  run(ctx){
+    const flags = shuffle([1, 1, 0, 0, Math.random() < 0.5 ? 1 : 0, Math.random() < 0.5 ? 1 : 0]);
+    const tpl = fresh('ship-or-test', ST, ST_N, t => t.id), log = [];
+    let i = -1, points = 0, over = false;
+    ctx.root.innerHTML = '<div class="tbar"><i id="st-t"></i></div>' + hud([['st-n','Function','1/'+ST_N],['st-p','Points','0'],['st-l','Seconds',ST_SECS]]) + '<div id="st-body"></div>';
+    ctx.timer(ST_SECS, $('st-t'), s => $('st-l').textContent = s, () => { over = true; finish(true); });
+    function next(){
+      if (over) return;
+      i++;
+      if (i >= ST_N) return finish(false);
+      const buggy = !!flags[i], F = tpl[i].gen(buggy), t0 = Date.now(), rec = { id: tpl[i].id, buggy, tested: false, action: null };
+      $('st-n').textContent = (i + 1) + '/' + ST_N;
+      $('st-body').innerHTML = '<div class="card ya-card"><span class="chip">Task</span><p class="ya-q">'+esc(F.task)+'</p>'
+        + '<div class="ai-box"><span class="ai-tag">🤖 AI wrote this</span><pre class="st-code">'+esc(F.code)+'</pre></div><div id="st-test"></div></div>'
+        + '<div class="row ya-act" id="st-act"><button class="btn light" id="st-back">↩ Send back</button><button class="btn light" id="st-run">▶ Run a test (−1)</button><button class="btn c" id="st-ship">🚀 Ship it</button></div><div id="st-out"></div>';
+      anim($('st-body').firstChild, { opacity:[0,1], y:[8,0] });
+      $('st-run').onclick = () => {
+        rec.tested = true; points -= 1; $('st-p').textContent = points; $('st-run').disabled = true;
+        const ok = F.want === F.got;
+        $('st-test').innerHTML = '<div class="st-test"><code>'+esc(F.call)+'</code><div><span class="muted">should give</span> <b>'+esc(F.want)+'</b></div><div><span class="muted">it gives</span> <b class="'+(ok ? 'ok' : 'no')+'">'+esc(F.got)+'</b></div></div>';
+        anim($('st-test'), { opacity:[0,1], y:[6,0] }); SFX.play(ok ? 'softok' : 'softbad');
+      };
+      const decide = act => {
+        rec.action = act; rec.secs = Math.round((Date.now() - t0) / 1000);
+        const good = act === 'ship' ? !buggy : buggy, delta = act === 'ship' ? (buggy ? -4 : 3) : (buggy ? 2 : -1);
+        points += delta; $('st-p').textContent = points; log.push(rec);
+        FX.result(good, true);
+        $('st-act').innerHTML = '';
+        $('st-out').innerHTML = '<div class="explain"><b>'+(act === 'ship' ? (buggy ? '🐞 A bug reached your users. ' : '✅ Shipped, and it works. ') : (buggy ? '✅ Good catch. ' : '↩ That one was fine. '))+(delta > 0 ? '+' : '')+delta+'</b><br>'
+          + (buggy ? 'The bug: '+esc(F.bug) : 'This code was correct.')+(rec.tested ? '' : '<div class="small" style="margin-top:6px">Test: <code>'+esc(F.call)+'</code> should give '+esc(F.want)+', it gives '+esc(F.got)+'.</div>')+'</div>'
+          + '<button class="btn c full" id="st-next" style="margin-top:12px">'+(i < ST_N - 1 ? 'Next function' : 'See results')+'</button>';
+        $('st-next').onclick = next; $('st-next').focus();
+      };
+      $('st-ship').onclick = () => decide('ship'); $('st-back').onclick = () => decide('back');
+    }
+    function finish(timeUp){
+      const bugs = log.filter(r => r.buggy), shipped = log.filter(r => r.action === 'ship');
+      const bugsShipped = bugs.filter(r => r.action === 'ship').length, caught = bugs.filter(r => r.action === 'back').length;
+      const tested = log.filter(r => r.tested).length, blind = shipped.filter(r => !r.tested).length, needless = log.filter(r => !r.buggy && r.action === 'back').length;
+      const totalBugs = flags.slice(0, Math.max(log.length, 0)).filter(Boolean).length;
+      const note = bugsShipped >= 2 ? 'You shipped ' + bugsShipped + ' buggy functions. AI code often looks right and is wrong at the edges (0, negative numbers, exactly 18). One quick test catches most of these.'
+        : blind >= 3 && bugsShipped ? 'You shipped ' + blind + ' functions without testing, and a bug got through. When AI writes code, run one test on an edge case before you trust it.'
+        : needless >= 2 ? 'You sent back ' + needless + ' functions that were fine. Testing is cheap: run one before you reject good code.'
+        : bugsShipped ? 'One bug got through to users. AI code that looks fine often breaks at an edge case (the last item, 0, a negative number, the exact limit). Test that case before you ship.'
+        : needless ? 'You caught the bugs, but sent back code that was fine. Run a quick test before rejecting: it costs less than redoing good work.'
+        : timeUp ? 'Time ran out. Reading the code for the edge case (the first and last number, 0, the exact limit) is faster than guessing.'
+        : 'You checked the AI’s code before trusting it, and no bug got through. That is the habit that keeps bugs away from users.';
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (ST_N * 3) * 100, title: caught + ' of ' + totalBugs + ' bugs caught', sub: log.length + ' functions reviewed' + (timeUp ? ', time ran out' : ''),
+        tiles: [[tested + '/' + log.length,'Tested before deciding'],[bugsShipped,'Bugs shipped'],[blind,'Shipped without a test'],[needless,'Good code sent back']],
+        note, meta: { reviewed: log.length, bugs: totalBugs, caught, bugsShipped, tested, shippedUntested: blind, needlessSendBacks: needless, points, timeUp,
+          items: log.map(r => ({ id: r.id, b: r.buggy ? 1 : 0, t: r.tested ? 1 : 0, a: r.action, s: r.secs })) } });
+    }
+    next();
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI];
+  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest];
 route();
 pullMe();
 </script>
