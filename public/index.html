@@ -784,6 +784,25 @@ html.w3d-ready .count .ripple{border-color:#fff}
 .bt-wrap canvas{display:block;margin:0 auto;width:min(100%, calc((100svh - 250px) * 4 / 3));min-width:min(100%, 300px);height:auto;aspect-ratio:4/3;touch-action:none;cursor:pointer}
 .bt-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;min-height:50px}
 input.field.mono{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
+/* AI games: the "AI says" box and You or AI? */
+.ai-box{margin-top:12px;border:2px solid color-mix(in srgb,var(--c-ai) 55%,#fff);background:color-mix(in srgb,var(--c-ai) 6%,#fff);border-radius:14px;padding:10px 12px;font:600 14px/1.5 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;white-space:pre-wrap}
+.ai-tag{display:block;font:800 11.5px var(--font);letter-spacing:.4px;color:var(--c-ai);margin-bottom:4px}
+.ya-card{margin-bottom:12px}
+.ya-q{font-size:17px;font-weight:800;margin:10px 0}
+.ya-card .code{margin:0 0 10px}
+.ya-opts .opt{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ya-l{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;border:2px solid var(--line);font-size:13px;font-weight:900}
+.ya-opt.sel .ya-l{background:var(--c);border-color:var(--c);color:#fff}
+.ya-t{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;font-weight:700}
+.ya-act{flex-wrap:wrap;justify-content:flex-end}
+.ya-act .btn{flex:1 1 140px}
+.ya-say{flex:1 1 100%;margin:0 0 4px;font-size:17px;font-weight:800}
+/* ---------- game mode: menu hidden while a game is open (full screen where the browser allows it) ---------- */
+body.ingame .tabbar{display:none}
+body.ingame{padding-left:0;padding-bottom:16px}
+body.ingame .toast,body.ingame .combo{left:50%}
+body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
+#g-fs svg{display:block;margin:auto}
 </style>
 </head>
 <body>
@@ -1018,6 +1037,7 @@ const ICON = {
   switch:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
   star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
+  split:'<circle cx="8" cy="12" r="4.5"/><rect x="13.5" y="7.5" width="8" height="9" rx="2.5"/><path d="M17.5 5v2.5M16 12h.01M19 12h.01"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
@@ -1262,7 +1282,7 @@ function renderGoal(){
 const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
-const NEW_OPEN = ['color-clash','seen-it'];
+const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
 const NEW_ORDER = ['bug-tracker'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
@@ -3827,9 +3847,447 @@ const BugTracker = { id:'bug-tracker', name:'Bug Tracker', skill:'focus', icon:'
 };
 
 
+/*AIQ-START*/
+/* ================= AI puzzle generator (shared by the AI games) =================
+   Each template makes a fresh puzzle with new numbers every time, so the games never run out.
+   A puzzle: { topic, q, code, opts[4], ans (index), trap (index of the tempting wrong answer),
+               right (AI's correct working), wrong (AI's wrong working, ends on the trap), hints:[nudge, method] }
+   When the "AI" is wrong it always gives the trap: the answer a hurried person (or a real AI) gets. */
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const numFmt = x => Number.isInteger(x) ? String(x) : String(+x.toFixed(2));
+const rupee = x => '₹' + numFmt(x);
+function mkQ(o){
+  const f = o.fmt || (x => typeof x === 'number' ? numFmt(x) : String(x));
+  const A = f(o.ans), T = f(o.trap);
+  const opts = [A, T];
+  (o.extra || []).map(f).forEach(v => { if (opts.length < 4 && !opts.includes(v) && v !== 'NaN') opts.push(v); });
+  for (let k = 1; opts.length < 4 && k < 50; k++) {                 // numeric filler if the extras collided
+    const n = typeof o.ans === 'number' ? f(o.ans + k * (k % 2 ? 1 : -1) * (o.step || 1)) : null;
+    if (n !== null && !opts.includes(n)) opts.push(n);
+    else if (n === null) opts.push(['None', 'Error', '0', '-1'].find(x => !opts.includes(x)));
+  }
+  const sh = shuffle(opts);
+  return { id: o.id, topic: o.topic, q: o.q, code: o.code || '', opts: sh, ans: sh.indexOf(A), trap: sh.indexOf(T),
+    right: o.right.replace(/\{A\}/g, A), wrong: o.wrong.replace(/\{T\}/g, T), hints: o.hints };
+}
+const MALE = ['Karthik','Ravi','Arjun','Imran','Rahul','Sai','Varun','Aditya','Nikhil','Faizan'];
+const NAMES = ['Asha','Ravi','Meena','Arjun','Priya','Imran','Divya','Kiran','Sana','Varun'];
+const WORDS = ['python','coding','binary','github','laptop','server','module','string','output','branch'];
+/* list repr like Python: [1, 2, 3] */
+const pyList = a => '[' + a.join(', ') + ']';
+
+const AIQ = [
+  /* ---------- aptitude ---------- */
+  { id:'batball', topic:'Aptitude', gen(){
+    const [big, small] = pick([['bat','ball'],['phone','cover'],['laptop','bag'],['guitar','case'],['watch','strap']]);
+    const D = pick([100, 200, 500, 1000]), b = ri(1, 30) * 5, T = 2 * b + D;
+    return mkQ({ id:this.id, topic:this.topic, fmt: rupee, ans:b, trap:2 * b, extra:[T / 2, b + 5, D / 2], step:5,
+      q:`A ${big} and a ${small} cost ₹${T} together. The ${big} costs ₹${D} more than the ${small}. How much is the ${small}?`,
+      right:`If the ${small} costs x, the ${big} costs x + ${D}. So 2x + ${D} = ${T}, and x = ${b}. Answer: {A}`,
+      wrong:`₹${T} − ₹${D} = ₹${2 * b}, so the ${small} costs ₹${2 * b}. Answer: {T}`,
+      hints:[`Check the quick answer: if the ${small} costs ₹${2 * b}, what does the ${big} cost? Do they add up to ₹${T}?`, `Call the ${small} x. Then x + (x + ${D}) = ${T}. Solve for x.`] }); } },
+  { id:'machines', topic:'Aptitude', gen(){
+    const n = ri(3, 9), t = ri(2, 9), m = pick([50, 100, 120, 200]), item = pick(['bottles','phone cases','T-shirts','chips']);
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => x + ' minutes', ans:t, trap:m, extra:[t * m / n, m / n, n * t],
+      q:`${n} machines make ${n} ${item} in ${t} minutes. How long do ${m} machines take to make ${m} ${item}?`,
+      right:`Each machine makes 1 in ${t} minutes. ${m} machines working at the same time make ${m} in the same ${t} minutes. Answer: {A}`,
+      wrong:`${n} machines need ${n} minutes' worth of work per item, so ${m} machines need ${m} minutes. Answer: {T}`,
+      hints:['How long does ONE machine take to make ONE item?', 'Each machine works at the same time as the others. More machines and more items cancel out.'] }); } },
+  { id:'doubling', topic:'Aptitude', gen(){
+    const d = ri(6, 30) * 2, [thing, place] = pick([['Algae','pond'],['A WhatsApp forward','college'],['Data on a server','disk']]);
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => 'Day ' + x, ans:d - 1, trap:d / 2, extra:[d - 2, d / 2 + 1], step:1,
+      q:`${thing} doubles every day. It fills the whole ${place} on day ${d}. On which day was the ${place} half full?`,
+      right:`It doubles every day, so the day before it was full it was half full: day ${d - 1}. Answer: {A}`,
+      wrong:`Half of ${d} days is ${d / 2}, so it was half full on day ${d / 2}. Answer: {T}`,
+      hints:['Think backwards from the day it was full.', 'If it doubles each day, how full was it one day earlier?'] }); } },
+  { id:'updown', topic:'Aptitude', gen(){
+    let P, x; do { P = pick([200, 400, 500, 800, 1000, 1200, 1600, 2000]); x = pick([10, 20, 25, 50]); } while (P * (10000 - x * x) % 10000);
+    const r = P * (10000 - x * x) / 10000, item = pick(['phone','pair of shoes','headset','backpack']);
+    return mkQ({ id:this.id, topic:this.topic, fmt: rupee, ans:r, trap:P, extra:[P * (100 + x) / 100, P * (100 - x) / 100],
+      q:`A ${item} costs ₹${P}. Its price goes up by ${x}%, then comes down by ${x}%. What does it cost now?`,
+      right:`Up ${x}%: ₹${P} × ${(100 + x) / 100} = ₹${P * (100 + x) / 100}. Down ${x}% of that: × ${(100 - x) / 100} = ₹${numFmt(r)}. Answer: {A}`,
+      wrong:`Up ${x}% and down ${x}% cancel out, so it is back to ₹${P}. Answer: {T}`,
+      hints:['The second change is a percent of the NEW price, not the old one.', `Work out the price after the rise first, then take ${x}% off that.`] }); } },
+  { id:'avgspeed', topic:'Aptitude', gen(){
+    const [a, b, r] = pick([[30,60,40],[40,60,48],[20,30,24],[60,90,72],[30,70,42],[45,90,60],[40,120,60],[36,45,40],[50,75,60]]);
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => numFmt(x) + ' km/h', ans:r, trap:(a + b) / 2, extra:[a, b, r + 5],
+      q:`You ride to college at ${a} km/h and come back the same way at ${b} km/h. What is your average speed for the whole trip?`,
+      right:`Say the trip is ${a * b} km each way. Going takes ${b} h, coming back ${a} h: ${2 * a * b} km in ${a + b} h = ${r} km/h. Answer: {A}`,
+      wrong:`Average of ${a} and ${b} is ${numFmt((a + b) / 2)}. Answer: {T}`,
+      hints:['You spend more time at the slower speed.', 'Average speed = total distance ÷ total time. Pick an easy distance and work out both times.'] }); } },
+  { id:'siblings', topic:'Aptitude', gen(){
+    const name = pick(MALE), s = ri(2, 6), b = pick([1, 2]);
+    return mkQ({ id:this.id, topic:this.topic, ans:b, trap:s * b, extra:[s + b, s, b + 1],
+      q:`${name} has ${s} sisters. Each sister has exactly ${b} brother${b > 1 ? 's' : ''}. How many boys are in the family?`,
+      right:`The sisters all share the same brother${b > 1 ? 's' : ''}, and ${name} is one of them. So there ${b > 1 ? 'are' : 'is'} ${b}. Answer: {A}`,
+      wrong:`${s} sisters × ${b} brother${b > 1 ? 's' : ''} each = ${s * b} boys. Answer: {T}`,
+      hints:['Are the sisters’ brothers different people, or the same ones?', `${name} is a brother to every sister.`] }); } },
+  { id:'interest', topic:'Aptitude', gen(){
+    const P = pick([1000, 2000, 5000, 8000, 10000]), r = pick([5, 8, 10, 12]), t = pick([2, 3, 4, 5]), SI = P * r * t / 100;
+    return mkQ({ id:this.id, topic:this.topic, fmt: rupee, ans:SI, trap:P * r / 100, extra:[P + SI, SI * 2],
+      q:`What is the simple interest on ₹${P} at ${r}% per year for ${t} years?`,
+      right:`Simple interest = P × R × T ÷ 100 = ${P} × ${r} × ${t} ÷ 100 = ₹${SI}. Answer: {A}`,
+      wrong:`${r}% of ₹${P} is ₹${P * r / 100}. Answer: {T}`,
+      hints:['Does the interest come once, or every year?', 'Simple interest = principal × rate × years ÷ 100.'] }); } },
+  { id:'together', topic:'Aptitude', gen(){
+    const [a, b, r] = pick([[12,6,4],[10,15,6],[20,30,12],[6,3,2],[12,24,8],[4,12,3],[20,5,4],[30,60,20],[18,9,6]]), [p, q] = shuffle(NAMES).slice(0, 2);
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => numFmt(x) + ' days', ans:r, trap:(a + b) / 2, extra:[a + b, Math.min(a, b)],
+      q:`${p} can finish a project in ${a} days. ${q} can finish it in ${b} days. How long do they take working together?`,
+      right:`In one day they do 1/${a} + 1/${b} = 1/${r} of the work. So together they take ${r} days. Answer: {A}`,
+      wrong:`The average of ${a} and ${b} days is ${numFmt((a + b) / 2)} days. Answer: {T}`,
+      hints:['Two people working together must be faster than the faster one alone.', 'Add the work each does in one day: 1/a + 1/b.'] }); } },
+  { id:'posts', topic:'Aptitude', gen(){
+    const g = pick([2, 3, 4, 5, 10]), k = ri(5, 20), L = g * k;
+    return mkQ({ id:this.id, topic:this.topic, ans:k + 1, trap:k, extra:[k - 1, k + 2],
+      q:`A straight fence is ${L} m long. There is a post every ${g} m, including one at each end. How many posts are there?`,
+      right:`${L} ÷ ${g} = ${k} gaps. Posts are one more than gaps: ${k + 1}. Answer: {A}`,
+      wrong:`${L} ÷ ${g} = ${k} posts. Answer: {T}`,
+      hints:['Draw a short fence: 2 gaps need how many posts?', 'Count the gaps, then remember the post at the start.'] }); } },
+  { id:'discount', topic:'Aptitude', gen(){
+    let x, y; do { [x, y] = shuffle([10, 20, 25, 30, 40, 50]).slice(0, 2); } while ((100 - x) * (100 - y) % 100);
+    const tot = 100 - (100 - x) * (100 - y) / 100;
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => numFmt(x) + '%', ans:tot, trap:x + y, extra:[Math.max(x, y), (x + y) / 2],
+      q:`A shop gives ${x}% off, then a further ${y}% off the new price. What is the total discount?`,
+      right:`After ${x}% off you pay ${100 - x}%. ${y}% off that leaves ${(100 - x) * (100 - y) / 100}% of the price. Discount = ${tot}%. Answer: {A}`,
+      wrong:`${x}% + ${y}% = ${x + y}%. Answer: {T}`,
+      hints:['The second discount is on a smaller price.', 'Try a ₹100 item: apply each discount in turn.'] }); } },
+  { id:'profit', topic:'Aptitude', gen(){
+    let C, p; do { C = pick([200, 400, 500, 800, 1000]); p = pick([10, 20, 25, 50]); } while (C * p % 100);
+    const S = C * (100 + p) / 100;
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => numFmt(x) + '%', ans:p, trap:(S - C) / S * 100, extra:[p * 2, p / 2],
+      q:`A shop buys a calculator for ₹${C} and sells it for ₹${S}. What is the profit percent?`,
+      right:`Profit = ₹${S - C}. Profit % is on the cost price: ${S - C} ÷ ${C} × 100 = ${p}%. Answer: {A}`,
+      wrong:`Profit ₹${S - C} out of ₹${S} is ${numFmt((S - C) / S * 100)}%. Answer: {T}`,
+      hints:['Profit percent is worked out on which price?', 'Profit % = profit ÷ cost price × 100.'] }); } },
+  { id:'kb', topic:'Number systems', gen(){
+    const n = ri(2, 16);
+    return mkQ({ id:this.id, topic:this.topic, fmt: x => x + ' bytes', ans:n * 1024, trap:n * 1000, extra:[n * 8, n * 1024 * 8],
+      q:`A file is ${n} KB. Using the binary units from class, how many bytes is that?`,
+      right:`In binary units 1 KB = 2¹⁰ = 1024 bytes. ${n} × 1024 = ${n * 1024}. Answer: {A}`,
+      wrong:`Kilo means 1000, so ${n} KB = ${n * 1000} bytes. Answer: {T}`,
+      hints:['Computers count in powers of 2.', '1 KB = 2¹⁰ bytes.'] }); } },
+  /* ---------- number systems and bitwise ---------- */
+  { id:'bin2dec', topic:'Number systems', gen(){
+    let n, rev; do { n = ri(9, 63); rev = parseInt(n.toString(2).split('').reverse().join(''), 2); } while (rev === n);
+    const b = n.toString(2);
+    return mkQ({ id:this.id, topic:this.topic, ans:n, trap:rev, extra:[n + 1, n * 2, n - 2],
+      q:`What is the binary number ${b} in decimal?`,
+      right:`Place values from the right are 1, 2, 4, 8, 16, 32. ${b.split('').map((d, i) => d === '1' ? 2 ** (b.length - 1 - i) : 0).filter(Boolean).join(' + ')} = ${n}. Answer: {A}`,
+      wrong:`Reading the place values from the left (1, 2, 4, ...), it adds up to ${rev}. Answer: {T}`,
+      hints:['Which end of a binary number is the 1s place?', 'Write 1, 2, 4, 8, ... under the digits starting from the right, then add where there is a 1.'] }); } },
+  { id:'dec2bin', topic:'Number systems', gen(){
+    let n, b, r; do { n = ri(5, 40); b = n.toString(2); r = b.split('').reverse().join(''); } while (r === b);
+    return mkQ({ id:this.id, topic:this.topic, ans:b, trap:r, extra:[(n + 1).toString(2), (n - 1).toString(2), (n + 2).toString(2)],
+      q:`What is ${n} in binary?`,
+      right:`Divide by 2 and read the remainders from bottom to top: ${b}. Check: it is ${n}. Answer: {A}`,
+      wrong:`Dividing by 2, the remainders in order are ${r}. Answer: {T}`,
+      hints:['When you divide by 2 again and again, which remainder is the 1s place?', 'Read the remainders from the last one to the first.'] }); } },
+  { id:'hex2dec', topic:'Number systems', gen(){
+    const d1 = ri(1, 9), d2 = ri(10, 15), h = d1 + 'ABCDEF'[d2 - 10];
+    return mkQ({ id:this.id, topic:this.topic, ans:d1 * 16 + d2, trap:d1 * 10 + d2, extra:[d1 * 16, d2 * 16 + d1],
+      q:`What is the hexadecimal number ${h} in decimal?`,
+      right:`${h[0]} is in the 16s place and ${h[1]} = ${d2}. ${d1} × 16 + ${d2} = ${d1 * 16 + d2}. Answer: {A}`,
+      wrong:`${h[1]} = ${d2}, and ${h[0]} is the tens digit: ${d1} × 10 + ${d2} = ${d1 * 10 + d2}. Answer: {T}`,
+      hints:['In hexadecimal, what is each place worth?', 'The left digit is worth 16 each.'] }); } },
+  { id:'and', topic:'Bitwise', gen(){
+    let a, b; do { a = ri(5, 15); b = ri(5, 15); } while (a === b || !(a & b) || (a & b) === Math.min(a, b));
+    return mkQ({ id:this.id, topic:this.topic, ans:a & b, trap:a | b, extra:[a + b, a ^ b],
+      q:'What does this print?', code:`print(${a} & ${b})`,
+      right:`${a} = ${a.toString(2).padStart(4, '0')}, ${b} = ${b.toString(2).padStart(4, '0')}. & keeps a 1 only where both have 1: ${(a & b).toString(2).padStart(4, '0')} = ${a & b}. Answer: {A}`,
+      wrong:`& combines the bits that are 1 in either number: ${(a | b).toString(2).padStart(4, '0')} = ${a | b}. Answer: {T}`,
+      hints:['Write both numbers in binary, one above the other.', '& gives 1 only where BOTH bits are 1.'] }); } },
+  { id:'or', topic:'Bitwise', gen(){
+    let a, b; do { a = ri(3, 14); b = ri(3, 14); } while (a === b || !(a & b));
+    return mkQ({ id:this.id, topic:this.topic, ans:a | b, trap:a + b, extra:[a & b, a ^ b],
+      q:'What does this print?', code:`print(${a} | ${b})`,
+      right:`${a} = ${a.toString(2).padStart(4, '0')}, ${b} = ${b.toString(2).padStart(4, '0')}. | gives 1 where either has a 1: ${(a | b).toString(2).padStart(4, '0')} = ${a | b}. Answer: {A}`,
+      wrong:`| adds the two numbers: ${a} + ${b} = ${a + b}. Answer: {T}`,
+      hints:['| is a bitwise operator, not a plus sign.', 'Line up the binary digits. A 1 in either number gives a 1.'] }); } },
+  { id:'lshift', topic:'Bitwise', gen(){
+    const a = ri(3, 12), k = ri(1, 3);
+    return mkQ({ id:this.id, topic:this.topic, ans:a * 2 ** k, trap:a * k === a * 2 ** k ? a + k : a * k, extra:[a >> k, a * 2 ** (k + 1), a + k],
+      q:'What does this print?', code:`print(${a} << ${k})`,
+      right:`<< ${k} shifts the bits left ${k} place${k > 1 ? 's' : ''}. Each shift doubles the number: ${a} × ${2 ** k} = ${a * 2 ** k}. Answer: {A}`,
+      wrong:`<< ${k} multiplies by ${k}. Answer: {T}`,
+      hints:['What does moving every bit one place left do to a binary number?', 'Each left shift multiplies by 2.'] }); } },
+  { id:'rshift', topic:'Bitwise', gen(){
+    let a, k; do { a = ri(9, 60); k = ri(1, 2); } while (a % 2 ** k === 0);
+    return mkQ({ id:this.id, topic:this.topic, ans:a >> k, trap:a / 2 ** k, extra:[(a >> k) + 1, a << k],
+      q:'What does this print?', code:`print(${a} >> ${k})`,
+      right:`>> ${k} shifts the bits right and drops the last ${k}. That is ${a} // ${2 ** k} = ${a >> k}. Answer: {A}`,
+      wrong:`>> ${k} divides by ${2 ** k}: ${a} / ${2 ** k} = ${numFmt(a / 2 ** k)}. Answer: {T}`,
+      hints:['When bits fall off the right end, can you get a decimal point?', '>> k is the same as // 2^k (whole-number division).'] }); } },
+  /* ---------- Python ---------- */
+  { id:'floordiv', topic:'Python', gen(){
+    let a, b; do { a = ri(7, 45); b = pick([2, 4, 5, 8]); } while (a % b === 0);
+    return mkQ({ id:this.id, topic:this.topic, ans:String(Math.floor(a / b)), trap:String(a / b), extra:[String(Math.ceil(a / b)), String(a % b)],
+      q:'What does this print?', code:`print(${a} // ${b})`,
+      right:`// is floor division. ${a} / ${b} = ${a / b}, and // drops the decimal part: ${Math.floor(a / b)}. Answer: {A}`,
+      wrong:`${a} divided by ${b} is ${a / b}. Answer: {T}`,
+      hints:['What is the difference between / and // in Python?', '// keeps only the whole-number part.'] }); } },
+  { id:'mod', topic:'Python', gen(){
+    let a, b; do { a = ri(10, 50); b = ri(3, 7); } while (a % b === 0 || a % b === Math.floor(a / b));
+    return mkQ({ id:this.id, topic:this.topic, ans:a % b, trap:Math.floor(a / b), extra:[a % b + 1, b - a % b],
+      q:'What does this print?', code:`print(${a} % ${b})`,
+      right:`% gives the remainder. ${a} = ${b} × ${Math.floor(a / b)} + ${a % b}. Answer: {A}`,
+      wrong:`${a} % ${b} is how many times ${b} goes into ${a}: ${Math.floor(a / b)}. Answer: {T}`,
+      hints:['Is % the quotient or the remainder?', `Write ${a} as ${b} × something + something.`] }); } },
+  { id:'sumrange', topic:'Python', gen(){
+    const n = ri(4, 12);
+    return mkQ({ id:this.id, topic:this.topic, ans:n * (n - 1) / 2, trap:n * (n + 1) / 2, extra:[n, (n - 1) * n],
+      q:'What does this print?', code:`print(sum(range(${n})))`,
+      right:`range(${n}) is 0 to ${n - 1}. 0 + 1 + ... + ${n - 1} = ${n * (n - 1) / 2}. Answer: {A}`,
+      wrong:`range(${n}) is 1 to ${n}, which adds up to ${n * (n + 1) / 2}. Answer: {T}`,
+      hints:['What is the first number range gives, and is the stop number included?', `range(${n}) starts at 0 and stops before ${n}.`] }); } },
+  { id:'lenrange', topic:'Python', gen(){
+    const a = ri(0, 5), s = ri(2, 4), k = ri(3, 8), b = a + s * k;
+    return mkQ({ id:this.id, topic:this.topic, ans:k, trap:k + 1, extra:[k - 1, b - a],
+      q:'What does this print?', code:`print(len(range(${a}, ${b}, ${s})))`,
+      right:`It counts ${a}, ${a + s}, ... up to but not including ${b}: that is ${k} numbers. Answer: {A}`,
+      wrong:`From ${a} to ${b} in steps of ${s}, counting both ends, gives ${k + 1} numbers. Answer: {T}`,
+      hints:['Is the stop value ever included in a range?', 'List the numbers it makes and count them.'] }); } },
+  { id:'negindex', topic:'Python', gen(){
+    const v = shuffle([3, 5, 7, 8, 12, 15, 20, 25, 30, 42]).slice(0, 5);
+    return mkQ({ id:this.id, topic:this.topic, ans:v[3], trap:v[2], extra:[v[4], v[1]],
+      q:'What does this print?', code:`nums = ${pyList(v)}\nprint(nums[-2])`,
+      right:`-1 is the last item, so -2 is the second from the end: ${v[3]}. Answer: {A}`,
+      wrong:`Index -2 counts two places back from the end, landing on ${v[2]}. Answer: {T}`,
+      hints:['Which item is nums[-1]?', 'Negative indexes count from the end, starting at -1.'] }); } },
+  { id:'slice', topic:'Python', gen(){
+    const w = pick(WORDS), i = ri(0, 2), j = i + ri(2, 3);
+    return mkQ({ id:this.id, topic:this.topic, ans:w.slice(i, j), trap:w.slice(i, j + 1), extra:[w.slice(i + 1, j + 1), w.slice(i + 1, j)],
+      q:'What does this print?', code:`word = "${w}"\nprint(word[${i}:${j}])`,
+      right:`It takes indexes ${i} to ${j - 1} (the stop index ${j} is left out): ${w.slice(i, j)}. Answer: {A}`,
+      wrong:`It takes indexes ${i} to ${j}: ${w.slice(i, j + 1)}. Answer: {T}`,
+      hints:['Is the character at the stop index included?', 'word[a:b] gives b − a characters.'] }); } },
+  { id:'strmul', topic:'Python', gen(){
+    const s = pick(['ab','hi','na','go','ok']), k = ri(2, 4);
+    return mkQ({ id:this.id, topic:this.topic, ans:s.repeat(k), trap:'TypeError', extra:[s + k, Array(k).fill(s).join(' ')],
+      q:'What does this print?', code:`print("${s}" * ${k})`,
+      right:`A string times a whole number repeats the string ${k} times. Answer: {A}`,
+      wrong:'You cannot multiply text by a number, so Python raises an error. Answer: {T}',
+      hints:['Python allows some maths on strings. Which ones?', '"a" * 3 repeats the string.'] }); } },
+  { id:'strplus', topic:'Python', gen(){
+    const a = ri(1, 9), b = ri(1, 9);
+    return mkQ({ id:this.id, topic:this.topic, ans:`${a}${b}`, trap:a + b, extra:['TypeError', `${a} ${b}`],
+      q:'What does this print?', code:`print("${a}" + "${b}")`,
+      right:`Both are strings (in quotes), so + joins them: ${a}${b}. Answer: {A}`,
+      wrong:`${a} + ${b} = ${a + b}. Answer: {T}`,
+      hints:['Look at the quotes. What type are these values?', '+ on two strings joins them.'] }); } },
+  { id:'intplus', topic:'Python', gen(){
+    const a = ri(2, 9), b = ri(2, 9);
+    return mkQ({ id:this.id, topic:this.topic, ans:a + b, trap:`${a}${b}`, extra:['TypeError', `${a}${b}${b}`],
+      q:'What does this print?', code:`print(int("${a}") + ${b})`,
+      right:`int("${a}") turns the text into the number ${a}. ${a} + ${b} = ${a + b}. Answer: {A}`,
+      wrong:`"${a}" is text, so + joins it with ${b}: ${a}${b}. Answer: {T}`,
+      hints:['What does int() do to "7"?', 'After int(), both sides are numbers.'] }); } },
+  { id:'append', topic:'Python', gen(){
+    const L = ri(1, 4), v = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]), a = v.slice(0, L), p = v.slice(L, L + 2);
+    return mkQ({ id:this.id, topic:this.topic, ans:L + 1, trap:L + 2, extra:[L, L + 3],
+      q:'What does this print?', code:`a = ${pyList(a)}\na.append(${pyList(p)})\nprint(len(a))`,
+      right:`append adds ONE item, and here that item is the whole list ${pyList(p)}. So the length goes from ${L} to ${L + 1}. Answer: {A}`,
+      wrong:`append adds the 2 new numbers, so the length is ${L} + 2 = ${L + 2}. Answer: {T}`,
+      hints:['How many items does append add, whatever you give it?', 'extend adds each item; append adds the list as one item.'] }); } },
+  { id:'sortnone', topic:'Python', gen(){
+    const v = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
+    return mkQ({ id:this.id, topic:this.topic, ans:'None', trap:pyList(v.slice().sort((x, y) => x - y)), extra:[pyList(v), 'Error'],
+      q:'What does this print?', code:`nums = ${pyList(v)}\nprint(nums.sort())`,
+      right:'sort() sorts the list in place and returns None, and that is what gets printed. Answer: {A}',
+      wrong:`sort() sorts the list, so it prints ${pyList(v.slice().sort((x, y) => x - y))}. Answer: {T}`,
+      hints:['What does the sort() method give back?', 'sort() changes the list itself. sorted() returns a new list.'] }); } },
+  { id:'dictget', topic:'Python', gen(){
+    const [k1, k2] = shuffle(['a','b','x','id','age','name']).slice(0, 2), v = ri(2, 9);
+    return mkQ({ id:this.id, topic:this.topic, ans:0, trap:'KeyError', extra:['None', v],
+      q:'What does this print?', code:`d = {"${k1}": ${v}}\nprint(d.get("${k2}", 0))`,
+      right:`"${k2}" is not in d, so get() returns the default you gave: 0. Answer: {A}`,
+      wrong:`"${k2}" is not a key in d, so Python raises an error. Answer: {T}`,
+      hints:['What is the difference between d["key"] and d.get("key")?', 'get() returns the second argument when the key is missing.'] }); } },
+  { id:'alias', topic:'Python', gen(){
+    const n = ri(2, 5), v = shuffle([1, 2, 3, 4, 5, 6, 7]).slice(0, n);
+    return mkQ({ id:this.id, topic:this.topic, ans:n + 1, trap:n, extra:[n + 2, 'Error'],
+      q:'What does this print?', code:`a = ${pyList(v)}\nb = a\nb.append(9)\nprint(len(a))`,
+      right:`b = a does not copy the list. a and b are the same list, so adding to b adds to a: ${n + 1}. Answer: {A}`,
+      wrong:`Only b changed. a still has ${n} items. Answer: {T}`,
+      hints:['Does b = a make a copy?', 'Both names point to the same list.'] }); } },
+  { id:'upper', topic:'Python', gen(){
+    const w = pick(WORDS);
+    return mkQ({ id:this.id, topic:this.topic, ans:w, trap:w.toUpperCase(), extra:['None', w[0].toUpperCase() + w.slice(1)],
+      q:'What does this print?', code:`s = "${w}"\ns.upper()\nprint(s)`,
+      right:`Strings never change. s.upper() makes a new string, but it is not saved, so s is still "${w}". Answer: {A}`,
+      wrong:`s.upper() turns s into capitals. Answer: {T}`,
+      hints:['Can a string be changed in place?', 'To keep the result you would need s = s.upper().'] }); } },
+  { id:'boolstr', topic:'Python', gen(){
+    const t = pick(['False', '0', 'No', ' ']);
+    return mkQ({ id:this.id, topic:this.topic, ans:'True', trap:'False', extra:['Error', 'None'],
+      q:'What does this print?', code:`print(bool("${t}"))`,
+      right:'Any string that is not empty counts as True, whatever it says. Answer: {A}',
+      wrong:`"${t}" means false, so bool gives False. Answer: {T}`,
+      hints:['Which strings are falsy in Python?', 'Only the empty string "" is False.'] }); } },
+  { id:'round', topic:'Python', gen(){
+    const e = pick([0, 2, 4, 6, 8, 10, 12]);
+    return mkQ({ id:this.id, topic:this.topic, ans:e, trap:e + 1, extra:[e + '.5', e - 1 < 0 ? e + 2 : e - 1],
+      q:'What does this print?', code:`print(round(${e}.5))`,
+      right:`Python rounds an exact .5 to the nearest EVEN number, so ${e}.5 becomes ${e}. Answer: {A}`,
+      wrong:`.5 always rounds up, so ${e}.5 becomes ${e + 1}. Answer: {T}`,
+      hints:['Python’s round() has a special rule for exact halves.', 'Halves go to the nearest even number (round(2.5) is 2).'] }); } },
+  { id:'while', topic:'Python', gen(){
+    let n, st; do { n = ri(10, 30); st = ri(3, 7); } while (n % st === 0);
+    const r = Math.ceil(n / st) * st;
+    return mkQ({ id:this.id, topic:this.topic, ans:r, trap:n, extra:[r - st, r + st],
+      q:'What does this print?', code:`i = 0\nwhile i < ${n}:\n    i += ${st}\nprint(i)`,
+      right:`i goes 0, ${st}, ${2 * st}, ... The loop stops at the first value that is not below ${n}: ${r}. Answer: {A}`,
+      wrong:`The loop runs until i reaches ${n}. Answer: {T}`,
+      hints:['Does i ever equal the limit exactly?', 'Write out the values of i one by one.'] }); } },
+  { id:'lenspace', topic:'Python', gen(){
+    const p = pick(['hello world','good morning','new delhi','git push','print hi','big data','dark mode']);
+    return mkQ({ id:this.id, topic:this.topic, ans:p.length, trap:p.length - 1, extra:[p.length + 1, 2],
+      q:'What does this print?', code:`print(len("${p}"))`,
+      right:`len counts every character, including the space: ${p.length}. Answer: {A}`,
+      wrong:`"${p.replace(' ', '')}" has ${p.length - 1} letters. Answer: {T}`,
+      hints:['Is a space a character?', 'Count every character between the quotes.'] }); } },
+  { id:'power', topic:'Python', gen(){
+    const a = pick([2, 3]);
+    return mkQ({ id:this.id, topic:this.topic, ans:a ** 9, trap:a ** 6, extra:[a * 9, a ** 5],
+      q:'What does this print?', code:`print(${a} ** 3 ** 2)`,
+      right:`** works right to left: 3 ** 2 = 9 first, then ${a} ** 9 = ${a ** 9}. Answer: {A}`,
+      wrong:`${a} ** 3 = ${a ** 3}, then squared = ${a ** 6}. Answer: {T}`,
+      hints:['Which ** happens first?', 'Powers are worked out from right to left.'] }); } },
+  { id:'find', topic:'Python', gen(){
+    const w = pick(WORDS), c = pick(['z','q','x','w']);
+    return mkQ({ id:this.id, topic:this.topic, ans:-1, trap:'ValueError', extra:['0', 'None'],
+      q:'What does this print?', code:`print("${w}".find("${c}"))`,
+      right:`find() returns -1 when the text is not found. (index() is the one that raises an error.) Answer: {A}`,
+      wrong:`"${c}" is not in the word, so Python raises an error. Answer: {T}`,
+      hints:['find() and index() behave differently when nothing is found.', 'One of them returns -1.'] }); } },
+  { id:'truediv', topic:'Python', gen(){
+    const q = ri(2, 9), b = ri(2, 6), a = q * b;
+    return mkQ({ id:this.id, topic:this.topic, ans:q + '.0', trap:String(q), extra:[q + '.5', (q - 1) + '.0'],
+      q:'What does this print?', code:`print(${a} / ${b})`,
+      right:`/ always gives a float in Python, even when it divides exactly: ${q}.0. Answer: {A}`,
+      wrong:`${a} / ${b} = ${q}. Answer: {T}`,
+      hints:['What type does / return in Python 3?', 'Even 4 / 2 gives 2.0.'] }); } }
+];
+
+/* fixed concept questions (Git, CSS, HTML, GenAI) mixed in for variety */
+const AIQ_FIXED = [
+  { topic:'Git', q:'You changed a file but did not run git add yet. Which command shows the exact lines you changed?', opts:['git diff','git status','git log','git commit'], ans:0, trap:1,
+    right:'git diff shows the changed lines that are not staged yet. Answer: git diff', wrong:'git status shows what changed in the file. Answer: git status', hints:['One command lists file names, another shows the lines.', 'Which command compares your work with the last saved version line by line?'] },
+  { topic:'Git', q:'Which command copies a whole repository from GitHub to your laptop for the first time?', opts:['git clone','git pull','git fetch','git init'], ans:0, trap:1,
+    right:'git clone makes a new local copy of a remote repository. Answer: git clone', wrong:'git pull downloads a repository from GitHub. Answer: git pull', hints:['You don’t have the project at all yet.', 'pull only works inside a repository you already have.'] },
+  { topic:'CSS', q:'A flex container has flex-direction: column. Which property centres the items vertically?', opts:['justify-content','align-items','text-align','vertical-align'], ans:0, trap:1,
+    right:'In a column, the main axis is vertical, and justify-content works on the main axis. Answer: justify-content', wrong:'align-items always controls vertical alignment. Answer: align-items', hints:['Which way does the main axis run in a column?', 'justify-content = main axis, align-items = cross axis.'] },
+  { topic:'CSS', q:'Which unit makes a CSS Grid column take a share of the leftover space?', opts:['fr','%','px','em'], ans:0, trap:1,
+    right:'fr means a fraction of the free space in the grid. Answer: fr', wrong:'% gives each column a share of the space. Answer: %', hints:['Grid has its own unit for sharing space.', 'It is short for "fraction".'] },
+  { topic:'HTML', q:'Which attribute gives an image text that screen readers read out?', opts:['alt','title','src','name'], ans:0, trap:1,
+    right:'alt describes the image for screen readers and shows if the image fails to load. Answer: alt', wrong:'title gives the image a description for screen readers. Answer: title', hints:['It is also shown when the image fails to load.', 'Short for "alternative text".'] },
+  { topic:'HTML', q:'Which tag makes a link to another page?', opts:['<a>','<link>','<href>','<nav>'], ans:0, trap:1,
+    right:'<a href="..."> makes a clickable link. <link> connects files like CSS in the head. Answer: <a>', wrong:'<link> is the tag for links. Answer: <link>', hints:['One tag goes in the head, one in the page.', 'The clickable one uses href.'] },
+  { topic:'GenAI', q:'A chatbot gives a confident answer with a source that does not exist. What is this called?', opts:['Hallucination','Overfitting','Tokenisation','Fine-tuning'], ans:0, trap:1,
+    right:'When an AI states made-up facts confidently, it is called a hallucination. Answer: Hallucination', wrong:'This is overfitting: the model memorised wrong facts. Answer: Overfitting', hints:['The AI is not lying on purpose. It is predicting likely words.', 'The word is borrowed from seeing things that are not there.'] },
+  { topic:'GenAI', q:'What does a language model read and write in?', opts:['Tokens','Whole sentences','Letters only','Pixels'], ans:0, trap:1,
+    right:'Models split text into tokens: whole words or pieces of words. Answer: Tokens', wrong:'A language model works one sentence at a time. Answer: Whole sentences', hints:['It is smaller than a sentence and often bigger than a letter.', 'Prices for AI APIs are counted in these.'] },
+  { topic:'GenAI', q:'You ask the same AI the same question twice and get different answers. What setting mostly controls this?', opts:['Temperature','Context window','Token limit','Training data'], ans:0, trap:2,
+    right:'Temperature controls randomness. Higher temperature gives more varied answers. Answer: Temperature', wrong:'The token limit decides how the answer changes each time. Answer: Token limit', hints:['Which setting is about randomness?', 'Turning it to 0 makes answers repeatable.'] },
+  { topic:'Command line', q:'Which command shows the folder you are in right now?', opts:['pwd','ls','cd','dir /s'], ans:0, trap:1,
+    right:'pwd prints the working directory. ls lists what is inside it. Answer: pwd', wrong:'ls shows where you are. Answer: ls', hints:['One command lists contents, another prints the location.', 'Its letters stand for "print working directory".'] }
+];
+/* a fresh puzzle: mostly generated, sometimes a concept question; never the same template twice in a row in one round */
+function aiQuestion(avoid){
+  if (Math.random() < 0.18) {
+    const f = fresh('aiq-fixed', AIQ_FIXED, 1)[0];
+    const idx = shuffle([0, 1, 2, 3]), opts = idx.map(i => f.opts[i]);
+    return { id:'fixed:' + f.q.slice(0, 20), topic:f.topic, q:f.q, code:'', opts, ans:idx.indexOf(f.ans), trap:idx.indexOf(f.trap), right:f.right, wrong:f.wrong, hints:f.hints };
+  }
+  let t; do { t = pick(AIQ); } while (avoid && avoid.includes(t.id) && AIQ.length > avoid.length);
+  return t.gen();
+}
+/* the AI's reply for a puzzle: right or wrong */
+const aiSays = (P, wrong) => ({ pick: wrong ? P.trap : P.ans, text: wrong ? P.wrong : P.right });
+/*AIQ-END*/
+
+/* ================= 19. You or AI? (using AI well): solve it yourself, or pay to ask AI; then keep or switch ================= */
+const YA_N = 6;
+const YouOrAI = { id:'you-or-ai', name:'You or AI?', skill:'ai', icon:'split', inspired:'research on how people rely on AI advice', topics:'aptitude, Python, number systems, Git, CSS, GenAI',
+  how:['Solve each puzzle yourself, or tap <b>Ask AI</b> to see its answer first. A right answer earns 2 points; asking AI costs 1.','If you answer first, the AI then gives its answer. When it disagrees, you choose: keep yours or switch.','The AI is often right, but not always. 6 puzzles.'],
+  run(ctx){
+    const wrongs = shuffle([1, 1, 0, 0, Math.random() < 0.4 ? 1 : 0, Math.random() < 0.4 ? 1 : 0]);   // which puzzles the AI gets wrong
+    const log = []; let i = -1, points = 0, used = [];
+    function next(){
+      i++;
+      if (i >= YA_N) return finish();
+      const P = aiQuestion(used); used.push(P.id);
+      const AI = aiSays(P, wrongs[i]), t0 = Date.now();
+      const rec = { topic: P.topic, aiWrong: !!wrongs[i], asked: false, askSecs: null, first: null, final: null };
+      let choice = null;
+      ctx.root.innerHTML = hud([['ya-n','Puzzle',(i+1)+'/'+YA_N],['ya-p','Points',points]])
+        + '<div class="card ya-card"><span class="chip">'+esc(P.topic)+'</span><p class="ya-q">'+esc(P.q)+'</p>'+(P.code ? code(P.code) : '')
+        + '<div class="ya-opts">'+P.opts.map((o, k) => '<button class="opt ya-opt" data-k="'+k+'"><span class="ya-l">'+'ABCD'[k]+'</span><span class="ya-t">'+esc(o)+'</span></button>').join('')+'</div>'
+        + '<div id="ya-ai"></div></div>'
+        + '<div id="ya-act" class="row ya-act"><button class="btn light" id="ya-ask">🤖 Ask AI (−1 point)</button><button class="btn c" id="ya-lock" disabled>Lock in</button></div>'
+        + '<div id="ya-out"></div>';
+      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      const opts = [...ctx.root.querySelectorAll('.ya-opt')];
+      const sel = k => { choice = k; opts.forEach((b, j) => b.classList.toggle('sel', j === k)); $('ya-lock').disabled = false; SFX.play('select'); };
+      opts.forEach((b, k) => b.onclick = () => { if (rec.final === null && rec.first === null) sel(k); });
+      const aiBox = () => '<div class="ai-box"><span class="ai-tag">🤖 AI says</span><div>'+esc(AI.text)+'</div></div>';
+      $('ya-ask').onclick = () => {
+        rec.asked = true; rec.askSecs = Math.round((Date.now() - t0) / 1000); points -= 1; $('ya-p').textContent = points;
+        $('ya-ai').innerHTML = aiBox(); anim($('ya-ai'), { opacity:[0,1], y:[6,0] });
+        $('ya-ask').disabled = true; SFX.play('whoosh');
+      };
+      $('ya-lock').onclick = () => {
+        if (choice === null) return;
+        rec.first = choice; opts.forEach(b => b.disabled = true);
+        if (rec.asked) return settle(choice);
+        /* answered alone: now the AI gives its view */
+        $('ya-ai').innerHTML = aiBox(); anim($('ya-ai'), { opacity:[0,1], y:[6,0] });
+        if (AI.pick === choice) {
+          $('ya-act').innerHTML = '<p class="ya-say">AI agrees with you.</p><button class="btn c" id="ya-go">Continue</button>';
+          $('ya-go').onclick = () => settle(choice);
+        } else {
+          $('ya-act').innerHTML = '<p class="ya-say">AI disagrees. Whose answer do you trust?</p><button class="btn light" id="ya-keep">Keep mine</button><button class="btn c" id="ya-sw">Switch to AI’s</button>';
+          $('ya-keep').onclick = () => settle(choice);
+          $('ya-sw').onclick = () => { opts.forEach((b, j) => b.classList.toggle('sel', j === AI.pick)); settle(AI.pick); };
+        }
+        $('ya-act').querySelector('button:last-child').focus();
+      };
+      function settle(final){
+        rec.final = final; rec.right = final === P.ans; rec.firstRight = rec.first === P.ans; rec.followedAI = final === AI.pick;
+        rec.secs = Math.round((Date.now() - t0) / 1000);
+        log.push(rec);
+        if (rec.right) points += 2; $('ya-p').textContent = points;
+        opts[P.ans].classList.add('right'); if (!rec.right) opts[final].classList.add('wrong');
+        FX.result(rec.right, true);
+        $('ya-act').innerHTML = '';
+        $('ya-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct.' : 'Not quite. The answer is '+esc(P.opts[P.ans])+'.')+'</b> '+esc(P.right.replace(/ Answer: .*$/, ''))
+          + (AI.pick !== P.ans ? '<div class="small" style="margin-top:6px">The AI was wrong here. It made the quick, tempting mistake.</div>' : '')+'</div>'
+          + '<button class="btn c full" id="ya-next" style="margin-top:12px">'+(i < YA_N - 1 ? 'Next puzzle' : 'See results')+'</button>';
+        $('ya-next').onclick = next; $('ya-next').focus();
+      }
+    }
+    function finish(){
+      const right = log.filter(r => r.right).length, asked = log.filter(r => r.asked).length;
+      const aiWrong = log.filter(r => r.aiWrong), followedWrong = aiWrong.filter(r => r.followedAI).length;
+      const droppedRight = log.filter(r => !r.asked && r.firstRight && !r.right).length;              // had it right, switched to AI
+      const keptWrong = log.filter(r => !r.asked && !r.aiWrong && !r.firstRight && !r.right).length;   // AI was right, kept own wrong answer
+      const fixedByAI = log.filter(r => !r.asked && !r.firstRight && r.right).length;
+      const note = followedWrong >= 2 ? 'You went with the AI ' + followedWrong + ' times when it was wrong. Its working looked reasonable, so it felt right. Before you accept an AI answer, do a quick check of your own (put the answer back into the question).'
+        : droppedRight ? 'You had the right answer and switched to the AI’s wrong one. Confidence is not correctness: when the AI disagrees, re-check both answers, then decide.'
+        : asked >= 4 ? 'You asked the AI on ' + asked + ' of 6 puzzles. Try each one yourself first. You keep more points, and your own answer helps you judge the AI’s.'
+        : keptWrong ? 'You kept your answer when the AI was right. Checking AI is good. Checking your own work when it disagrees is just as important.'
+        : 'You thought for yourself first and judged the AI’s answers on their merits. That is how to use AI well.';
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (YA_N * 2) * 100, title: right + ' of ' + YA_N + ' correct', sub: 'The AI was wrong on ' + aiWrong.length + ' of 6, on purpose',
+        tiles: [[asked + '/6','Asked AI first'],[followedWrong + '/' + aiWrong.length,'Followed AI when wrong'],[droppedRight,'Dropped a right answer'],[fixedByAI,'AI fixed your mistake']],
+        note, meta: { right, asked, aiWrong: aiWrong.length, followedWrong, droppedRight, keptWrong, fixedByAI, points,
+          items: log.map(r => ({ t: r.topic, aw: r.aiWrong ? 1 : 0, a: r.asked ? 1 : 0, as: r.askSecs, f: r.firstRight ? 1 : 0, r: r.right ? 1 : 0, s: r.secs })) } });
+    }
+    next();
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker];
+  ColorClash, SeenIt, BugTracker, YouOrAI];
 route();
 pullMe();
 </script>
