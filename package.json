@@ -11,8 +11,7 @@
     "dev": "vercel dev",
     "models": "node --env-file=.env.local scripts/cheapest-models.mjs",
     "test:judge": "node --env-file=.env.local scripts/test-judge.mjs",
-    "db:setup": "node --env-file=.env.local scripts/db-setup.mjs",
-    "test:bot": "node --env-file=.env.local scripts/test-bot.mjs"
+    "db:setup": "node --env-file=.env.local scripts/db-setup.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0"

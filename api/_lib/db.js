@@ -11,7 +11,7 @@ export function db() {
 // game ids the page knows about; anything else is rejected
 export const GAME_IDS = ['word-spread', 'beat-the-7', 'missing-link', 'link-grid', 'wiki-hop', 'recall-rebuild', 'back-track',
   'symbol-sprint', 'rule-switch', 'robot-path', 'fallacy-hunt', 'argue-back', 'trust-or-check', 'source-check', 'taste-test',
-  'color-clash', 'seen-it', 'bug-tracker', 'break-the-bot'];
+  'color-clash', 'seen-it', 'bug-tracker'];
 
 // batch (stored in students.pilot) groups the leaderboard; roster rows without one go in ALL
 export const BATCH_RE = /^[A-Z0-9 _-]{1,30}$/;

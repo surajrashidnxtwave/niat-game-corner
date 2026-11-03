@@ -180,7 +180,6 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           <button data-csv="plays">Rounds<small>every round played</small></button>
           <button data-csv="feedback">Feedback<small>ratings, comments, reports</small></button>
           <button data-csv="starts">Starts<small>every Play press, to see who quit early</small></button>
-          <button data-csv="bot">Break the Bot chats<small>every message and reply</small></button>
         </div>
       </div>
       <button class="btn" id="share">🔗 Copy share link</button>
@@ -314,7 +313,7 @@ const pct = (a, b) => b ? (a / b * 100) : 0;
 const pctTxt = (a, b) => { const p = pct(a, b); return b ? (p > 0 && p < 1 ? p.toFixed(1) : Math.round(p)) + '%' : '–'; };
 const when = t => t ? new Date(t).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' }) : '';
 const dayLabel = d => new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short' });
-const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-link':'Missing Link','link-grid':'Link Grid','wiki-hop':'Wiki Hop','recall-rebuild':'Recall Rebuild','back-track':'Back Track','symbol-sprint':'Symbol Sprint','rule-switch':'Rule Switch','robot-path':'Robot Path','fallacy-hunt':'Fallacy Hunt','argue-back':'Argue Back','trust-or-check':'Trust or Check','source-check':'Source Check','taste-test':'Taste Test','color-clash':'Color Clash','seen-it':'Seen It?','bug-tracker':'Bug Tracker','break-the-bot':'Break the Bot' };
+const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-link':'Missing Link','link-grid':'Link Grid','wiki-hop':'Wiki Hop','recall-rebuild':'Recall Rebuild','back-track':'Back Track','symbol-sprint':'Symbol Sprint','rule-switch':'Rule Switch','robot-path':'Robot Path','fallacy-hunt':'Fallacy Hunt','argue-back':'Argue Back','trust-or-check':'Trust or Check','source-check':'Source Check','taste-test':'Taste Test','color-clash':'Color Clash','seen-it':'Seen It?','bug-tracker':'Bug Tracker' };
 const gname = id => id ? (NAMES[id] || id) : 'General';
 const DIFF = { easy:'Too easy', right:'Just right', hard:'Too hard' };
 const CAT = { wrong:'Marked my answer wrong', broke:'Something broke', confusing:'Confusing', slow:'Slow or stuck', other:'Other' };

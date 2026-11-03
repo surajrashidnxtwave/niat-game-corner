@@ -30,8 +30,6 @@ const GAME_SKILL = {
   'rule-switch': 'flexibility',
   'robot-path': 'planning',
   'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai'
-  // 'break-the-bot' is left out on purpose: everyone cracks all 3 bots, so its score says nothing about
-  // whether a student checks AI. Counting it would push every student's "Using AI well" score up.
 };
 const SKILL_KEYS = ['creativity', 'insight', 'memory', 'focus', 'reasoning', 'flexibility', 'planning', 'ai'];
 const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2); };
@@ -90,8 +88,6 @@ const CSV = {
              FROM feedback f JOIN students s ON s.id = f.student_id ORDER BY f.created_at`,
   starts: `SELECT st.started_at, s.name, s.roll AS niat_id, s.pilot AS batch, st.game_id
            FROM starts st JOIN students s ON s.id = st.student_id ORDER BY st.started_at`,
-  bot: `SELECT b.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, b.run, b.level + 1 AS level, b.msg, b.reply, b.log, b.blocked, b.cracked, b.cost
-        FROM bot_log b JOIN students s ON s.id = b.student_id ORDER BY b.created_at`,
   progress: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, p.game_id, p.active / 60 AS minutes, p.plays AS rounds, p.best, p.best_pct, p.vol AS kg_lifted, p.updated_at
              FROM progress p JOIN students s ON s.id = p.student_id ORDER BY s.pilot, s.roll, p.game_id`
 };

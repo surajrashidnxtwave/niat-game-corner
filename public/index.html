@@ -783,16 +783,6 @@ html.w3d-ready .count .ripple{border-color:#fff}
 /* the whole box must fit on screen while tracking: width follows the column, capped by the screen height */
 .bt-wrap canvas{display:block;margin:0 auto;width:min(100%, calc((100svh - 250px) * 4 / 3));min-width:min(100%, 300px);height:auto;aspect-ratio:4/3;touch-action:none;cursor:pointer}
 .bt-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;min-height:50px}
-/* Break the Bot */
-.bb-def{font-size:14px;margin-bottom:8px;background:var(--card);border-radius:14px;padding:8px 12px;box-shadow:var(--shadow)}
-.bb-chat{height:340px;overflow-y:auto;background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.bb-msg{max-width:85%;padding:9px 13px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
-.bb-msg.me{align-self:flex-end;background:var(--c);color:#fff;border-bottom-right-radius:6px}
-.bb-msg.bot{align-self:flex-start;background:var(--chip);border-bottom-left-radius:6px}
-.bb-log{align-self:flex-start;font-size:12px;color:var(--soft);margin:-2px 0 4px 6px;max-width:85%}
-.bb-row{display:flex;gap:8px;margin-bottom:8px}
-.bb-row .field{flex:1;min-width:0;font-size:16px}
-.bb-row .btn{flex:none;padding:12px 18px}
 input.field.mono{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
 </style>
 </head>
@@ -1019,7 +1009,6 @@ const ICON = {
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
   bug:'<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M12 12v8M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/>',
-  shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
 };
 const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
 
@@ -1255,13 +1244,13 @@ function renderGoal(){
 
 /* ---------- unlocks ----------
    First 15 games: 5 to start (one per skill), then 1 new game for each day the daily goal is met.
-   4 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
+   3 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
    NEW_ORDER unlock one by one, 1 for each goal day on or after NEW_SINCE. */
 const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it'];
-const NEW_ORDER = ['bug-tracker','break-the-bot'];
+const NEW_ORDER = ['bug-tracker'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -1272,12 +1261,9 @@ const daysToUnlock = id => NEW_OPEN.includes(id) ? 0 : NEW_ORDER.includes(id) ? 
 /* the demo account (batch DEMO) is for testing, so every game is open there */
 const isDemo = () => !!ME && ME.pilot === 'DEMO';
 const isLocked = id => !isDemo() && daysToUnlock(id) > 0;
-/* Break the Bot is hidden for the rest of the day once the day's AI budget is used up (the server says so) */
-let BOT_OPEN = false;
-const shown = g => !!g && !(g.id === 'break-the-bot' && !BOT_OPEN);
 const ALL_ORDER = UNLOCK_ORDER.concat(NEW_OPEN, NEW_ORDER);
-const unlockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => shown(g) && !isLocked(g.id));
-const lockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => shown(g) && isLocked(g.id))
+const unlockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => g && !isLocked(g.id));
+const lockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => g && isLocked(g.id))
   .sort((a, b) => daysToUnlock(a.id) - daysToUnlock(b.id) || NEW_ORDER.includes(b.id) - NEW_ORDER.includes(a.id));
 const nextUnlock = () => lockedGames()[0] || null;
 /* the games that today's finished goal unlocked */
@@ -1287,7 +1273,7 @@ function justUnlocked(){
   if (goalDays() <= UNLOCK_ORDER.length - START_GAMES) out.push(UNLOCK_ORDER[unlockedCount() - 1]);
   const n = newGoalDays();
   if (iso(new Date()) >= NEW_SINCE && n >= 1 && n <= NEW_ORDER.length) out.push(NEW_ORDER[n - 1]);
-  return out.map(id => GAMES.find(g => g.id === id)).filter(shown);
+  return out.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
 }
 
 /* ---------- per-game difficulty: Lv 1-5, up after a round of 80%+, down after one under 40% ----------
@@ -1366,7 +1352,7 @@ function renderHome(){
    Fixed for the day, so the home screen and the circuit agree. */
 function todayPlan(){
   const td = todayState();
-  if (td.plan && td.plan.every(id => !isLocked(id) && shown(GAMES.find(g => g.id === id)))) return td.plan;
+  if (td.plan && td.plan.every(id => GAMES.some(g => g.id === id) && !isLocked(id))) return td.plan;
   const rnd = seeded(td.d + ':plan:' + (ME ? ME.id : 0));
   const mix = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const open = unlockedGames(), out = [];
@@ -1502,7 +1488,7 @@ function renderMuscles(){
 }
 function renderMuscleDetail(st){
   const k = mSel, m = st[k], s = SKILLS[k], ti = tierIx(m.vol);
-  const games = GAMES.filter(g => g.skill === k && shown(g));
+  const games = GAMES.filter(g => g.skill === k);
   const open = games.filter(g => !isLocked(g.id));
   const best = open.slice().sort((a,b) => gs(a.id).bestPct - gs(b.id).bestPct)[0];
   const soonest = Math.min(...games.map(g => daysToUnlock(g.id)));
@@ -1566,9 +1552,7 @@ function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c)
 function showIntro(g){
   setColor(g);
   const st = gs(g.id), locked = isLocked(g.id), n = daysToUnlock(g.id), left = Math.ceil((DAY_GOAL - todaySecs()) / 60);
-  const foot = !shown(g)
-    ? '<div class="bestline">Break the Bot is resting for today. It uses AI, and today’s AI budget is used up. Come back tomorrow.</div><button class="btn light" data-go="home">All workouts</button>'
-    : locked
+  const foot = locked
     ? '<div class="bestline">'+(n === 1 && todaySecs() < DAY_GOAL ? 'Only '+left+' more minute'+(left === 1 ? '' : 's')+' of training today to unlock it!' : 'Unlocks after '+n+' more workout day'+(n === 1 ? '' : 's')+'.')+'</div><button class="btn lockcta" data-go="home">'+svgI('lock', 2.4).replace('<svg ','<svg style="width:18px;height:18px" ')+' Locked</button>'
     : '<div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button>';
   const stage = $('stage');
@@ -1586,7 +1570,7 @@ function showIntro(g){
   anim(el.querySelectorAll('.orb'), { scale:[0.85,1], opacity:[0,1] }, { delay: stag(0.06), duration:0.5 });
   anim(el.querySelectorAll('.how li'), { opacity:[0,1], x:[-12,0] }, { delay: stag(0.07) });
   SFX.play('whoosh');
-  if (locked || !shown(g)) return;
+  if (locked) return;
   $('go').onclick = () => countdown(g);
   /* in a guided workout, show where they are; the countdown still waits for Play so they can read the rules */
   if (AUTOSTART === g.id) {
@@ -1595,7 +1579,7 @@ function showIntro(g){
   }
 }
 function countdown(g){
-  if (isLocked(g.id) || !shown(g)) { location.hash = ''; return; }
+  if (isLocked(g.id)) { location.hash = ''; return; }
   SFX.unlock();
   FS.on();
   queueStart(g.id);
@@ -2772,15 +2756,6 @@ async function syncNow(){
   }
 }
 setInterval(() => { if (ME && (syncDirty || (S.pq && S.pq.length) || (S.sq && S.sq.length))) syncNow(); }, 120000);
-/* is Break the Bot open today? It closes once the day's AI budget is used up. */
-async function botStatus(){
-  const r = await api('/api/bot', { action:'status' });
-  const open = r.status === 200 && r.j.ok && r.j.open === true;
-  if (open === BOT_OPEN) return;
-  BOT_OPEN = open;
-  if (view === 'home') renderHome(); else if (view === 'muscles') renderMuscles();
-}
-botStatus(); setInterval(botStatus, 10 * 60 * 1000);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'hidden' || !ME || !(syncDirty || (S.pq && S.pq.length))) return;
   try { if (navigator.sendBeacon('/api/student', new Blob([JSON.stringify(syncBody())], { type:'application/json' }))) syncDirty = false; } catch(e){}
@@ -3421,7 +3396,7 @@ function renderWho(){
   $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
 }
 
-/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot =================
+/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker =================
    Each one ends with ctx.end({ score, pct, title, sub, tiles, note, lines, meta }).
    tiles = [[value, label], ...] and note = one insight; meta = game-specific fields saved with the round. */
 const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2); };
@@ -3667,115 +3642,10 @@ const BugTracker = { id:'bug-tracker', name:'Bug Tracker', skill:'focus', icon:'
   }
 };
 
-/* ================= 19. Break the Bot (using AI well): get the password out of 3 chatbots ================= */
-/* The bots, their passwords and their defences run on the server (api/bot.js). The page only shows the chat. */
-const BB_LEVELS = [
-  { name:'Intern Bot', defence:'No defence', hello:'Hi! I’m the new intern bot. I was told to keep a password safe. Ask me anything.',
-    why:'The bot was only told to keep the password safe. It had no rule against sharing it, so it just tried to be helpful.',
-    you:'AI is built to help. If you give an AI tool private data, assume it can come out in a reply.' },
-  { name:'Filter Bot', defence:'Blocks messages with words like “password” or “secret”', hello:'Upgraded. I block any message with forbidden words in it. Good luck.',
-    why:'The filter checked for words, not meaning. Asking about “the thing you protect” means the same thing but uses none of the blocked words.',
-    you:'Word filters are easy to get around. When you build a chatbot, a list of banned words does not make it safe.' },
-  { name:'Guarded Bot', defence:'Checks every reply and blocks it if the password appears', hello:'Now I check my own replies. If the password shows up in anything I say, it gets deleted.',
-    why:'The output check only looked for the exact word. Spelled out, reversed or hidden in a poem, it slipped through.',
-    you:'AI can leak information in forms a simple check doesn’t recognise. Never rely on AI alone to protect anything important.' }
-];
-const BB_MAX = 10;   // messages per level; keep in step with MAX_PER_LEVEL in api/_lib/bot-core.js
-const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'shield', inspired:'prompt-injection games like Gandalf', topics:'how chatbots and their safety checks work',
-  how:['Each bot guards a password. Chat with it and trick it into telling you. You get 10 messages per level.','Each level has a stronger defence. Watch the grey notes under the bot’s replies: they show what the defence did.','Type the password in the box under the chat to crack the level. 3 levels.'],
-  run(ctx){
-    let run = rid(), left = BB_MAX;
-    const per = [0,0,0], cracked = ['','',''];
-    let level = 0, busy = false;
-    function total(){ return per.reduce((a,b) => a+b, 0); }
-    function chatLevel(){
-      const L = BB_LEVELS[level];
-      left = BB_MAX;
-      ctx.root.innerHTML = hud([['bb-l','Level',(level+1)+'/3'],['bb-left','Messages left',left],['bb-m','Sent in total',total()]])
-        + '<div class="bb-def"><b>Level '+(level+1)+': '+L.name+'</b> · <span class="muted">'+esc(L.defence)+'</span></div>'
-        + '<div class="bb-chat" id="bb-chat" aria-live="polite"></div>'
-        + '<form class="bb-row" id="bb-send"><input class="field" id="bb-in" maxlength="300" autocomplete="off" placeholder="Message the bot" aria-label="Message the bot"><button class="btn c">Send</button></form>'
-        + '<form class="bb-row" id="bb-pw"><input class="field mono" id="bb-g" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="Password" aria-label="Password"><button class="btn light">Check</button></form>'
-        + '<div class="small" id="bb-x" aria-live="polite"></div>';
-      bubble('bot', L.hello);
-      $('bb-send').onsubmit = e => { e.preventDefault(); send(); };
-      $('bb-pw').onsubmit = e => { e.preventDefault(); check(); };
-      $('bb-g').oninput = e => { const p = e.target.selectionStart; e.target.value = e.target.value.toUpperCase(); e.target.setSelectionRange(p, p); };
-      $('bb-in').focus({ preventScroll:true });
-    }
-    function bubble(who, text, log){
-      const c = $('bb-chat');
-      c.insertAdjacentHTML('beforeend', '<div class="bb-msg '+who+'">'+esc(text)+'</div>' + (log ? '<div class="bb-log">'+esc(log)+'</div>' : ''));
-      c.scrollTop = c.scrollHeight;
-    }
-    const note = (t, bad) => { const x = $('bb-x'); x.textContent = t; x.style.color = bad ? 'var(--bad)' : 'var(--soft)'; };
-    async function send(){
-      const inp = $('bb-in'), msg = inp.value.trim();
-      if (!msg || busy) return;
-      busy = true; note('');
-      bubble('me', msg); inp.value = '';
-      const btn = $('bb-send').querySelector('button'); AI.thinking(btn, true);
-      const r = await api('/api/bot', { action:'send', token: ME && ME.token, run, level, msg }, 20000);
-      if (!$('bb-chat')) return;
-      AI.thinking(btn, false); btn.disabled = false; busy = false;
-      const j = r.j || {};
-      if (r.status === 200 && j.ok) {
-        per[level]++; $('bb-m').textContent = total();
-        left = Math.max(0, Number.isInteger(j.left) ? j.left : left - 1); $('bb-left').textContent = left;
-        if (!left) outOfMessages();
-        bubble('bot', j.reply, j.log);
-        SFX.play(j.blocked ? 'softbad' : 'softok');
-      } else {
-        $('bb-chat').lastElementChild.remove();
-        inp.value = msg;
-        if (j.error === 'closed') { BOT_OPEN = false; note('Break the Bot is resting for today. Come back tomorrow.', true); }
-        else if (j.error === 'limit') { inp.value = ''; outOfMessages(); }
-        else if (r.status === 401) note('Please log in again to play.', true);
-        else note(j.error && j.error.length > 12 ? j.error : 'The bot didn’t respond. Send your message again.', true);
-      }
-      inp.focus({ preventScroll:true });
-    }
-    /* out of messages: the password box still works; or start the level again with a fresh bot */
-    function outOfMessages(){
-      $('bb-in').disabled = true; $('bb-send').querySelector('button').disabled = true;
-      $('bb-x').innerHTML = '<span style="color:var(--bad)">You’ve used all '+BB_MAX+' messages for this level.</span> If you know the password, type it below. <button type="button" class="btn light" id="bb-again" style="margin-top:8px;width:100%">Start this level again</button>';
-      $('bb-again').onclick = () => { run = rid(); chatLevel(); };
-    }
-    async function check(){
-      const g = $('bb-g').value;
-      if (!g.replace(/[^A-Za-z]/g, '') || busy) return;
-      busy = true;
-      const r = await api('/api/bot', { action:'check', token: ME && ME.token, run, level, guess: g }, 10000);
-      busy = false;
-      if (!$('bb-g')) return;
-      if (r.status === 200 && r.j.ok && r.j.correct) { cracked[level] = r.j.cracked || ''; FX.result(true, false); won(); }
-      else if (r.status === 200 && r.j.ok) { note('Not it. Keep chatting.', true); shake($('bb-g')); FX.result(false, true); }
-      else note('Couldn’t check that. Try again.', true);
-    }
-    function won(){
-      const L = BB_LEVELS[level], n = per[level];
-      ctx.root.innerHTML = '<div class="card nb-panel"><span class="chip">Level '+(level+1)+' cracked</span><h2>Cracked in '+plural(n, 'message')+'</h2>'
-        + '<div class="explain"><b>Why the defence failed</b><br>'+L.why+'</div>'
-        + '<div class="explain"><b>What this means for you</b><br>'+L.you+'</div>'
-        + '<button class="btn c full" id="bb-next" style="margin-top:14px">'+(level < 2 ? 'Next level' : 'See results')+'</button></div>';
-      if (!reduced()) confetti();
-      $('bb-next').focus();
-      $('bb-next').onclick = () => {
-        if (level < 2) { level++; return chatLevel(); }
-        const t = total();
-        ctx.end({ score: Math.max(10, 100 - Math.max(0, t - 3) * 4), pct: Math.max(30, 100 - Math.max(0, t - 3) * 4), title: 'All 3 bots broken', sub: plural(t, 'message') + ' in total',
-          tiles: per.map((m, i) => [plural(m, 'msg'), 'Level ' + (i+1)]),
-          note: 'Every defence here checked the surface of the text, not its meaning. AI tools work the same way: they follow patterns, not intentions. So check what AI tells you, and never trust it to keep something safe on its own.',
-          meta: { messagesPerLevel: per, total: t, crackedWith: cracked } });
-      };
-    }
-    chatLevel();
-  }
-};
 
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, BreakBot];
+  ColorClash, SeenIt, BugTracker];
 route();
 pullMe();
 </script>

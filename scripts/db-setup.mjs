@@ -96,28 +96,7 @@ const steps = [
      game_id     text NOT NULL,
      started_at  timestamptz NOT NULL
    )`,
-  `CREATE INDEX IF NOT EXISTS starts_game_idx ON starts (game_id, started_at)`,
-  // Break the Bot: every chat message, for review (cracked = the message that won the level)
-  `CREATE TABLE IF NOT EXISTS bot_log (
-     id          bigserial PRIMARY KEY,
-     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-     run         text NOT NULL,
-     level       smallint NOT NULL,
-     msg         text NOT NULL,
-     reply       text NOT NULL,
-     log         text,
-     blocked     text,
-     cost        numeric NOT NULL DEFAULT 0,
-     cracked     boolean NOT NULL DEFAULT false,
-     created_at  timestamptz NOT NULL DEFAULT now()
-   )`,
-  `CREATE INDEX IF NOT EXISTS bot_log_run_idx ON bot_log (student_id, run, level)`,
-  `CREATE INDEX IF NOT EXISTS bot_log_day_idx ON bot_log (student_id, created_at)`,
-  // AI spending per day (India time); Break the Bot closes for the day at its cap
-  `CREATE TABLE IF NOT EXISTS ai_spend (
-     day  date PRIMARY KEY,
-     usd  numeric NOT NULL DEFAULT 0
-   )`
+  `CREATE INDEX IF NOT EXISTS starts_game_idx ON starts (game_id, started_at)`
 ];
 
 for (const s of steps) await sql.query(s);
