@@ -82,7 +82,9 @@ const steps = [
   `ALTER TABLE feedback ADD CONSTRAINT feedback_rating_check CHECK (rating BETWEEN 1 AND 11)`,
   `CREATE INDEX IF NOT EXISTS plays_student_idx ON plays (student_id, played_at)`,
   `CREATE INDEX IF NOT EXISTS feedback_kind_idx ON feedback (kind, created_at)`,
-  `CREATE INDEX IF NOT EXISTS students_pilot_idx ON students (pilot)`
+  `CREATE INDEX IF NOT EXISTS students_pilot_idx ON students (pilot)`,
+  // a second spelling of the student's name from another official list; login accepts either
+  `ALTER TABLE students ADD COLUMN IF NOT EXISTS alt_name text`
 ];
 
 for (const s of steps) await sql.query(s);

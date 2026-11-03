@@ -38,9 +38,10 @@ async function join(req, res, b) {
   if (limited('jr:' + roll, 8, 10 * 60_000)) return res.status(429).json({ ok: false, error: 'Too many tries for this NIAT ID. Wait 10 minutes and try again.' });
 
   const sql = db();
-  const s = (await sql`SELECT id, name, roll, pilot FROM students WHERE roll = ${roll}`)[0];
+  const s = (await sql`SELECT id, name, alt_name, roll, pilot FROM students WHERE roll = ${roll}`)[0];
   if (!s) return res.status(404).json({ ok: false, error: 'We couldn’t find that NIAT ID. Check it, or ask your mentor.' });
-  if (!nameMatches(s.name, first)) return res.status(401).json({ ok: false, error: 'That name doesn’t match this NIAT ID. Type your first name (or any one part of your name) as in college records.' });
+  // alt_name: the same student's name as spelled in another official list ("Kavi Yarasu" / "K KAVIYARASU")
+  if (!nameMatches(s.name, first) && !(s.alt_name && nameMatches(s.alt_name, first))) return res.status(401).json({ ok: false, error: 'That name doesn’t match this NIAT ID. Type your first name (or any one part of your name) as in college records.' });
 
   const token = newToken();
   await sql`INSERT INTO sessions (token_hash, student_id) VALUES (${hashToken(token)}, ${s.id})`;
