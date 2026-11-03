@@ -975,6 +975,19 @@ const h = (html) => { const t = document.createElement('template'); t.innerHTML 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const shuffle = a => { a = a.slice(); for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; };
 const pick = a => a[Math.floor(Math.random()*a.length)];
+/* no repeats: a student sees every item of a pool before any item comes back (kept on this device).
+   id = which pool, items = the pool, n = how many to take, key = a stable id per item (default: its position) */
+function fresh(id, items, n, key){
+  key = key || ((x, i) => i);
+  S.seen = S.seen || {};
+  const keys = items.map(key), seen = new Set(S.seen[id] || []), all = items.map((x, i) => i);
+  let out = shuffle(all.filter(i => !seen.has(keys[i]))).slice(0, n);
+  if (out.length < n) { seen.clear(); out = out.concat(shuffle(all.filter(i => !out.includes(i))).slice(0, n - out.length)); }
+  out.forEach(i => seen.add(keys[i]));
+  S.seen[id] = [...seen].slice(-500); save();
+  return out.map(i => items[i]);
+}
+const txtKey = x => String(typeof x === 'string' ? x : x.msg).slice(0, 60);
 const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
 
@@ -1846,7 +1859,7 @@ const B7 = [
 const BeatSeven = { id:'beat-the-7', name:'Beat the 7', skill:'creativity', icon:'seven', inspired:'the “why AI picks 7” reel', topics:'Python, web, everyday',
   how:['Answer quick prompts, like “a name for a loop variable”.','Most people, and most chatbots, give the same few answers.','Typical answer: 0 points. Common answer: 2. Your own idea: 5.'],
   run(ctx){
-    const qs = shuffle(B7).slice(0,6); let i = 0, score = 0, log = [];
+    const qs = fresh('beat-the-7', B7, 6); let i = 0, score = 0, log = [];
     ctx.root.innerHTML = hud([['b7-q','Prompt','1/6'],['b7-s','Points','0']]) + '<div class="card"><div class="big" id="b7-text"></div>'
       + '<div class="row" style="margin-top:14px"><input class="field" id="b7-in" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer"><button class="btn c" id="b7-go">Go</button></div><div id="b7-fb"></div></div>';
     const inp = $('b7-in'); inp.addEventListener('paste', e => e.preventDefault());
@@ -1939,7 +1952,7 @@ const ML = [
 const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', icon:'chain', inspired:'the Remote Associates Test', topics:'Python, web, maths, everyday',
   how:['You see three words, like data, fire, code.','Type the one word that goes with all three (base: database, Firebase, codebase).','Solve as many as you can in 2 minutes. A hint costs points.'],
   run(ctx){
-    let score = 0, solved = 0, streak = 0, best = 0, cur, hints, wrongs, t0, used = new Set();
+    let score = 0, solved = 0, streak = 0, best = 0, cur, hints, wrongs, t0, used = new Set((S.seen && S.seen['missing-link']) || []);
     ctx.root.innerHTML = '<div class="tbar"><i id="ml-t"></i></div>' + hud([['ml-sc','Score','0'],['ml-st','Streak','0'],['ml-so','Solved','0']])
       + '<div class="ml-cues" id="ml-cues"></div><div class="big" id="ml-hint" style="text-align:center;letter-spacing:.2em;min-height:30px;color:var(--c)"></div>'
       + '<div class="row" style="margin-top:8px"><input class="field" id="ml-in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="The link word"><button class="btn c" id="ml-go">Check</button></div>'
@@ -1947,8 +1960,9 @@ const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', i
     const inp = $('ml-in'); inp.addEventListener('paste', e => e.preventDefault());
     const next = () => {
       const lvl = streak >= 6 ? 3 : streak >= 3 ? 2 : 1;
-      let pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl && !used.has(i)); if (!pool.length) pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl);
-      const i = pick(pool); used.add(i); cur = ML[i]; hints = 0; wrongs = 0; t0 = Date.now();
+      let pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl && !used.has(i));
+      if (!pool.length) { ML.forEach((it,k) => { if (it[5] === lvl) used.delete(k); }); pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl); }
+      const i = pick(pool); used.add(i); (S.seen = S.seen || {})['missing-link'] = [...used]; save(); cur = ML[i]; hints = 0; wrongs = 0; t0 = Date.now();
       $('ml-cues').innerHTML = cur.slice(0,3).map(w => '<div class="tile">'+w+'</div>').join('');
       anim(document.querySelectorAll('#ml-cues .tile'), { opacity:[0,1], y:[16,0], scale:[.9,1] }, { delay: stag(0.06) });
       $('ml-hint').textContent = ''; inp.value = ''; inp.focus();
@@ -1997,14 +2011,28 @@ const LG = [
   [['Ctrl shortcuts while typing',['undo','redo','find','bold']],['Git commands',['init','add','status','log']],['Python built-in functions',['print','input','len','type']],['Things you do to a file',['rename','delete','move','upload']]],
   [['UPI apps',['PhonePe','Paytm','GPay','BHIM']],['Social apps',['Instagram','YouTube','Snapchat','WhatsApp']],['Cloud storage',['Drive','Dropbox','OneDrive','iCloud']],['AI chatbots',['ChatGPT','Gemini','Claude','Copilot']]],
   [['Powers of 2',['16','32','64','128']],['Perfect squares',['25','36','49','81']],['Prime numbers',['11','13','17','19']],['Multiples of 10',['20','50','70','90']]],
-  [['Tags inside <head>',['title','meta','link','style']],['Page layout tags',['header','footer','nav','section']],['Table tags',['table','tr','td','th']],['Text formatting tags',['b','i','strong','em']]]
+  [['Tags inside <head>',['title','meta','link','style']],['Page layout tags',['header','footer','nav','section']],['Table tags',['table','tr','td','th']],['Text formatting tags',['b','i','strong','em']]],
+  [['Python dict methods',['keys','values','items','update']],['Python keywords',['def','return','import','pass']],['Git commands',['fetch','stash','diff','reset']],['Command line commands',['echo','grep','man','clear']]],
+  [['Ways to write 8',['0b1000','0o10','0x8','8']],['Ways to write 10',['0b1010','0o12','0xA','10']],['Ways to write 16',['0b10000','0o20','0x10','16']],['Ways to write 255',['0b11111111','0o377','0xFF','255']]],
+  [['Statistics words',['mean','median','mode','range']],['Python built-in functions',['len','sum','print','sorted']],['Profit and loss words',['profit','loss','discount','markup']],['Interest words',['principal','rate','compound','EMI']]],
+  [['HTML attributes',['href','src','alt','id']],['Tailwind text sizes',['text-sm','text-base','text-lg','text-xl']],['CSS font-weight values',['bold','normal','lighter','bolder']],['HTML form tags',['form','input','label','textarea']]],
+  [['Git commands that talk to GitHub',['push','pull','fetch','clone']],['States of a file in Git',['untracked','staged','modified','committed']],['Command line file commands',['cp','mv','rm','touch']],['More Python keywords',['del','pass','with','global']]],
+  [['Parts of a good prompt',['role','context','task','example']],['LLM words',['token','parameter','training','hallucination']],['Python string methods',['format','join','replace','find']],['Kinds of input an AI can take',['text','image','audio','video']]],
+  [['flex-direction values',['row','column','row-reverse','column-reverse']],['justify-content values',['space-between','space-around','space-evenly','flex-start']],['text-align values',['left','right','center','justify']],['CSS Grid properties',['grid-column','grid-row','grid-area','grid-template-columns']]],
+  [['Python maths operators',['+','//','%','**']],['Python maths built-ins',['abs','round','pow','divmod']],['Falsy values in Python',['0','None','[]','""']],['Python errors',['TypeError','ValueError','KeyError','ZeroDivisionError']]],
+  [['Food and grocery delivery',['Zomato','Swiggy','Zepto','Blinkit']],['Ride apps',['Ola','Uber','Rapido','Namma Yatri']],['Shopping apps',['Flipkart','Amazon','Myntra','Meesho']],['Government apps',['DigiLocker','UMANG','mAadhaar','Aarogya Setu']]],
+  [['Windows CMD commands',['dir','cls','del','type']],['Linux and Mac commands',['ls','clear','cat','rm']],['Keyboard keys',['Esc','Tab','Shift','Enter']],['Python keywords',['import','from','as','is']]],
+  [['Number system bases',['2','8','10','16']],['Data size units',['KB','MB','GB','TB']],['Hex digits that are letters',['A','B','E','F']],['Bitwise operations',['AND','OR','XOR','NOT']]],
+  [['Tailwind margin and padding',['m-2','px-4','py-2','mt-8']],['Tailwind colour classes',['bg-blue-500','text-red-600','border-gray-300','bg-white']],['Tailwind flexbox classes',['flex','items-center','justify-between','gap-4']],['Tailwind screen sizes',['sm','md','lg','xl']]],
+  [['Empty tags (no closing tag)',['br','hr','img','input']],['Attributes of the a tag',['href','target','download','rel']],['Media tags',['video','audio','canvas','iframe']],['Semantic tags',['main','article','aside','figure']]],
+  [['Only strings have these',['isdigit','startswith','title','zfill']],['Only lists have these',['append','extend','sort','insert']],['Only dicts have these',['get','setdefault','fromkeys','popitem']],['Python built-ins for loops and lists',['sorted','reversed','enumerate','zip']]]
 ];
-const LGNOTE = ['Trap: “float” is also a CSS property, but it is not a display value.','Trap: “break” sounds like CSS too, but here it belongs with Python loops.','Trap: “branch” is part of a tree, but the tree group is already full without it.','Trap: “pop” and “remove” sound general, but they are list methods. “Edge” sounds like a border, but it is a browser.','Trap: “sample” sounds like data, but here it is a probability word. “bit” and “byte” are units of data.','Trap: “text” is a Tailwind prefix, but on its own it is an input type.','Trap: “add” and “status” sound general, but they are Git commands. “find” is Ctrl+F.','Trap: WhatsApp has payments too, but it belongs with social apps.','Trap: 16 and 64 are also perfect squares, but only the powers of 2 need them.','Trap: “link” sounds like the a tag, but it is a tag that goes inside head.'];
+const LGNOTE = ['Trap: “float” is also a CSS property, but it is not a display value.','Trap: “break” sounds like CSS too, but here it belongs with Python loops.','Trap: “branch” is part of a tree, but the tree group is already full without it.','Trap: “pop” and “remove” sound general, but they are list methods. “Edge” sounds like a border, but it is a browser.','Trap: “sample” sounds like data, but here it is a probability word. “bit” and “byte” are units of data.','Trap: “text” is a Tailwind prefix, but on its own it is an input type.','Trap: “add” and “status” sound general, but they are Git commands. “find” is Ctrl+F.','Trap: WhatsApp has payments too, but it belongs with social apps.','Trap: 16 and 64 are also perfect squares, but only the powers of 2 need them.','Trap: “link” sounds like the a tag, but it is a tag that goes inside head.','Trap: “update” and “reset” sound like Git, but “update” is a dict method. “clear” is also a list method, but here it clears the screen.','Trap: 0o10 and 0x10 look like ten, but 0o10 is 8 and 0x10 is 16.','Trap: “range” is also a Python built-in, but here it is a statistics word.','Trap: “textarea” starts with “text” like the Tailwind classes, but it is a form tag. “bold” also fits Ctrl shortcuts, but here it is a font-weight value.','Trap: “del” deletes things like “rm”, but it is a Python keyword. “fetch” is a Git command that talks to GitHub, not a file state.','Trap: “format” sounds like a part of a prompt, but here it is a string method. “text” is also a prompt, but here it is a kind of input.','Trap: “center” can also be a justify-content value, but the justify-content group is full without it. “justify” is a text-align value.','Trap: pow and ** both find powers, but pow is a built-in function. “0” is a number, but here it is a falsy value.','Trap: Amazon also delivers groceries, but it is a shopping app. Zepto and Blinkit sell groceries, not rides.','Trap: “del” is also a Python keyword and “type” is a Python built-in, but here they are Windows commands. “clear” is the Linux and Mac version of “cls”.','Trap: “B” looks like the B in KB and MB, but here it is a hex digit (B = 11).','Trap: “gap-4” adds space, but it sets the gap between flex items, not margin or padding. “text-red-600” starts with “text”, but it sets a colour.','Trap: “input” is also a Python built-in, but here it is an empty HTML tag. “aside” and “figure” are semantic tags, not media tags.','Trap: “sorted” and “reversed” look like the list methods sort and reverse, but they are built-in functions.'];
 const LGCOL = ['#FFD966','#A7E3A1','#A9C8FF','#D6B8FF'];
 const LinkGrid = { id:'link-grid', name:'Link Grid', skill:'insight', icon:'grid', inspired:'NYT Connections', topics:'Python, HTML/CSS, Git, maths',
   how:['16 words hide 4 groups of 4.','Tap 4 words that belong together, then Submit.','Some words look like they fit two groups. You can make 4 mistakes.'],
   run(ctx){
-    const pi = Math.floor(Math.random()*LG.length), P = LG[pi];
+    const pi = fresh('link-grid', LG.map((x, i) => i), 1)[0], P = LG[pi];
     let words = shuffle(P.flatMap(g => g[1])), sel = [], solved = [], lives = lvVal('link-grid'), startLives = lives;
     const draw = () => {
       ctx.root.innerHTML = '<p class="prompt">Find the four groups.</p><div>'+solved.map(gi => '<div class="lg-solved" style="background:'+LGCOL[gi]+'"><b>'+P[gi][0]+'</b><span>'+P[gi][1].join(', ')+'</span></div>').join('')+'</div>'
@@ -2077,7 +2105,7 @@ Object.keys(WIKI).forEach(a => Object.keys(WIKI).forEach(b => { if (a !== b) { c
 const WikiHop = { id:'wiki-hop', name:'Wiki Hop', skill:'insight', icon:'nodes', inspired:'the Wiki Game', topics:'web, hardware, number systems, Git, AI',
   how:['You start on one page and must reach a target page.','Read the page. Tap a blue link inside the text to jump.','Plan your route: fewer clicks, higher score.'],
   run(ctx){
-    const near = WH.filter(x => x.best === lvVal('wiki-hop')), P = pick(near.length ? near : WH); let at = P.from, path = [P.from], clicks = 0;
+    const near = WH.filter(x => x.best === lvVal('wiki-hop')), P = fresh('wiki-hop', near.length ? near : WH, 1, x => x.from + '>' + x.to)[0]; let at = P.from, path = [P.from], clicks = 0;
     const draw = () => {
       const body = WIKI[at].replace(/\[\[(.+?)\]\]/g, (m, t) => '<a href="#" class="wl" data-t="'+t+'">'+t+'</a>');
       ctx.root.innerHTML = '<div class="wh-target">🎯 Reach: '+P.to+'</div>' + hud([['wh-c','Clicks',clicks],['wh-b','Shortest route',P.best]])
@@ -2127,7 +2155,7 @@ const RR = [
 const RecallRebuild = { id:'recall-rebuild', name:'Recall Rebuild', skill:'memory', icon:'book', inspired:'the note-taking vs chatbot study', topics:'Git, CSS, Python, UPI',
   how:['Read a short passage, or a few lines of code. You get 40 seconds.','It disappears. Write down everything you remember.','You score for each key fact or line you rebuild. No notes.'],
   run(ctx){
-    const P = pick(RR);
+    const P = fresh('recall-rebuild', RR, 1)[0];
     ctx.root.innerHTML = '<div class="tbar"><i id="rr-t"></i></div><p class="prompt">Read carefully. It will disappear. <b>'+P.title+'</b></p><div class="card">'+(P.kind === 'code' ? code(P.text) : '<div class="passage">'+P.text+'</div>')+'</div><button class="btn c full" id="rr-ready" style="margin-top:14px">I’m ready</button>';
     anim(ctx.root.querySelector('.card'), { opacity:[0,1], y:[12,0] });
     const stop = ctx.timer(lvVal('recall-rebuild'), $('rr-t'), null, () => write());
@@ -2228,28 +2256,28 @@ const SymbolSprint = { id:'symbol-sprint', name:'Symbol Sprint', skill:'focus', 
 const TRICKS = [
   { id:'story', name:'One story isn’t proof', means:'Using one person’s experience as if it proves something for everyone.', spot:'Ask: is this one case, or many?',
     ex:'“My senior got placed without learning DSA, so DSA is useless.”',
-    yes:['“My cousin used only AI for every assignment and still passed. So AI-only studying works.”','“My laptop never got a virus without antivirus, so nobody needs antivirus.”','“Rohan learnt coding only from reels and got an internship. So reels are all you need.”','“My friend never studied for the mid-sem and still got an A, so studying doesn’t matter.”'],
-    no:['“A survey of 2,000 students found that those who practised coding daily scored higher.”','“Data from five batches shows that students who submitted all assignments scored higher on average.”'] },
+    yes:['“My cousin used only AI for every assignment and still passed. So AI-only studying works.”','“My laptop never got a virus without antivirus, so nobody needs antivirus.”','“Rohan learnt coding only from reels and got an internship. So reels are all you need.”','“My friend never studied for the mid-sem and still got an A, so studying doesn’t matter.”','“My roommate charges his phone overnight every day and the battery is fine. So overnight charging never harms any phone.”','“I paid a shop by scanning a QR code once and got cheated. UPI is totally unsafe.”','“My brother skipped all college clubs and still got a ₹12 LPA offer, so clubs are a waste of time.”','“One guy in my hostel used a free VPN for a year with no problem. So free VPNs are completely safe.”','“My friend wrote her whole project in one long Python file and got full marks, so splitting code into functions is pointless.”','“I asked ChatGPT one maths question and it got it right, so it never makes mistakes in maths.”'],
+    no:['“A survey of 2,000 students found that those who practised coding daily scored higher.”','“Data from five batches shows that students who submitted all assignments scored higher on average.”','“Our college placement report shows that 70% of students with internships got offers, compared with 40% of those without.”','“The app has over 50,000 reviews on the Play Store, and most of the recent ones complain about the same login bug.”','“In our lab, 28 out of 30 students fixed the error after updating pip, so let’s try that first.”','“Cyber-crime reports show thousands of UPI frauds each year start with a fake ‘collect’ request, so check before you tap Pay.”','“We tested the AI tool on 100 past exam questions and it got 23 wrong, so we should check its answers.”','“Several reviewers tested this laptop and its battery lasted under 4 hours, so carry your charger to labs.”','“I tried the shortcut on five different files and it worked every time, so it’s probably safe for our project.”','“The college checked 500 submissions and found many copied AI answers, so they are adding a short viva.”'] },
   { id:'crowd', name:'Everyone’s doing it', means:'Saying something is right or best just because it’s popular.', spot:'Ask: popular, or actually better? What’s the reason?',
     ex:'“Everyone in our class uses this AI notes app, so it must be the best.”',
-    yes:['“All the startups use Tailwind now, so it’s obviously better than plain CSS.”','“This prompt trick has a million views, so it must work.”','“This laptop is the top seller on Flipkart, so it must be the best one for coding.”','“Everyone’s skipping the Friday lab, so it can’t be important.”'],
-    no:['“Tailwind lets you style without switching files, which saves me time on small projects.”','“Most teams use Git because it lets them track and undo changes safely.”'] },
+    yes:['“All the startups use Tailwind now, so it’s obviously better than plain CSS.”','“This prompt trick has a million views, so it must work.”','“This laptop is the top seller on Flipkart, so it must be the best one for coding.”','“Everyone’s skipping the Friday lab, so it can’t be important.”','“Half my hostel bought this earphone brand, so it must have the best sound.”','“Everyone in my branch uses VS Code, so it must be the best editor.”','“This coding course has 5 lakh enrolments, so it must be the best way to learn Python.”','“All my friends are dropping Python to learn only AI tools, so I should too.”','“This GitHub repo has 50,000 stars, so its code can’t have any bugs.”','“Everyone in my group pays the mess bill with this new app, so it must be the safest one.”'],
+    no:['“Tailwind lets you style without switching files, which saves me time on small projects.”','“Most teams use Git because it lets them track and undo changes safely.”','“I use VS Code because its Python extension shows errors while I type.”','“UPI is handy for small payments because the money reaches instantly and there’s no card to carry.”','“Many coders use dark mode, but pick what’s easy on your eyes. Try both for a week.”','“This library is widely used, which means more tutorials and answers online when you get stuck.”','“I chose this laptop because it has 16 GB RAM, which helps when I run Chrome and VS Code together.”','“Let’s use Google Docs for the report, since all five of us can edit it at the same time.”','“Put your projects on GitHub, because recruiters can see your code and your commit history.”','“Python is a good first language because its syntax is short and easy to read.”'] },
   { id:'person', name:'Attack the person', means:'Attacking who is speaking instead of what they said.', spot:'Ask: is this about the argument, or the person?',
     ex:'“Don’t listen to Ravi’s code review. He failed maths last semester.”',
-    yes:['“Why trust her opinion on Python? She uses a five-year-old laptop.”','“He’s from a small-town college, so his GitHub tips can’t be any good.”','“Ignore that article on AI risks. The writer isn’t even an engineer.”','“You can’t give me coding tips, you’re just a first-year.”'],
-    no:['“Don’t use that function. The documentation says it was removed in the latest version.”','“His bug fix doesn’t work. I ran the tests and three of them still fail.”'] },
+    yes:['“Why trust her opinion on Python? She uses a five-year-old laptop.”','“He’s from a small-town college, so his GitHub tips can’t be any good.”','“Ignore that article on AI risks. The writer isn’t even an engineer.”','“You can’t give me coding tips, you’re just a first-year.”','“Don’t take his Git advice seriously. He’s always late to class.”','“Her review of my app is wrong. She’s just jealous because her own app didn’t do well.”','“Why should we listen to the class rep about the deadline? He’s so annoying.”','“That YouTuber says to learn the basics before AI tools, but his videos are so boring, so he must be wrong.”','“You found a bug in my code? You can’t even type fast.”','“Don’t trust Neha’s budget plan for the fest. She lost her ID card twice this month.”'],
+    no:['“Don’t use that function. The documentation says it was removed in the latest version.”','“His bug fix doesn’t work. I ran the tests and three of them still fail.”','“Your loop runs one extra time. Use range(10), not range(11), if you want 10 numbers.”','“Her fest budget leaves out the cost of the sound system, so let’s add that line first.”','“The article says AI will replace all coders, but it gives no data to back that up.”','“I disagree with his Git tip. Force-pushing to main can delete other people’s commits.”','“Your review says the app is slow, but it opened in under a second on all three phones we tried.”','“That video uses Tailwind class names from an old version. Check the official docs for the new ones.”','“The senior’s interview tip is useful, but it was for a different company, so check this company’s pattern too.”','“Your CSS is missing a semicolon on line 12, which is why the next rule isn’t working.”'] },
   { id:'twoways', name:'Only two options', means:'Pretending there are only two choices when there are more.', spot:'Ask: is there a third option, or a middle path?',
     ex:'“Either you learn AI right now or your career is over.”',
-    yes:['“You either use ChatGPT for everything or you’re stuck in the past.”','“Either your code is perfect or you’re a bad programmer.”','“Either you get placed in your first interview or you’re not cut out for tech.”','“If you’re not using Tailwind, you must be writing messy CSS.”'],
-    no:['“You can use Flexbox, Grid, or both. Pick based on the layout you need.”','“We can ship on Friday, or cut one small feature so we have time to test. Let’s pick.”'] },
+    yes:['“You either use ChatGPT for everything or you’re stuck in the past.”','“Either your code is perfect or you’re a bad programmer.”','“Either you get placed in your first interview or you’re not cut out for tech.”','“If you’re not using Tailwind, you must be writing messy CSS.”','“Either you buy a MacBook or you can’t do serious coding.”','“If you don’t have a 9 CGPA, you can forget about getting any job.”','“You either code 10 hours a day or you’ll never be a developer.”','“Either we use Grid for the whole site or the layout will be a mess.”','“Either you join every coding club or you’ll have nothing to put on your resume.”','“You either pay with UPI for everything or you’re living in the 90s.”'],
+    no:['“You can use Flexbox, Grid, or both. Pick based on the layout you need.”','“We can ship on Friday, or cut one small feature so we have time to test. Let’s pick.”','“For this page you can use Flexbox, Grid, or plain CSS. Grid is easiest for the photo gallery.”','“You can learn from videos, books, or practice sites. Try a mix and see what works for you.”','“You can pay by UPI, card, or cash here. UPI is fastest if the network is good.”','“The file either exists or it doesn’t, so check with ls before you try to open it.”','“We can fix the bug tonight, ask the TA tomorrow, or post it in the group. Let’s try the group first.”','“After B.Tech you could take a job, study further, or try a startup. Talk to seniors who did each.”','“A bit is either 0 or 1, so 3 bits can make 8 different patterns.”','“You don’t have to choose between AI and your own notes. Use AI to quiz yourself on what you wrote.”'] },
   { id:'cause', name:'Before isn’t because', means:'Assuming that because one thing happened first, it caused the next.', spot:'Ask: could something else explain it? Was it tested?',
     ex:'“I updated my phone and then my exam went badly. The update ruined my exam.”',
-    yes:['“I switched to dark mode and my marks went up. Dark mode makes you smarter.”','“The site went down right after Sai joined the team. He must have broken it.”','“Ever since the new canteen opened, more students are failing. The canteen is the problem.”','“I drank coffee before the exam and topped it. Coffee is the secret.”'],
-    no:['“The app crashes every time I add this line and works when I remove it, so this line is likely the bug.”','“After we compressed the images, the page loaded twice as fast across ten repeated tests.”'] },
+    yes:['“I switched to dark mode and my marks went up. Dark mode makes you smarter.”','“The site went down right after Sai joined the team. He must have broken it.”','“Ever since the new canteen opened, more students are failing. The canteen is the problem.”','“I drank coffee before the exam and topped it. Coffee is the secret.”','“I started using a new keyboard and my code had fewer bugs. The keyboard fixed my bugs.”','“Our team wore matching T-shirts and won the hackathon. The T-shirts brought us the win.”','“I changed my LinkedIn photo and got three interview calls the next week. The new photo did it.”','“The library Wi-Fi went down right after I opened my laptop. My laptop crashed the Wi-Fi.”','“I used a blue pen in the exam and got my highest score ever. Blue pens help you score.”','“Our college got a new logo and placements went up that year. The logo brought in the companies.”'],
+    no:['“The app crashes every time I add this line and works when I remove it, so this line is likely the bug.”','“After we compressed the images, the page loaded twice as fast across ten repeated tests.”','“The page is slow every time I turn this extension on and fast every time I turn it off. The extension is slowing it.”','“The code failed only for empty lists. When I added a check for empty lists, all the tests passed.”','“Half the class was picked at random to take a practice quiz, and that half scored higher in the test.”','“My phone heats up only when that one game is running. When I close it, the phone cools down.”','“Every input with a space crashes the program and inputs without spaces work fine, so the space is the issue.”','“The build broke on the commit that renamed the file. Undoing just that one commit fixed it.”','“After the lab router was moved, speed tests went up in every room, and they dropped again when it was moved back.”','“I ran the same prompt 20 times with examples and 20 times without, and with examples it got the format right more often.”'] },
   { id:'twist', name:'Twisting the point', means:'Changing what someone said into a weaker, extreme version, then attacking that.', spot:'Ask: is that really what they said?',
     ex:'Priya: “Let’s check AI answers before submitting.” Arjun: “So you want to ban AI completely? That’s so backward.”',
-    yes:['Teacher: “Add a few comments to your code.” Student: “So you want a comment on every single line? That’s ridiculous.”','Anu: “We should limit phone use in labs.” Kiran: “So you think phones are evil? Grow up.”','Sai: “Let’s use fewer AI tools in exams.” Meena: “So you want us to write on stone tablets?”','Lead: “Let’s write tests for the login page.” Dev: “So you think I write broken code all the time?”'],
-    no:['Rahul: “We should limit phones in labs.” Sneha: “Fair, but we need them for OTP logins, so let’s allow that.”','Ravi: “Let’s use Git for the project.” Asha: “Agreed, and let’s keep the setup simple since some of us are new to it.”'] }
+    yes:['Teacher: “Add a few comments to your code.” Student: “So you want a comment on every single line? That’s ridiculous.”','Anu: “We should limit phone use in labs.” Kiran: “So you think phones are evil? Grow up.”','Sai: “Let’s use fewer AI tools in exams.” Meena: “So you want us to write on stone tablets?”','Lead: “Let’s write tests for the login page.” Dev: “So you think I write broken code all the time?”','Asha: “Let’s start the project a week earlier.” Rohan: “So you think we’re all lazy? Wow.”','Senior: “Try reading the error message before asking.” Junior: “So we should never ask anyone for help? That’s so rude.”','Friend: “Maybe check reviews before buying that laptop.” Vikram: “So you think I can’t make a single decision on my own?”','Mentor: “Use Tailwind for small projects, it saves time.” Kavya: “So you want us to forget CSS forever? No way.”','Pooja: “Let’s keep the group chat for project updates.” Arun: “So we’re not allowed to talk to each other at all now?”','Teacher: “Try writing the code yourself before asking AI.” Student: “So you think AI is useless and we should go back to 1990?”'],
+    no:['Rahul: “We should limit phones in labs.” Sneha: “Fair, but we need them for OTP logins, so let’s allow that.”','Ravi: “Let’s use Git for the project.” Asha: “Agreed, and let’s keep the setup simple since some of us are new to it.”','Asha: “Let’s start the project a week earlier.” Rohan: “Good idea, but exams end on Friday. Can we start Monday?”','Teacher: “Try writing the code yourself before asking AI.” Student: “Okay. Can we use AI to check our code after we finish?”','Pooja: “Let’s keep the group chat for project updates.” Arun: “Makes sense. Let’s make a separate group for fun stuff.”','Mentor: “Use Tailwind for small projects.” Kavya: “True, but for this one the teacher asked for plain CSS, so we can’t.”','Friend: “Check reviews before buying that laptop.” Vikram: “Right, I’ll also compare the RAM and battery on two sites.”','Lead: “Let’s write tests for the login page.” Dev: “Sure. Should we start with the wrong-password cases?”','Neha: “Let’s use fewer slides in the demo.” Karthik: “Agreed, but we need one slide for the results, so let’s keep that.”','Sir: “Push your code to GitHub every day.” Student: “Okay. Even small changes, or only when something works?”'] }
 ];
 const NOTRICK = 'No trick, fair point';
 const FallacyHunt = { id:'fallacy-hunt', name:'Fallacy Hunt', skill:'reasoning', icon:'lens', inspired:'Cranky Uncle and Bad News', topics:'tech and campus conversations',
@@ -2259,12 +2287,12 @@ const FallacyHunt = { id:'fallacy-hunt', name:'Fallacy Hunt', skill:'reasoning',
     const toLearn = TRICKS.filter(t => !st.learned.includes(t.id)).slice(0,2);
     let score = 0, right = 0, total = 0;
     const steps = [];
-    toLearn.forEach(t => { steps.push({ type:'learn', t }); shuffle([{ msg:pick(t.yes), ans:t.name }, { msg:pick(t.no), ans:NOTRICK }]).forEach(q => steps.push({ type:'check', t, q })); });
+    toLearn.forEach(t => { steps.push({ type:'learn', t }); shuffle([{ msg:fresh('fh-yes', t.yes, 1, txtKey)[0], ans:t.name }, { msg:fresh('fh-no', t.no, 1, txtKey)[0], ans:NOTRICK }]).forEach(q => steps.push({ type:'check', t, q })); });
     const known = TRICKS.filter(t => st.learned.includes(t.id) || toLearn.includes(t));
     let pool = []; known.forEach(t => { t.yes.forEach(m => pool.push({ msg:m, ans:t.name })); });
     const mixN = known.length >= 6 ? 8 : 4;
     const noPool = shuffle(known.flatMap(t => t.no)); const nNo = mixN >= 8 ? 2 : 1;
-    const mixed = shuffle(pool).slice(0, mixN - nNo).concat(noPool.slice(0, nNo).map(m => ({ msg:m, ans:NOTRICK })));
+    const mixed = shuffle(fresh('fh-yes', pool, mixN - nNo, txtKey).concat(fresh('fh-no', noPool, nNo, txtKey).map(m => ({ msg:m, ans:NOTRICK }))));
     shuffle(mixed).forEach(q => steps.push({ type:'mix', q }));
     let s = 0;
     const next = () => {
@@ -2340,12 +2368,116 @@ const AB = [
   { claim:'Hostel students score better, so living on campus makes you smarter.',
     opts:[['They might differ in other ways, like study time or travel time, so the hostel may not be the cause.',1,'Strong: it points to other explanations.'],
           ['Day scholars are just as smart as hostel students, and saying otherwise is really insulting.',0,'Weak: feelings, not a reason.'],
-          ['My roommate lives in the hostel and barely passes, so living on campus can’t help anyone.',0,'Weak: one story used as proof.']] }
+          ['My roommate lives in the hostel and barely passes, so living on campus can’t help anyone.',0,'Weak: one story used as proof.']] },
+{ claim:'AI will replace all programmers in the next five years.',
+    opts:[['AI writes code fast, but someone still has to decide what to build, check the code and fix it.',1,'Strong: it names work that AI still needs people for.'],
+          ['People have been saying computers will take all jobs for fifty years, and it never happened.',0,'Weak: past guesses don’t prove what happens next.'],
+          ['Anyone who believes this has clearly never written a single line of real code in their life.',0,'Weak: it attacks the person, not the claim.']] },
+  { claim:'CGPA doesn’t matter. Only skills matter for placements.',
+    opts:[['Toppers in my class say CGPA is everything, and they would know better than anyone else.',0,'Weak: it leans on who said it, not on a reason.'],
+          ['Many companies set a CGPA cut-off, so a low CGPA can stop you before anyone sees your skills.',1,'Strong: it shows a concrete way CGPA still matters.'],
+          ['Your parents will feel very proud of a high CGPA, and that is worth more than any job offer.',0,'Weak: it appeals to feelings and dodges the point.']] },
+  { claim:'You must finish all of DSA in 1st year, or you won’t get placed.',
+    opts:[['DSA is very hard, and nobody can be expected to learn something that difficult in one year.',0,'Weak: “it’s hard” doesn’t show the claim is wrong.'],
+          ['Some seniors finished DSA in 1st year and still didn’t get placed, so it clearly doesn’t help.',0,'Weak: a few stories used as proof.'],
+          ['Placements come in 3rd and 4th year. A strong base in Python and logic now makes DSA easier later.',1,'Strong: it uses the real timeline and shows a better plan.']] },
+  { claim:'The AI sounded very sure, so its answer must be right.',
+    opts:[['AI can sound just as sure when it is wrong. Confidence isn’t proof, so test the answer yourself.',1,'Strong: it separates sounding sure from being right.'],
+          ['AI is made by engineers in other countries, so it can’t understand questions from Indian students.',0,'Weak: an attack on the source, not on the answer.'],
+          ['Teachers also sound very sure in class, and they are sometimes wrong too, so nobody can be trusted.',0,'Weak: it jumps to an extreme that doesn’t follow.']] },
+  { claim:'I watched the full Python tutorial, so I know Python now.',
+    opts:[['That tutorial has millions of views, so it must have taught you everything you need to know.',0,'Weak: popularity isn’t proof of learning.'],
+          ['Watching feels like learning, but you only find the gaps when you write the code without help.',1,'Strong: it names how to check whether you really learned.'],
+          ['Tutorials are long and boring, and most students fall asleep before they reach the end of them.',0,'Weak: off the point. It’s about boredom, not learning.']] },
+  { claim:'Copying the assignment from a friend is fine. Everyone does it.',
+    opts:[['Copying is against college rules, and rules exist for a reason, so you should always follow them.',0,'Weak: “it’s a rule” doesn’t explain why copying hurts you.'],
+          ['Students who copy are cheaters, and cheaters never become good engineers, no matter what.',0,'Weak: an attack and a huge overgeneralisation.'],
+          ['Even if many copy, the assignment is your practice. Skipping it leaves you stuck in the lab exam.',1,'Strong: it shows the real cost to you.']] },
+  { claim:'A laptop with more RAM will make me a better coder.',
+    opts:[['More RAM helps programs run smoothly, but coding skill comes from practice, not from hardware.',1,'Strong: it accepts what RAM does and shows where the claim breaks.'],
+          ['Good laptops are very expensive in India, and many families can’t afford to buy one easily.',0,'Weak: a side issue. Price doesn’t answer the claim.'],
+          ['My friend has a costly laptop and still writes bad code, so laptops never matter at all.',0,'Weak: one story used as proof.']] },
+  { claim:'A caller knew my name and bank, so it’s safe to share my OTP.',
+    opts:[['Phone calls from unknown numbers are annoying, so it’s best to just cut them all quickly.',0,'Weak: it’s about annoyance, not safety.'],
+          ['Your name and bank are easy to find. Banks never ask for your OTP, so knowing details proves nothing.',1,'Strong: it explains why the “proof” fails and states the rule.'],
+          ['Scammers are bad people who will be punished one day, so there’s no need to worry about them.',0,'Weak: wishful thinking, not a reason.']] },
+  { claim:'Coding is only for people who were good at maths in school.',
+    opts:[['Some famous coders were bad at maths in school, so maths clearly has nothing to do with coding.',0,'Weak: a few stories used as proof, and it overgeneralises.'],
+          ['Saying this is very discouraging to students, and teachers should never say such things.',0,'Weak: feelings, not a reason.'],
+          ['Most early coding needs logic and patience more than hard maths, and both grow with practice.',1,'Strong: it names what coding really needs.']] },
+  { claim:'My code ran without any error, so it must be correct.',
+    opts:[['No error only means Python could run it. Test it with different inputs to check the output.',1,'Strong: it separates “runs” from “correct” and says what to do.'],
+          ['Python is a very popular language, so it would warn you if anything was wrong with your code.',0,'Weak: popularity doesn’t mean Python catches wrong logic.'],
+          ['Real programmers always write code that has at least a few bugs, so yours must have some too.',0,'Weak: a made-up rule with no evidence.']] },
+  { claim:'The command line is outdated. Everything can be done with a mouse.',
+    opts:[['The command line looks cool in movies, and hackers in films always use it, so you should too.',0,'Weak: movies are not a reason.'],
+          ['Git, servers and many dev tools are used through the terminal, and commands are easy to repeat.',1,'Strong: it gives concrete places where the terminal is needed.'],
+          ['The command line was invented a long time ago, and old things are usually the most reliable.',0,'Weak: “it’s old” isn’t a reason either way.']] },
+  { claim:'I started coding late, so I can never catch up with the toppers.',
+    opts:[['Toppers are just lucky, and luck always runs out sooner or later for everyone in college.',0,'Weak: it attacks others and relies on hope.'],
+          ['Everyone says hard work pays off, so you will surely catch up if you just believe in yourself.',0,'Weak: a slogan, not a reason.'],
+          ['Skill grows with regular practice, so steady daily work can close the gap over four years.',1,'Strong: it explains how the gap can close.']] },
+  { claim:'Open-source software is free, so it must be low quality.',
+    opts:[['Free things are usually given away by people who are kind and want to help, which is nice.',0,'Weak: it praises the makers, not the quality.'],
+          ['Price doesn’t decide quality. Free tools like Python and Git are used by top companies every day.',1,'Strong: it breaks the link with clear examples.'],
+          ['Paid software is made by greedy companies, so you should never pay for any software at all.',0,'Weak: an attack and an overgeneralisation.']] },
+  { claim:'AI gave me three wrong answers, so AI is completely useless.',
+    opts:[['AI makes mistakes, so check its answers. It can still help you understand ideas and draft faster.',1,'Strong: it accepts the mistakes and shows a sensible way to use AI.'],
+          ['AI companies spend crores on research, so their tools must be useful to every single person.',0,'Weak: money spent isn’t proof of usefulness.'],
+          ['You probably typed bad questions, so the mistakes were your fault and not the AI’s fault.',0,'Weak: it blames the person without any evidence.']] },
+  { claim:'Writing comments in code is a waste of time.',
+    opts:[['Comments make your code look longer, and longer code always looks more impressive to faculty.',0,'Weak: it’s about looks, not usefulness.'],
+          ['Every good programmer in the world writes comments, so you have to write them in your code too.',0,'Weak: “everyone does it” isn’t a reason.'],
+          ['Comments help you and your teammates understand the code weeks later, which saves time fixing it.',1,'Strong: it shows the time that comments save.']] },
+  { claim:'My senior got placed without any projects, so I don’t need projects.',
+    opts:[['One case isn’t a rule. Projects show what you can build, and interviewers often ask about them.',1,'Strong: it spots the single example and gives a reason.'],
+          ['Your senior was probably just lucky in that interview, and you might not be that lucky next year.',0,'Weak: a guess about luck, not a reason.'],
+          ['Projects are fun to build, and it would be really sad to miss out on all that fun in college.',0,'Weak: feelings, not a reason.']] },
+  { claim:'Sleeping only 4 hours before exams gives me more time to study.',
+    opts:[['Toppers in every college stay up all night before exams, so it must be the best way to study.',0,'Weak: “toppers do it” isn’t proof it works.'],
+          ['Less sleep hurts memory and focus, so the extra hours often give you less learning, not more.',1,'Strong: it shows the hidden cost of the extra hours.'],
+          ['Your hostel warden will not like it if you keep the room lights on late every single night.',0,'Weak: off the point.']] },
+  { claim:'Learning binary is useless, because computers handle it for us.',
+    opts:[['Binary was taught to our seniors too, so it must still be important for every engineer.',0,'Weak: “we’ve always done it” isn’t a reason.'],
+          ['Computers are machines with no feelings, so we should never let them do all our thinking.',0,'Weak: a slogan that doesn’t answer the claim.'],
+          ['Binary explains things you’ll use, like file sizes, hex colours in CSS and bitwise operators.',1,'Strong: it names real places where binary helps.']] },
+  { claim:'Communication doesn’t matter for coders. Only code matters.',
+    opts:[['Interviews, team calls and bug reports all need clear communication, not just code.',1,'Strong: it names real parts of the job that need it.'],
+          ['Good speakers always get more friends in college, and friends are important for happiness.',0,'Weak: off the point. It isn’t about coding work.'],
+          ['Coders who don’t talk much are usually rude and don’t care about their teams at all.',0,'Weak: it attacks people, not the claim.']] },
+  { claim:'This app has a 4.8 rating on the Play Store, so it’s safe to install.',
+    opts:[['A high rating means lots of people like it, and so many people can’t all be wrong about it.',0,'Weak: popularity isn’t safety.'],
+          ['Ratings can be faked and show likes, not safety. Check the developer and the permissions it wants.',1,'Strong: it separates rating from safety and says what to check.'],
+          ['All free apps are scams made to steal your data, so never install any app from the Play Store.',0,'Weak: a huge overgeneralisation.']] },
+  { claim:'Aptitude tests are pointless, because they don’t test coding.',
+    opts:[['Many companies use aptitude as the first round, and it tests speed and logic that coding needs too.',1,'Strong: it gives two concrete reasons.'],
+          ['Aptitude tests have been used by companies for decades, so they must be useful for everyone.',0,'Weak: “it’s been done for years” isn’t a reason.'],
+          ['Students who skip aptitude prep are lazy and will regret it when their friends get placed.',0,'Weak: an attack and a scare, not a reason.']] },
+  { claim:'You need an expensive paid course to get a tech job.',
+    opts:[['Expensive courses are run by businesses that only want your money, so never trust them.',0,'Weak: it attacks the sellers and overgeneralises.'],
+          ['Many good free resources exist, and companies check what you can do, not what you paid.',1,'Strong: it points to what really decides a job.'],
+          ['My neighbour paid ₹2 lakh for a course and still has no job, so courses never work.',0,'Weak: one story used as proof.']] },
+  { claim:'Two friends used a study app and their marks went up, so the app works.',
+    opts:[['Study apps keep sending notifications, and that can be really distracting during class.',0,'Weak: off the point.'],
+          ['Your friends are smart, so they would have scored well anyway, and the app made no difference.',0,'Weak: a guess stated as fact.'],
+          ['Two people is too small a group, and they may have also studied more. Compare with many students.',1,'Strong: it names two problems with the evidence.']] },
+  { claim:'Prompting AI is easy, so there’s nothing to learn about it.',
+    opts:[['Clear prompts with context and examples get much better answers, and writing them takes practice.',1,'Strong: it shows that prompt quality changes the result.'],
+          ['Big companies now hire prompt engineers, so prompting must be the most important skill there is.',0,'Weak: it overstates and leans on job titles.'],
+          ['AI is the future, and anyone who doesn’t learn it now will be left behind forever.',0,'Weak: a scare, not a reason.']] },
+  { claim:'Hackathons are only for experts. 1st years shouldn’t join.',
+    opts:[['Hackathons give free food and T-shirts, so they are worth joining just for that alone.',0,'Weak: off the point.'],
+          ['Teams need many skills, and a first hackathon teaches a lot quickly, even if you don’t win.',1,'Strong: it shows what a beginner gains.'],
+          ['Experts were also beginners once, and saying this to 1st years is really unfair to them.',0,'Weak: feelings, not a reason.']] },
+  { claim:'Reading error messages is pointless. Just paste the code into Google.',
+    opts:[['Google is so slow on hostel Wi-Fi that searching takes forever, so it’s not worth it.',0,'Weak: a side issue, not the real point.'],
+          ['Good programmers never use Google, so searching means you are not a real coder.',0,'Weak: a false rule and a personal jab.'],
+          ['The error message names the line and the problem, which is the fastest clue to the fix.',1,'Strong: it shows what the message gives you.']] }
 ];
 const ArgueBack = { id:'argue-back', name:'Argue Back', skill:'reasoning', icon:'chat', inspired:'Kialo debates', topics:'tech claims students hear',
   how:['Read a claim people often make about tech or college.','Pick the strongest reply. All replies are about the same length.','Strong replies answer the real point with a reason. Watch for replies that only sound smart.'],
   run(ctx){
-    const qs = shuffle(AB).slice(0,4); let i = 0, right = 0;
+    const qs = fresh('argue-back', AB, 4); let i = 0, right = 0;
     const show = () => {
       const q = qs[i], o = shuffle(q.opts), ci = o.findIndex(x => x[1]);
       ctx.root.innerHTML = hud([['ab-i','Claim',(i+1)+'/4'],['ab-r','Strong picks',right]]) + '<div class="msgcard"><div class="from">Someone says</div><b>“'+q.claim+'”</b></div><p class="prompt" style="margin-top:14px">Which reply is strongest?</p><div id="ab-o"></div>';
@@ -2408,7 +2540,7 @@ const TC = [
 const TrustCheck = { id:'trust-or-check', name:'Trust or Check', skill:'ai', icon:'eye', inspired:'The Decision Lab on automation bias', topics:'Python (operators, strings, lists, dicts, sets)',
   how:['An AI tells you what a piece of Python code prints. It always sounds sure.','Work it out yourself, then choose: is the AI right or wrong?','Say how sure you are. Sure and right scores most; sure and wrong costs you.'],
   run(ctx){
-    const qs = shuffle(TC).slice(0,6); let i = 0, score = 0, right = 0, caught = 0, wrongAI = 0;
+    const qs = fresh('trust-or-check', TC, 6); let i = 0, score = 0, right = 0, caught = 0, wrongAI = 0;
     const show = () => {
       const q = qs[i]; let verdict = null, sure = null;
       ctx.root.innerHTML = hud([['tc-i','Snippet',(i+1)+'/6'],['tc-s','Points',score]]) + '<div class="card">'+code(q.c)
@@ -2465,12 +2597,64 @@ const SC = [
   { src:'Bank SMS', text:'Your bank will never send a link asking you to update KYC by SMS. If you get such a message, don’t click the link. Call the number printed on your bank card instead.',
     sum:['Banks don’t send KYC update links by SMS.','Don’t click links in such messages.','Call the number printed on your bank card.','You can reply to the SMS to check if it’s real.'], bad:3, why:'The source never says to reply. Replying to a scam confirms your number is active.' },
   { src:'Python docs', text:'range(start, stop) gives numbers from start up to, but not including, stop. range(5) gives 0, 1, 2, 3 and 4. A third argument, step, sets the gap between numbers.',
-    sum:['range(5) gives 0 to 4.','The stop value is not included.','range(1, 5) gives 1, 2, 3, 4 and 5.','A third argument sets the step.'], bad:2, why:'Stop is not included, so range(1, 5) ends at 4.' }
+    sum:['range(5) gives 0 to 4.','The stop value is not included.','range(1, 5) gives 1, 2, 3, 4 and 5.','A third argument sets the step.'], bad:2, why:'Stop is not included, so range(1, 5) ends at 4.' },
+  { src:'Python docs', text:'Strings in Python cannot be changed after they are made. Methods like upper() and replace() do not change the original string. They return a new string, so you must save the result in a variable.',
+    sum:['A string cannot be changed in place.','upper() gives back a new string.','replace() changes the original string directly.','Save the result if you want to keep it.'], bad:2, why:'The source says these methods return a new string. The original stays the same.' },
+  { src:'Python docs', text:'append(x) adds x as one item at the end of a list. extend(x) adds each item of x one by one. If a = [1, 2], then a.append([3, 4]) gives a 3 items, but a.extend([3, 4]) gives a 4 items.',
+    sum:['append() adds one item at the end.','After a.append([3, 4]), a has 4 items.','extend() adds items one by one.','After a.extend([3, 4]), a has 4 items.'], bad:1, why:'append() adds the whole list as one item, so a has 3 items.' },
+  { src:'Python docs', text:'In Python 3, the / operator always gives a float, so 7 / 2 is 3.5. The // operator does floor division, so 7 // 2 is 3. The % operator gives the remainder, so 7 % 2 is 1.',
+    sum:['/ always gives a float.','7 / 2 gives 3.5.','7 // 2 also gives 3.5.','7 % 2 gives the remainder, 1.'], bad:2, why:'The source says 7 // 2 is 3. Floor division drops the decimal part.' },
+  { src:'Python docs', text:'input() always returns a string, even when the user types a number. To do maths with it, convert it using int() or float(). If you add two inputs without converting them, they join together as text.',
+    sum:['If the user types a number, input() returns an int.','input() always gives back a string.','Use int() or float() to do maths with it.','Adding two unconverted inputs joins them as text.'], bad:0, why:'The source says input() returns a string, even for numbers.' },
+  { src:'Python docs', text:'The in operator on a dictionary checks the keys, not the values. To check the values, use d.values(). So "a" in {"a": 1} is True, but 1 in {"a": 1} is False.',
+    sum:['in checks the keys of a dictionary.','To check values, use d.values().','"a" in {"a": 1} is True.','1 in {"a": 1} is also True.'], bad:3, why:'1 is a value, not a key. The source says this gives False.' },
+  { src:'Python docs', text:'In an if condition, 0, None, an empty string and an empty list all count as False. Any non-empty string counts as True, even the string "0".',
+    sum:['0 counts as False.','An empty list counts as False.','The string "0" counts as False.','None counts as False.'], bad:2, why:'"0" is a non-empty string, so the source says it counts as True.' },
+  { src:'Git guide', text:'git clone copies a full repository from a remote, like GitHub, to your computer. The copy includes all the files and the full commit history. Git names that remote origin.',
+    sum:['git clone copies a repository to your computer.','It copies only the latest files, not the history.','It works with remotes like GitHub.','The remote gets the name origin.'], bad:1, why:'The source says the copy includes the full commit history.' },
+  { src:'Git guide', text:'git fetch downloads new commits from the remote but does not change your files. git pull downloads the new commits and also merges them into your current branch.',
+    sum:['git pull gets new commits from the remote.','git pull merges them into your branch.','git fetch downloads new commits too.','git fetch also merges them into your files.'], bad:3, why:'The source says fetch does not change your files. Only pull merges.' },
+  { src:'Git guide', text:'A .gitignore file lists files that Git should not track, like secret keys or build folders. It only works for files that are not tracked yet. If a file was already committed, adding it to .gitignore will not remove it from the repo.',
+    sum:['.gitignore tells Git which files to skip.','It is useful for files like secret keys.','Adding a committed file to .gitignore removes it from the repo.','It only affects files that are not tracked yet.'], bad:2, why:'The source says an already committed file stays in the repo.' },
+  { src:'Command line notes', text:'rm deletes a file. Files deleted with rm do not go to the Recycle Bin, so they are hard to get back. rm -r deletes a folder and everything inside it.',
+    sum:['rm deletes files.','Files deleted with rm go to the Recycle Bin.','rm -r deletes a folder and its contents.','Deleted files are hard to get back.'], bad:1, why:'The source says they do not go to the Recycle Bin. That is why rm is risky.' },
+  { src:'Number systems notes', text:'Binary uses only two digits, 0 and 1. Each place is worth double the place to its right: 1, 2, 4, 8 and so on. So binary 1011 is 8 + 0 + 2 + 1, which is 11 in decimal.',
+    sum:['Binary uses only 0 and 1.','Each place is worth double the one to its right.','Binary 1011 equals 13 in decimal.','The rightmost place is worth 1.'], bad:2, why:'The source works it out as 8 + 0 + 2 + 1, which is 11.' },
+  { src:'Number systems notes', text:'Hexadecimal uses 16 digits: 0 to 9, then A to F. A stands for 10 and F stands for 15. One hex digit stands for exactly 4 bits, so FF is 255 in decimal.',
+    sum:['Hex has 16 digits.','A stands for 10 and F stands for 15.','FF equals 255 in decimal.','One hex digit stands for 8 bits.'], bad:3, why:'The source says one hex digit is 4 bits. Two hex digits make 8 bits.' },
+  { src:'Bitwise notes', text:'The & operator gives 1 only where both bits are 1. The | operator gives 1 where at least one bit is 1. So 6 & 3 is 2, and 6 | 3 is 7.',
+    sum:['& gives 1 only where both bits are 1.','| gives 1 if either bit is 1.','6 & 3 equals 7.','6 | 3 equals 7.'], bad:2, why:'The source says 6 & 3 is 2. 7 is the answer for 6 | 3.' },
+  { src:'Bitwise notes', text:'Shifting the bits of a whole number one place to the left doubles it. Shifting one place to the right halves it and drops any remainder. So 13 shifted right by one place is 6.',
+    sum:['Shifting left by one place doubles a number.','Shifting right by one place halves it.','13 shifted right by one place gives 6.5.','Any remainder is dropped when shifting right.'], bad:2, why:'The remainder is dropped, so the source says the answer is 6.' },
+  { src:'Aptitude notes', text:'A shop raises a price by 10%, and later cuts the new price by 10%. The final price is 1% less than the original. For example, ₹100 becomes ₹110, and then ₹99.',
+    sum:['The price first goes up by 10%.','Then the new price is cut by 10%.','The final price is the same as the original.','₹100 ends up as ₹99.'], bad:2, why:'The source says the final price is 1% less. The 10% cut is on a bigger number.' },
+  { src:'Aptitude notes', text:'Simple interest is worked out only on the original amount. The formula is SI = P × R × T / 100. So ₹1,000 at 5% a year for 2 years earns ₹100 as interest.',
+    sum:['Simple interest uses only the original amount.','The interest is added each year and earns more interest.','SI = P × R × T / 100.','₹1,000 at 5% for 2 years earns ₹100.'], bad:1, why:'That describes compound interest. The source says simple interest is only on the original amount.' },
+  { src:'Aptitude notes', text:'The average of some numbers is their sum divided by how many numbers there are. The average of 4, 6 and 11 is 7. If every number goes up by 2, the average also goes up by 2.',
+    sum:['Average is the sum divided by the count.','The average of 4, 6 and 11 is 7.','Adding 2 to every number raises the average by 6.','You divide by how many numbers there are.'], bad:2, why:'The source says the average goes up by 2, the same as each number.' },
+  { src:'GenAI reading', text:'A context window is the amount of text a model can read at one time. It is counted in tokens. A token is often a part of a word. If a chat gets longer than the window, the model can lose track of the earliest messages.',
+    sum:['The context window is how much text the model can read at once.','It is counted in tokens.','A token is always one full word.','In very long chats, the model can forget early messages.'], bad:2, why:'The source says a token is often a part of a word.' },
+  { src:'GenAI reading', text:'Temperature is a setting that controls how random a model’s output is. A low temperature makes answers more predictable. A high temperature makes them more varied, but also more likely to go off track.',
+    sum:['Temperature controls how random the output is.','Low temperature gives more predictable answers.','High temperature gives more varied answers.','High temperature makes answers more accurate.'], bad:3, why:'The source says high temperature makes answers more likely to go off track.' },
+  { src:'GenAI reading', text:'Giving a model a few examples inside your prompt is called few-shot prompting. Asking with no examples is called zero-shot. Examples help the model follow the format you want. They do not change the model itself.',
+    sum:['Few-shot prompting gives the model examples.','Zero-shot means no examples are given.','Examples permanently retrain the model.','Examples help the model match your format.'], bad:2, why:'The source says examples do not change the model itself.' },
+  { src:'CSS notes', text:'grid-template-columns: 1fr 2fr makes two columns. The second column gets twice as much free space as the first. The gap property sets the space between rows and columns.',
+    sum:['This makes two columns.','The first column is twice as wide as the second.','gap adds space between rows and columns.','fr shares out the free space.'], bad:1, why:'It is the other way round. The 2fr column, the second one, gets twice the space.' },
+  { src:'Tailwind docs', text:'In Tailwind, you style elements by adding small utility classes in the HTML, like p-4 for padding or text-center. A prefix like md: applies a class only from medium screen widths and up.',
+    sum:['Tailwind uses small utility classes.','p-4 adds padding.','md:text-center works only on screens smaller than medium.','You add the classes in the HTML.'], bad:2, why:'The source says md: works from medium screen widths and up.' },
+  { src:'CSS notes', text:'An id selector is more specific than a class selector. A class selector is more specific than a tag selector. When two rules clash, the more specific one wins. If they are equally specific, the rule that comes later wins.',
+    sum:['An id beats a class.','A class beats a tag selector.','The more specific rule wins a clash.','If two rules are equally specific, the first one wins.'], bad:3, why:'The source says the later rule wins.' },
+  { src:'Placement notice', text:'The coding test for the internship drive is on 20 January at 2 pm in Lab 4. Bring your laptop, fully charged. No one will be allowed in after 2:15 pm.',
+    sum:['The test is on 20 January at 2 pm.','It will be held in Lab 4.','Bring a fully charged laptop.','You can still enter until 2:30 pm.'], bad:3, why:'The notice says no entry after 2:15 pm. Fifteen minutes could cost you the test.' },
+  { src:'UPI safety tip', text:'A UPI collect request asks you to pay money. If you approve it with your PIN, money leaves your account. Scammers often send collect requests and say you have won a prize.',
+    sum:['A collect request asks you to pay.','Approving it with your PIN takes money out of your account.','Scammers may say you have won a prize.','Approving a collect request is how you receive a prize.'], bad:3, why:'The source says approving a collect request sends money out. That trick is a common scam.' },
+  { src:'Bank SMS', text:'Never share an OTP with anyone, even if they say they are from your bank. An OTP works only for a few minutes. It proves that you are the one making the transaction.',
+    sum:['Don’t share your OTP with anyone.','This includes people who say they are from your bank.','An OTP stays valid for a whole day.','It proves you are the one making the transaction.'], bad:2, why:'The source says an OTP works only for a few minutes.' }
 ];
 const SourceCheck = { id:'source-check', name:'Source Check', skill:'ai', icon:'lens', inspired:'checking AI summaries against the source', topics:'Python, Git, CSS, GenAI, UPI',
   how:['You get a short source text and an AI summary of it.','One sentence in the summary says something the source doesn’t.','Compare them and tap the wrong sentence. You don’t need to know the topic.'],
   run(ctx){
-    const qs = shuffle(SC).slice(0,4); let i = 0, right = 0;
+    const qs = fresh('source-check', SC, 4); let i = 0, right = 0;
     const show = () => {
       const q = qs[i], order = shuffle([0,1,2,3]);
       ctx.root.innerHTML = hud([['sc-i','Summary',(i+1)+'/4'],['sc-r','Caught',right]]) + '<div class="card source"><div class="small muted">Source: '+q.src+'</div><p style="margin:6px 0 0">'+q.text+'</p></div>'
@@ -2499,7 +2683,7 @@ const TS = [
 const TasteTest = { id:'taste-test', name:'Taste Test', skill:'ai', icon:'star', inspired:'Aashish Pahwa’s “AI ideas feel familiar” post', topics:'Python names, Git, CSS, prompting',
   how:['An AI gives you 6 options for a small task.','First, pick the best one.','Then say exactly what’s wrong with 3 of the others. That’s the real skill.'],
   run(ctx){
-    const B = pick(TS); const opts = shuffle(B.opts); let score = 0, flawRight = 0;
+    const B = fresh('taste-test', TS, 1)[0]; const opts = shuffle(B.opts); let score = 0, flawRight = 0;
     ctx.root.innerHTML = '<div class="botmsg"><div class="bot">🤖</div><div class="txt"><div class="small muted">Task</div><b>'+B.brief+'</b><br>Here are 6 options:</div></div><p class="prompt" style="margin-top:12px">Step 1: tap the best option.</p><div id="ts-o">'
       + opts.map((o,n) => '<button class="opt idea" data-n="'+n+'"><span class="rk">'+(n+1)+'</span><span>'+esc(o[0])+'</span></button>').join('') + '</div><div id="ts-2"></div>';
     anim(ctx.root.querySelectorAll('.idea'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.04) });
