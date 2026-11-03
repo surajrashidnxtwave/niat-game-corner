@@ -29,7 +29,7 @@ const GAME_SKILL = {
   'fallacy-hunt': 'reasoning', 'argue-back': 'reasoning',
   'rule-switch': 'flexibility',
   'robot-path': 'planning',
-  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai', 'ship-or-test': 'ai', 'you-or-ai': 'ai'
+  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai', 'hint-ladder': 'ai', 'ship-or-test': 'ai', 'you-or-ai': 'ai'
 };
 const SKILL_KEYS = ['creativity', 'insight', 'memory', 'focus', 'reasoning', 'flexibility', 'planning', 'ai'];
 const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2); };

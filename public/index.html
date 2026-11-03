@@ -808,6 +808,11 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 .st-test{margin-top:10px;background:var(--chip);border-radius:12px;padding:10px 12px;display:grid;gap:4px;font-size:14px}
 .st-test code,.st-test b{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace}
 .st-test b.ok{color:var(--ok)}.st-test b.no{color:var(--bad)}
+/* Hint Ladder */
+.hl-ladder{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.hl-rung{flex:1 1 120px;font-size:15px;padding:11px 12px}
+.hl-rung small{font-weight:800;color:var(--soft);margin-left:2px}
+.hl-rung:disabled{opacity:.45}
 </style>
 </head>
 <body>
@@ -1044,6 +1049,7 @@ const ICON = {
   star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
   split:'<circle cx="8" cy="12" r="4.5"/><rect x="13.5" y="7.5" width="8" height="9" rx="2.5"/><path d="M17.5 5v2.5M16 12h.01M19 12h.01"/>',
   ship:'<path d="M4 15l2 4h12l2-4z"/><path d="M12 3v12M12 3l5 6h-5"/>',
+  ladder:'<path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
@@ -1289,7 +1295,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker','ship-or-test'];
+const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -4422,9 +4428,74 @@ const ShipOrTest = { id:'ship-or-test', name:'Ship or Test', skill:'ai', icon:'s
   }
 };
 
+/* ================= 21. Hint Ladder (using AI well): an AI tutor helps in steps. A nudge, the method, or the full answer ================= */
+const HL_N = 5, HL_RUNGS = [['Nudge', 1], ['Method', 2], ['Full answer', 4]];
+const HintLadder = { id:'hint-ladder', name:'Hint Ladder', skill:'ai', icon:'ladder', inspired:'research on AI tutors and learning', topics:'aptitude, Python, number systems, Git, CSS, GenAI',
+  how:['Each puzzle is worth 4 points. An AI tutor can help: a <b>nudge</b> costs 1, the <b>method</b> costs 2, the <b>full answer</b> costs 4.','Take only as much help as you need. You can climb one step at a time or jump.','5 puzzles. One try each.'],
+  run(ctx){
+    const log = []; let i = -1, points = 0, used = [];
+    function next(){
+      i++;
+      if (i >= HL_N) return finish();
+      const P = aiQuestion(used); used.push(P.id);
+      const t0 = Date.now(), rec = { topic: P.topic, rungs: [], firstHelp: null, right: false };
+      let choice = null, cost = 0, done = false;
+      ctx.root.innerHTML = hud([['hl-n','Puzzle',(i+1)+'/'+HL_N],['hl-p','Points',points],['hl-c','This puzzle','4']])
+        + '<div class="card ya-card"><span class="chip">'+esc(P.topic)+'</span><p class="ya-q">'+esc(P.q)+'</p>'+(P.code ? code(P.code) : '')
+        + '<div class="ya-opts">'+P.opts.map((o, k) => '<button class="opt ya-opt" data-k="'+k+'"><span class="ya-l">'+'ABCD'[k]+'</span><span class="ya-t">'+esc(o)+'</span></button>').join('')+'</div>'
+        + '<div id="hl-help"></div></div>'
+        + '<div class="hl-ladder" id="hl-lad">'+HL_RUNGS.map((r, k) => '<button class="btn light hl-rung" data-r="'+k+'">'+['💡','🧭','📖'][k]+' '+r[0]+' <small>−'+r[1]+'</small></button>').join('')+'</div>'
+        + '<div class="row ya-act" id="hl-act"><button class="btn c" id="hl-lock" disabled>Lock in</button></div><div id="hl-out"></div>';
+      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      const opts = [...ctx.root.querySelectorAll('.ya-opt')];
+      opts.forEach((b, k) => b.onclick = () => { if (done) return; choice = k; opts.forEach((x, j) => x.classList.toggle('sel', j === k)); $('hl-lock').disabled = false; SFX.play('select'); });
+      const texts = [P.hints[0], P.hints[1], P.right];
+      ctx.root.querySelectorAll('.hl-rung').forEach(b => b.onclick = () => {
+        if (done) return;
+        const k = +b.dataset.r;
+        if (rec.firstHelp === null) rec.firstHelp = Math.round((Date.now() - t0) / 1000);
+        rec.rungs.push(k); cost = Math.min(4, cost + HL_RUNGS[k][1]); $('hl-c').textContent = Math.max(0, 4 - cost);
+        b.disabled = true;
+        $('hl-help').insertAdjacentHTML('beforeend', '<div class="ai-box"><span class="ai-tag">🤖 Tutor: '+HL_RUNGS[k][0].toLowerCase()+'</span><div>'+esc(texts[k])+'</div></div>');
+        anim($('hl-help').lastElementChild, { opacity:[0,1], y:[6,0] }); SFX.play('whoosh');
+        if (k === 2) ctx.root.querySelectorAll('.hl-rung').forEach(x => x.disabled = true);
+      });
+      $('hl-lock').onclick = () => {
+        if (choice === null || done) return;
+        done = true; rec.right = choice === P.ans; rec.secs = Math.round((Date.now() - t0) / 1000);
+        const got = rec.right ? Math.max(0, 4 - cost) : 0; points += got; $('hl-p').textContent = points;
+        log.push(rec);
+        opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('.hl-rung').forEach(x => x.disabled = true);
+        opts[P.ans].classList.add('right'); if (!rec.right) opts[choice].classList.add('wrong');
+        FX.result(rec.right, true);
+        $('hl-act').innerHTML = '';
+        $('hl-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct. +' + got : 'Not quite. The answer is ' + esc(P.opts[P.ans]) + '.')+'</b>'+(rec.rungs.includes(2) ? '' : ' '+esc(P.right.replace(/ Answer: .*$/, '')))+'</div>'
+          + '<button class="btn c full" id="hl-next" style="margin-top:12px">'+(i < HL_N - 1 ? 'Next puzzle' : 'See results')+'</button>';
+        $('hl-next').onclick = next; $('hl-next').focus();
+      };
+    }
+    function finish(){
+      const right = log.filter(r => r.right).length, alone = log.filter(r => r.right && !r.rungs.length).length;
+      const jumped = log.filter(r => r.rungs[0] === 2).length, full = log.filter(r => r.rungs.includes(2)).length;
+      const nudgeOnly = log.filter(r => r.right && r.rungs.length && !r.rungs.includes(2)).length;
+      const quick = log.filter(r => r.firstHelp !== null && r.firstHelp < 10).length, helped = log.filter(r => r.rungs.length).length;
+      const note = jumped >= 2 ? 'You went straight to the full answer ' + jumped + ' times. Reading a worked answer feels like learning, but you remember far more when you take a nudge and finish it yourself. Try the smallest hint first.'
+        : quick >= 3 ? 'You asked for help within 10 seconds on ' + quick + ' puzzles. Give each one a real try first. Being stuck for a minute is where the learning happens.'
+        : nudgeOnly >= 2 ? 'A small nudge was enough for you ' + nudgeOnly + ' times. That is the best way to use an AI tutor: just enough help to keep thinking for yourself.'
+        : alone >= 4 ? 'You solved ' + alone + ' puzzles without any help. Save the tutor for when you are really stuck.'
+        : 'Take the smallest hint that gets you moving, then finish the puzzle yourself. That is how an AI tutor helps you learn instead of doing the work for you.';
+      ctx.end({ score: points, pct: points / (HL_N * 4) * 100, title: right + ' of ' + HL_N + ' correct', sub: helped + ' with help from the tutor',
+        tiles: [[alone,'Solved alone'],[nudgeOnly,'A small hint was enough'],[full,'Took the full answer'],[jumped,'Jumped straight to it']],
+        note, meta: { right, alone, nudgeOnly, fullAnswers: full, jumpedToAnswer: jumped, quickHelp: quick, points,
+          items: log.map(r => ({ t: r.topic, h: r.rungs.join(''), fh: r.firstHelp, r: r.right ? 1 : 0, s: r.secs })) } });
+    }
+    next();
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest];
+  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder];
 route();
 pullMe();
 </script>
