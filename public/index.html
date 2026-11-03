@@ -813,6 +813,13 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 .hl-rung{flex:1 1 120px;font-size:15px;padding:11px 12px}
 .hl-rung small{font-weight:800;color:var(--soft);margin-left:2px}
 .hl-rung:disabled{opacity:.45}
+/* Sure or Not */
+.sn-conf{margin-top:6px;display:grid;gap:6px}
+.sn-conf div{display:flex;gap:6px;flex-wrap:wrap}
+.sn-conf .chipb{flex:1 1 90px}
+.sn-conf .chipb[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
+.sn-bar{margin-top:8px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--c-ai) 15%,#fff);overflow:hidden}
+.sn-bar i{display:block;height:100%;background:var(--c-ai)}
 </style>
 </head>
 <body>
@@ -1295,7 +1302,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder'];
+const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -4493,9 +4500,79 @@ const HintLadder = { id:'hint-ladder', name:'Hint Ladder', skill:'ai', icon:'lad
   }
 };
 
+/* ================= 22. Sure or Not (using AI well): say how sure you are, then a very confident AI answers ================= */
+const SN_N = 6, SN_LEVELS = [['Guessing', 1], ['Fairly sure', 2], ['Very sure', 3]];
+const SureOrNot = { id:'sure-or-not', name:'Sure or Not', skill:'ai', icon:'gauge', inspired:'research on confident AI and human judgement', topics:'aptitude, Python, number systems, Git, CSS, GenAI',
+  how:['Answer each puzzle and say how sure you are: guessing (1), fairly sure (2) or very sure (3).','Then an AI gives its answer and says how sure it is. You can keep yours or switch.','A right final answer wins your points; a wrong one loses them. 6 puzzles.'],
+  run(ctx){
+    const wrongs = shuffle([1, 1, 1, 0, 0, 0]), log = []; let i = -1, points = 0, used = [];
+    function next(){
+      i++;
+      if (i >= SN_N) return finish();
+      const P = aiQuestion(used); used.push(P.id);
+      const AI = aiSays(P, wrongs[i]), aiConf = ri(91, 99), t0 = Date.now();
+      const rec = { topic: P.topic, aiWrong: !!wrongs[i], conf: null, first: null, final: null };
+      let choice = null, conf = null;
+      ctx.root.innerHTML = hud([['sn-n','Puzzle',(i+1)+'/'+SN_N],['sn-p','Points',points]])
+        + '<div class="card ya-card"><span class="chip">'+esc(P.topic)+'</span><p class="ya-q">'+esc(P.q)+'</p>'+(P.code ? code(P.code) : '')
+        + '<div class="ya-opts">'+P.opts.map((o, k) => '<button class="opt ya-opt" data-k="'+k+'"><span class="ya-l">'+'ABCD'[k]+'</span><span class="ya-t">'+esc(o)+'</span></button>').join('')+'</div>'
+        + '<div class="sn-conf" id="sn-conf"><span class="small muted">How sure are you?</span><div>'+SN_LEVELS.map((l, k) => '<button class="chipb" data-c="'+k+'" aria-pressed="false">'+l[0]+'</button>').join('')+'</div></div>'
+        + '<div id="sn-ai"></div></div>'
+        + '<div class="row ya-act" id="sn-act"><button class="btn c" id="sn-lock" disabled>Lock in</button></div><div id="sn-out"></div>';
+      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      const opts = [...ctx.root.querySelectorAll('.ya-opt')], ready = () => $('sn-lock').disabled = choice === null || conf === null;
+      opts.forEach((b, k) => b.onclick = () => { if (rec.first !== null) return; choice = k; opts.forEach((x, j) => x.classList.toggle('sel', j === k)); SFX.play('select'); ready(); });
+      ctx.root.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { if (rec.first !== null) return; conf = +b.dataset.c; ctx.root.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
+      $('sn-lock').onclick = () => {
+        rec.first = choice; rec.conf = conf; opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('[data-c]').forEach(x => x.disabled = true);
+        $('sn-ai').innerHTML = '<div class="ai-box"><span class="ai-tag">🤖 AI says · '+aiConf+'% sure</span><div>'+esc(AI.text)+'</div><div class="sn-bar"><i style="width:'+aiConf+'%"></i></div></div>';
+        anim($('sn-ai'), { opacity:[0,1], y:[6,0] });
+        if (AI.pick === choice) {
+          $('sn-act').innerHTML = '<p class="ya-say">AI agrees with you.</p><button class="btn c" id="sn-go">Continue</button>';
+          $('sn-go').onclick = () => settle(choice);
+        } else {
+          $('sn-act').innerHTML = '<p class="ya-say">AI disagrees, and it is '+aiConf+'% sure.</p><button class="btn light" id="sn-keep">Keep mine</button><button class="btn c" id="sn-sw">Switch to AI’s</button>';
+          $('sn-keep').onclick = () => settle(choice);
+          $('sn-sw').onclick = () => { opts.forEach((b, j) => b.classList.toggle('sel', j === AI.pick)); settle(AI.pick); };
+        }
+      };
+      function settle(final){
+        rec.final = final; rec.right = final === P.ans; rec.firstRight = rec.first === P.ans; rec.secs = Math.round((Date.now() - t0) / 1000);
+        log.push(rec);
+        const c = SN_LEVELS[rec.conf][1], delta = rec.right ? c : -c; points += delta; $('sn-p').textContent = points;
+        opts[P.ans].classList.add('right'); if (!rec.right) opts[final].classList.add('wrong');
+        FX.result(rec.right, true);
+        $('sn-act').innerHTML = '';
+        $('sn-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct. +' + c : 'Not quite. −' + c + '. The answer is ' + esc(P.opts[P.ans]) + '.')+'</b> '+esc(P.right.replace(/ Answer: .*$/, ''))
+          + (AI.pick !== P.ans ? '<div class="small" style="margin-top:6px">The AI said it was '+aiConf+'% sure, and it was wrong. How sure an AI sounds tells you nothing about whether it is right.</div>' : '')+'</div>'
+          + '<button class="btn c full" id="sn-next" style="margin-top:12px">'+(i < SN_N - 1 ? 'Next puzzle' : 'See results')+'</button>';
+        $('sn-next').onclick = next; $('sn-next').focus();
+      }
+    }
+    function finish(){
+      const right = log.filter(r => r.right).length;
+      const caved = log.filter(r => r.firstRight && !r.right).length;                         // right, then switched to the confident AI's wrong answer
+      const cavedSure = log.filter(r => r.firstRight && !r.right && r.conf === 2).length;
+      const ignored = log.filter(r => !r.aiWrong && !r.firstRight && !r.right).length;      // AI right, kept own wrong answer
+      const sureRight = log.filter(r => r.conf === 2 && r.firstRight).length, sure = log.filter(r => r.conf === 2).length;
+      const guessRight = log.filter(r => r.conf === 0 && r.firstRight).length, guess = log.filter(r => r.conf === 0).length;
+      const note = cavedSure ? 'You were very sure, you were right, and you still switched to the AI. An AI saying "97% sure" is not evidence. When you have worked it out, trust your working unless you can find a mistake in it.'
+        : caved ? 'You had the right answer and switched to a confident AI. Before switching, find the step where you went wrong. If you can’t find one, keep your answer.'
+        : ignored >= 2 ? 'The AI was right and you kept your wrong answer ' + ignored + ' times. Confidence is good, but when the AI disagrees, re-check your own working too.'
+        : sure && sureRight < sure ? 'When you said "very sure" you were right ' + sureRight + ' of ' + sure + ' times. Notice when your confidence runs ahead of your checking.'
+        : 'You judged the AI on its working, not on how confident it sounded. That is exactly the right habit.';
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (SN_N * 3) * 100, title: right + ' of ' + SN_N + ' correct', sub: 'The AI was 91–99% sure every time, and wrong on 3',
+        tiles: [[caved,'Switched away from a right answer'],[ignored,'Kept a wrong answer'],[sure ? sureRight + '/' + sure : '–','Very sure and right'],[guess ? guessRight + '/' + guess : '–','Guessed and right']],
+        note, meta: { right, caved, cavedWhenVerySure: cavedSure, keptWrongVsRightAI: ignored, verySure: sure, verySureRight: sureRight, guessed: guess, guessedRight: guessRight, points,
+          items: log.map(r => ({ t: r.topic, aw: r.aiWrong ? 1 : 0, c: r.conf, f: r.firstRight ? 1 : 0, r: r.right ? 1 : 0, s: r.secs })) } });
+    }
+    next();
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder];
+  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot];
 route();
 pullMe();
 </script>
