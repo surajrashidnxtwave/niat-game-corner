@@ -803,29 +803,23 @@ body.ingame{padding-left:0;padding-bottom:16px}
 body.ingame .toast,body.ingame .combo{left:50%}
 body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
 #g-fs svg{display:block;margin:auto}
-/* Ship or Test */
-.st-code{margin:0;font:600 14px/1.55 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;white-space:pre;overflow-x:auto;color:var(--ink)}
-.st-test{margin-top:10px;background:var(--chip);border-radius:12px;padding:10px 12px;display:grid;gap:4px;font-size:14px}
-.st-test code,.st-test b{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace}
-.st-test b.ok{color:var(--ok)}.st-test b.no{color:var(--bad)}
+/* Code Review */
+.cr-code{margin-top:4px;border:2px solid color-mix(in srgb,var(--c-ai) 55%,#fff);background:color-mix(in srgb,var(--c-ai) 6%,#fff);border-radius:14px;padding:8px 6px 6px}
+.cr-code .ai-tag{padding:0 6px}
+.cr-line{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border-radius:8px;padding:4px 6px;border:2px solid transparent;font:600 14px/1.5 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;color:var(--ink);white-space:pre}
+.cr-line code{white-space:pre;overflow-x:auto}
+.cr-line:hover{background:rgba(255,255,255,.7)}
+.cr-no{flex:none;width:18px;text-align:right;color:var(--soft);font-size:12px}
+.cr-line.sel{border-color:var(--c);background:#fff}
+.cr-line.ai{box-shadow:inset 4px 0 0 var(--c-ai)}
+.cr-line.bug{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,#fff)}
+.cr-line.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,#fff)}
+#cr-none.on{background:var(--c);color:#fff}
 /* Hint Ladder */
 .hl-ladder{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .hl-rung{flex:1 1 120px;font-size:15px;padding:11px 12px}
 .hl-rung small{font-weight:800;color:var(--soft);margin-left:2px}
 .hl-rung:disabled{opacity:.45}
-/* Sure or Not */
-.sn-conf{margin-top:6px;display:grid;gap:6px}
-.sn-conf div{display:flex;gap:6px;flex-wrap:wrap}
-.sn-conf .chipb{flex:1 1 90px}
-.sn-conf .chipb[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
-.sn-bar{margin-top:8px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--c-ai) 15%,#fff);overflow:hidden}
-.sn-bar i{display:block;height:100%;background:var(--c-ai)}
-/* Rush Hour */
-.rh-card{min-height:250px}
-.rh-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.rh-opts .opt{margin:0;text-align:center;justify-content:center;display:flex;align-items:center;gap:6px;min-height:54px;touch-action:manipulation}
-.rh-opt.rh-ai{border-color:var(--c-ai);background:color-mix(in srgb,var(--c-ai) 9%,#fff)}
-.rh-bot{font-size:15px}
 /* Right Tool */
 .rt-s{font-size:18px;line-height:1.45;margin:4px 0}
 .rt-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1067,9 +1061,8 @@ const ICON = {
   robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
   star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
   split:'<circle cx="8" cy="12" r="4.5"/><rect x="13.5" y="7.5" width="8" height="9" rx="2.5"/><path d="M17.5 5v2.5M16 12h.01M19 12h.01"/>',
-  ship:'<path d="M4 15l2 4h12l2-4z"/><path d="M12 3v12M12 3l5 6h-5"/>',
+  codei:'<path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/><path d="M13.5 4l-3 16"/>',
   ladder:'<path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/>',
-  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   tools:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
@@ -1316,7 +1309,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not','rush-hour','right-tool'];
+const NEW_ORDER = ['bug-tracker','code-review','hint-ladder','right-tool'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -1347,10 +1340,10 @@ function justUnlocked(){
    Back Track, Fallacy Hunt and Robot Path already get harder on their own. */
 const LADDER = {
   'word-spread':[90,80,70,60,50], 'missing-link':[120,110,100,90,80], 'recall-rebuild':[40,35,30,26,22],
-  'symbol-sprint':[35,40,45,50,55], 'rule-switch':[40,44,48,52,56], 'link-grid':[4,4,3,3,2], 'wiki-hop':[4,4,5,5,6]
+  'symbol-sprint':[35,40,45,50,55], 'rule-switch':[40,44,48,52,56], 'you-or-ai':[1,2,3,4,5], 'link-grid':[4,4,3,3,2], 'wiki-hop':[4,4,5,5,6]
 };
 const LV_HINT = { 'word-spread':'less time', 'missing-link':'less time', 'recall-rebuild':'less time to read',
-  'symbol-sprint':'a higher target', 'rule-switch':'a higher target', 'link-grid':'fewer mistakes allowed', 'wiki-hop':'longer routes' };
+  'symbol-sprint':'a higher target', 'rule-switch':'a higher target', 'you-or-ai':'confidence, then a clock', 'link-grid':'fewer mistakes allowed', 'wiki-hop':'longer routes' };
 const lvOf = id => Math.min(5, Math.max(1, gs(id).lv || 1));
 const lvVal = id => LADDER[id][lvOf(id) - 1];
 /* "How to play" lines that quote a number the level changes */
@@ -4238,39 +4231,45 @@ function aiQuestion(avoid){
 const aiSays = (P, wrong) => ({ pick: wrong ? P.trap : P.ans, text: wrong ? P.wrong : P.right });
 /*AIQ-END*/
 
-/* ================= 19. You or AI? (using AI well): solve it yourself, or pay to ask AI; then keep or switch ================= */
-const YA_N = 6;
+/* ================= 19. You or AI? (using AI well): solve it yourself, or pay to ask AI; then keep or switch =================
+   Levels (the portal's Lv 1-5, up after 80%+, down under 40%):
+   Lv 1 plain · Lv 2 you say how sure you are, and the AI says how sure it is · Lv 3-5 the same, plus a clock per puzzle (30 / 20 / 15 s). */
+const YA_N = 6, YA_CLOCK = [0, 0, 30, 20, 15], YA_CONF = ['Guessing', 'Fairly sure', 'Very sure'];
 const YouOrAI = { id:'you-or-ai', name:'You or AI?', skill:'ai', icon:'split', inspired:'research on how people rely on AI advice', topics:'aptitude, Python, number systems, Git, CSS, GenAI',
-  how:['Solve each puzzle yourself, or tap <b>Ask AI</b> to see its answer first. A right answer earns 2 points; asking AI costs 1.','If you answer first, the AI then gives its answer. When it disagrees, you choose: keep yours or switch.','The AI is often right, but not always. 6 puzzles.'],
+  how:['Solve each puzzle yourself, or tap <b>Ask AI</b> to see its answer first. A right answer earns 2 points; asking AI costs 1.','If you answer first, the AI then gives its answer. When it disagrees, you choose: keep yours or switch.','The AI is often right, but not always. Higher levels add confidence and a clock. 6 puzzles.'],
   run(ctx){
+    const lv = lvOf('you-or-ai'), clock = YA_CLOCK[lv - 1], withConf = lv >= 2;
     const wrongs = shuffle([1, 1, 0, 0, Math.random() < 0.4 ? 1 : 0, Math.random() < 0.4 ? 1 : 0]);   // which puzzles the AI gets wrong
     const log = []; let i = -1, points = 0, used = [];
     function next(){
       i++;
       if (i >= YA_N) return finish();
       const P = aiQuestion(used); used.push(P.id);
-      const AI = aiSays(P, wrongs[i]), t0 = Date.now();
-      const rec = { topic: P.topic, aiWrong: !!wrongs[i], asked: false, askSecs: null, first: null, final: null };
-      let choice = null;
-      ctx.root.innerHTML = hud([['ya-n','Puzzle',(i+1)+'/'+YA_N],['ya-p','Points',points]])
+      const AI = aiSays(P, wrongs[i]), aiConf = ri(91, 99), t0 = Date.now();
+      const rec = { topic: P.topic, aiWrong: !!wrongs[i], asked: false, askSecs: null, first: null, final: null, conf: null, timeout: false };
+      let choice = null, conf = null, stopClock = null, settled = false;
+      ctx.root.innerHTML = (clock ? '<div class="tbar"><i id="ya-t"></i></div>' : '') + hud([['ya-n','Puzzle',(i+1)+'/'+YA_N],['ya-p','Points',points]].concat(clock ? [['ya-s','Seconds',clock]] : []))
         + '<div class="card ya-card"><span class="chip">'+esc(P.topic)+'</span><p class="ya-q">'+esc(P.q)+'</p>'+(P.code ? code(P.code) : '')
         + '<div class="ya-opts">'+P.opts.map((o, k) => '<button class="opt ya-opt" data-k="'+k+'"><span class="ya-l">'+'ABCD'[k]+'</span><span class="ya-t">'+esc(o)+'</span></button>').join('')+'</div>'
+        + (withConf ? '<div class="sn-conf" id="ya-conf"><span class="small muted">How sure are you?</span><div>'+YA_CONF.map((l, k) => '<button class="chipb" data-c="'+k+'" aria-pressed="false">'+l+'</button>').join('')+'</div></div>' : '')
         + '<div id="ya-ai"></div></div>'
         + '<div id="ya-act" class="row ya-act"><button class="btn light" id="ya-ask">🤖 Ask AI (−1 point)</button><button class="btn c" id="ya-lock" disabled>Lock in</button></div>'
         + '<div id="ya-out"></div>';
       anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
       const opts = [...ctx.root.querySelectorAll('.ya-opt')];
-      const sel = k => { choice = k; opts.forEach((b, j) => b.classList.toggle('sel', j === k)); $('ya-lock').disabled = false; SFX.play('select'); };
-      opts.forEach((b, k) => b.onclick = () => { if (rec.final === null && rec.first === null) sel(k); });
-      const aiBox = () => '<div class="ai-box"><span class="ai-tag">🤖 AI says</span><div>'+esc(AI.text)+'</div></div>';
+      const ready = () => { $('ya-lock').disabled = choice === null || (withConf && conf === null); };
+      opts.forEach((b, k) => b.onclick = () => { if (rec.first !== null || settled) return; choice = k; opts.forEach((x, j) => x.classList.toggle('sel', j === k)); SFX.play('select'); ready(); });
+      ctx.root.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { if (rec.first !== null || settled) return; conf = +b.dataset.c; ctx.root.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
+      const aiBox = () => '<div class="ai-box"><span class="ai-tag">🤖 AI says'+(withConf ? ' · ' + aiConf + '% sure' : '')+'</span><div>'+esc(AI.text)+'</div>'+(withConf ? '<div class="sn-bar"><i style="width:'+aiConf+'%"></i></div>' : '')+'</div>';
+      if (clock) stopClock = ctx.timer(clock, $('ya-t'), s => { const e = $('ya-s'); if (e) e.textContent = s; }, () => { if (!settled) { rec.timeout = rec.first === null; settle(rec.first !== null ? rec.first : -1); } });
       $('ya-ask').onclick = () => {
         rec.asked = true; rec.askSecs = Math.round((Date.now() - t0) / 1000); points -= 1; $('ya-p').textContent = points;
         $('ya-ai').innerHTML = aiBox(); anim($('ya-ai'), { opacity:[0,1], y:[6,0] });
         $('ya-ask').disabled = true; SFX.play('whoosh');
       };
       $('ya-lock').onclick = () => {
-        if (choice === null) return;
-        rec.first = choice; opts.forEach(b => b.disabled = true);
+        if (choice === null || settled) return;
+        rec.first = choice; rec.conf = conf; opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('[data-c]').forEach(x => x.disabled = true);
         if (rec.asked) return settle(choice);
         /* answered alone: now the AI gives its view */
         $('ya-ai').innerHTML = aiBox(); anim($('ya-ai'), { opacity:[0,1], y:[6,0] });
@@ -4278,22 +4277,24 @@ const YouOrAI = { id:'you-or-ai', name:'You or AI?', skill:'ai', icon:'split', i
           $('ya-act').innerHTML = '<p class="ya-say">AI agrees with you.</p><button class="btn c" id="ya-go">Continue</button>';
           $('ya-go').onclick = () => settle(choice);
         } else {
-          $('ya-act').innerHTML = '<p class="ya-say">AI disagrees. Whose answer do you trust?</p><button class="btn light" id="ya-keep">Keep mine</button><button class="btn c" id="ya-sw">Switch to AI’s</button>';
+          $('ya-act').innerHTML = '<p class="ya-say">AI disagrees'+(withConf ? ', and it is ' + aiConf + '% sure' : '')+'. Whose answer do you trust?</p><button class="btn light" id="ya-keep">Keep mine</button><button class="btn c" id="ya-sw">Switch to AI’s</button>';
           $('ya-keep').onclick = () => settle(choice);
           $('ya-sw').onclick = () => { opts.forEach((b, j) => b.classList.toggle('sel', j === AI.pick)); settle(AI.pick); };
         }
         $('ya-act').querySelector('button:last-child').focus();
       };
       function settle(final){
+        if (settled) return; settled = true; if (stopClock) stopClock();
         rec.final = final; rec.right = final === P.ans; rec.firstRight = rec.first === P.ans; rec.followedAI = final === AI.pick;
         rec.secs = Math.round((Date.now() - t0) / 1000);
         log.push(rec);
         if (rec.right) points += 2; $('ya-p').textContent = points;
-        opts[P.ans].classList.add('right'); if (!rec.right) opts[final].classList.add('wrong');
+        opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('[data-c]').forEach(x => x.disabled = true);
+        opts[P.ans].classList.add('right'); if (final >= 0 && !rec.right) opts[final].classList.add('wrong');
         FX.result(rec.right, true);
         $('ya-act').innerHTML = '';
-        $('ya-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct.' : 'Not quite. The answer is '+esc(P.opts[P.ans])+'.')+'</b> '+esc(P.right.replace(/ Answer: .*$/, ''))
-          + (AI.pick !== P.ans ? '<div class="small" style="margin-top:6px">The AI was wrong here. It made the quick, tempting mistake.</div>' : '')+'</div>'
+        $('ya-out').innerHTML = '<div class="explain"><b>'+(rec.timeout ? 'Time’s up. The answer is '+esc(P.opts[P.ans])+'.' : rec.right ? 'Correct.' : 'Not quite. The answer is '+esc(P.opts[P.ans])+'.')+'</b> '+esc(P.right.replace(/ Answer: .*$/, ''))
+          + (AI.pick !== P.ans ? '<div class="small" style="margin-top:6px">The AI was wrong here'+(withConf ? ', even though it said it was ' + aiConf + '% sure' : '')+'. It made the quick, tempting mistake.</div>' : '')+'</div>'
           + '<button class="btn c full" id="ya-next" style="margin-top:12px">'+(i < YA_N - 1 ? 'Next puzzle' : 'See results')+'</button>';
         $('ya-next').onclick = next; $('ya-next').focus();
       }
@@ -4302,17 +4303,23 @@ const YouOrAI = { id:'you-or-ai', name:'You or AI?', skill:'ai', icon:'split', i
       const right = log.filter(r => r.right).length, asked = log.filter(r => r.asked).length;
       const aiWrong = log.filter(r => r.aiWrong), followedWrong = aiWrong.filter(r => r.followedAI).length;
       const droppedRight = log.filter(r => !r.asked && r.firstRight && !r.right).length;              // had it right, switched to AI
-      const keptWrong = log.filter(r => !r.asked && !r.aiWrong && !r.firstRight && !r.right).length;   // AI was right, kept own wrong answer
-      const fixedByAI = log.filter(r => !r.asked && !r.firstRight && r.right).length;
-      const note = followedWrong >= 2 ? 'You went with the AI ' + followedWrong + ' times when it was wrong. Its working looked reasonable, so it felt right. Before you accept an AI answer, do a quick check of your own (put the answer back into the question).'
-        : droppedRight ? 'You had the right answer and switched to the AI’s wrong one. Confidence is not correctness: when the AI disagrees, re-check both answers, then decide.'
-        : asked >= 4 ? 'You asked the AI on ' + asked + ' of 6 puzzles. Try each one yourself first. You keep more points, and your own answer helps you judge the AI’s.'
+      const droppedWhenSure = log.filter(r => !r.asked && r.firstRight && !r.right && r.conf === 2).length;
+      const keptWrong = log.filter(r => !r.asked && !r.aiWrong && r.first >= 0 && !r.firstRight && !r.right).length;   // AI was right, kept own wrong answer
+      const fixedByAI = log.filter(r => !r.asked && r.first >= 0 && !r.firstRight && r.right).length;
+      const timeouts = log.filter(r => r.timeout).length;
+      const sure = log.filter(r => r.conf === 2), sureRight = sure.filter(r => r.firstRight).length;
+      const note = droppedWhenSure ? 'You were very sure, you were right, and you still switched to the AI. An AI saying "97% sure" is not evidence. If you can’t find a mistake in your own working, keep your answer.'
+        : followedWrong >= 2 ? 'You went with the AI ' + followedWrong + ' times when it was wrong. Its working looked reasonable, so it felt right. Before you accept an AI answer, do a quick check of your own (put the answer back into the question).'
+        : droppedRight ? 'You had the right answer and switched to the AI’s wrong one. When the AI disagrees, re-check both answers, then decide.'
+        : asked >= 4 ? 'You asked the AI on ' + asked + ' of 6 puzzles' + (clock ? ', with the clock running' : '') + '. Try each one yourself first. You keep more points, and your own answer helps you judge the AI’s.'
         : keptWrong ? 'You kept your answer when the AI was right. Checking AI is good. Checking your own work when it disagrees is just as important.'
         : 'You thought for yourself first and judged the AI’s answers on their merits. That is how to use AI well.';
-      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (YA_N * 2) * 100, title: right + ' of ' + YA_N + ' correct', sub: 'The AI was wrong on ' + aiWrong.length + ' of 6, on purpose',
-        tiles: [[asked + '/6','Asked AI first'],[followedWrong + '/' + aiWrong.length,'Followed AI when wrong'],[droppedRight,'Dropped a right answer'],[fixedByAI,'AI fixed your mistake']],
-        note, meta: { right, asked, aiWrong: aiWrong.length, followedWrong, droppedRight, keptWrong, fixedByAI, points,
-          items: log.map(r => ({ t: r.topic, aw: r.aiWrong ? 1 : 0, a: r.asked ? 1 : 0, as: r.askSecs, f: r.firstRight ? 1 : 0, r: r.right ? 1 : 0, s: r.secs })) } });
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (YA_N * 2) * 100, title: right + ' of ' + YA_N + ' correct', sub: 'Lv ' + lv + (clock ? ', ' + clock + ' seconds each' : '') + '. The AI was wrong on ' + aiWrong.length + ', on purpose',
+        tiles: [[asked + '/6','Asked AI first'],[aiWrong.length ? followedWrong + '/' + aiWrong.length : '–','Followed AI when wrong'],[droppedRight,'Dropped a right answer'],
+          withConf ? [sure.length ? sureRight + '/' + sure.length : '–','Very sure and right'] : [fixedByAI,'AI fixed your mistake']],
+        note, meta: { level: lv, clock, right, asked, aiWrong: aiWrong.length, followedWrong, droppedRight, droppedWhenVerySure: droppedWhenSure, keptWrong, fixedByAI, timeouts,
+          verySure: sure.length, verySureRight: sureRight, points,
+          items: log.map(r => ({ t: r.topic, aw: r.aiWrong ? 1 : 0, a: r.asked ? 1 : 0, as: r.askSecs, c: r.conf, f: r.firstRight ? 1 : 0, r: r.right ? 1 : 0, to: r.timeout ? 1 : 0, s: r.secs })) } });
     }
     next();
   }
@@ -4389,61 +4396,74 @@ const ST = [
 ];
 /*ST-END*/
 
-/* ================= 20. Ship or Test (using AI well): an AI wrote the code. Ship it, test it, or send it back ================= */
-const ST_N = 6, ST_SECS = 120;
-const ShipOrTest = { id:'ship-or-test', name:'Ship or Test', skill:'ai', icon:'ship', inspired:'code review of AI-written code', topics:'Python functions up to dictionaries',
-  how:['An AI wrote a small Python function for each task. Some have a bug.','<b>Ship it</b> (+3, but −4 if it has a bug), <b>Run a test</b> (−1, shows what it returns), or <b>Send back</b> (+2 if buggy, −1 if it was fine).','6 functions in 2 minutes.'],
+/* ================= 20. Code Review (using AI well): find the bug in AI-written code. An AI reviewer can help, but it sometimes lies ================= */
+/* The buggy and correct versions of each ST template differ on one line: that line is the bug. */
+const stBugLine = t => { const a = t.gen(false).code.split('\n'), b = t.gen(true).code.split('\n'); return b.findIndex((l, k) => l !== a[k]); };
+const CR_N = 6;
+const CodeReview = { id:'code-review', name:'Code Review', skill:'ai', icon:'codei', inspired:'asking AI to check AI-written code', topics:'Python functions up to dictionaries',
+  how:['An AI wrote a small Python function for each task. Some have one buggy line.','Tap the line with the bug, or tap <b>No bug</b>. Right: +3.','Stuck? <b>Ask the AI reviewer</b> (−1). It is right most of the time, but not always. 6 functions.'],
   run(ctx){
-    const flags = shuffle([1, 1, 0, 0, Math.random() < 0.5 ? 1 : 0, Math.random() < 0.5 ? 1 : 0]);
-    const tpl = fresh('ship-or-test', ST, ST_N, t => t.id), log = [];
-    let i = -1, points = 0, over = false;
-    ctx.root.innerHTML = '<div class="tbar"><i id="st-t"></i></div>' + hud([['st-n','Function','1/'+ST_N],['st-p','Points','0'],['st-l','Seconds',ST_SECS]]) + '<div id="st-body"></div>';
-    ctx.timer(ST_SECS, $('st-t'), s => $('st-l').textContent = s, () => { over = true; finish(true); });
+    const flags = shuffle([1, 1, 1, 0, 0, Math.random() < 0.5 ? 1 : 0]), lies = shuffle([1, 1, 0, 0, 0, Math.random() < 0.4 ? 1 : 0]);
+    const tpl = fresh('code-review', ST, CR_N, t => t.id), log = [];
+    let i = -1, points = 0;
     function next(){
-      if (over) return;
       i++;
-      if (i >= ST_N) return finish(false);
-      const buggy = !!flags[i], F = tpl[i].gen(buggy), t0 = Date.now(), rec = { id: tpl[i].id, buggy, tested: false, action: null };
-      $('st-n').textContent = (i + 1) + '/' + ST_N;
-      $('st-body').innerHTML = '<div class="card ya-card"><span class="chip">Task</span><p class="ya-q">'+esc(F.task)+'</p>'
-        + '<div class="ai-box"><span class="ai-tag">🤖 AI wrote this</span><pre class="st-code">'+esc(F.code)+'</pre></div><div id="st-test"></div></div>'
-        + '<div class="row ya-act" id="st-act"><button class="btn light" id="st-back">↩ Send back</button><button class="btn light" id="st-run">▶ Run a test (−1)</button><button class="btn c" id="st-ship">🚀 Ship it</button></div><div id="st-out"></div>';
-      anim($('st-body').firstChild, { opacity:[0,1], y:[8,0] });
-      $('st-run').onclick = () => {
-        rec.tested = true; points -= 1; $('st-p').textContent = points; $('st-run').disabled = true;
-        const ok = F.want === F.got;
-        $('st-test').innerHTML = '<div class="st-test"><code>'+esc(F.call)+'</code><div><span class="muted">should give</span> <b>'+esc(F.want)+'</b></div><div><span class="muted">it gives</span> <b class="'+(ok ? 'ok' : 'no')+'">'+esc(F.got)+'</b></div></div>';
-        anim($('st-test'), { opacity:[0,1], y:[6,0] }); SFX.play(ok ? 'softok' : 'softbad');
+      if (i >= CR_N) return finish();
+      const T = tpl[i], buggy = !!flags[i], F = T.gen(buggy), lines = F.code.split('\n'), bugLine = buggy ? stBugLine(T) : -1, t0 = Date.now();
+      /* the reviewer: honest, or a confident lie (says "correct" when buggy, or blames a wrong line) */
+      const lie = !!lies[i], otherLine = pick(lines.map((l, k) => k).filter(k => k !== bugLine && k > 0 && lines[k].trim()));
+      const review = !lie ? (buggy ? { line: bugLine, text: 'Line ' + (bugLine + 1) + ' has a bug. ' + F.bug } : { line: -1, text: 'I checked every line. This code is correct.' })
+        : (buggy && (Math.random() < 0.6 || otherLine === undefined) ? { line: -1, text: 'I checked every line. This code is correct.' } : { line: otherLine, text: 'Line ' + (otherLine + 1) + ' looks wrong. It will give the wrong result for some inputs.' });
+      const rec = { id: T.id, buggy, lie, asked: false, pick: null };
+      let sel = null, done = false;
+      ctx.root.innerHTML = hud([['cr-n','Function',(i+1)+'/'+CR_N],['cr-p','Points',points]])
+        + '<div class="card ya-card"><span class="chip">Task</span><p class="ya-q">'+esc(F.task)+'</p>'
+        + '<div class="cr-code" id="cr-code"><span class="ai-tag">🤖 AI wrote this · tap a line</span>'+lines.map((l, k) => '<button class="cr-line" data-l="'+k+'"><span class="cr-no">'+(k + 1)+'</span><code>'+(esc(l) || ' ')+'</code></button>').join('')+'</div>'
+        + '<div id="cr-ai"></div></div>'
+        + '<div class="row ya-act" id="cr-act"><button class="btn light" id="cr-ask">🤖 Ask AI reviewer (−1)</button><button class="btn light" id="cr-none">✅ No bug</button><button class="btn c" id="cr-lock" disabled>Lock in</button></div><div id="cr-out"></div>';
+      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      const lineBtns = [...ctx.root.querySelectorAll('.cr-line')];
+      const choose = v => { if (done) return; sel = v; lineBtns.forEach((b, k) => b.classList.toggle('sel', k === v)); $('cr-none').classList.toggle('on', v === -1); $('cr-lock').disabled = false; SFX.play('select'); };
+      lineBtns.forEach((b, k) => b.onclick = () => choose(k));
+      $('cr-none').onclick = () => choose(-1);
+      $('cr-ask').onclick = () => {
+        rec.asked = true; rec.askSecs = Math.round((Date.now() - t0) / 1000); points -= 1; $('cr-p').textContent = points; $('cr-ask').disabled = true;
+        $('cr-ai').innerHTML = '<div class="ai-box"><span class="ai-tag">🤖 AI reviewer</span><div>'+esc(review.text)+'</div></div>';
+        anim($('cr-ai'), { opacity:[0,1], y:[6,0] }); SFX.play('whoosh');
+        if (review.line >= 0) lineBtns[review.line].classList.add('ai');
       };
-      const decide = act => {
-        rec.action = act; rec.secs = Math.round((Date.now() - t0) / 1000);
-        const good = act === 'ship' ? !buggy : buggy, delta = act === 'ship' ? (buggy ? -4 : 3) : (buggy ? 2 : -1);
-        points += delta; $('st-p').textContent = points; log.push(rec);
-        FX.result(good, true);
-        $('st-act').innerHTML = '';
-        $('st-out').innerHTML = '<div class="explain"><b>'+(act === 'ship' ? (buggy ? '🐞 A bug reached your users. ' : '✅ Shipped, and it works. ') : (buggy ? '✅ Good catch. ' : '↩ That one was fine. '))+(delta > 0 ? '+' : '')+delta+'</b><br>'
-          + (buggy ? 'The bug: '+esc(F.bug) : 'This code was correct.')+(rec.tested ? '' : '<div class="small" style="margin-top:6px">Test: <code>'+esc(F.call)+'</code> should give '+esc(F.want)+', it gives '+esc(F.got)+'.</div>')+'</div>'
-          + '<button class="btn c full" id="st-next" style="margin-top:12px">'+(i < ST_N - 1 ? 'Next function' : 'See results')+'</button>';
-        $('st-next').onclick = next; $('st-next').focus();
+      $('cr-lock').onclick = () => {
+        if (sel === null || done) return;
+        done = true; rec.pick = sel; rec.right = sel === bugLine; rec.followedAI = rec.asked && sel === review.line; rec.secs = Math.round((Date.now() - t0) / 1000);
+        log.push(rec);
+        if (rec.right) points += 3; $('cr-p').textContent = points;
+        lineBtns.forEach(b => b.disabled = true);
+        if (bugLine >= 0) lineBtns[bugLine].classList.add('bug');
+        if (!rec.right && sel >= 0) lineBtns[sel].classList.add('wrong');
+        FX.result(rec.right, true);
+        $('cr-act').innerHTML = '';
+        $('cr-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct. +3' : buggy ? 'The bug is on line ' + (bugLine + 1) + '.' : 'There was no bug in this one.')+'</b> '
+          + (buggy ? esc(F.bug) : 'The code does what the task asks.')
+          + '<div class="small" style="margin-top:6px">Example: <code>'+esc(F.call)+'</code> should give '+esc(F.want)+(buggy ? ', and this code gives '+esc(F.got) : '')+'.</div>'
+          + (rec.asked && lie ? '<div class="small" style="margin-top:6px">The AI reviewer was wrong here. It sounded just as sure as when it was right.</div>' : '')+'</div>'
+          + '<button class="btn c full" id="cr-next" style="margin-top:12px">'+(i < CR_N - 1 ? 'Next function' : 'See results')+'</button>';
+        $('cr-next').onclick = next; $('cr-next').focus();
       };
-      $('st-ship').onclick = () => decide('ship'); $('st-back').onclick = () => decide('back');
     }
-    function finish(timeUp){
-      const bugs = log.filter(r => r.buggy), shipped = log.filter(r => r.action === 'ship');
-      const bugsShipped = bugs.filter(r => r.action === 'ship').length, caught = bugs.filter(r => r.action === 'back').length;
-      const tested = log.filter(r => r.tested).length, blind = shipped.filter(r => !r.tested).length, needless = log.filter(r => !r.buggy && r.action === 'back').length;
-      const totalBugs = flags.slice(0, Math.max(log.length, 0)).filter(Boolean).length;
-      const note = bugsShipped >= 2 ? 'You shipped ' + bugsShipped + ' buggy functions. AI code often looks right and is wrong at the edges (0, negative numbers, exactly 18). One quick test catches most of these.'
-        : blind >= 3 && bugsShipped ? 'You shipped ' + blind + ' functions without testing, and a bug got through. When AI writes code, run one test on an edge case before you trust it.'
-        : needless >= 2 ? 'You sent back ' + needless + ' functions that were fine. Testing is cheap: run one before you reject good code.'
-        : bugsShipped ? 'One bug got through to users. AI code that looks fine often breaks at an edge case (the last item, 0, a negative number, the exact limit). Test that case before you ship.'
-        : needless ? 'You caught the bugs, but sent back code that was fine. Run a quick test before rejecting: it costs less than redoing good work.'
-        : timeUp ? 'Time ran out. Reading the code for the edge case (the first and last number, 0, the exact limit) is faster than guessing.'
-        : 'You checked the AI’s code before trusting it, and no bug got through. That is the habit that keeps bugs away from users.';
-      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (ST_N * 3) * 100, title: caught + ' of ' + totalBugs + ' bugs caught', sub: log.length + ' functions reviewed' + (timeUp ? ', time ran out' : ''),
-        tiles: [[tested + '/' + log.length,'Tested before deciding'],[bugsShipped,'Bugs shipped'],[blind,'Shipped without a test'],[needless,'Good code sent back']],
-        note, meta: { reviewed: log.length, bugs: totalBugs, caught, bugsShipped, tested, shippedUntested: blind, needlessSendBacks: needless, points, timeUp,
-          items: log.map(r => ({ id: r.id, b: r.buggy ? 1 : 0, t: r.tested ? 1 : 0, a: r.action, s: r.secs })) } });
+    function finish(){
+      const right = log.filter(r => r.right).length, asked = log.filter(r => r.asked).length;
+      const lied = log.filter(r => r.asked && r.lie), fooled = lied.filter(r => r.followedAI).length;
+      const caught = log.filter(r => r.buggy && r.right).length, bugs = log.filter(r => r.buggy).length;
+      const missed = log.filter(r => r.buggy && r.pick === -1).length, falseAlarm = log.filter(r => !r.buggy && r.pick !== -1).length;
+      const note = fooled >= 2 ? 'The AI reviewer was wrong ' + lied.length + ' times when you asked, and you went with it ' + fooled + ' times. An AI checking AI code makes the same kind of mistakes. Read the line it points to and test it in your head with one small input.'
+        : fooled ? 'You followed the AI reviewer once when it was wrong. "Looks correct" from an AI is not a test. Try one small input (like 0, or the exact limit) yourself.'
+        : asked >= 5 ? 'You asked the reviewer on almost every function. Read the code first: most bugs here sit at an edge (the last item, 0, the exact limit), and you can spot them.'
+        : missed >= 2 ? 'You marked ' + missed + ' buggy functions as fine. AI code usually looks right. Check the edges: where loops start and stop, and > versus >=.'
+        : 'You read the code yourself and used the AI reviewer with care. That is how to work with AI-written code.';
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (CR_N * 3) * 100, title: right + ' of ' + CR_N + ' right', sub: caught + ' of ' + bugs + ' bugs found',
+        tiles: [[asked + '/' + CR_N,'Asked the AI reviewer'],[lied.length ? fooled + '/' + lied.length : '–','Followed it when it was wrong'],[missed,'Bugs you marked as fine'],[falseAlarm,'Correct code you blamed']],
+        note, meta: { right, asked, reviewerWrong: lied.length, followedWrongReview: fooled, bugs, caught, missedBugs: missed, falseAlarms: falseAlarm, points,
+          items: log.map(r => ({ id: r.id, b: r.buggy ? 1 : 0, l: r.lie ? 1 : 0, a: r.asked ? 1 : 0, fo: r.followedAI ? 1 : 0, r: r.right ? 1 : 0, s: r.secs })) } });
     }
     next();
   }
@@ -4511,129 +4531,6 @@ const HintLadder = { id:'hint-ladder', name:'Hint Ladder', skill:'ai', icon:'lad
           items: log.map(r => ({ t: r.topic, h: r.rungs.join(''), fh: r.firstHelp, r: r.right ? 1 : 0, s: r.secs })) } });
     }
     next();
-  }
-};
-
-/* ================= 22. Sure or Not (using AI well): say how sure you are, then a very confident AI answers ================= */
-const SN_N = 6, SN_LEVELS = [['Guessing', 1], ['Fairly sure', 2], ['Very sure', 3]];
-const SureOrNot = { id:'sure-or-not', name:'Sure or Not', skill:'ai', icon:'gauge', inspired:'research on confident AI and human judgement', topics:'aptitude, Python, number systems, Git, CSS, GenAI',
-  how:['Answer each puzzle and say how sure you are: guessing (1), fairly sure (2) or very sure (3).','Then an AI gives its answer and says how sure it is. You can keep yours or switch.','A right final answer wins your points; a wrong one loses them. 6 puzzles.'],
-  run(ctx){
-    const wrongs = shuffle([1, 1, 1, 0, 0, 0]), log = []; let i = -1, points = 0, used = [];
-    function next(){
-      i++;
-      if (i >= SN_N) return finish();
-      const P = aiQuestion(used); used.push(P.id);
-      const AI = aiSays(P, wrongs[i]), aiConf = ri(91, 99), t0 = Date.now();
-      const rec = { topic: P.topic, aiWrong: !!wrongs[i], conf: null, first: null, final: null };
-      let choice = null, conf = null;
-      ctx.root.innerHTML = hud([['sn-n','Puzzle',(i+1)+'/'+SN_N],['sn-p','Points',points]])
-        + '<div class="card ya-card"><span class="chip">'+esc(P.topic)+'</span><p class="ya-q">'+esc(P.q)+'</p>'+(P.code ? code(P.code) : '')
-        + '<div class="ya-opts">'+P.opts.map((o, k) => '<button class="opt ya-opt" data-k="'+k+'"><span class="ya-l">'+'ABCD'[k]+'</span><span class="ya-t">'+esc(o)+'</span></button>').join('')+'</div>'
-        + '<div class="sn-conf" id="sn-conf"><span class="small muted">How sure are you?</span><div>'+SN_LEVELS.map((l, k) => '<button class="chipb" data-c="'+k+'" aria-pressed="false">'+l[0]+'</button>').join('')+'</div></div>'
-        + '<div id="sn-ai"></div></div>'
-        + '<div class="row ya-act" id="sn-act"><button class="btn c" id="sn-lock" disabled>Lock in</button></div><div id="sn-out"></div>';
-      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
-      const opts = [...ctx.root.querySelectorAll('.ya-opt')], ready = () => $('sn-lock').disabled = choice === null || conf === null;
-      opts.forEach((b, k) => b.onclick = () => { if (rec.first !== null) return; choice = k; opts.forEach((x, j) => x.classList.toggle('sel', j === k)); SFX.play('select'); ready(); });
-      ctx.root.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { if (rec.first !== null) return; conf = +b.dataset.c; ctx.root.querySelectorAll('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
-      $('sn-lock').onclick = () => {
-        rec.first = choice; rec.conf = conf; opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('[data-c]').forEach(x => x.disabled = true);
-        $('sn-ai').innerHTML = '<div class="ai-box"><span class="ai-tag">🤖 AI says · '+aiConf+'% sure</span><div>'+esc(AI.text)+'</div><div class="sn-bar"><i style="width:'+aiConf+'%"></i></div></div>';
-        anim($('sn-ai'), { opacity:[0,1], y:[6,0] });
-        if (AI.pick === choice) {
-          $('sn-act').innerHTML = '<p class="ya-say">AI agrees with you.</p><button class="btn c" id="sn-go">Continue</button>';
-          $('sn-go').onclick = () => settle(choice);
-        } else {
-          $('sn-act').innerHTML = '<p class="ya-say">AI disagrees, and it is '+aiConf+'% sure.</p><button class="btn light" id="sn-keep">Keep mine</button><button class="btn c" id="sn-sw">Switch to AI’s</button>';
-          $('sn-keep').onclick = () => settle(choice);
-          $('sn-sw').onclick = () => { opts.forEach((b, j) => b.classList.toggle('sel', j === AI.pick)); settle(AI.pick); };
-        }
-      };
-      function settle(final){
-        rec.final = final; rec.right = final === P.ans; rec.firstRight = rec.first === P.ans; rec.secs = Math.round((Date.now() - t0) / 1000);
-        log.push(rec);
-        const c = SN_LEVELS[rec.conf][1], delta = rec.right ? c : -c; points += delta; $('sn-p').textContent = points;
-        opts[P.ans].classList.add('right'); if (!rec.right) opts[final].classList.add('wrong');
-        FX.result(rec.right, true);
-        $('sn-act').innerHTML = '';
-        $('sn-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct. +' + c : 'Not quite. −' + c + '. The answer is ' + esc(P.opts[P.ans]) + '.')+'</b> '+esc(P.right.replace(/ Answer: .*$/, ''))
-          + (AI.pick !== P.ans ? '<div class="small" style="margin-top:6px">The AI said it was '+aiConf+'% sure, and it was wrong. How sure an AI sounds tells you nothing about whether it is right.</div>' : '')+'</div>'
-          + '<button class="btn c full" id="sn-next" style="margin-top:12px">'+(i < SN_N - 1 ? 'Next puzzle' : 'See results')+'</button>';
-        $('sn-next').onclick = next; $('sn-next').focus();
-      }
-    }
-    function finish(){
-      const right = log.filter(r => r.right).length;
-      const caved = log.filter(r => r.firstRight && !r.right).length;                         // right, then switched to the confident AI's wrong answer
-      const cavedSure = log.filter(r => r.firstRight && !r.right && r.conf === 2).length;
-      const ignored = log.filter(r => !r.aiWrong && !r.firstRight && !r.right).length;      // AI right, kept own wrong answer
-      const sureRight = log.filter(r => r.conf === 2 && r.firstRight).length, sure = log.filter(r => r.conf === 2).length;
-      const guessRight = log.filter(r => r.conf === 0 && r.firstRight).length, guess = log.filter(r => r.conf === 0).length;
-      const note = cavedSure ? 'You were very sure, you were right, and you still switched to the AI. An AI saying "97% sure" is not evidence. When you have worked it out, trust your working unless you can find a mistake in it.'
-        : caved ? 'You had the right answer and switched to a confident AI. Before switching, find the step where you went wrong. If you can’t find one, keep your answer.'
-        : ignored >= 2 ? 'The AI was right and you kept your wrong answer ' + ignored + ' times. Confidence is good, but when the AI disagrees, re-check your own working too.'
-        : sure && sureRight < sure ? 'When you said "very sure" you were right ' + sureRight + ' of ' + sure + ' times. Notice when your confidence runs ahead of your checking.'
-        : 'You judged the AI on its working, not on how confident it sounded. That is exactly the right habit.';
-      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (SN_N * 3) * 100, title: right + ' of ' + SN_N + ' correct', sub: 'The AI was 91–99% sure every time, and wrong on 3',
-        tiles: [[caved,'Switched away from a right answer'],[ignored,'Kept a wrong answer'],[sure ? sureRight + '/' + sure : '–','Very sure and right'],[guess ? guessRight + '/' + guess : '–','Guessed and right']],
-        note, meta: { right, caved, cavedWhenVerySure: cavedSure, keptWrongVsRightAI: ignored, verySure: sure, verySureRight: sureRight, guessed: guess, guessedRight: guessRight, points,
-          items: log.map(r => ({ t: r.topic, aw: r.aiWrong ? 1 : 0, c: r.conf, f: r.firstRight ? 1 : 0, r: r.right ? 1 : 0, s: r.secs })) } });
-    }
-    next();
-  }
-};
-
-/* ================= 23. Rush Hour (using AI well): quick puzzles against the clock, with an instant Ask AI button ================= */
-/* only the quick templates: each can be solved in a few seconds */
-const RH_IDS = ['floordiv','mod','strplus','intplus','lenspace','truediv','boolstr','hex2dec','posts','siblings','kb','strmul','round','upper','dictget','negindex','sumrange','or','lshift'];
-const RH_SECS = 60;
-const RushHour = { id:'rush-hour', name:'Rush Hour', skill:'ai', icon:'bolt', inspired:'research on AI use under time pressure', topics:'quick Python, number systems and aptitude',
-  how:['Answer as many quick puzzles as you can in 60 seconds.','Tap <b>Ask AI</b> and it instantly marks its pick. It is right about 3 times in 4.','Your own right answer: +2. Right with AI’s help: +1. Wrong: −1.'],
-  run(ctx){
-    const pool = AIQ.filter(t => RH_IDS.includes(t.id)), log = [], start = Date.now();
-    let points = 0, cur = null, asked = false, aiPick = null, qT0 = 0, last = null, over = false;
-    ctx.root.innerHTML = '<div class="tbar"><i id="rh-t"></i></div>' + hud([['rh-p','Points','0'],['rh-n','Answered','0'],['rh-l','Seconds',RH_SECS]])
-      + '<div class="card ya-card rh-card"><p class="ya-q" id="rh-q"></p><div id="rh-code"></div><div class="rh-opts" id="rh-opts"></div></div>'
-      + '<button class="btn light full" id="rh-ask">🤖 Ask AI</button>';
-    function next(){
-      let t; do { t = pick(pool); } while (pool.length > 1 && t.id === last);
-      last = t.id; cur = t.gen(); asked = false; aiPick = null; qT0 = Date.now();
-      $('rh-q').textContent = cur.q; $('rh-code').innerHTML = cur.code ? code(cur.code) : '';
-      $('rh-opts').innerHTML = cur.opts.map((o, k) => '<button class="opt rh-opt" data-k="'+k+'"><span class="ya-t">'+esc(o)+'</span></button>').join('');
-      $('rh-ask').disabled = false;
-    }
-    $('rh-opts').addEventListener('pointerdown', e => {
-      const b = e.target.closest('[data-k]'); if (!b || over) return; e.preventDefault();
-      const k = +b.dataset.k, right = k === cur.ans, el = (Date.now() - start) / 1000;
-      const followed = asked && k === aiPick;
-      log.push({ t: cur.topic, a: asked ? 1 : 0, aw: asked && aiPick !== cur.ans ? 1 : 0, fo: followed ? 1 : 0, r: right ? 1 : 0, half: el < RH_SECS / 2 ? 1 : 2, ms: Date.now() - qT0 });
-      points += right ? (asked ? 1 : 2) : -1; $('rh-p').textContent = points; $('rh-n').textContent = log.length;
-      ring(b, right); FX.result(right, true);
-      next();
-    });
-    $('rh-ask').onclick = () => {
-      if (asked || over) return;
-      asked = true; $('rh-ask').disabled = true;
-      aiPick = Math.random() < 0.75 ? cur.ans : cur.trap;
-      const b = $('rh-opts').children[aiPick]; b.classList.add('rh-ai'); b.insertAdjacentHTML('afterbegin', '<span class="rh-bot">🤖</span>');
-      SFX.play('select');
-    };
-    next();
-    ctx.timer(RH_SECS, $('rh-t'), s => $('rh-l').textContent = s, () => {
-      over = true;
-      const n = log.length, asks = log.filter(r => r.a).length, own = log.filter(r => !r.a), aiWrong = log.filter(r => r.aw), followedWrong = aiWrong.filter(r => r.fo).length;
-      const h1 = log.filter(r => r.half === 1), h2 = log.filter(r => r.half === 2);
-      const rate = a => a.length ? Math.round(a.filter(r => r.a).length / a.length * 100) : 0, early = rate(h1), late = rate(h2);
-      const ownAcc = own.length ? Math.round(own.filter(r => r.r).length / own.length * 100) : 0;
-      const note = late - early >= 30 ? 'As the clock ran down you asked the AI much more (' + early + '% of puzzles in the first half, ' + late + '% in the second). Pressure pushes us to hand over the thinking. That is exactly when AI mistakes slip through.'
-        : followedWrong >= 2 ? 'You went with the AI’s pick ' + followedWrong + ' times when it was wrong. In a rush it is tempting to tap whatever it marks. A one-second check catches most of these.'
-        : n && asks / n > 0.6 ? 'You asked the AI on most puzzles. Your own answers were right ' + ownAcc + '% of the time. Back yourself more: your own right answer is worth double.'
-        : 'You mostly trusted your own thinking, even under time pressure, and used the AI with care.';
-      ctx.end({ score: Math.max(0, points), pct: Math.min(100, Math.max(0, points) / 30 * 100), title: points + ' points', sub: n + ' answered in 60 seconds',
-        tiles: [[n ? Math.round(asks / n * 100) + '%' : '0%','Asked AI'],[early + '% → ' + late + '%','Asking, first half → second half'],[aiWrong.length ? followedWrong + '/' + aiWrong.length : '–','Followed AI when wrong'],[own.length ? ownAcc + '%' : '–','Your own accuracy']],
-        note, meta: { answered: n, asked: asks, askRateEarly: early, askRateLate: late, aiWrongShown: aiWrong.length, followedWrong, ownAccuracy: ownAcc, points, items: log } });
-    });
   }
 };
 
@@ -4808,7 +4705,7 @@ const RightTool = { id:'right-tool', name:'Right Tool', skill:'ai', icon:'tools'
 
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot, RushHour, RightTool];
+  ColorClash, SeenIt, BugTracker, YouOrAI, CodeReview, HintLadder, RightTool];
 route();
 pullMe();
 </script>
