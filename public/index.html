@@ -820,6 +820,12 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 .sn-conf .chipb[aria-pressed="true"]{background:var(--c);border-color:var(--c);color:#fff}
 .sn-bar{margin-top:8px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--c-ai) 15%,#fff);overflow:hidden}
 .sn-bar i{display:block;height:100%;background:var(--c-ai)}
+/* Rush Hour */
+.rh-card{min-height:250px}
+.rh-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rh-opts .opt{margin:0;text-align:center;justify-content:center;display:flex;align-items:center;gap:6px;min-height:54px;touch-action:manipulation}
+.rh-opt.rh-ai{border-color:var(--c-ai);background:color-mix(in srgb,var(--c-ai) 9%,#fff)}
+.rh-bot{font-size:15px}
 </style>
 </head>
 <body>
@@ -1057,6 +1063,7 @@ const ICON = {
   split:'<circle cx="8" cy="12" r="4.5"/><rect x="13.5" y="7.5" width="8" height="9" rx="2.5"/><path d="M17.5 5v2.5M16 12h.01M19 12h.01"/>',
   ship:'<path d="M4 15l2 4h12l2-4z"/><path d="M12 3v12M12 3l5 6h-5"/>',
   ladder:'<path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
@@ -1302,7 +1309,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not'];
+const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not','rush-hour'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -4570,9 +4577,62 @@ const SureOrNot = { id:'sure-or-not', name:'Sure or Not', skill:'ai', icon:'gaug
   }
 };
 
+/* ================= 23. Rush Hour (using AI well): quick puzzles against the clock, with an instant Ask AI button ================= */
+/* only the quick templates: each can be solved in a few seconds */
+const RH_IDS = ['floordiv','mod','strplus','intplus','lenspace','truediv','boolstr','hex2dec','posts','siblings','kb','strmul','round','upper','dictget','negindex','sumrange','or','lshift'];
+const RH_SECS = 60;
+const RushHour = { id:'rush-hour', name:'Rush Hour', skill:'ai', icon:'bolt', inspired:'research on AI use under time pressure', topics:'quick Python, number systems and aptitude',
+  how:['Answer as many quick puzzles as you can in 60 seconds.','Tap <b>Ask AI</b> and it instantly marks its pick. It is right about 3 times in 4.','Your own right answer: +2. Right with AI’s help: +1. Wrong: −1.'],
+  run(ctx){
+    const pool = AIQ.filter(t => RH_IDS.includes(t.id)), log = [], start = Date.now();
+    let points = 0, cur = null, asked = false, aiPick = null, qT0 = 0, last = null, over = false;
+    ctx.root.innerHTML = '<div class="tbar"><i id="rh-t"></i></div>' + hud([['rh-p','Points','0'],['rh-n','Answered','0'],['rh-l','Seconds',RH_SECS]])
+      + '<div class="card ya-card rh-card"><p class="ya-q" id="rh-q"></p><div id="rh-code"></div><div class="rh-opts" id="rh-opts"></div></div>'
+      + '<button class="btn light full" id="rh-ask">🤖 Ask AI</button>';
+    function next(){
+      let t; do { t = pick(pool); } while (pool.length > 1 && t.id === last);
+      last = t.id; cur = t.gen(); asked = false; aiPick = null; qT0 = Date.now();
+      $('rh-q').textContent = cur.q; $('rh-code').innerHTML = cur.code ? code(cur.code) : '';
+      $('rh-opts').innerHTML = cur.opts.map((o, k) => '<button class="opt rh-opt" data-k="'+k+'"><span class="ya-t">'+esc(o)+'</span></button>').join('');
+      $('rh-ask').disabled = false;
+    }
+    $('rh-opts').addEventListener('pointerdown', e => {
+      const b = e.target.closest('[data-k]'); if (!b || over) return; e.preventDefault();
+      const k = +b.dataset.k, right = k === cur.ans, el = (Date.now() - start) / 1000;
+      const followed = asked && k === aiPick;
+      log.push({ t: cur.topic, a: asked ? 1 : 0, aw: asked && aiPick !== cur.ans ? 1 : 0, fo: followed ? 1 : 0, r: right ? 1 : 0, half: el < RH_SECS / 2 ? 1 : 2, ms: Date.now() - qT0 });
+      points += right ? (asked ? 1 : 2) : -1; $('rh-p').textContent = points; $('rh-n').textContent = log.length;
+      ring(b, right); FX.result(right, true);
+      next();
+    });
+    $('rh-ask').onclick = () => {
+      if (asked || over) return;
+      asked = true; $('rh-ask').disabled = true;
+      aiPick = Math.random() < 0.75 ? cur.ans : cur.trap;
+      const b = $('rh-opts').children[aiPick]; b.classList.add('rh-ai'); b.insertAdjacentHTML('afterbegin', '<span class="rh-bot">🤖</span>');
+      SFX.play('select');
+    };
+    next();
+    ctx.timer(RH_SECS, $('rh-t'), s => $('rh-l').textContent = s, () => {
+      over = true;
+      const n = log.length, asks = log.filter(r => r.a).length, own = log.filter(r => !r.a), aiWrong = log.filter(r => r.aw), followedWrong = aiWrong.filter(r => r.fo).length;
+      const h1 = log.filter(r => r.half === 1), h2 = log.filter(r => r.half === 2);
+      const rate = a => a.length ? Math.round(a.filter(r => r.a).length / a.length * 100) : 0, early = rate(h1), late = rate(h2);
+      const ownAcc = own.length ? Math.round(own.filter(r => r.r).length / own.length * 100) : 0;
+      const note = late - early >= 30 ? 'As the clock ran down you asked the AI much more (' + early + '% of puzzles in the first half, ' + late + '% in the second). Pressure pushes us to hand over the thinking. That is exactly when AI mistakes slip through.'
+        : followedWrong >= 2 ? 'You went with the AI’s pick ' + followedWrong + ' times when it was wrong. In a rush it is tempting to tap whatever it marks. A one-second check catches most of these.'
+        : n && asks / n > 0.6 ? 'You asked the AI on most puzzles. Your own answers were right ' + ownAcc + '% of the time. Back yourself more: your own right answer is worth double.'
+        : 'You mostly trusted your own thinking, even under time pressure, and used the AI with care.';
+      ctx.end({ score: Math.max(0, points), pct: Math.min(100, Math.max(0, points) / 30 * 100), title: points + ' points', sub: n + ' answered in 60 seconds',
+        tiles: [[n ? Math.round(asks / n * 100) + '%' : '0%','Asked AI'],[early + '% → ' + late + '%','Asking, first half → second half'],[aiWrong.length ? followedWrong + '/' + aiWrong.length : '–','Followed AI when wrong'],[own.length ? ownAcc + '%' : '–','Your own accuracy']],
+        note, meta: { answered: n, asked: asks, askRateEarly: early, askRateLate: late, aiWrongShown: aiWrong.length, followedWrong, ownAccuracy: ownAcc, points, items: log } });
+    });
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot];
+  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot, RushHour];
 route();
 pullMe();
 </script>
