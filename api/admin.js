@@ -23,7 +23,7 @@ const uniOf = pilot => (UNIS.find(([p]) => pilot.startsWith(p)) || [, 'Other'])[
 // Game -> brain muscle. Keep in step with the `skill` field of each game in public/index.html.
 const GAME_SKILL = {
   'word-spread': 'creativity', 'beat-the-7': 'creativity',
-  'missing-link': 'insight', 'link-grid': 'insight', 'wiki-hop': 'insight', 'word-radar': 'insight',
+  'missing-link': 'insight', 'link-grid': 'insight', 'wiki-hop': 'insight',
   'recall-rebuild': 'memory', 'back-track': 'memory', 'seen-it': 'memory',
   'symbol-sprint': 'focus', 'color-clash': 'focus', 'bug-tracker': 'focus',
   'fallacy-hunt': 'reasoning', 'argue-back': 'reasoning',

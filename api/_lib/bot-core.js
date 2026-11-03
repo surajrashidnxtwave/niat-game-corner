@@ -20,7 +20,7 @@ export const LEVELS = [
 ];
 
 export const MAX_MSG_LEN = 300;      // characters per student message
-export const MAX_PER_LEVEL = 40;     // messages per level per game session
+export const MAX_PER_LEVEL = 10;     // messages per level per game session (BB_MAX in the page shows the same number)
 export const DAILY_CAP_USD = 2;      // all students together; the game closes for the day after this
 
 const BLOCKED = ['password', 'secret', 'passcode', 'pass word', 'pwd', 'key', 'code word', 'codeword'];

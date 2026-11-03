@@ -794,34 +794,6 @@ html.w3d-ready .count .ripple{border-color:#fff}
 .bb-row .field{flex:1;min-width:0;font-size:16px}
 .bb-row .btn{flex:none;padding:12px 18px}
 input.field.mono{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
-/* Word Radar */
-.wr-tabs{display:flex;gap:6px;margin-bottom:12px}
-.wr-tabs button{flex:1;padding:9px 6px;border-radius:999px;background:var(--chip);font-weight:800;font-size:14px}
-.wr-tabs button[aria-selected="true"]{background:var(--c);color:#fff}
-.wr-cols{display:grid;gap:14px}
-@media (min-width:640px){.wr-cols{grid-template-columns:1fr 1fr;align-items:start}}
-.wr-radar{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:8px}
-.wr-radar svg{display:block;width:100%;height:auto}
-.wr-ring{font-size:9px;fill:var(--soft);font-weight:700}
-.wr-word{font:700 13px ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px}
-.wr-fb{min-height:22px;font-size:14px;color:var(--soft)}
-.wr-fb.ok{color:var(--ok)}.wr-fb.warm{color:var(--c)}.wr-fb.bad{color:var(--bad)}
-.wr-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto}
-.wr-item{display:grid;grid-template-columns:24px 1fr auto 74px;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:8px 10px;border:2px solid transparent;font-size:14px}
-.wr-item.last{border-color:var(--c)}
-.wr-item small{color:var(--soft)}
-.wr-item b{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis}
-.wr-item span{font-variant-numeric:tabular-nums}
-.wr-item em{font-style:normal;font-weight:800;font-size:12.5px;text-align:right}
-.wr-item em.hot{color:var(--bad)}.wr-item em.warm{color:var(--c-focus)}.wr-item em.cold{color:var(--soft)}
-
-/* ---------- game mode: menu hidden while a game is open (full screen where the browser allows it) ---------- */
-body.ingame .tabbar{display:none}
-body.ingame{padding-left:0;padding-bottom:16px}
-body.ingame .toast,body.ingame .combo{left:50%}
-body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
-#g-fs svg{display:block;margin:auto}
-
 </style>
 </head>
 <body>
@@ -1048,7 +1020,6 @@ const ICON = {
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
   bug:'<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M12 12v8M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/>',
   shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
-  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>'
 };
 const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
 
@@ -1284,13 +1255,13 @@ function renderGoal(){
 
 /* ---------- unlocks ----------
    First 15 games: 5 to start (one per skill), then 1 new game for each day the daily goal is met.
-   5 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
+   4 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
    NEW_ORDER unlock one by one, 1 for each goal day on or after NEW_SINCE. */
 const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it'];
-const NEW_ORDER = ['word-radar','bug-tracker','break-the-bot'];
+const NEW_ORDER = ['bug-tracker','break-the-bot'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -1298,7 +1269,9 @@ const unlockedCount = () => Math.min(UNLOCK_ORDER.length, START_GAMES + goalDays
 const unlockRank = id => UNLOCK_ORDER.indexOf(id);
 /* goal days still needed to open a game (0 or less = open) */
 const daysToUnlock = id => NEW_OPEN.includes(id) ? 0 : NEW_ORDER.includes(id) ? NEW_ORDER.indexOf(id) - newGoalDays() + 1 : unlockRank(id) - unlockedCount() + 1;
-const isLocked = id => daysToUnlock(id) > 0;
+/* the demo account (batch DEMO) is for testing, so every game is open there */
+const isDemo = () => !!ME && ME.pilot === 'DEMO';
+const isLocked = id => !isDemo() && daysToUnlock(id) > 0;
 /* Break the Bot is hidden for the rest of the day once the day's AI budget is used up (the server says so) */
 let BOT_OPEN = false;
 const shown = g => !!g && !(g.id === 'break-the-bot' && !BOT_OPEN);
@@ -3448,7 +3421,7 @@ function renderWho(){
   $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
 }
 
-/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot, Word Radar =================
+/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot =================
    Each one ends with ctx.end({ score, pct, title, sub, tiles, note, lines, meta }).
    tiles = [[value, label], ...] and note = one insight; meta = game-specific fields saved with the round. */
 const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2); };
@@ -3707,15 +3680,18 @@ const BB_LEVELS = [
     why:'The output check only looked for the exact word. Spelled out, reversed or hidden in a poem, it slipped through.',
     you:'AI can leak information in forms a simple check doesn’t recognise. Never rely on AI alone to protect anything important.' }
 ];
+const BB_MAX = 10;   // messages per level; keep in step with MAX_PER_LEVEL in api/_lib/bot-core.js
 const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'shield', inspired:'prompt-injection games like Gandalf', topics:'how chatbots and their safety checks work',
-  how:['Each bot guards a password. Chat with it and trick it into telling you.','Each level has a stronger defence. Watch the grey notes under the bot’s replies: they show what the defence did.','Type the password in the box under the chat to crack the level. 3 levels.'],
+  how:['Each bot guards a password. Chat with it and trick it into telling you. You get 10 messages per level.','Each level has a stronger defence. Watch the grey notes under the bot’s replies: they show what the defence did.','Type the password in the box under the chat to crack the level. 3 levels.'],
   run(ctx){
-    const run = rid(), per = [0,0,0], cracked = ['','',''];
+    let run = rid(), left = BB_MAX;
+    const per = [0,0,0], cracked = ['','',''];
     let level = 0, busy = false;
     function total(){ return per.reduce((a,b) => a+b, 0); }
     function chatLevel(){
       const L = BB_LEVELS[level];
-      ctx.root.innerHTML = hud([['bb-l','Level',(level+1)+'/3'],['bb-m','Messages',total()]])
+      left = BB_MAX;
+      ctx.root.innerHTML = hud([['bb-l','Level',(level+1)+'/3'],['bb-left','Messages left',left],['bb-m','Sent in total',total()]])
         + '<div class="bb-def"><b>Level '+(level+1)+': '+L.name+'</b> · <span class="muted">'+esc(L.defence)+'</span></div>'
         + '<div class="bb-chat" id="bb-chat" aria-live="polite"></div>'
         + '<form class="bb-row" id="bb-send"><input class="field" id="bb-in" maxlength="300" autocomplete="off" placeholder="Message the bot" aria-label="Message the bot"><button class="btn c">Send</button></form>'
@@ -3745,17 +3721,25 @@ const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'s
       const j = r.j || {};
       if (r.status === 200 && j.ok) {
         per[level]++; $('bb-m').textContent = total();
+        left = Math.max(0, Number.isInteger(j.left) ? j.left : left - 1); $('bb-left').textContent = left;
+        if (!left) outOfMessages();
         bubble('bot', j.reply, j.log);
         SFX.play(j.blocked ? 'softbad' : 'softok');
       } else {
         $('bb-chat').lastElementChild.remove();
         inp.value = msg;
         if (j.error === 'closed') { BOT_OPEN = false; note('Break the Bot is resting for today. Come back tomorrow.', true); }
-        else if (j.error === 'limit') note('You’ve used all your messages for this level. Try again later.', true);
+        else if (j.error === 'limit') { inp.value = ''; outOfMessages(); }
         else if (r.status === 401) note('Please log in again to play.', true);
         else note(j.error && j.error.length > 12 ? j.error : 'The bot didn’t respond. Send your message again.', true);
       }
       inp.focus({ preventScroll:true });
+    }
+    /* out of messages: the password box still works; or start the level again with a fresh bot */
+    function outOfMessages(){
+      $('bb-in').disabled = true; $('bb-send').querySelector('button').disabled = true;
+      $('bb-x').innerHTML = '<span style="color:var(--bad)">You’ve used all '+BB_MAX+' messages for this level.</span> If you know the password, type it below. <button type="button" class="btn light" id="bb-again" style="margin-top:8px;width:100%">Start this level again</button>';
+      $('bb-again').onclick = () => { run = rid(); chatLevel(); };
     }
     async function check(){
       const g = $('bb-g').value;
@@ -3789,124 +3773,9 @@ const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'s
   }
 };
 
-/* ================= 21. Word Radar (insight): find the secret word; each guess shows how close its meaning is (Semantle) ================= */
-/* The secret words and similarity data stay on the server (api/radar.js). */
-const WR_N = 9497;   // size of the word list (only used to draw the radar before the first answer)
-const WordRadar = { id:'word-radar', name:'Word Radar', skill:'insight', icon:'radar', inspired:'Semantle', topics:'word meanings, the way AI sees them',
-  how:['Guess the secret word. Any English word works.','Each guess shows how close its <b>meaning</b> is, as a rank: #1 is the closest word, “cold” is far away.','Use each result to choose your next guess. A hint opens after 8 guesses.'],
-  run(ctx){
-    const st = gs('word-radar');
-    let puzzle = [1,2,3].includes(st.wr) ? st.wr : 1, guesses, hints, n, busy, over;
-    function reset(p){
-      puzzle = p; guesses = []; hints = 0; n = WR_N; busy = false; over = false;
-      ctx.root.innerHTML = hud([['wr-g','Guesses','0'],['wr-b','Closest','–']])
-        + '<div class="wr-tabs" role="tablist">'+[1,2,3].map(i => '<button role="tab" aria-selected="'+(i === puzzle)+'" data-p="'+i+'">Puzzle '+i+'</button>').join('')+'</div>'
-        + '<div class="wr-cols"><div class="wr-radar" id="wr-radar"></div><div>'
-        + '<form class="bb-row" id="wr-f"><input class="field mono" id="wr-in" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type a word" aria-label="Your guess"><button class="btn c">Guess</button></form>'
-        + '<div class="wr-fb" id="wr-fb" aria-live="polite"></div>'
-        + '<div class="row" style="margin:8px 0 12px"><button class="btn light" id="wr-hint" style="flex:1" disabled></button><button class="btn light" id="wr-give" style="flex:1">Show answer</button></div>'
-        + '<div class="wr-list" id="wr-list"></div></div></div>';
-      ctx.root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (+b.dataset.p !== puzzle && !busy) reset(+b.dataset.p); });
-      $('wr-f').onsubmit = e => { e.preventDefault(); guess(); };
-      $('wr-hint').onclick = hint; $('wr-give').onclick = giveUp;
-      render();
-      $('wr-in').focus({ preventScroll:true });
-    }
-    const fb = (t, cls) => { const f = $('wr-fb'); f.textContent = t; f.className = 'wr-fb ' + (cls || ''); };
-    const bestRank = () => guesses.length ? Math.min(...guesses.map(g => g.rank)) : null;
-    const label = r => r === 0 ? 'found' : r <= 10 ? '#' + r + ' hot' : r <= 100 ? '#' + r : r <= 1000 ? '#' + r + ' warm' : 'cold';
-    const dist = r => r === 0 ? 0 : Math.max(14, Math.log10(r + 1) / Math.log10(n) * 130);
-    function render(){
-      const b = bestRank();
-      $('wr-g').textContent = guesses.length;
-      $('wr-b').textContent = b === null ? '–' : b === 0 ? 'found' : '#' + b;
-      const left = 8 - guesses.length, h = $('wr-hint');
-      h.disabled = left > 0 || over; h.textContent = left > 0 ? 'Get a hint (after ' + left + ' more)' : 'Get a hint';
-      /* radar: secret in the centre, rings at rank 10, 100 and 1000, each guess at the golden angle */
-      const C = 150, latest = guesses[guesses.length - 1];
-      let svg = '<svg viewBox="0 0 300 300" role="img" aria-label="Radar of your guesses. The centre is the secret word.">'
-        + '<circle cx="'+C+'" cy="'+C+'" r="130" fill="var(--chip)" stroke="var(--line)" stroke-width="2"/>'
-        + [10,100,1000].map(r => { const d = dist(r); return '<circle cx="'+C+'" cy="'+C+'" r="'+d.toFixed(1)+'" fill="none" stroke="var(--soft)" stroke-opacity=".45" stroke-dasharray="4 4"/><text x="'+C+'" y="'+(C - d - 3).toFixed(1)+'" text-anchor="middle" class="wr-ring">top '+r+'</text>'; }).join('')
-        + '<circle cx="'+C+'" cy="'+C+'" r="7" fill="var(--c)"/>';
-      guesses.forEach((g, i) => {
-        const a = i * 2.399963, d = dist(g.rank), x = C + d*Math.cos(a), y = C + d*Math.sin(a);
-        if (g !== latest) svg += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="var(--soft)" opacity=".6"/>';
-      });
-      if (latest) {
-        const i = guesses.length - 1, a = i * 2.399963, d = dist(latest.rank), x = C + d*Math.cos(a), y = C + d*Math.sin(a), right = x < C + 60;
-        svg += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="var(--c)" stroke="#fff" stroke-width="2"/>'
-          + '<text x="'+(x + (right ? 11 : -11)).toFixed(1)+'" y="'+(y + 4).toFixed(1)+'" text-anchor="'+(right ? 'start' : 'end')+'" class="wr-word">'+esc(latest.word)+'</text>';
-      }
-      $('wr-radar').innerHTML = svg + '</svg>';
-      const list = guesses.map((g, i) => ({ g, i })).sort((a, b) => a.g.rank - b.g.rank);
-      $('wr-list').innerHTML = list.length ? list.map(({ g, i }) => '<div class="wr-item'+(g === latest ? ' last' : '')+'"><small>'+(i+1)+'</small><b>'+esc(g.word)+'</b><span>'+(g.sim*100).toFixed(1)+'</span><em class="'+(g.rank <= 10 ? 'hot' : g.rank <= 1000 ? 'warm' : 'cold')+'">'+label(g.rank)+'</em></div>').join('')
-        : '<div class="small muted">Your guesses show up here, closest first.</div>';
-    }
-    function add(r, hint){
-      n = r.n || n;
-      const g = { word: r.word, sim: r.sim, rank: r.rank, hint: !!hint };
-      guesses.push(g);
-      if (hint) fb('Hint: “' + r.word + '” is ranked #' + r.rank + '.');
-      else if (r.rank === 0) fb('Found it!', 'ok');
-      else fb(r.rank <= 10 ? 'Very close.' : r.rank <= 1000 ? 'Warm. Explore around this meaning.' : 'Cold. Try a completely different area.', r.rank <= 10 ? 'ok' : r.rank <= 1000 ? 'warm' : '');
-      SFX.play(r.rank === 0 ? 'correct' : r.rank <= 1000 ? 'softok' : 'tick');
-      render();
-      if (r.rank === 0) { over = true; ctx.after(700, () => finish(false, r.word, r.top10 || [])); }
-    }
-    async function guess(){
-      const inp = $('wr-in'), w = inp.value.trim().toLowerCase();
-      if (!w || busy || over) return;
-      if (guesses.some(g => g.word === w)) { fb('You already tried “' + w + '”.'); inp.select(); return; }
-      busy = true;
-      const r = await api('/api/radar', { action:'guess', puzzle, word: w });
-      busy = false;
-      if (!$('wr-in')) return;
-      if (r.status === 200 && r.j.ok) { inp.value = ''; add(r.j); }
-      else if (r.status === 200 && r.j.reason === 'not_in_list') { fb('“' + w + '” isn’t in our word list. Try another word or a simpler form of it.', 'bad'); inp.select(); }
-      else fb('Couldn’t check that word. Try again.', 'bad');
-      if (!over) inp.focus({ preventScroll:true });
-    }
-    async function hint(){
-      if (busy || over || guesses.length < 8) return;
-      busy = true;
-      const b = bestRank();
-      const r = await api('/api/radar', { action:'hint', puzzle, bestRank: b, triedRanks: guesses.map(g => g.rank) });
-      busy = false;
-      if (!$('wr-in')) return;
-      if (r.status === 200 && r.j.ok && !guesses.some(g => g.word === r.j.word)) { hints++; add(r.j, true); }
-      else fb('Couldn’t get a hint. Try again.', 'bad');
-    }
-    async function giveUp(){
-      if (busy || over) return;
-      busy = true;
-      const r = await api('/api/radar', { action:'reveal', puzzle });
-      busy = false;
-      if (r.status === 200 && r.j.ok) { over = true; finish(true, r.j.secret, r.j.top10); }
-      else fb('Couldn’t load the answer. Try again.', 'bad');
-    }
-    function finish(gaveUp, secret, top10){
-      const warmAt = guesses.findIndex(g => g.rank <= 1000), toWarm = warmAt >= 0 ? warmAt + 1 : null;
-      let jump = null, gain = 0;
-      for (let i = 1; i < guesses.length; i++) { const d = guesses[i-1].rank - guesses[i].rank; if (d > gain) { gain = d; jump = [guesses[i-1].rank, guesses[i].rank]; } }
-      const k = guesses.length, next = puzzle % 3 + 1;
-      st.wr = next; save();
-      const note = gaveUp ? 'Tough one. Look at the closest words below: that’s how the AI groups meaning. Next time, spread your first guesses across very different topics to find the warm zone faster.'
-        : toWarm > 7 ? 'It took you ' + toWarm + ' guesses to get warm. Good experimenters test very different ideas first (food, tech, nature, feelings), then narrow down. That’s also how you debug: rule out big areas before small ones.'
-        : 'You found the warm zone in ' + (toWarm === 1 ? '1 guess' : toWarm + ' guesses') + ' and narrowed in from there. That’s reasoning by experiment: each guess told you something, and you used it.';
-      const pct = gaveUp ? 10 : Math.max(20, Math.min(100, 100 - Math.max(0, k - 5) * 2 - hints * 10));
-      ctx.end({ score: pct, pct, title: gaveUp ? 'The word was “' + secret + '”' : 'Found “' + secret + '” in ' + k + ' guesses', sub: 'Puzzle ' + puzzle + ' of 3', again: 'Play puzzle ' + next,
-        tiles: [[k,'Guesses'],[hints,'Hints used'],[toWarm || '–','Guesses to get warm'],[jump ? '#' + jump[0] + ' → #' + jump[1] : '–','Biggest jump']],
-        note: note + '<div class="small" style="margin-top:10px">The AI’s 10 closest words to “' + esc(secret) + '”:</div><div class="chips" style="margin:6px 0">' + top10.map(w => '<span class="chip">' + esc(w) + '</span>').join('') + '</div>'
-          + '<div class="small">Words are points in space for AI, and meaning is distance. That’s why changing one word in a prompt changes the answer you get.</div>',
-        meta: { puzzle, secret, guesses: k, hints, gaveUp, guessesToWarm: toWarm, guessList: guesses.map(g => g.word) } });
-    }
-    reset(puzzle);
-  }
-};
-
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, BreakBot, WordRadar];
+  ColorClash, SeenIt, BugTracker, BreakBot];
 route();
 pullMe();
 </script>
