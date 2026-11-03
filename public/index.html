@@ -826,6 +826,12 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 .rh-opts .opt{margin:0;text-align:center;justify-content:center;display:flex;align-items:center;gap:6px;min-height:54px;touch-action:manipulation}
 .rh-opt.rh-ai{border-color:var(--c-ai);background:color-mix(in srgb,var(--c-ai) 9%,#fff)}
 .rh-bot{font-size:15px}
+/* Right Tool */
+.rt-s{font-size:18px;line-height:1.45;margin:4px 0}
+.rt-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rt-tools .opt{margin:0;display:flex;align-items:center;gap:8px;min-height:58px}
+.rt-ic{font-size:22px}
+.rt-tool.risk{border-color:color-mix(in srgb,var(--bad) 45%,#fff)}
 </style>
 </head>
 <body>
@@ -1064,6 +1070,7 @@ const ICON = {
   ship:'<path d="M4 15l2 4h12l2-4z"/><path d="M12 3v12M12 3l5 6h-5"/>',
   ladder:'<path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10"/>',
   bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  tools:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
@@ -1309,7 +1316,7 @@ const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-spri
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
 const NEW_OPEN = ['color-clash','seen-it','you-or-ai'];
-const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not','rush-hour'];
+const NEW_ORDER = ['bug-tracker','ship-or-test','hint-ladder','sure-or-not','rush-hour','right-tool'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -4630,9 +4637,178 @@ const RushHour = { id:'rush-hour', name:'Rush Hour', skill:'ai', icon:'bolt', in
   }
 };
 
+/* Right Tool situations: best tool, reasonable ones (ok), risky ones. Hand-written; risky AI = privacy, money, official facts, or graded work. */
+const RT = [
+  { s:'Your club needs 10 name ideas for the college tech fest by tonight. You have no ideas yet.', best:'ai', ok:['person','self'], risky:[], why:'Brainstorming many ideas fast is what AI does well. You still pick and polish the final name.' },
+  { s:'Your teacher explained Python for loops, but you still do not get it. You want it explained another way.', best:'ai', ok:['docs','person'], risky:[], why:'AI can re-explain a concept in simple words, with new examples, as many times as you need.' },
+  { s:'Your Python program shows "IndentationError: unexpected indent" and you do not understand the message.', best:'ai', ok:['docs','person'], risky:[], why:'Paste the error and code into AI to learn what it means. It is your own code, so nothing private is shared.' },
+  { s:'You have 12 pages of your own lecture notes on number systems. You want a one-page summary for revision.', best:'ai', ok:['self'], risky:[], why:'Summarising your own notes is a safe, helpful AI task. Check the summary against your notes.' },
+  { s:'Your aptitude test is next week. You want 10 extra practice questions on percentages.', best:'ai', ok:['docs'], risky:[], why:'AI can quickly make practice questions. Solve them yourself and check doubtful answers with a textbook.' },
+  { s:'You want to send a polite email to your mentor asking to move your weekly meeting. You are not sure how to word it.', best:'ai', ok:['self'], risky:[], why:'AI is good at drafting polite emails. Read it, fix details, and send it in your own name.' },
+  { s:'You keep mixing up justify-content and align-items in CSS Flexbox.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain the difference with a small example. MDN is also good if you want the exact rules.' },
+  { s:'You wrote your LinkedIn About section, but it sounds stiff. You want it to read more clearly.', best:'ai', ok:['person','self'], risky:[], why:'AI can suggest clearer wording for text you wrote. Keep the facts true and the voice yours.' },
+  { s:'You need ideas for a small Python mini project that uses lists and dictionaries.', best:'ai', ok:['person'], risky:[], why:'Project ideas are brainstorming. AI can give many options sized for a beginner.' },
+  { s:'Git shows "fatal: not a git repository" when you type git status. You do not know what it means.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain the error in plain words: you are not inside a folder that has git init run.' },
+  { s:'You understand binary to decimal better in your mother tongue. You want it explained in Telugu.', best:'ai', ok:['person'], risky:[], why:'AI can explain a concept in your own language. That makes learning easier.' },
+  { s:'You have five subjects and mid-sems in three weeks. You want a study timetable from your list.', best:'ai', ok:['self'], risky:[], why:'AI can quickly draft a plan from your list. Then adjust it to your real day.' },
+  { s:'Your lab viva on Git is on Monday. You want someone to ask you practice questions tonight.', best:'ai', ok:['person'], risky:[], why:'AI can act as a quiz partner at any hour. You answer, so you still do the learning.' },
+  { s:'You are running the first coding club meeting and need a simple meeting agenda.', best:'ai', ok:['self'], risky:[], why:'Drafting an agenda is quick, low-risk AI work. Edit it to fit your club.' },
+  { s:'You want a daily-life example that shows the difference between a Python list and a tuple.', best:'ai', ok:['docs','person'], risky:[], why:'AI is good at making fresh examples to explain a concept another way.' },
+  { s:'You have an internship HR interview next week. You want to practise common questions.', best:'ai', ok:['person'], risky:[], why:'AI can play the interviewer and give practice questions any time you want.' },
+  { s:'You wrote a cover letter for an internship. You want the grammar and spelling checked.', best:'ai', ok:['person'], risky:[], why:'Checking grammar on your own writing is a safe AI task. Make sure the facts stay correct.' },
+  { s:'In your GenAI class you heard the word "temperature" for chatbots. You want a simple explanation.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain basic AI ideas simply, with examples. Your class notes can confirm it.' },
+  { s:'Your hackathon team needs a fun team name in the next 10 minutes.', best:'ai', ok:['self','person'], risky:[], why:'Fast idea generation is a good use of AI. The team picks the one it likes.' },
+  { s:'Your notes comparing HTML tags are messy. You want them turned into a neat table.', best:'ai', ok:['self'], risky:[], why:'Reformatting your own notes is quick and safe for AI. Check nothing got lost.' },
+  { s:'You see the Tailwind classes "flex justify-between items-center" in a sample page and want to know what they do together.', best:'ai', ok:['docs'], risky:[], why:'AI can explain how the classes work together. Tailwind docs give the exact detail if needed.' },
+  { s:'You must give a 2-minute talk on "AI in farming" in English class. You want an outline to start from.', best:'ai', ok:['self'], risky:[], why:'AI can suggest an outline. You add your own points and practise speaking it.' },
+  { s:'Your HTML page shows all lines joined together, even though you pressed Enter between them. You are confused.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain that HTML ignores line breaks and show you p or br tags.' },
+  { s:'You finished your Python grade calculator. You want ideas for tricky inputs to test it with.', best:'ai', ok:['self'], risky:[], why:'AI is good at listing edge cases like 0, 100 or negative marks. You run the tests yourself.' },
+  { s:'A long English article for your essay is hard to follow. You want the main points in simple words.', best:'ai', ok:['person'], risky:[], why:'AI can simplify a public article to help you understand it. Read the original for exact quotes.' },
+  { s:'In communication class you mix up "affect" and "effect". You want a few example sentences.', best:'ai', ok:['docs'], risky:[], why:'AI can quickly give many example sentences. A dictionary is also fine.' },
+  { s:'You want flashcards made from your own notes on bitwise operators for quick revision.', best:'ai', ok:['self'], risky:[], why:'Turning your own notes into flashcards saves time. Check each card is correct.' },
+  { s:'You want to practise for a placement group discussion on "Online classes vs offline classes".', best:'ai', ok:['person'], risky:[], why:'AI can give points for both sides and play other speakers so you can practise.' },
+  { s:'Your CSS has grid-template-columns: repeat(3, 1fr) and you are not sure what 1fr means.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain fr units with a simple picture in words. MDN has the exact definition.' },
+  { s:'You are taking a graded Moodle quiz right now and are unsure about one answer.', best:'self', ok:[], risky:['ai','person'], why:'A graded quiz tests what you know. Using AI or a friend is cheating.' },
+  { s:'A shop gives 15% off on a ₹400 shirt. You want the discount amount.', best:'self', ok:[], risky:[], why:'It is a quick one-line sum: ₹60. Doing it yourself is faster and builds aptitude skill.' },
+  { s:'You hurt your friend’s feelings and want to send an apology message.', best:'self', ok:['person'], risky:[], why:'An apology must be in your own words. A copied AI message can feel fake.' },
+  { s:'Your graded Python lab assignment is due tomorrow and you are stuck on one part.', best:'self', ok:['person'], risky:['ai'], why:'Graded work must be your own. Try again, or ask your TA for a hint, not the full answer from AI.' },
+  { s:'Your practice sheet asks you to convert binary 1011 to decimal.', best:'self', ok:['docs'], risky:[], why:'This is practice for your own skill. It is 11, and doing it by hand is the point.' },
+  { s:'During a lab viva, the examiner asks you to explain a line of your own code.', best:'self', ok:[], risky:['ai','person'], why:'A viva checks your own understanding. You must answer yourself.' },
+  { s:'The hostel dinner bill is ₹600 and four friends are splitting it equally.', best:'self', ok:[], risky:[], why:'₹150 each is a quick sum. Opening AI for this is slower than doing it.' },
+  { s:'You need to write a short commit message for the bug fix you just made.', best:'self', ok:['docs'], risky:[], why:'You know what you changed, so you can write it best in a few words.' },
+  { s:'Your teacher’s feedback form asks how well you understood this week’s topics.', best:'self', ok:[], risky:['ai'], why:'Only you know how much you understood. AI cannot answer honestly for you.' },
+  { s:'Your mentor asks for a weekly reflection on what you learned and where you struggled.', best:'self', ok:[], risky:['ai'], why:'A reflection is about your own experience. An AI-written one helps no one.' },
+  { s:'A company’s take-home aptitude test says "no outside help allowed".', best:'self', ok:[], risky:['ai','person'], why:'The rules say no help. Using AI or friends breaks the rules and can cost you the offer.' },
+  { s:'Your practice sheet asks what print(3 + 2 * 2) shows.', best:'self', ok:['ai'], risky:[], why:'Work it out yourself: multiplication first, so 7. You can check with AI or by running it later.' },
+  { s:'Your 5-line program fails and you can clearly see a missing colon after the if line.', best:'self', ok:['ai'], risky:[], why:'You already see the bug. Fixing it yourself is fastest.' },
+  { s:'You are in a live campus coding contest and stuck on question 2.', best:'self', ok:[], risky:['ai','person'], why:'A contest tests your own skill. Outside help is cheating.' },
+  { s:'You want to write a thank-you note to your parents for their support this year.', best:'self', ok:[], risky:[], why:'A personal note means most in your own words, even if simple.' },
+  { s:'Your teacher asks you to practise git add and git commit in a test repo.', best:'self', ok:['docs'], risky:[], why:'Typing the commands yourself is how you learn them. Check docs if you forget one.' },
+  { s:'You finished a practice mock test and the answer key is given. You want your score.', best:'self', ok:[], risky:[], why:'Just compare with the key. It is quick and you see your own mistakes.' },
+  { s:'Your English teacher wants a graded one-page essay with your opinion on online learning.', best:'self', ok:['person'], risky:['ai'], why:'It is graded and asks for your opinion. Write it yourself.' },
+  { s:'You must give honest peer-review comments on a classmate’s project for marks.', best:'self', ok:[], risky:['ai'], why:'Peer review is your own judgement. AI cannot give your honest view.' },
+  { s:'You are solving a Brain Gym logic puzzle to sharpen your thinking.', best:'self', ok:[], risky:[], why:'The puzzle exists to train your brain. Asking AI removes the benefit.' },
+  { s:'Your first HTML assignment is to build a simple page about yourself.', best:'self', ok:['docs'], risky:['ai'], why:'Typing tags yourself is how you learn HTML. Use MDN when you forget a tag.' },
+  { s:'You need to know how many minutes are in 2 hours 30 minutes for your timetable.', best:'self', ok:[], risky:[], why:'It is 150 minutes. A quick mental sum is faster than asking anyone.' },
+  { s:'In a group project, you must write the slide that explains what you personally did.', best:'self', ok:[], risky:['ai'], why:'Only you know your own work. AI would invent details.' },
+  { s:'Hackathon judges ask you to explain your team’s code live on stage.', best:'self', ok:[], risky:['ai'], why:'Judges want to see that you understand your work. Explain it yourself.' },
+  { s:'You accidentally pushed a file with your college portal password to a public GitHub repo.', best:'self', ok:['person'], risky:['ai'], why:'Change the password yourself right away. Never paste the password into an AI chat.' },
+  { s:'You want to check which Python version is installed on your laptop.', best:'self', ok:['docs'], risky:[], why:'Just run python --version in the terminal. AI cannot see your laptop.' },
+  { s:'You need the largest of five marks: 72, 85, 64, 91, 78.', best:'self', ok:[], risky:[], why:'You can see 91 is largest in seconds. No tool needed.' },
+  { s:'You wrote a function and want to see what it returns for the input 5.', best:'self', ok:['ai'], risky:[], why:'Just run it. Running your own code gives the real answer.' },
+  { s:'Your teacher asks each student to write two lines on their career goal in the class form.', best:'self', ok:[], risky:[], why:'Your goal is personal. Only you can write it truthfully.' },
+  { s:'You are writing answers in a closed-book semester exam.', best:'self', ok:[], risky:['ai','person'], why:'An exam is your own work. Any outside help is cheating.' },
+  { s:'You need the last date to pay this semester’s college fee.', best:'docs', ok:['person'], risky:['ai'], why:'Fee dates are official facts. Check the college notice or portal. AI may guess wrong.' },
+  { s:'You want the exact mid-sem exam timetable.', best:'docs', ok:['person'], risky:['ai'], why:'Exam dates come only from the official college notice. AI does not know them.' },
+  { s:'You want to know the daily UPI transfer limit on your bank account.', best:'docs', ok:['person'], risky:['ai'], why:'Limits differ by bank and change. Check your bank’s official app or page.' },
+  { s:'You need the exact meaning of the maxsplit argument in Python’s str.split().', best:'docs', ok:['ai'], risky:[], why:'The Python docs give the exact rule with examples. AI is fine but may be less exact.' },
+  { s:'You want to know the fine per day for late library book returns.', best:'docs', ok:['person'], risky:['ai'], why:'This is a college rule. Check the library notice or website, not AI.' },
+  { s:'You want the application deadline for an internship you saw on a company’s careers page.', best:'docs', ok:[], risky:['ai'], why:'Deadlines are exact facts. Read the official careers page. AI may give an old or wrong date.' },
+  { s:'You want to know if you are eligible for a state scholarship.', best:'docs', ok:['person'], risky:['ai'], why:'Eligibility rules are on the official scholarship portal. AI can be wrong or outdated.' },
+  { s:'Someone says the hostel gate closing time has changed. You want the exact new time.', best:'docs', ok:['person'], risky:['ai'], why:'Check the official hostel notice. AI cannot know your hostel’s rules.' },
+  { s:'You want the exact options of git reset to undo your last commit safely.', best:'docs', ok:['ai','person'], risky:[], why:'The official Git docs explain each option exactly. Wrong flags can lose work.' },
+  { s:'You want to know the refund rules for cancelling your train ticket home.', best:'docs', ok:['person'], risky:['ai'], why:'Refund rules are official and change. Check the railway booking site’s rules page.' },
+  { s:'You want the exact Tailwind class for a padding of 1rem.', best:'docs', ok:['ai'], risky:[], why:'Tailwind docs list every class exactly. It takes seconds to check.' },
+  { s:'You want the minimum CGPA needed for an upcoming placement drive.', best:'docs', ok:['person'], risky:['ai'], why:'Cutoffs are set per drive. Read the placement cell notice, not AI.' },
+  { s:'You want the last date to register for a national student hackathon.', best:'docs', ok:[], risky:['ai'], why:'Only the official event page has the correct date.' },
+  { s:'You want to know the minimum attendance needed to sit for end-sem exams.', best:'docs', ok:['person'], risky:['ai'], why:'This rule is in your college handbook. AI might give another college’s rule.' },
+  { s:'You want to know from which Python version dictionaries keep insertion order by rule.', best:'docs', ok:['ai'], risky:[], why:'The official Python docs state it exactly: from Python 3.7.' },
+  { s:'You need to update the mobile number linked to your Aadhaar.', best:'docs', ok:['person'], risky:['ai'], why:'Use only the official UIDAI website. Never share Aadhaar details with an AI chat.' },
+  { s:'You need your bank’s customer care number to report a problem.', best:'docs', ok:[], risky:['ai'], why:'Get it from the bank’s official app or card. Numbers from AI or search results can be fake.' },
+  { s:'You want the list of topics for your end-sem Python exam.', best:'docs', ok:['person'], risky:['ai'], why:'The official syllabus document is the real source. AI may add wrong topics.' },
+  { s:'You want to know if you qualify for the GitHub Student Developer Pack.', best:'docs', ok:['person'], risky:['ai'], why:'Rules can change. Check GitHub’s official page for the current rules.' },
+  { s:'You want the fee and last date to apply for re-evaluation of your marks.', best:'docs', ok:['person'], risky:['ai'], why:'This is an exact official fact. Check the exam cell notice.' },
+  { s:'You want the correct HTML attribute to open a link in a new tab.', best:'docs', ok:['ai'], risky:[], why:'MDN gives the exact answer, target="_blank", with safety notes.' },
+  { s:'You want to know how many medical leave days students are allowed.', best:'docs', ok:['person'], risky:['ai'], why:'Leave rules are in the student handbook. AI will only guess.' },
+  { s:'Your laptop’s keyboard stopped working and you want to know if the warranty covers it.', best:'docs', ok:['person'], risky:['ai'], why:'Warranty terms are on the brand’s official page or your bill. AI cannot know your plan.' },
+  { s:'You want to know what personal data the official college app collects.', best:'docs', ok:['person'], risky:['ai'], why:'Read the app’s official privacy policy. AI can only guess.' },
+  { s:'You want the exact git config command to set your name for commits.', best:'docs', ok:['ai','person'], risky:[], why:'The official Git docs show the exact command and options.' },
+  { s:'You want the exact details of your mobile recharge plan, like data per day and validity.', best:'docs', ok:['person'], risky:['ai'], why:'Plans change often. Check your telecom company’s official app.' },
+  { s:'You want the exact order in which Python applies & and | in one expression.', best:'docs', ok:['ai'], risky:[], why:'The Python docs have the official operator precedence table.' },
+  { s:'You heard the mess menu changes from next week and want to see the new menu.', best:'docs', ok:['person'], risky:['ai'], why:'The hostel notice board has the real menu. AI cannot know it.' },
+  { s:'You want the exact date your college’s semester break starts.', best:'docs', ok:['person'], risky:['ai'], why:'The academic calendar is the official source. AI may invent a date.' },
+  { s:'You want the exact list of documents needed to open a student bank account.', best:'docs', ok:['person'], risky:['ai'], why:'Each bank lists its rules on its official page. AI may be wrong.' },
+  { s:'You have felt very low for two weeks and cannot sleep properly.', best:'person', ok:[], risky:['ai'], why:'You don’t have to handle this alone. Talk to someone you trust, or the college counsellor. A real person can listen and help.' },
+  { s:'A caller says he is from your bank and asks for the OTP you just got.', best:'person', ok:['docs'], risky:['ai'], why:'Never share an OTP. Hang up and call your bank on the official number to report it.' },
+  { s:'You were ill on the exam day and want to know if you can take a make-up exam.', best:'person', ok:['docs'], risky:['ai'], why:'Ask the exam cell or your teacher. They decide, and AI cannot know your college rules.' },
+  { s:'You sent ₹2,000 by UPI to the wrong person by mistake.', best:'person', ok:['docs'], risky:['ai'], why:'Contact your bank quickly through its official help. Do not share account details with AI.' },
+  { s:'You must choose between two electives and want to know how each one really goes.', best:'person', ok:['ai','docs'], risky:[], why:'Seniors and mentors know how the courses feel in your college. AI does not.' },
+  { s:'Someone posted a private photo of a classmate in the hostel WhatsApp group.', best:'person', ok:[], risky:['ai'], why:'Tell the warden or a mentor. Never upload someone’s private photo to an AI tool.' },
+  { s:'Your teacher’s assignment does not say if it is individual or group work.', best:'person', ok:['docs'], risky:['ai'], why:'Only your teacher knows. Ask them. AI would only guess.' },
+  { s:'You have had fever for three days and AI suggested a medicine.', best:'person', ok:[], risky:['ai','self'], why:'See a doctor or the campus clinic. Medicine choices need a real doctor.' },
+  { s:'You are about to sign a PG rental agreement and do not understand some clauses.', best:'person', ok:['docs'], risky:['ai'], why:'Ask a parent or trusted adult before signing. Legal and money decisions need real people.' },
+  { s:'An internship offer asks you to pay a ₹5,000 "training fee" before joining.', best:'person', ok:['docs'], risky:['ai'], why:'Check with your placement cell first. Asking for money upfront is a common scam sign.' },
+  { s:'Your lab partner has not done any work on your shared project for two weeks.', best:'person', ok:[], risky:['ai'], why:'Talk to your partner first, then your teacher if needed. This needs a real conversation.' },
+  { s:'You lost your college ID card on campus.', best:'person', ok:['docs'], risky:['ai'], why:'Tell the admin office so they can block it and give a new one.' },
+  { s:'You want honest feedback on your body language in a mock interview.', best:'person', ok:['ai'], risky:[], why:'A mentor or friend can see you in person and give real feedback.' },
+  { s:'A senior in the hostel keeps forcing you to do his work and threatens you.', best:'person', ok:['docs'], risky:['ai'], why:'Report it to the warden or anti-ragging committee. You need real help and protection.' },
+  { s:'A pop-up on your laptop says "Virus found! Call this number now".', best:'person', ok:[], risky:['ai'], why:'Do not call. Ask the college IT team or a tech-savvy friend. Such pop-ups are often scams.' },
+  { s:'You want to know what the placement process at your college actually feels like.', best:'person', ok:['ai'], risky:[], why:'Seniors who went through it can share real experience. AI only knows general things.' },
+  { s:'You think your lab marks were cut unfairly even though your code works.', best:'person', ok:[], risky:['ai'], why:'Talk to your teacher politely. Only they can review and change your marks.' },
+  { s:'Your project team keeps arguing about who should do which part.', best:'person', ok:['ai'], risky:[], why:'Sit together and talk it out. People must agree on roles themselves.' },
+  { s:'A friend says you should put your scholarship money into a trading app he likes.', best:'person', ok:[], risky:['ai'], why:'Talk to your parents or a trusted adult first. Money decisions need real advice.' },
+  { s:'You are thinking about changing your branch next year.', best:'person', ok:['docs'], risky:['ai'], why:'Talk to your mentor and parents. Big life decisions need people who know you.' },
+  { s:'You need a recommendation letter from your Python professor for a summer school.', best:'person', ok:[], risky:['ai'], why:'Ask the professor directly. A recommendation must come from them, not AI.' },
+  { s:'You notice the college portal shows other students’ marks when you change the link.', best:'person', ok:[], risky:['ai'], why:'Report it to the college IT admin. Do not share the link or the data with anyone, including AI.' },
+  { s:'You got an itchy rash after eating in the mess.', best:'person', ok:[], risky:['ai'], why:'Tell the warden and visit the campus clinic. Health problems need a real doctor.' },
+  { s:'You want to join a professor’s small research project this semester.', best:'person', ok:['docs'], risky:['ai'], why:'Email or meet the professor. Only they can say yes.' },
+  { s:'You want to know how your mentor grades your weekly reports.', best:'person', ok:['docs'], risky:['ai'], why:'Ask your mentor. They set the grading, so AI cannot know.' },
+  { s:'A new number on WhatsApp says it is your friend and urgently asks for ₹2,000.', best:'person', ok:[], risky:['ai'], why:'Call your friend on their old number to check. Do not send money first.' },
+  { s:'You cannot decide between joining NCC or the coding club as a fresher.', best:'person', ok:['ai'], risky:[], why:'Talk to seniors in both. They know the time it takes and what you gain.' },
+  { s:'Your scholarship amount has not come into your account after two months.', best:'person', ok:['docs'], risky:['ai'], why:'Ask the college scholarship cell. They can check your file. Never share bank details with AI.' },
+  { s:'A friend asks for your college portal password to fill a form for you.', best:'person', ok:[], risky:['ai'], why:'Say no politely, and talk to your friend. Never share passwords with anyone or any AI.' },
+  { s:'Your laptop broke and you need to decide whether to repair it or buy a new one with family money.', best:'person', ok:['docs'], risky:['ai'], why:'Talk to your parents and a trusted repair shop. Money choices need real people.' },
+  { s:'You see <<<<<<< and >>>>>>> markers in a file after a git merge and do not know what they mean.', best:'ai', ok:['docs','person'], risky:[], why:'AI can explain merge conflict markers in plain words and show how to fix them. Git docs give the full detail.' }
+];
+/* ================= 24. Right Tool (using AI well): for each situation, pick yourself, AI, the official source or a person ================= */
+const RT_TOOLS = { self:['🧠','Do it myself'], ai:['🤖','Ask AI'], docs:['📘','Official source'], person:['🙋','Ask a person'] };
+const RT_N = 8;
+const RightTool = { id:'right-tool', name:'Right Tool', skill:'ai', icon:'tools', inspired:'guidelines on when to use AI', topics:'college life, coding, money and privacy',
+  how:['Each card is a real situation. Pick the best help: do it yourself, ask AI, check the official source, or ask a person.','Best choice +2. A reasonable one +1. A risky one −2 (like giving AI your OTP, or trusting it for an exam date).','8 situations.'],
+  run(ctx){
+    const cards = fresh('right-tool', RT, RT_N, c => c.s.slice(0, 60)), log = []; let i = -1, points = 0;
+    function next(){
+      i++;
+      if (i >= RT_N) return finish();
+      const C = cards[i], t0 = Date.now();
+      ctx.root.innerHTML = hud([['rt-n','Situation',(i+1)+'/'+RT_N],['rt-p','Points',points]])
+        + '<div class="card ya-card"><p class="ya-q rt-s">'+esc(C.s)+'</p></div>'
+        + '<div class="rt-tools">'+Object.entries(RT_TOOLS).map(([k, t]) => '<button class="opt rt-tool" data-t="'+k+'"><span class="rt-ic">'+t[0]+'</span>'+t[1]+'</button>').join('')+'</div><div id="rt-out"></div>';
+      anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      ctx.root.querySelectorAll('.rt-tool').forEach(b => b.onclick = () => {
+        if (ctx.root.querySelector('.rt-tool:disabled')) return;
+        const t = b.dataset.t, kind = t === C.best ? 'best' : C.ok.includes(t) ? 'ok' : C.risky.includes(t) ? 'risky' : 'meh';
+        const delta = { best:2, ok:1, risky:-2, meh:0 }[kind];
+        points += delta; $('rt-p').textContent = points;
+        log.push({ best: C.best, pick: t, kind, aiRisky: C.risky.includes('ai') ? 1 : 0, s: Math.round((Date.now() - t0) / 1000) });
+        ctx.root.querySelectorAll('.rt-tool').forEach(x => { x.disabled = true; const k = x.dataset.t; if (k === C.best) x.classList.add('right'); else if (C.risky.includes(k)) x.classList.add('risk'); });
+        if (kind !== 'best') b.classList.add(kind === 'risky' ? 'wrong' : 'sel');
+        FX.result(kind === 'best' || kind === 'ok', true);
+        $('rt-out').innerHTML = '<div class="explain"><b>'+{ best:'Best choice. +2', ok:'Reasonable. +1', risky:'Risky here. −2', meh:'Not the best fit. 0' }[kind]+'</b> Best: '+RT_TOOLS[C.best][1]+'. '+esc(C.why)+'</div>'
+          + '<button class="btn c full" id="rt-next" style="margin-top:12px">'+(i < RT_N - 1 ? 'Next situation' : 'See results')+'</button>';
+        $('rt-next').onclick = next; $('rt-next').focus();
+      });
+    }
+    function finish(){
+      const best = log.filter(r => r.kind === 'best').length;
+      const aiRisky = log.filter(r => r.pick === 'ai' && r.kind === 'risky').length;
+      const offload = log.filter(r => r.pick === 'ai' && r.best === 'self').length;
+      const missed = log.filter(r => r.best === 'ai' && r.pick !== 'ai').length, aiCards = log.filter(r => r.best === 'ai').length;
+      const note = aiRisky ? 'You picked AI ' + aiRisky + ' time' + (aiRisky > 1 ? 's' : '') + ' where it was risky. Never give AI passwords, OTPs or private details, and don’t trust it for official facts like exam dates, fees or deadlines. Check the source.'
+        : offload ? 'You handed AI a task you should do yourself. When the point is to learn, or the work is being graded, AI doing it robs you of the practice.'
+        : missed >= 2 ? 'You skipped AI ' + missed + ' times where it would really help (brainstorming, explaining a concept another way, drafting). Used well, it saves time.'
+        : 'You matched the tool to the job: AI where it helps, the official source for facts, people for decisions, and your own head for learning.';
+      ctx.end({ score: Math.max(0, points), pct: Math.max(0, points) / (RT_N * 2) * 100, title: best + ' of ' + RT_N + ' best choices', sub: 'Using AI where it helps, and only there',
+        tiles: [[best + '/' + RT_N,'Best choices'],[aiRisky,'Used AI where it was risky'],[offload,'Handed AI your own work'],[aiCards ? missed + '/' + aiCards : '–','Skipped AI where it helps']],
+        note, meta: { best, aiWhenRisky: aiRisky, offloaded: offload, skippedHelpfulAI: missed, points, items: log } });
+    }
+    next();
+  }
+};
+
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot, RushHour];
+  ColorClash, SeenIt, BugTracker, YouOrAI, ShipOrTest, HintLadder, SureOrNot, RushHour, RightTool];
 route();
 pullMe();
 </script>
