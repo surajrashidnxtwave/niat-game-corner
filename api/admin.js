@@ -29,7 +29,7 @@ const GAME_SKILL = {
   'fallacy-hunt': 'reasoning', 'argue-back': 'reasoning',
   'rule-switch': 'flexibility',
   'robot-path': 'planning',
-  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai', 'placement-bot': 'ai'
+  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai'
   // 'break-the-bot' is left out on purpose: everyone cracks all 3 bots, so its score says nothing about
   // whether a student checks AI. Counting it would push every student's "Using AI well" score up.
 };

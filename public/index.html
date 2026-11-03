@@ -794,22 +794,6 @@ html.w3d-ready .count .ripple{border-color:#fff}
 .bb-row .field{flex:1;min-width:0;font-size:16px}
 .bb-row .btn{flex:none;padding:12px 18px}
 input.field.mono{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
-/* Placement Bot */
-.pb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 14px}
-.pb-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:#fff;border:3px solid var(--line);border-radius:16px;padding:12px}
-.pb-card[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 7%,#fff)}
-.pb-score{font:700 26px/1 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace}
-.pb-score small{font:700 11px var(--font);color:var(--soft);margin-left:4px}
-.pb-chart{background:#fff;border-radius:16px;padding:14px;margin:12px 0 14px}
-.pb-bar{display:grid;grid-template-columns:110px 1fr 30px;align-items:center;gap:8px;margin-top:8px;font-size:14px}
-.pb-bar i{display:block;height:14px;border-radius:999px;background:var(--c)}
-.pb-list{margin:12px 0 14px;display:flex;flex-direction:column;gap:8px}
-.pb-row{background:#fff;border-radius:14px;padding:10px 12px}
-.pb-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pb-line b{flex:1;min-width:80px}
-.pb-dec{font-size:12.5px;font-weight:900;padding:3px 10px;border-radius:999px;color:#fff}
-.pb-dec.ok{background:var(--ok)}.pb-dec.no{background:var(--bad)}
-.pb-more{margin-top:6px;color:var(--soft)}
 /* Word Radar */
 .wr-tabs{display:flex;gap:6px;margin-bottom:12px}
 .wr-tabs button{flex:1;padding:9px 6px;border-radius:999px;background:var(--chip);font-weight:800;font-size:14px}
@@ -838,37 +822,6 @@ body.ingame .toast,body.ingame .combo{left:50%}
 body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
 #g-fs svg{display:block;margin:auto}
 
-/* Placement Bot: people, the door they walk into, timed hiring */
-.pb-av{width:56px;height:56px;flex:none;display:block;border-radius:50%}
-.pb-card{position:relative;transition:opacity .25s,transform .25s}
-.pb-card.gone{opacity:.25;transform:scale(.94);pointer-events:none}
-.pb-card.gone::after{content:'Hired';position:absolute;top:10px;right:10px;font-size:12px;font-weight:900;color:#fff;background:var(--ok);border-radius:999px;padding:2px 9px}
-.pb-line .pb-av{width:38px;height:38px}
-.pb-line b{min-width:60px}
-.pb-hirehead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
-.pb-hirehead h2{margin:0}
-.pb-doorwrap{flex:none;perspective:300px}
-.pb-door{display:flex;flex-direction:column;align-items:center;gap:3px}
-.pb-sign{font-size:11px;font-weight:900;letter-spacing:.3px;color:#fff;background:var(--ink);border-radius:6px;padding:2px 8px}
-.pb-frame{position:relative;width:46px;height:62px;border-radius:8px 8px 0 0;background:#2A2440;border:4px solid #8A7A63;border-bottom:0;overflow:visible;transform-style:preserve-3d}
-.pb-leaf{position:absolute;inset:0;background:linear-gradient(90deg,#B98B5C,#A97C50);border-radius:4px 4px 0 0;transform-origin:left center;transition:transform .35s ease-out}
-.pb-leaf::after{content:'';position:absolute;right:6px;top:50%;width:5px;height:5px;border-radius:50%;background:#F5D27A}
-.pb-door.open .pb-leaf{transform:rotateY(-75deg)}
-.pb-walker{position:fixed;z-index:60;pointer-events:none;margin:0}
-.pb-sticky{position:sticky;top:0;z-index:5;background:var(--card);padding-top:8px;margin-top:-8px}
-.pb-sticky .tbar{margin-bottom:10px}
-@media (max-width:520px){
-  .pb-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .pb-card{padding:9px;gap:2px}
-  .pb-card .pb-av{width:40px;height:40px}
-  .pb-card b{font-size:14px}
-  .pb-card .pb-score{font-size:20px}
-  .pb-card .pb-score small{display:none}
-  .pb-card .small{font-size:12px;line-height:1.3}
-  .pb-card .chip{font-size:11px;padding:3px 8px}
-  .pb-card.gone::after{top:6px;right:6px;font-size:11px}
-}
-@media (prefers-reduced-motion:reduce){.pb-leaf,.pb-card{transition:none}}
 </style>
 </head>
 <body>
@@ -1095,7 +1048,6 @@ const ICON = {
   layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
   bug:'<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M12 12v8M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/>',
   shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
-  people:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2A5 5 0 0 1 21.5 19"/>',
   radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>'
 };
 const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
@@ -1332,13 +1284,13 @@ function renderGoal(){
 
 /* ---------- unlocks ----------
    First 15 games: 5 to start (one per skill), then 1 new game for each day the daily goal is met.
-   6 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
+   5 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
    NEW_ORDER unlock one by one, 1 for each goal day on or after NEW_SINCE. */
 const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
-const NEW_OPEN = ['color-clash','placement-bot'];
-const NEW_ORDER = ['seen-it','word-radar','bug-tracker','break-the-bot'];
+const NEW_OPEN = ['color-clash','seen-it'];
+const NEW_ORDER = ['word-radar','bug-tracker','break-the-bot'];
 const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
 const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
@@ -3496,7 +3448,7 @@ function renderWho(){
   $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
 }
 
-/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot, Placement Bot, Word Radar =================
+/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot, Word Radar =================
    Each one ends with ctx.end({ score, pct, title, sub, tiles, note, lines, meta }).
    tiles = [[value, label], ...] and note = one insight; meta = game-specific fields saved with the round. */
 const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2); };
@@ -3837,192 +3789,6 @@ const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'s
   }
 };
 
-/* ================= 20. Placement Bot (using AI well): you are accountable for an AI's hiring shortlist ================= */
-/* Bias is shown with metro vs town campus only. Do not change it to gender, caste, religion or any other protected trait.
-   Step 1: you hire under time pressure (5 in 60 s, 7 in 45 s, 10 in 30 s). Each hire walks into the office.
-   Steps 2-4: ScreenBot is trained on 5 years of metro-heavy hiring, makes a confident shortlist, then the full picture. */
-const PB_ROUNDS = [{ need:5, pool:8, secs:60 }, { need:7, pool:11, secs:45 }, { need:10, pool:15, secs:30 }];
-const PB_PEOPLE = [['Divya K.','f'],['Arjun R.','m'],['Lakshmi P.','f'],['Sai Teja','m'],['Ayesha S.','f'],['Rohit M.','m'],['Ananya G.','f'],['Rahul V.','m'],
-  ['Kavya N.','f'],['Karthik S.','m'],['Sana F.','f'],['Varun T.','m'],['Bhavana L.','f'],['Abdul H.','m'],['Swathi R.','f'],['Manoj K.','m'],['Fatima Z.','f'],
-  ['Ravi C.','m'],['Harini D.','f'],['Aditya P.','m'],['Ishita B.','f'],['Pranav J.','m'],['Keerthi M.','f'],['Yash A.','m'],['Meera S.','f'],['Faizan Q.','m'],
-  ['Neha U.','f'],['Gopal I.','m'],['Nikhita O.','f'],['Tarun E.','m'],['Priya W.','f'],['Nitin Y.','m'],['Rani X.','f'],['Suresh B.','m']];
-const PB_PROJECTS = ['Library management app','Bus timings app for a small town','To-do app from a tutorial','120 coding problems solved','One hackathon entry','No project yet',
-  'Calculator in Python','Portfolio website','Quiz game in Python','Expense tracker','Weather app','Attendance tracker','Snake game in Python','Notes app',
-  'College fest web page','Marks calculator','Grocery list app','Flexbox photo gallery'];
-const PB_POOL = [['Kiran','Town',93,'Attendance tracker used by 3 classes','m'],['Meghana','Metro',70,'Portfolio website','f'],['Harsha','Town',86,'Expense splitter app','m'],['Vikram','Metro',61,'Calculator app','m'],
-  ['Sneha','Metro',82,'Quiz game in Python','f'],['Naveen','Town',77,'Weather dashboard','m'],['Pooja','Metro',66,'Notes app','f'],['Imran','Town',89,'Chatbot for college FAQs','m']];
-const PB_WHY = [['Kiran’s resume must have a weakness the bot noticed.',0],['ScreenBot learned from past hires, who were mostly from metro campuses.',1],['The bot made a random mistake.',0],['Town campus students are weaker coders.',0]];
-const PB_FIX = [
-  ['Delete the campus column and retrain.', 1, 'Better, but not fixed. ScreenBot starts using pin code and college name, which carry the same information. Only 1 town candidate makes the shortlist.'],
-  ['Retrain on coding-test results, with equal numbers of past candidates from both campus types.', 3, 'Fixed. The new shortlist is Kiran, Imran, Harsha and Sneha, the top 4 coding scores.'],
-  ['Stop using AI and read all 600 by hand.', 1, 'Fair, but slow. It takes 3 weeks, and tired reviewers make their own biased calls.'],
-  ['Keep the bot, but a person reviews every rejection with a coding score above 85.', 2, 'A good safety net. It catches Kiran, Imran and Harsha. The bot itself is still biased, so the next problem might slip through.']];
-
-/* flat illustrated person, built from the name so the same person always looks the same */
-const PB_SKIN = ['#F2CDA9','#E3B18A','#C98E63','#A8714B','#86563A'], PB_HAIR = ['#1E1915','#2D211A','#3A2A1F','#4A3426'];
-const PB_SHIRT = ['#5B6CFF','#0F9F8F','#FF7A2F','#F0457A','#2F7BF0','#20A35A','#7B61FF','#E09A00'];
-function pbAvatar(name, g){
-  let h = 0; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const skin = PB_SKIN[h % 5], hair = PB_HAIR[(h >>> 3) % 4], shirt = PB_SHIRT[(h >>> 5) % 8], style = (h >>> 8) % 3;
-  const hairBack = g === 'f'
-    ? (style === 0 ? '<path d="M17 30c0-12 7-19 15-19s15 7 15 19v14c-3 2-6 2-8 0V30H25v14c-2 2-5 2-8 0z" fill="'+hair+'"/>'
-      : style === 1 ? '<circle cx="32" cy="12" r="6" fill="'+hair+'"/>' : '<path d="M18 30c0-11 6-18 14-18s14 7 14 18v6H18z" fill="'+hair+'"/>')
-    : '';
-  const hairTop = g === 'f'
-    ? '<path d="M20 28c1-9 6-14 12-14s11 5 12 14c-5-4-10-6-14-6s-7 2-10 6z" fill="'+hair+'"/>'
-    : style === 0 ? '<path d="M20 27c0-9 5-14 12-14s12 5 12 14c-3-3-7-5-12-5s-9 2-12 5z" fill="'+hair+'"/>'
-    : style === 1 ? '<path d="M20 28c-1-10 5-16 12-16 8 0 13 6 12 16l-3-5c-4 1-12 1-18-1z" fill="'+hair+'"/><circle cx="24" cy="16" r="4" fill="'+hair+'"/><circle cx="32" cy="13" r="4.5" fill="'+hair+'"/><circle cx="40" cy="16" r="4" fill="'+hair+'"/>'
-    : '<path d="M20 26c0-8 5-13 12-13s12 5 12 13l-2-1c-2-4-6-6-10-6s-8 2-10 6z" fill="'+hair+'"/>';
-  /* light background: the shirt colour mixed 82% with white */
-  const bg = '#' + [1,3,5].map(k => Math.round(parseInt(shirt.slice(k, k+2), 16) * 0.18 + 255 * 0.82).toString(16).padStart(2, '0')).join('');
-  /* the person is drawn on a 64 grid, then scaled up so head and shoulders fill the circle */
-  return '<svg class="pb-av" viewBox="0 0 64 64" style="background:'+bg+'" aria-hidden="true"><g transform="translate(32 40) scale(1.32) translate(-32 -40)">'
-    + hairBack + '<path d="M12 64c1-12 9-18 20-18s19 6 20 18z" fill="'+shirt+'"/><path d="M27 46l5 6 5-6" fill="#fff" opacity=".85"/><rect x="28" y="38" width="8" height="9" rx="3" fill="'+skin+'"/>'
-    + '<ellipse cx="20.6" cy="30" rx="2" ry="2.8" fill="'+skin+'"/><ellipse cx="43.4" cy="30" rx="2" ry="2.8" fill="'+skin+'"/>'
-    + '<ellipse cx="32" cy="29" rx="11" ry="12.5" fill="'+skin+'"/>' + hairTop
-    + '<path d="M26.2 26.6h3.4M34.4 26.6h3.4" stroke="'+hair+'" stroke-width="1.3" stroke-linecap="round"/>'
-    + '<circle cx="28" cy="30" r="1.4" fill="#1E1915"/><circle cx="36" cy="30" r="1.4" fill="#1E1915"/><path d="M29 35.5q3 2 6 0" stroke="#1E1915" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></svg>';
-}
-/* the door at the top of the hiring screen; label = Office or Interview */
-const pbDoor = (label, id) => '<div class="pb-doorwrap"><div class="pb-door" id="'+id+'"><span class="pb-sign">'+label+'</span><div class="pb-frame"><i class="pb-leaf"></i></div></div></div>';
-/* a hired person walks from their card into the door */
-function pbWalk(fromEl, door){
-  if (!fromEl || !door) return;
-  door.classList.add('open'); clearTimeout(door._t); door._t = setTimeout(() => door.classList.remove('open'), 800);
-  if (reduced() || !M) return;
-  const a = fromEl.getBoundingClientRect(), d = door.querySelector('.pb-frame').getBoundingClientRect();
-  const c = fromEl.cloneNode(true); c.classList.add('pb-walker');
-  Object.assign(c.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
-  document.body.appendChild(c);
-  const dx = d.left + d.width/2 - (a.left + a.width/2), dy = d.top + d.height*0.55 - (a.top + a.height/2);
-  M.animate(c, { x:[0, dx*0.35, dx*0.7, dx], y:[0, dy*0.35 - 10, dy*0.7, dy], scale:[1, 0.95, 0.8, 0.55], opacity:[1, 1, 1, 0] }, { duration:0.85, ease:'easeInOut' });
-  setTimeout(() => c.remove(), 950);
-}
-function pbRoundPool(round, used){
-  const R = PB_ROUNDS[round], people = shuffle(PB_PEOPLE.filter(p => !used.has(p[0]))).slice(0, R.pool), proj = shuffle(PB_PROJECTS);
-  const scores = shuffle(Array.from({ length:50 }, (x, i) => 48 + i)).slice(0, R.pool);
-  return people.map((p, i) => { used.add(p[0]); return { name:p[0], g:p[1], campus: Math.random() < 0.5 ? 'Metro' : 'Town', score: scores[i], project: proj[i % proj.length] }; });
-}
-
-const PlacementBot = { id:'placement-bot', name:'Placement Bot', skill:'ai', icon:'people', inspired:'“Survival of the Best Fit”', topics:'AI hiring and training data',
-  how:['You are hiring Junior Python Developers. First you pick people yourself, against the clock.','Then an AI screening bot takes over. You are accountable for its shortlist, so check whatever you want before you approve it.','4 short steps.'],
-  run(ctx){
-    const inspected = new Set(), used = new Set(), hiredNames = [], perRound = [];
-    let foundCause = false, fixChoice = -1, fixScore = 0, round = 0;
-    const panel = (n, html, extra) => { ctx.root.innerHTML = hud([['pb-s','Step',n+'/4']].concat(extra || [])) + '<div class="card nb-panel"><div class="small muted">Step '+n+' of 4</div>'+html+'</div>'; anim(ctx.root.querySelector('.nb-panel'), { opacity:[0,1], y:[8,0] }); };
-
-    /* step 1: you hire, 3 timed rounds */
-    function roundIntro(){
-      const R = PB_ROUNDS[round];
-      panel(1, '<h2>'+(round === 0 ? 'Your company needs Junior Python Developers.' : round === 1 ? 'More applications came in.' : 'Last round. The pile keeps growing.')+'</h2>'
-        + '<p>Round '+(round+1)+' of 3: hire <b>'+R.need+' people in '+R.secs+' seconds</b>. Tap a candidate to hire them.'+(round === 0 ? ' Pick the people you think will code best.' : '')+'</p>'
-        + '<button class="btn c full" id="pb-start">Start round '+(round+1)+'</button>');
-      $('pb-start').onclick = playRound; $('pb-start').focus();
-    }
-    function playRound(){
-      const R = PB_ROUNDS[round], pool = pbRoundPool(round, used), t0 = Date.now();
-      const topIdx = pool.map((c, i) => [c.score, i]).sort((a, b) => b[0] - a[0]).slice(0, R.need).map(x => x[1]);
-      let hired = [], done = false, stop = null;
-      panel(1, '<div class="pb-sticky"><div class="pb-hirehead"><div><h2>Hire '+R.need+' people</h2><div class="small muted">Round '+(round+1)+' of 3</div></div>'+pbDoor('Office', 'pb-door')+'</div>'
-        + '<div class="tbar"><i id="pb-t"></i></div></div>'
-        + '<div class="pb-grid">'+pool.map((c, i) => '<button class="pb-card press" data-i="'+i+'" aria-label="Hire '+c.name+', coding test '+c.score+'">'
-          + pbAvatar(c.name, c.g) + '<b>'+c.name+'</b><span class="pb-score">'+c.score+'<small>/100 coding test</small></span><span class="small">'+c.project+'</span><span class="chip">'+c.campus+' campus</span></button>').join('')+'</div>',
-        [['pb-h','Hired','0/'+R.need],['pb-l','Seconds',R.secs]]);
-      ctx.root.querySelectorAll('.pb-card').forEach(b => b.onclick = () => {
-        if (done || b.classList.contains('gone')) return;
-        const i = +b.dataset.i;
-        hired.push(i); hiredNames.push(pool[i].name);
-        pbWalk(b.querySelector('.pb-av'), $('pb-door'));
-        b.classList.add('gone'); b.disabled = true; SFX.play('select');
-        $('pb-h').textContent = hired.length + '/' + R.need;
-        anim($('pb-h'), { scale:[1.3,1] }, { duration:0.25 });
-        if (hired.length >= R.need) end();
-      });
-      stop = ctx.timer(R.secs, $('pb-t'), s => $('pb-l').textContent = s, () => end(true));
-      function end(timeUp){
-        if (done) return; done = true; if (stop) stop();
-        const matched = hired.filter(i => topIdx.includes(i)).length;
-        perRound.push({ need: R.need, hired: hired.length, matched, secs: Math.round((Date.now() - t0) / 1000) });
-        ctx.after(timeUp ? 300 : 900, () => {
-          round++;
-          if (round < PB_ROUNDS.length) {
-            panel(1, '<h2>'+(timeUp ? 'Time’s up.' : 'Round '+round+' done.')+'</h2><p>You hired '+hired.length+' of '+R.need+'. '+matched+' of them were among the top '+R.need+' coding scores.</p>'
-              + '<button class="btn c full" id="pb-start">Next round</button>');
-            $('pb-start').onclick = roundIntro; $('pb-start').focus();
-          } else step2();
-        });
-      }
-    }
-
-    /* step 2: train the bot */
-    function step2(){
-      panel(2, '<h2>600 applications just came in.</h2><p>You can’t read them all, so you’ll train ScreenBot on the company’s last 5 years of hiring. Back then, very few town campus students applied.</p>'
-        + '<div class="pb-chart"><div class="small muted">Who got hired in the last 5 years (50 people)</div>'
-        + '<div class="pb-bar"><span>Metro campus</span><i style="width:88%"></i><b>44</b></div><div class="pb-bar"><span>Town campus</span><i style="width:12%"></i><b>6</b></div></div>'
-        + '<button class="btn c full" id="pb-train">Train ScreenBot on this data</button>');
-      $('pb-train').onclick = () => { const b = $('pb-train'); b.disabled = true; b.innerHTML = '<span class="ai-dots"><i></i><i></i><i></i></span> Training…'; ctx.after(1100, step3); };
-    }
-
-    /* step 3: the bot hires. Bot score = 0.45 × coding + (45 if metro else 5); top 4 get interviews. */
-    function step3(){
-      const rows = PB_POOL.map(c => { const s = 0.45*c[2] + (c[1] === 'Metro' ? 45 : 5); return { c, s, conf: Math.min(99, Math.round(60 + Math.abs(s - 60)*1.4)) }; }).sort((a, b) => b.s - a.s);
-      rows.forEach((r, i) => r.ok = i < 4);
-      panel(3, '<div class="pb-hirehead"><div><h2>ScreenBot picked 4 of 8 for interviews.</h2></div>'+pbDoor('Interview', 'pb-door')+'</div>'
-        + '<p>You’re accountable for this shortlist. Check whatever you want before you approve it.</p><div class="pb-list">'
-        + rows.map((r, i) => '<div class="pb-row"><div class="pb-line">'+pbAvatar(r.c[0], r.c[4])+'<b>'+r.c[0]+'</b><span class="pb-dec '+(r.ok ? 'ok' : 'no')+'">'+(r.ok ? 'Interview' : 'Reject')+'</span><span class="small muted">'+r.conf+'% sure</span>'
-          + '<button class="linkbtn" data-i="'+i+'" aria-expanded="false">Inspect</button></div><div class="pb-more small" hidden>Coding test '+r.c[2]+'/100, '+r.c[1].toLowerCase()+' campus, '+r.c[3]+'</div></div>').join('')
-        + '</div><button class="btn c full" id="pb-ok">Approve shortlist</button>');
-      ctx.root.querySelectorAll('.pb-row .linkbtn').forEach(b => b.onclick = () => {
-        const more = b.closest('.pb-row').querySelector('.pb-more'), open = more.hidden;
-        more.hidden = !open; b.setAttribute('aria-expanded', open); b.textContent = open ? 'Hide' : 'Inspect';
-        if (open) inspected.add(rows[+b.dataset.i].c[0]);
-      });
-      $('pb-ok').onclick = () => {
-        $('pb-ok').disabled = true;
-        /* the 4 shortlisted walk into the interview room, one after another */
-        const avs = [...ctx.root.querySelectorAll('.pb-row')].slice(0, 4).map(r => r.querySelector('.pb-av'));
-        avs.forEach((a, k) => ctx.after(k * 220, () => { pbWalk(a, $('pb-door')); a.style.visibility = 'hidden'; }));
-        ctx.after(reduced() ? 0 : 1500, step4);
-      };
-    }
-
-    /* step 4: the full picture */
-    function step4(){
-      panel(4, '<h2>Here’s the full picture.</h2><p>All 4 interviews went to metro candidates. ScreenBot rejected Kiran (93), Harsha (86), Naveen (77) and Imran (89). Three of them scored higher than everyone it picked.</p>'
-        + '<h3>Why did ScreenBot reject Kiran, who scored 93?</h3><div id="pb-q1">'+PB_WHY.map((o, i) => '<button class="opt" data-i="'+i+'">'+o[0]+'</button>').join('')+'</div><div id="pb-q2"></div>');
-      ctx.root.querySelectorAll('#pb-q1 .opt').forEach(b => b.onclick = () => {
-        if (ctx.root.querySelector('#pb-q1 .right')) return;
-        const i = +b.dataset.i, right = PB_WHY.findIndex(o => o[1]);
-        foundCause = i === right;
-        b.classList.add(foundCause ? 'right' : 'wrong'); ctx.root.querySelectorAll('#pb-q1 .opt')[right].classList.add('right');
-        FX.result(foundCause, true);
-        const q2 = $('pb-q2');
-        q2.innerHTML = '<h3>AI learns patterns from past data, including unfair ones. How would you fix ScreenBot?</h3>' + PB_FIX.map((o, i) => '<button class="opt" data-i="'+i+'">'+o[0]+'</button>').join('') + '<div id="pb-out"></div>';
-        anim(q2, { opacity:[0,1], y:[8,0] });
-        q2.querySelectorAll('.opt').forEach(x => x.onclick = () => {
-          if (fixChoice >= 0) return;
-          fixChoice = +x.dataset.i; fixScore = PB_FIX[fixChoice][1];
-          x.classList.add(fixScore >= 2 ? 'right' : 'wrong'); FX.result(fixScore >= 2, true);
-          $('pb-out').innerHTML = '<div class="explain">'+PB_FIX[fixChoice][2]+'</div><button class="btn c full" id="pb-end" style="margin-top:12px">See results</button>';
-          $('pb-end').onclick = finish; $('pb-end').focus();
-        });
-      });
-    }
-
-    function finish(){
-      const n = inspected.size, matched = perRound.reduce((a, r) => a + r.matched, 0), need = PB_ROUNDS.reduce((a, r) => a + r.need, 0);
-      const pct = Math.round(50 * Math.min(n, 4) / 4 + (foundCause ? 20 : 0) + 30 * fixScore / 3);
-      ctx.end({ score: pct, pct, title: n ? 'You checked the bot' : 'You trusted the bot', sub: 'AI repeats the patterns in its training data',
-        tiles: [[n + '/8','Candidates checked'],[foundCause ? 'Yes' : 'No','Found the cause'],[fixScore + '/3','Fix quality'],[matched + '/' + need,'Your hires were top scorers']],
-        note: n === 0 ? 'You approved the shortlist without opening a single candidate. The bot sounded confident, and that was enough. That’s the same move as copying an AI answer without reading it. Next time, open at least the rejections that surprise you.'
-          : n <= 3 ? 'You checked ' + n + ' of 8 candidates before approving. A good start. The rejected ones with high scores were the clue; checking AI means looking where it might be wrong.'
-          : 'You checked ' + n + ' of 8 candidates before approving. That’s the habit that catches AI mistakes: confident is not the same as correct.',
-        meta: { inspected: n, inspectedNames: [...inspected], approvedBlind: n === 0, foundCause, fixChoice, fixScore, manualMatch: matched, manualNeed: need, manualRounds: perRound, manualPicks: hiredNames } });
-    }
-    roundIntro();
-  }
-};
-
 /* ================= 21. Word Radar (insight): find the secret word; each guess shows how close its meaning is (Semantle) ================= */
 /* The secret words and similarity data stay on the server (api/radar.js). */
 const WR_N = 9497;   // size of the word list (only used to draw the radar before the first answer)
@@ -4140,7 +3906,7 @@ const WordRadar = { id:'word-radar', name:'Word Radar', skill:'insight', icon:'r
 
 /* ================= registry ================= */
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
-  ColorClash, SeenIt, BugTracker, BreakBot, PlacementBot, WordRadar];
+  ColorClash, SeenIt, BugTracker, BreakBot, WordRadar];
 route();
 pullMe();
 </script>
