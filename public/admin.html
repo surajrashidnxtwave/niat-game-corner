@@ -179,6 +179,8 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           <button data-csv="progress">Progress<small>per student, per game</small></button>
           <button data-csv="plays">Rounds<small>every round played</small></button>
           <button data-csv="feedback">Feedback<small>ratings, comments, reports</small></button>
+          <button data-csv="starts">Starts<small>every Play press, to see who quit early</small></button>
+          <button data-csv="bot">Break the Bot chats<small>every message and reply</small></button>
         </div>
       </div>
       <button class="btn" id="share">🔗 Copy share link</button>
@@ -312,7 +314,7 @@ const pct = (a, b) => b ? (a / b * 100) : 0;
 const pctTxt = (a, b) => { const p = pct(a, b); return b ? (p > 0 && p < 1 ? p.toFixed(1) : Math.round(p)) + '%' : '–'; };
 const when = t => t ? new Date(t).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' }) : '';
 const dayLabel = d => new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day:'numeric', month:'short' });
-const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-link':'Missing Link','link-grid':'Link Grid','wiki-hop':'Wiki Hop','recall-rebuild':'Recall Rebuild','back-track':'Back Track','symbol-sprint':'Symbol Sprint','rule-switch':'Rule Switch','robot-path':'Robot Path','fallacy-hunt':'Fallacy Hunt','argue-back':'Argue Back','trust-or-check':'Trust or Check','source-check':'Source Check','taste-test':'Taste Test' };
+const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-link':'Missing Link','link-grid':'Link Grid','wiki-hop':'Wiki Hop','recall-rebuild':'Recall Rebuild','back-track':'Back Track','symbol-sprint':'Symbol Sprint','rule-switch':'Rule Switch','robot-path':'Robot Path','fallacy-hunt':'Fallacy Hunt','argue-back':'Argue Back','trust-or-check':'Trust or Check','source-check':'Source Check','taste-test':'Taste Test','color-clash':'Color Clash','seen-it':'Seen It?','bug-tracker':'Bug Tracker','break-the-bot':'Break the Bot','placement-bot':'Placement Bot','word-radar':'Word Radar' };
 const gname = id => id ? (NAMES[id] || id) : 'General';
 const DIFF = { easy:'Too easy', right:'Just right', hard:'Too hard' };
 const CAT = { wrong:'Marked my answer wrong', broke:'Something broke', confusing:'Confusing', slow:'Slow or stuck', other:'Other' };
@@ -457,7 +459,7 @@ function render(){
   /* games */
   const games = (d.games || []).slice().sort((a, b) => (b.minutes || 0) - (a.minutes || 0));
   table($('t-games'), [
-    ['Game', g => '<b>' + esc(gname(g.game_id)) + '</b>'], ['Players', g => fmt(g.players), 'n'], ['Rounds', g => fmt(g.rounds), 'n'], ['Minutes', g => fmt(g.minutes), 'n'],
+    ['Game', g => '<b>' + esc(gname(g.game_id)) + '</b>'], ['Players', g => fmt(g.players), 'n'], ['Starts', g => g.starts == null ? '–' : fmt(g.starts), 'n'], ['Rounds', g => fmt(g.rounds), 'n'], ['Median time', g => g.med_secs == null ? '–' : Math.floor(g.med_secs/60) + ':' + String(g.med_secs%60).padStart(2,'0'), 'n'], ['Minutes', g => fmt(g.minutes), 'n'],
     ['Median best score', g => g.med_best == null ? '–' : g.med_best + '%', 'n'], ['Median rating', g => g.ratings ? g.rating + ' <span class="muted">(' + g.ratings + ')</span>' : '–', 'n'],
     ['Difficulty', g => { const e = g.easy || 0, j = g.just_right || 0, h = g.hard || 0, t = e + j + h; if (!t) return '<span class="muted">–</span>';
       return '<div class="split" data-tip="' + esc('Too easy ' + e + ' · Just right ' + j + ' · Too hard ' + h) + '">' + [[e,'var(--brand-3)'],[j,'var(--brand-2)'],[h,'var(--brand)']].filter(x => x[0]).map(x => '<i style="width:' + (x[0] / t * 100) + '%;background:' + x[1] + '"></i>').join('') + '</div>'; }],

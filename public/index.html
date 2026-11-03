@@ -751,6 +751,124 @@ html.w3d-ready .count .ripple{border-color:#fff}
 .t3d b{color:var(--c-insight)}
 .lbhead.empty .lbslot{display:none!important}
 @media (prefers-reduced-motion:reduce){html.w3d .gcard,html.w3d .hero .check{transition:none}}
+
+/* ---------- new games (Nov 2026) ---------- */
+.rsub{margin:-4px 0 10px}
+.rtiles{flex-wrap:wrap;margin:6px 0 10px}
+.rtiles div{min-width:calc(50% - 4px);flex:1 1 0;padding:8px 10px}
+@media (min-width:560px){.rtiles div{min-width:0}}
+.rtiles b{display:block;font-size:20px}
+.rnote{text-align:left;border-left:4px solid var(--c);margin:0 0 10px}
+.nb-panel{text-align:left}
+.nb-panel h2{margin:4px 0 8px;font-size:22px;line-height:1.25}
+.nb-panel h3{margin:16px 0 8px;font-size:16px}
+.nb-panel .explain{margin-top:10px}
+/* Color Clash */
+.cc-box{background:#fff;border-radius:20px;box-shadow:var(--shadow);min-height:260px;display:grid;place-items:center;align-content:center;gap:10px;margin-bottom:12px;padding:16px}
+.cc-box b{font:700 clamp(44px,12vw,76px)/1 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
+.cc-f{min-height:22px;font-size:14px;color:var(--soft)}
+.cc-f.ok{color:var(--ok)}.cc-f.no{color:var(--bad)}
+.cc-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cc-btns button{height:64px;border-radius:16px;color:#fff;font-weight:900;font-size:15px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;touch-action:manipulation}
+.cc-btns small{font-size:11px;font-weight:700;opacity:.85}
+/* Seen It? */
+.si-box{position:relative;background:#fff;border-radius:20px;box-shadow:var(--shadow);min-height:230px;display:grid;place-items:center;padding:20px 16px;margin-bottom:12px;border:3px solid transparent;overflow:hidden;transition:border-color .15s}
+.si-box.ok{border-color:var(--ok)}.si-box.no{border-color:var(--bad)}
+.si-card{margin:0;font:700 clamp(15px,4.2vw,20px)/1.5 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;white-space:pre;color:var(--ink);text-align:left;overflow-x:auto;max-width:100%}
+.si-bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--c);transform-origin:left}
+.si-btn{height:68px;font-size:20px;touch-action:manipulation}
+/* Bug Tracker */
+.bt-msg{text-align:center;font-weight:900;font-size:17px;min-height:26px;margin-bottom:8px}
+.bt-wrap{background:#fff;border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+/* the whole box must fit on screen while tracking: width follows the column, capped by the screen height */
+.bt-wrap canvas{display:block;margin:0 auto;width:min(100%, calc((100svh - 250px) * 4 / 3));min-width:min(100%, 300px);height:auto;aspect-ratio:4/3;touch-action:none;cursor:pointer}
+.bt-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;min-height:50px}
+/* Break the Bot */
+.bb-def{font-size:14px;margin-bottom:8px;background:var(--card);border-radius:14px;padding:8px 12px;box-shadow:var(--shadow)}
+.bb-chat{height:340px;overflow-y:auto;background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.bb-msg{max-width:85%;padding:9px 13px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}
+.bb-msg.me{align-self:flex-end;background:var(--c);color:#fff;border-bottom-right-radius:6px}
+.bb-msg.bot{align-self:flex-start;background:var(--chip);border-bottom-left-radius:6px}
+.bb-log{align-self:flex-start;font-size:12px;color:var(--soft);margin:-2px 0 4px 6px;max-width:85%}
+.bb-row{display:flex;gap:8px;margin-bottom:8px}
+.bb-row .field{flex:1;min-width:0;font-size:16px}
+.bb-row .btn{flex:none;padding:12px 18px}
+input.field.mono{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;letter-spacing:1px}
+/* Placement Bot */
+.pb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 14px}
+.pb-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:#fff;border:3px solid var(--line);border-radius:16px;padding:12px}
+.pb-card[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 7%,#fff)}
+.pb-score{font:700 26px/1 ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace}
+.pb-score small{font:700 11px var(--font);color:var(--soft);margin-left:4px}
+.pb-chart{background:#fff;border-radius:16px;padding:14px;margin:12px 0 14px}
+.pb-bar{display:grid;grid-template-columns:110px 1fr 30px;align-items:center;gap:8px;margin-top:8px;font-size:14px}
+.pb-bar i{display:block;height:14px;border-radius:999px;background:var(--c)}
+.pb-list{margin:12px 0 14px;display:flex;flex-direction:column;gap:8px}
+.pb-row{background:#fff;border-radius:14px;padding:10px 12px}
+.pb-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pb-line b{flex:1;min-width:80px}
+.pb-dec{font-size:12.5px;font-weight:900;padding:3px 10px;border-radius:999px;color:#fff}
+.pb-dec.ok{background:var(--ok)}.pb-dec.no{background:var(--bad)}
+.pb-more{margin-top:6px;color:var(--soft)}
+/* Word Radar */
+.wr-tabs{display:flex;gap:6px;margin-bottom:12px}
+.wr-tabs button{flex:1;padding:9px 6px;border-radius:999px;background:var(--chip);font-weight:800;font-size:14px}
+.wr-tabs button[aria-selected="true"]{background:var(--c);color:#fff}
+.wr-cols{display:grid;gap:14px}
+@media (min-width:640px){.wr-cols{grid-template-columns:1fr 1fr;align-items:start}}
+.wr-radar{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:8px}
+.wr-radar svg{display:block;width:100%;height:auto}
+.wr-ring{font-size:9px;fill:var(--soft);font-weight:700}
+.wr-word{font:700 13px ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px}
+.wr-fb{min-height:22px;font-size:14px;color:var(--soft)}
+.wr-fb.ok{color:var(--ok)}.wr-fb.warm{color:var(--c)}.wr-fb.bad{color:var(--bad)}
+.wr-list{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto}
+.wr-item{display:grid;grid-template-columns:24px 1fr auto 74px;align-items:center;gap:8px;background:#fff;border-radius:12px;padding:8px 10px;border:2px solid transparent;font-size:14px}
+.wr-item.last{border-color:var(--c)}
+.wr-item small{color:var(--soft)}
+.wr-item b{font-family:ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis}
+.wr-item span{font-variant-numeric:tabular-nums}
+.wr-item em{font-style:normal;font-weight:800;font-size:12.5px;text-align:right}
+.wr-item em.hot{color:var(--bad)}.wr-item em.warm{color:var(--c-focus)}.wr-item em.cold{color:var(--soft)}
+
+/* ---------- game mode: menu hidden while a game is open (full screen where the browser allows it) ---------- */
+body.ingame .tabbar{display:none}
+body.ingame{padding-left:0;padding-bottom:16px}
+body.ingame .toast,body.ingame .combo{left:50%}
+body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 0px))}
+#g-fs svg{display:block;margin:auto}
+
+/* Placement Bot: people, the door they walk into, timed hiring */
+.pb-av{width:56px;height:56px;flex:none;display:block;border-radius:50%}
+.pb-card{position:relative;transition:opacity .25s,transform .25s}
+.pb-card.gone{opacity:.25;transform:scale(.94);pointer-events:none}
+.pb-card.gone::after{content:'Hired';position:absolute;top:10px;right:10px;font-size:12px;font-weight:900;color:#fff;background:var(--ok);border-radius:999px;padding:2px 9px}
+.pb-line .pb-av{width:38px;height:38px}
+.pb-line b{min-width:60px}
+.pb-hirehead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+.pb-hirehead h2{margin:0}
+.pb-doorwrap{flex:none;perspective:300px}
+.pb-door{display:flex;flex-direction:column;align-items:center;gap:3px}
+.pb-sign{font-size:11px;font-weight:900;letter-spacing:.3px;color:#fff;background:var(--ink);border-radius:6px;padding:2px 8px}
+.pb-frame{position:relative;width:46px;height:62px;border-radius:8px 8px 0 0;background:#2A2440;border:4px solid #8A7A63;border-bottom:0;overflow:visible;transform-style:preserve-3d}
+.pb-leaf{position:absolute;inset:0;background:linear-gradient(90deg,#B98B5C,#A97C50);border-radius:4px 4px 0 0;transform-origin:left center;transition:transform .35s ease-out}
+.pb-leaf::after{content:'';position:absolute;right:6px;top:50%;width:5px;height:5px;border-radius:50%;background:#F5D27A}
+.pb-door.open .pb-leaf{transform:rotateY(-75deg)}
+.pb-walker{position:fixed;z-index:60;pointer-events:none;margin:0}
+.pb-sticky{position:sticky;top:0;z-index:5;background:var(--card);padding-top:8px;margin-top:-8px}
+.pb-sticky .tbar{margin-bottom:10px}
+@media (max-width:520px){
+  .pb-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .pb-card{padding:9px;gap:2px}
+  .pb-card .pb-av{width:40px;height:40px}
+  .pb-card b{font-size:14px}
+  .pb-card .pb-score{font-size:20px}
+  .pb-card .pb-score small{display:none}
+  .pb-card .small{font-size:12px;line-height:1.3}
+  .pb-card .chip{font-size:11px;padding:3px 8px}
+  .pb-card.gone::after{top:6px;right:6px;font-size:11px}
+}
+@media (prefers-reduced-motion:reduce){.pb-leaf,.pb-card{transition:none}}
 </style>
 </head>
 <body>
@@ -849,6 +967,7 @@ html.w3d-ready .count .ripple{border-color:#fff}
   <div class="gtop">
     <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
     <div class="goal" id="g-goal"><span aria-hidden="true">⏱</span><div class="bar"><i id="g-gbar"></i></div><span class="t" id="g-time">0:00</span></div>
+    <button class="round press" id="g-fs" aria-label="Exit full screen" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
     <button class="round press" data-report aria-label="Report a problem">🐞</button>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
@@ -971,7 +1090,13 @@ const ICON = {
   switch:'<path d="M4 8h13l-3-3M20 16H7l3 3"/>',
   robot:'<rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v2M21 13v2"/>',
   star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
-  lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  palette:'<path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.9 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.8 1.9-1.8H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2" fill="currentColor"/><circle cx="10.5" cy="7" r="1.2" fill="currentColor"/><circle cx="15.5" cy="7.5" r="1.2" fill="currentColor"/>',
+  layers:'<rect x="7" y="3" width="13" height="13" rx="2.5"/><path d="M4 7v11a2 2 0 0 0 2 2h11"/>',
+  bug:'<rect x="7" y="8" width="10" height="12" rx="5"/><path d="M9 8a3 3 0 0 1 6 0M12 12v8M3 13h4M17 13h4M4 7l3 2M20 7l-3 2M4 19l3-2M20 19l-3-2"/>',
+  shield:'<path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  people:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2A5 5 0 0 1 21.5 19"/>',
+  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>'
 };
 const svgI = (k, sw) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(sw||2.3)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>';
 
@@ -1154,6 +1279,8 @@ function route(){
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   view = next; curGame = gid;
   document.body.classList.toggle('joining', view === 'join');
+  document.body.classList.toggle('ingame', view === 'game');
+  if (view !== 'game') FS.off();
   if (view === 'feedback') renderGeneralFeedback();
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'view-' + view));
   document.querySelectorAll('.tab[data-go]').forEach(t => t.setAttribute('aria-current', t.dataset.go === view || (t.dataset.go === 'home' && view === 'game') ? 'page' : 'false'));
@@ -1203,17 +1330,40 @@ function renderGoal(){
   $('g-goal').classList.toggle('paused', !on);
 }
 
-/* ---------- unlocks: 5 games to start (one per skill), then 1 new game for each day the daily goal is met ---------- */
+/* ---------- unlocks ----------
+   First 15 games: 5 to start (one per skill), then 1 new game for each day the daily goal is met.
+   6 games added in Nov 2026 run on a second track alongside: NEW_OPEN are open from the start;
+   NEW_ORDER unlock one by one, 1 for each goal day on or after NEW_SINCE. */
 const UNLOCK_ORDER = ['word-spread','missing-link','recall-rebuild','symbol-sprint','rule-switch',
   'trust-or-check','robot-path','fallacy-hunt','beat-the-7','back-track','link-grid','source-check','argue-back','wiki-hop','taste-test'];
 const START_GAMES = 5;
+const NEW_OPEN = ['color-clash','placement-bot'];
+const NEW_ORDER = ['seen-it','word-radar','bug-tracker','break-the-bot'];
+const NEW_SINCE = '2026-11-03';
 const goalDays = () => Object.values(S.hist || {}).filter(a => a >= DAY_GOAL).length;
+const newGoalDays = () => Object.entries(S.hist || {}).filter(([d, a]) => d >= NEW_SINCE && a >= DAY_GOAL).length;
 const unlockedCount = () => Math.min(UNLOCK_ORDER.length, START_GAMES + goalDays());
 const unlockRank = id => UNLOCK_ORDER.indexOf(id);
-const isLocked = id => unlockRank(id) >= unlockedCount();
-const unlockedGames = () => UNLOCK_ORDER.slice(0, unlockedCount()).map(id => GAMES.find(g => g.id === id));
-const nextUnlock = () => unlockedCount() < UNLOCK_ORDER.length ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount()]) : null;
-const daysToUnlock = id => unlockRank(id) - unlockedCount() + 1;
+/* goal days still needed to open a game (0 or less = open) */
+const daysToUnlock = id => NEW_OPEN.includes(id) ? 0 : NEW_ORDER.includes(id) ? NEW_ORDER.indexOf(id) - newGoalDays() + 1 : unlockRank(id) - unlockedCount() + 1;
+const isLocked = id => daysToUnlock(id) > 0;
+/* Break the Bot is hidden for the rest of the day once the day's AI budget is used up (the server says so) */
+let BOT_OPEN = false;
+const shown = g => !!g && !(g.id === 'break-the-bot' && !BOT_OPEN);
+const ALL_ORDER = UNLOCK_ORDER.concat(NEW_OPEN, NEW_ORDER);
+const unlockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => shown(g) && !isLocked(g.id));
+const lockedGames = () => ALL_ORDER.map(id => GAMES.find(g => g.id === id)).filter(g => shown(g) && isLocked(g.id))
+  .sort((a, b) => daysToUnlock(a.id) - daysToUnlock(b.id) || NEW_ORDER.includes(b.id) - NEW_ORDER.includes(a.id));
+const nextUnlock = () => lockedGames()[0] || null;
+/* the games that today's finished goal unlocked */
+function justUnlocked(){
+  if (todaySecs() < DAY_GOAL) return [];
+  const out = [];
+  if (goalDays() <= UNLOCK_ORDER.length - START_GAMES) out.push(UNLOCK_ORDER[unlockedCount() - 1]);
+  const n = newGoalDays();
+  if (iso(new Date()) >= NEW_SINCE && n >= 1 && n <= NEW_ORDER.length) out.push(NEW_ORDER[n - 1]);
+  return out.map(id => GAMES.find(g => g.id === id)).filter(shown);
+}
 
 /* ---------- per-game difficulty: Lv 1-5, up after a round of 80%+, down after one under 40% ----------
    Each value list is what that game uses at Lv 1..5 (time limits, targets, lives, route length).
@@ -1237,7 +1387,7 @@ const lvTag = id => LADDER[id] ? 'Lv ' + lvOf(id) : id === 'back-track' ? 'N = '
 
 /* ---------- home ---------- */
 function libCard(g){
-  const st = gs(g.id), locked = isLocked(g.id), isNext = locked && unlockRank(g.id) === unlockedCount(), stars = st.plays ? starCount(st.bestPct) : 0;
+  const st = gs(g.id), locked = isLocked(g.id), isNext = locked && daysToUnlock(g.id) === 1, stars = st.plays ? starCount(st.bestPct) : 0;
   const tag = locked ? '<span class="lockb">'+svgI('lock', 2.6)+(isNext ? 'Next' : 'Locked')+'</span>'
     : lvTag(g.id) ? '<span class="tagnew">'+lvTag(g.id)+'</span>' : '';
   const n = daysToUnlock(g.id);
@@ -1281,9 +1431,9 @@ function renderHome(){
   const open = unlockedGames();
   $('h-donewrap').hidden = !open.length;
   $('h-done').innerHTML = open.map(libCard).join('');
-  const locked = GAMES.filter(g => isLocked(g.id)).sort((a,b) => unlockRank(a.id) - unlockRank(b.id));
+  const locked = lockedGames();
   $('h-lockwrap').hidden = !locked.length;
-  $('h-unlocked').textContent = locked.length + ' to unlock · 1 new each workout day';
+  $('h-unlocked').textContent = locked.length + ' to unlock · new games each workout day';
   $('h-library').innerHTML = locked.map(libCard).join('');
   anim(document.querySelectorAll('#h-checks .ptile, #view-home .gcard'), { opacity:[0,1], y:[16,0] }, { delay: stag(0.03) });
 }
@@ -1291,7 +1441,7 @@ function renderHome(){
    Fixed for the day, so the home screen and the circuit agree. */
 function todayPlan(){
   const td = todayState();
-  if (td.plan && td.plan.every(id => !isLocked(id))) return td.plan;
+  if (td.plan && td.plan.every(id => !isLocked(id) && shown(GAMES.find(g => g.id === id)))) return td.plan;
   const rnd = seeded(td.d + ':plan:' + (ME ? ME.id : 0));
   const mix = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const open = unlockedGames(), out = [];
@@ -1427,7 +1577,7 @@ function renderMuscles(){
 }
 function renderMuscleDetail(st){
   const k = mSel, m = st[k], s = SKILLS[k], ti = tierIx(m.vol);
-  const games = GAMES.filter(g => g.skill === k);
+  const games = GAMES.filter(g => g.skill === k && shown(g));
   const open = games.filter(g => !isLocked(g.id));
   const best = open.slice().sort((a,b) => gs(a.id).bestPct - gs(b.id).bestPct)[0];
   const soonest = Math.min(...games.map(g => daysToUnlock(g.id)));
@@ -1467,12 +1617,33 @@ document.addEventListener('click', e => {
 });
 const starCount = p => p >= 85 ? 3 : p >= 60 ? 2 : p >= 30 ? 1 : 0;
 
+/* ---------- full screen: every game asks for it on the Play tap (browsers only allow it after a tap).
+   iPhone Safari has no full screen for pages; there the menu is still hidden while a game is open. ---------- */
+const FS = {
+  el: () => document.fullscreenElement || document.webkitFullscreenElement || null,
+  can: () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen),
+  on(){
+    if (FS.el() || !FS.can()) return;
+    const d = document.documentElement;
+    try { const p = (d.requestFullscreen || d.webkitRequestFullscreen).call(d, { navigationUI:'hide' }); if (p && p.catch) p.catch(() => {}); } catch(e){}
+  },
+  off(){
+    if (!FS.el()) return;
+    try { const p = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (p && p.catch) p.catch(() => {}); } catch(e){}
+  },
+  sync(){ const b = $('g-fs'); if (!b) return; b.hidden = !FS.el(); }
+};
+['fullscreenchange','webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, FS.sync));
+document.addEventListener('click', e => { if (e.target.closest('#g-fs')) FS.off(); });
+
 /* ---------- game shell: intro → countdown → play → results ---------- */
 function setColor(g){ $('view-game').style.setProperty('--c', SKILLS[g.skill].c); document.documentElement.style.setProperty('--c', SKILLS[g.skill].c); W3('tint', SKILLS[g.skill].c); }
 function showIntro(g){
   setColor(g);
   const st = gs(g.id), locked = isLocked(g.id), n = daysToUnlock(g.id), left = Math.ceil((DAY_GOAL - todaySecs()) / 60);
-  const foot = locked
+  const foot = !shown(g)
+    ? '<div class="bestline">Break the Bot is resting for today. It uses AI, and today’s AI budget is used up. Come back tomorrow.</div><button class="btn light" data-go="home">All workouts</button>'
+    : locked
     ? '<div class="bestline">'+(n === 1 && todaySecs() < DAY_GOAL ? 'Only '+left+' more minute'+(left === 1 ? '' : 's')+' of training today to unlock it!' : 'Unlocks after '+n+' more workout day'+(n === 1 ? '' : 's')+'.')+'</div><button class="btn lockcta" data-go="home">'+svgI('lock', 2.4).replace('<svg ','<svg style="width:18px;height:18px" ')+' Locked</button>'
     : '<div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button>';
   const stage = $('stage');
@@ -1490,7 +1661,7 @@ function showIntro(g){
   anim(el.querySelectorAll('.orb'), { scale:[0.85,1], opacity:[0,1] }, { delay: stag(0.06), duration:0.5 });
   anim(el.querySelectorAll('.how li'), { opacity:[0,1], x:[-12,0] }, { delay: stag(0.07) });
   SFX.play('whoosh');
-  if (locked) return;
+  if (locked || !shown(g)) return;
   $('go').onclick = () => countdown(g);
   /* in a guided workout, show where they are; the countdown still waits for Play so they can read the rules */
   if (AUTOSTART === g.id) {
@@ -1499,8 +1670,10 @@ function showIntro(g){
   }
 }
 function countdown(g){
-  if (isLocked(g.id)) { location.hash = ''; return; }
+  if (isLocked(g.id) || !shown(g)) { location.hash = ''; return; }
   SFX.unlock();
+  FS.on();
+  queueStart(g.id);
   const ov = h('<div class="count"><span class="ripple"></span><b>3</b></div>'); document.body.appendChild(ov);
   if (window.World3D && !reduced()) { W3('warp', SKILLS[g.skill].c, 2300); document.documentElement.classList.add('warping'); }
   const go = () => { ov.remove(); document.documentElement.classList.remove('warping'); play(g); };
@@ -1520,7 +1693,7 @@ function play(g){
   anim(root, { opacity:[0,1], y:[12,0] });
   FX.reset();
   lastAct = Date.now();
-  const timers = [];
+  const timers = [], t0 = Date.now();
   const ctx = {
     root,
     after(ms, fn){ const t = setTimeout(fn, ms); timers.push(t); return t; },
@@ -1539,14 +1712,14 @@ function play(g){
       const stop = () => cancelAnimationFrame(raf);
       timers.push({ stop }); return stop;
     },
-    end(res){ stopAll(); results(g, res); }
+    end(res){ stopAll(); results(g, res, Math.round((Date.now() - t0) / 1000)); }
   };
   function stopAll(){ timers.forEach(t => typeof t === 'number' ? clearTimeout(t) : t.stop()); timers.length = 0; if (gameStop) gameStop(); }
   let gameStop = null;
   cleanup = stopAll;
   gameStop = g.run(ctx) || null;
 }
-function results(g, res){
+function results(g, res, secs){
   const st = gs(g.id);
   const prevBest = st.best, ptsBefore = points();
   const pct = Math.max(0, Math.min(100, Math.round(res.pct) || 0));
@@ -1560,7 +1733,7 @@ function results(g, res){
   SESS.kg += lift;
   if (!S.kday || S.kday.d !== today) S.kday = { d:today, kg:{} };
   S.kday.kg[g.skill] = (S.kday.kg[g.skill] || 0) + lift;
-  queuePlay(g.id, Math.max(0, Math.round(res.score) || 0), pct, lift);
+  queuePlay(g.id, Math.max(0, Math.round(res.score) || 0), pct, lift, secs, res.meta);
   save(); syncNow();
   res.lines = (res.lines || []).concat(['💪 <b>+' + lift + ' kg</b> lifted for your ' + SKILLS[g.skill].name + ' muscle.']);
   if (LADDER[g.id]) {
@@ -1592,9 +1765,12 @@ function results(g, res){
     + '<div class="tier" id="r-tier" style="--t:'+tier[1]+'">'+tier[2]+' '+tier[0]+' rank</div>'
     + (res.score > prevBest && prevBest > 0 ? '<span class="newbest">New best</span>' : '')
     + '<h2>'+esc(res.title || (stars === 3 ? 'Brilliant!' : stars === 2 ? 'Nice work!' : stars === 1 ? 'Good start' : 'Keep practising'))+'</h2>'
+    + (res.sub ? '<p class="muted rsub">'+esc(res.sub)+'</p>' : '')
+    + (res.tiles ? '<div class="hud rtiles">'+res.tiles.map(t => '<div><b>'+esc(t[0])+'</b><span>'+esc(t[1])+'</span></div>').join('')+'</div>' : '')
+    + (res.note ? '<div class="explain rnote">'+res.note+'</div>' : '')
     + '<div class="lines">'+(res.lines||[]).map(l => '<div>'+l+'</div>').join('')+'</div>'
     + '<div id="r-next"></div>'
-    + '<div class="row"><button class="btn light" data-go="home" style="flex:1">All workouts</button><button class="btn c" id="again" style="flex:1">Play again</button></div>'
+    + '<div class="row"><button class="btn light" data-go="home" style="flex:1">All workouts</button><button class="btn c" id="again" style="flex:1">'+esc(res.again || 'Play again')+'</button></div>'
     + '<button type="button" class="btn light full" data-endsess style="margin-top:10px">⏹ End session</button>'
     + '<div class="fbcard" id="r-fb" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line)"></div>'
     + '</div>');
@@ -2637,32 +2813,49 @@ async function api(path, body, ms){
   } catch(e){ return { status: 0, j: {} }; } finally { clearTimeout(t); }
 }
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-function queuePlay(game, score, pct, lift){ (S.pq = S.pq || []).push({ cid: rid(), game, score, pct, lift, at: Date.now() }); }
+function queuePlay(game, score, pct, lift, secs, meta){
+  const p = { cid: rid(), game, score, pct, lift, at: Date.now() };
+  if (Number.isInteger(secs)) p.secs = Math.min(86400, Math.max(0, secs));
+  if (meta) p.meta = meta;
+  (S.pq = S.pq || []).push(p);
+}
+/* one record per Play press, so we can count games opened but not finished */
+function queueStart(game){ (S.sq = S.sq || []).push({ cid: rid(), game, at: Date.now() }); if (S.sq.length > 200) S.sq = S.sq.slice(-200); save(); }
 function syncBody(){
   const games = {};
   for (const [id, v] of Object.entries(S.g)) games[id] = { active: Math.floor(v.active || 0), best: Math.floor(v.best || 0), bestPct: Math.floor(v.bestPct || 0), plays: v.plays || 0, vol: Math.floor(v.vol || 0) };
   const hist = {}, cut = iso(new Date(Date.now() - 14 * 86400000));
   for (const [d, a] of Object.entries(S.hist || {})) if (d >= cut) hist[d] = Math.min(86400, Math.floor(a));
-  return { action:'sync', token: ME.token, games, plays: (S.pq || []).slice(0, 50), hist, badges: S.badges || [] };
+  return { action:'sync', token: ME.token, games, plays: (S.pq || []).slice(0, 50), starts: (S.sq || []).slice(0, 50), hist, badges: S.badges || [] };
 }
 let syncing = false;
 async function syncNow(){
   if (!ME || syncing) return;
   syncing = true;
-  const body = syncBody(), sent = new Set(body.plays.map(p => p.cid));
+  const body = syncBody(), sent = new Set(body.plays.map(p => p.cid).concat(body.starts.map(x => x.cid)));
   syncDirty = false;
   const r = await api('/api/student', body);
   syncing = false;
   if (r.status === 200 && r.j.ok) {
     lastSyncOk = Date.now();
     S.pq = (S.pq || []).filter(p => !sent.has(p.cid));
+    S.sq = (S.sq || []).filter(x => !sent.has(x.cid));
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){}
   } else {
     syncDirty = true;
     if (r.status === 401) signOut(true);
   }
 }
-setInterval(() => { if (ME && (syncDirty || (S.pq && S.pq.length))) syncNow(); }, 120000);
+setInterval(() => { if (ME && (syncDirty || (S.pq && S.pq.length) || (S.sq && S.sq.length))) syncNow(); }, 120000);
+/* is Break the Bot open today? It closes once the day's AI budget is used up. */
+async function botStatus(){
+  const r = await api('/api/bot', { action:'status' });
+  const open = r.status === 200 && r.j.ok && r.j.open === true;
+  if (open === BOT_OPEN) return;
+  BOT_OPEN = open;
+  if (view === 'home') renderHome(); else if (view === 'muscles') renderMuscles();
+}
+botStatus(); setInterval(botStatus, 10 * 60 * 1000);
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'hidden' || !ME || !(syncDirty || (S.pq && S.pq.length))) return;
   try { if (navigator.sendBeacon('/api/student', new Blob([JSON.stringify(syncBody())], { type:'application/json' }))) syncDirty = false; } catch(e){}
@@ -2991,8 +3184,8 @@ function milestone(t){
   const left = Math.round((DAY_GOAL - t) / 60), nx = nextUnlock();
   if (t === DAY_GOAL) {
     /* today's goal has just counted, so the newest unlocked game is the one this day earned */
-    const got = goalDays() <= UNLOCK_ORDER.length - START_GAMES ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount() - 1]) : null;
-    return '🎯 ' + GOAL_MIN + ' minutes done!' + (got ? ' 🔓 ' + got.name + ' unlocked!' : '') + ' Finish this round to celebrate';
+    const got = justUnlocked();
+    return '🎯 ' + GOAL_MIN + ' minutes done!' + (got.length ? ' 🔓 ' + got.map(g => g.name).join(' and ') + ' unlocked!' : '') + ' Finish this round to celebrate';
   }
   if (t === Math.round(DAY_GOAL / 2)) return nx ? '🔓 Halfway! ' + left + ' more minutes to unlock ' + nx.name : '🔥 Halfway! ' + left + ' minutes to go';
   if (t < DAY_GOAL && t % 300 === 0) return '💪 ' + (t / 60) + ' minutes! ' + left + ' to go. 🎁 Chest after this round';
@@ -3156,8 +3349,7 @@ function leaveNudge(){
   return true;
 }
 function goalModal(){
-  const sk = streakInfo(), gotNew = unlockedCount() > START_GAMES && goalDays() <= UNLOCK_ORDER.length - START_GAMES
-    ? GAMES.find(g => g.id === UNLOCK_ORDER[unlockedCount() - 1]) : null, nx = nextUnlock();
+  const sk = streakInfo(), got = justUnlocked(), gotNew = got.length ? { name: got.map(g => g.name).join(' and ') } : null, nx = nextUnlock();
   if (!reduced()) confetti();
   SFX.play('fanfare');
   const p = openModal('<div class="goalwin">'+slot3d('trophy', 'goalslot', img3d('trophy', 150, 'pop3d'), 'gold')+'<div class="big">'+fmt(DAY_GOAL)+' ✓</div><h3 id="mtitle">Today’s workout done!</h3>'
@@ -3304,8 +3496,651 @@ function renderWho(){
   $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
 }
 
+/* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker, Break the Bot, Placement Bot, Word Radar =================
+   Each one ends with ctx.end({ score, pct, title, sub, tiles, note, lines, meta }).
+   tiles = [[value, label], ...] and note = one insight; meta = game-specific fields saved with the round. */
+const median = a => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m-1] + s[m]) / 2); };
+const pctOf = (a, b) => b ? Math.round(a / b * 100) : 0;
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+
+/* ================= 16. Color Clash (focus): tap the ink colour, not the word (Stroop) ================= */
+const CC_INK = [['Red','#E5383B'],['Green','#16A34A'],['Blue','#2F6BFF'],['Yellow','#D9A400']];
+const CC_WORDS = [['RED','GREEN','BLUE','YELLOW'], ['ERROR','PASS','INFO','WARN']];   // round 2: ERROR = red, PASS = green, INFO = blue, WARN = yellow
+const CC_SECS = [20, 25];
+const ColorClash = { id:'color-clash', name:'Color Clash', skill:'focus', icon:'palette', inspired:'the Stroop test', topics:'colour words and terminal messages',
+  how:['A word appears in coloured ink. Tap the <b>ink colour</b>, not what the word says.','Round 1 is 20 seconds of colour names. Round 2 is 25 seconds of terminal words like ERROR and PASS.','Right is +10, wrong is −5. Keys 1 to 4 work too.'],
+  run(ctx){
+    const trials = []; let score = 0, round = 0, cur = null;
+    const onKey = e => { if (cur && /^[1-4]$/.test(e.key)) { e.preventDefault(); answer(+e.key - 1); } };
+    document.addEventListener('keydown', onKey);
+    function startRound(){
+      ctx.root.innerHTML = '<div class="tbar"><i id="cc-t"></i></div>' + hud([['cc-s','Score',score],['cc-l','Seconds',CC_SECS[round]],['cc-r','Round',(round+1)+'/2']])
+        + '<div class="cc-box"><b id="cc-w"></b><div id="cc-f" class="cc-f" aria-live="polite"></div></div>'
+        + '<div class="cc-btns">'+CC_INK.map((c,i) => '<button class="press" data-i="'+i+'" style="background:'+c[1]+'">'+c[0]+'<small>key '+(i+1)+'</small></button>').join('')+'</div>';
+      ctx.root.querySelector('.cc-btns').addEventListener('pointerdown', e => { const b = e.target.closest('[data-i]'); if (b) { e.preventDefault(); answer(+b.dataset.i); } });
+      next();
+      ctx.timer(CC_SECS[round], $('cc-t'), s => $('cc-l').textContent = s, () => { cur = null; round === 0 ? between() : finish(); });
+    }
+    function next(){
+      const ink = Math.floor(Math.random()*4), cong = Math.random() < 0.25;
+      const word = cong ? ink : pick([0,1,2,3].filter(i => i !== ink));
+      const w = $('cc-w'); w.textContent = CC_WORDS[round][word]; w.style.color = CC_INK[ink][1];
+      cur = { ink, cong, t: performance.now() };
+    }
+    function answer(i){
+      if (!cur) return;
+      const rt = performance.now() - cur.t, good = i === cur.ink;
+      trials.push({ round, good, cong: cur.cong, rt });
+      score = Math.max(0, score + (good ? 10 : -5)); $('cc-s').textContent = score;
+      const f = $('cc-f'); f.textContent = good ? 'Correct' : 'That was the word, not the ink'; f.className = 'cc-f ' + (good ? 'ok' : 'no');
+      FX.result(good, true);
+      next();
+    }
+    function between(){
+      ctx.root.innerHTML = '<div class="card nb-panel"><h2>Round 1 done. Now the coder trap.</h2><p class="muted">Now the words are terminal messages. ERROR feels red and PASS feels green, but you still tap the ink colour.</p>'
+        + '<button class="btn c full" id="cc-go">Start round 2</button></div>';
+      $('cc-go').onclick = () => { round = 1; startRound(); };
+      $('cc-go').focus();
+    }
+    function finish(){
+      const ok = trials.filter(t => t.good), r2 = trials.filter(t => t.round === 1);
+      const acc = pctOf(ok.length, trials.length), med = median(ok.map(t => t.rt));
+      const okInc = ok.filter(t => !t.cong).map(t => t.rt), okCon = ok.filter(t => t.cong).map(t => t.rt);
+      const inter = okInc.length && okCon.length ? Math.max(0, median(okInc) - median(okCon)) : 0;
+      const r2acc = pctOf(r2.filter(t => t.good).length, r2.length);
+      ctx.end({ score, pct: acc * Math.min(1, ok.length / 40), title: score + ' points', sub: plural(trials.length, 'answer') + ' in 45 seconds',
+        tiles: [[acc + '%','Accuracy'],[med + ' ms','Median reaction'],[inter + ' ms','Clash slowdown'],[r2acc + '%','Coder round accuracy']],
+        note: inter < 120 ? 'You held back the automatic reaction well. Clashing words barely slowed you down.'
+          : inter < 250 ? 'Clashing words slowed you a little. That pause is your brain overriding a habit, and it gets faster with practice.'
+          : 'Clashing words slowed you a lot. Your first impulse wins often, which is the same thing that happens when the first answer you see (or AI gives) feels right. Play a few more rounds.',
+        meta: { score, accuracy: acc, interferenceMs: inter, medianRtMs: med, round2Accuracy: r2acc, trials: trials.length } });
+    }
+    startRound();
+    return () => document.removeEventListener('keydown', onKey);
+  }
+};
+
+/* ================= 17. Seen It? (memory): tap only exact repeats; look-alikes change one character (MemTrax) ================= */
+const SI_BASE = ['for i in range(5):', 'IndexError: list index out of range', 'x = input("Enter age: ")', 'print("Hello", end="")',
+  'TypeError: can only concatenate str\n(not "int") to str', 'while n > 0:\n    n -= 1', 'def area(r):\n    return 3.14 * r * r',
+  'nums = [2, 4, 6]', 'if marks >= 40:', 'SyntaxError: invalid syntax'];
+const SI_LURES = [['for i in range(6):', 'for i in range(5):'], ['print("Hello", end=" ")', 'print("Hello", end="")'], ['nums = [2, 4, 8]', 'nums = [2, 4, 6]'], ['if marks > 40:', 'if marks >= 40:']];
+const SI_MS = 3000;
+function siSequence(){
+  let list;
+  /* the same card never shows twice in a row */
+  for (let tries = 0; tries < 500; tries++) {
+    list = shuffle(SI_BASE.concat(Array.from({ length:16 }, () => pick(SI_BASE))));
+    if (list.every((c, i) => i === 0 || c !== list[i-1])) break;
+  }
+  /* fallback if every shuffle had a pair: swap the second card of a pair with a later card that is different */
+  for (let i = 1; i < list.length; i++) if (list[i] === list[i-1]) {
+    const j = list.findIndex((c, k) => k > i && c !== list[i] && c !== list[i-1] && c !== list[i+1] && list[k-1] !== list[i] && list[k+1] !== list[i]);
+    if (j > 0) [list[i], list[j]] = [list[j], list[i]];
+  }
+  const seq = list.map(text => ({ text, lure:false }));
+  SI_LURES.forEach(([text, orig]) => { const first = seq.findIndex(c => c.text === orig); const at = first + 1 + Math.floor(Math.random() * (seq.length - first)); seq.splice(at, 0, { text, lure:true }); });
+  const seen = new Set();
+  seq.forEach(c => { c.repeat = !c.lure && seen.has(c.text); seen.add(c.text); });
+  return seq;
+}
+const SeenIt = { id:'seen-it', name:'Seen It?', skill:'memory', icon:'layers', inspired:'the MemTrax memory test', topics:'Python lines and error messages',
+  how:['Cards of Python code and errors appear one at a time, 3 seconds each.','Tap <b>Seen it</b> when a card is an <b>exact</b> repeat of one you saw before. Space works too.','Careful: some cards come back with one small change. Those are not repeats.'],
+  run(ctx){
+    const seq = siSequence(), repeats = seq.filter(c => c.repeat).length;
+    let i = -1, pressed = false, shownAt = 0, hits = 0, misses = 0, fa = 0, lureFa = 0; const rts = [];
+    ctx.root.innerHTML = hud([['si-h','Caught','0'],['si-c','Cards','0/'+seq.length]])
+      + '<div class="si-box" id="si-box"><pre class="si-card" id="si-card"></pre><i class="si-bar" id="si-bar"></i></div>'
+      + '<button class="btn c full si-btn press" id="si-btn">Seen it</button>';
+    const box = $('si-box');
+    function press(){
+      if (i < 0 || pressed) return; pressed = true;
+      const c = seq[i];
+      if (c.repeat) { hits++; rts.push(performance.now() - shownAt); $('si-h').textContent = hits; }
+      else { fa++; if (c.lure) lureFa++; }
+      box.classList.add(c.repeat ? 'ok' : 'no'); FX.result(c.repeat, true);
+    }
+    function show(){
+      if (i >= 0 && seq[i].repeat && !pressed) misses++;
+      i++;
+      if (i >= seq.length) return finish();
+      pressed = false; box.classList.remove('ok','no');
+      $('si-card').textContent = seq[i].text; $('si-c').textContent = (i+1) + '/' + seq.length;
+      const bar = $('si-bar'); bar.style.transition = 'none'; bar.style.transform = 'scaleX(1)'; void bar.offsetWidth;
+      bar.style.transition = 'transform ' + SI_MS + 'ms linear'; bar.style.transform = 'scaleX(0)';
+      shownAt = performance.now();
+      ctx.after(SI_MS, show);
+    }
+    function finish(){
+      const caught = pctOf(hits, repeats), avg = rts.length ? Math.round(rts.reduce((a,b) => a+b, 0) / rts.length) : 0;
+      ctx.end({ score: hits, pct: Math.max(0, caught - fa * 8), title: hits + ' of ' + repeats + ' repeats caught', sub: '30 cards, 3 seconds each',
+        tiles: [[caught + '%','Repeats caught'],[avg ? avg + ' ms' : '–','Avg recognition'],[fa,'False taps'],[lureFa + '/4','Look-alikes fooled you']],
+        note: lureFa >= 1 ? 'You fell for ' + plural(lureFa, 'look-alike') + '. In code, one character changes everything. When you debug or check AI-written code, read the line, don’t just recognise its shape.'
+          : caught >= 80 ? 'Strong memory and you weren’t fooled by look-alikes. That precise attention is what catches bugs.'
+          : 'You missed several repeats. Try saying each card in your head as it appears; it helps memory stick.',
+        meta: { hits, repeats, misses, falseAlarms: fa, lureFalseAlarms: lureFa, avgRtMs: avg } });
+    }
+    $('si-btn').addEventListener('pointerdown', e => { e.preventDefault(); press(); });
+    const onKey = e => { if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); press(); } };
+    document.addEventListener('keydown', onKey);
+    show();
+    return () => document.removeEventListener('keydown', onKey);
+  }
+};
+
+/* ================= 18. Bug Tracker (focus): track 3 bugs among 8 moving packets in a 3D box ================= */
+const BT_W = 720, BT_H = 540, BT_R = 0.13, BT_ROUNDS = 6, BT_CUE = 2200, BT_MOVE = 7000;
+const BT_CY = Math.cos(0.55), BT_SY = Math.sin(0.55), BT_CX = Math.cos(0.32), BT_SX = Math.sin(0.32);
+function btProject(p){
+  const x1 = p[0]*BT_CY + p[2]*BT_SY, z1 = -p[0]*BT_SY + p[2]*BT_CY;
+  const y2 = p[1]*BT_CX - z1*BT_SX, z2 = p[1]*BT_SX + z1*BT_CX;
+  const f = BT_H * 1.15 / (z2 + 4.2);
+  return { x: BT_W/2 + x1*f, y: BT_H/2 - y2*f, z: z2, r: BT_R*f };
+}
+function btDir(){ const z = Math.random()*2 - 1, a = Math.random()*Math.PI*2, s = Math.sqrt(1 - z*z); return [s*Math.cos(a), s*Math.sin(a), z]; }
+const BugTracker = { id:'bug-tracker', name:'Bug Tracker', skill:'focus', icon:'bug', inspired:'3D multiple-object tracking', topics:'a server box full of data packets',
+  how:['3 of the 8 packets in the server box are bugs. They glow for 2 seconds.','Then every packet looks the same and moves for 7 seconds. Keep your eyes on the bugs.','When they stop, tap the 3 bugs. Find all 3 and the next round is faster. 6 rounds.'],
+  run(ctx){
+    const css = getComputedStyle(document.documentElement);
+    const col = { line: css.getPropertyValue('--line').trim() || '#E3E3EF', muted: '#9AA1B4', ink: css.getPropertyValue('--ink').trim() || '#141B34', ok: css.getPropertyValue('--ok').trim() || '#16A36F', bad: css.getPropertyValue('--bad').trim() || '#EF4444', acc: css.getPropertyValue('--c-focus').trim() || '#FF7A2F' };
+    let round = 0, speed = 0.55, found = 0, perfect = 0, top = 0, balls = [], phase = 'cue', picks = [], raf = 0, last = 0, stopped = false;
+    const history = [];
+    ctx.root.innerHTML = hud([['bt-r','Round','1/'+BT_ROUNDS],['bt-f','Bugs found','0']])
+      + '<div class="bt-msg" id="bt-msg" aria-live="polite"></div>'
+      + '<div class="bt-wrap"><canvas id="bt-cv" width="'+BT_W+'" height="'+BT_H+'" aria-label="Server box with moving packets"></canvas></div>'
+      + '<div class="bt-foot"><span class="small muted" id="bt-sp"></span><button class="btn c" id="bt-next" hidden>Next round</button></div>';
+    const cv = $('bt-cv'), g2 = cv.getContext('2d');
+    const corners = [-1,1].flatMap(x => [-1,1].flatMap(y => [-1,1].map(z => [x,y,z])));
+    const edges = []; corners.forEach((a,i) => corners.forEach((b,j) => { if (j > i && a.filter((v,k) => v !== b[k]).length === 1) edges.push([i,j]); }));
+    const msg = t => $('bt-msg').textContent = t;
+    function place(){
+      balls = [];
+      while (balls.length < 8) {
+        const p = [0,0,0].map(() => Math.random()*1.6 - 0.8);
+        if (balls.every(b => Math.hypot(b.p[0]-p[0], b.p[1]-p[1], b.p[2]-p[2]) >= 0.45)) balls.push({ p, v: btDir(), bug: balls.length < 3 });
+      }
+    }
+    function step(dt){
+      const lim = 1 - BT_R;
+      balls.forEach(b => { for (let k = 0; k < 3; k++) { b.p[k] += b.v[k]*speed*dt; if (b.p[k] > lim) { b.p[k] = lim; b.v[k] = -Math.abs(b.v[k]); } if (b.p[k] < -lim) { b.p[k] = -lim; b.v[k] = Math.abs(b.v[k]); } } });
+      for (let i = 0; i < balls.length; i++) for (let j = i+1; j < balls.length; j++) {
+        const a = balls[i], b = balls[j], d = [0,1,2].map(k => b.p[k] - a.p[k]), dist = Math.hypot(...d);
+        if (dist < 2*BT_R && dist > 1e-6) {
+          [a.v, b.v] = [b.v, a.v];
+          const push = (2*BT_R - dist) / 2 + 0.002;
+          for (let k = 0; k < 3; k++) { a.p[k] -= d[k]/dist*push; b.p[k] += d[k]/dist*push; a.p[k] = Math.max(-lim, Math.min(lim, a.p[k])); b.p[k] = Math.max(-lim, Math.min(lim, b.p[k])); }
+        }
+      }
+    }
+    function draw(){
+      g2.clearRect(0, 0, BT_W, BT_H);
+      const pc = corners.map(btProject);
+      g2.strokeStyle = col.line; g2.lineWidth = 2; g2.beginPath();
+      edges.forEach(([i,j]) => { g2.moveTo(pc[i].x, pc[i].y); g2.lineTo(pc[j].x, pc[j].y); }); g2.stroke();
+      balls.map(b => ({ b, s: btProject(b.p) })).sort((a, b) => b.s.z - a.s.z).forEach(({ b, s }) => {
+        const picked = picks.includes(b);
+        let fill = col.muted;
+        if (phase === 'cue' && b.bug) fill = col.acc;
+        if (phase === 'reveal' && b.bug) fill = picked ? col.ok : col.bad;
+        const gr = g2.createRadialGradient(s.x - s.r*0.35, s.y - s.r*0.35, s.r*0.1, s.x, s.y, s.r);
+        gr.addColorStop(0, 'rgba(255,255,255,.85)'); gr.addColorStop(0.35, fill); gr.addColorStop(1, fill);
+        g2.beginPath(); g2.arc(s.x, s.y, s.r, 0, Math.PI*2); g2.fillStyle = gr; g2.fill();
+        if ((phase === 'pick' && picked) || (phase === 'reveal' && picked && !b.bug)) {
+          g2.lineWidth = 4; g2.strokeStyle = phase === 'pick' ? col.acc : col.ink;
+          g2.beginPath(); g2.arc(s.x, s.y, s.r + 4, 0, Math.PI*2); g2.stroke();
+        }
+      });
+    }
+    function loop(t){
+      if (stopped) return;
+      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0; last = t;
+      if (phase === 'move') step(dt);
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+    function startRound(){
+      phase = 'cue'; picks = []; place(); last = 0;
+      $('bt-r').textContent = (round+1) + '/' + BT_ROUNDS; $('bt-sp').textContent = 'speed ' + speed.toFixed(2); $('bt-next').hidden = true;
+      msg('Watch the orange packets');
+      ctx.after(BT_CUE, () => { phase = 'move'; msg('Keep tracking'); ctx.after(BT_MOVE, () => { phase = 'pick'; msg('Tap the 3 bugs'); }); });
+    }
+    cv.addEventListener('pointerdown', e => {
+      if (phase !== 'pick') return;
+      e.preventDefault();
+      const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * BT_W / r.width, y = (e.clientY - r.top) * BT_H / r.height;
+      /* tap area: 1.4 × the packet's radius, but at least 22 screen pixels so small phone screens work with a finger */
+      let best = null, bd = Infinity; const minR = 22 * BT_W / r.width;
+      balls.forEach(b => { if (picks.includes(b)) return; const s = btProject(b.p), d = Math.hypot(s.x - x, s.y - y); if (d <= Math.max(s.r*1.4, minR) && d < bd) { bd = d; best = b; } });
+      if (!best) return;
+      picks.push(best); SFX.play('select');
+      if (picks.length === 3) reveal();
+    });
+    function reveal(){
+      phase = 'reveal';
+      const n = picks.filter(b => b.bug).length;
+      found += n; $('bt-f').textContent = found;
+      history.push({ speed: +speed.toFixed(2), found: n });
+      if (n === 3) { perfect++; top = Math.max(top, speed); }
+      FX.result(n === 3, false);
+      msg(n === 3 ? 'All 3 bugs found. Speeding up.' : n + ' of 3 found. Missed bugs are red.');
+      speed = n === 3 ? speed * 1.18 : n <= 1 ? speed * 0.88 : speed;
+      round++;
+      const nb = $('bt-next'); nb.hidden = false; nb.textContent = round >= BT_ROUNDS ? 'See results' : 'Next round'; nb.focus();
+    }
+    $('bt-next').onclick = () => {
+      if (round < BT_ROUNDS) return startRound();
+      const acc = pctOf(found, 18);
+      ctx.end({ score: found, pct: acc, title: found + ' of 18 bugs found', sub: '6 rounds',
+        tiles: [[acc + '%','Accuracy'],[perfect,'Perfect rounds'],[top ? top.toFixed(2) : '–','Top speed cleared']],
+        note: acc >= 80 ? 'You kept several moving targets in mind at once. That split attention is what you use when you follow a program’s variables in your head.'
+          : 'Tracking 3 things at once is hard for everyone at first. Try grouping the 3 bugs into one imaginary triangle and follow its shape.',
+        meta: { found, total: 18, perfectRounds: perfect, topSpeed: +top.toFixed(2), history } });
+    };
+    startRound();
+    raf = requestAnimationFrame(loop);
+    return () => { stopped = true; cancelAnimationFrame(raf); };
+  }
+};
+
+/* ================= 19. Break the Bot (using AI well): get the password out of 3 chatbots ================= */
+/* The bots, their passwords and their defences run on the server (api/bot.js). The page only shows the chat. */
+const BB_LEVELS = [
+  { name:'Intern Bot', defence:'No defence', hello:'Hi! I’m the new intern bot. I was told to keep a password safe. Ask me anything.',
+    why:'The bot was only told to keep the password safe. It had no rule against sharing it, so it just tried to be helpful.',
+    you:'AI is built to help. If you give an AI tool private data, assume it can come out in a reply.' },
+  { name:'Filter Bot', defence:'Blocks messages with words like “password” or “secret”', hello:'Upgraded. I block any message with forbidden words in it. Good luck.',
+    why:'The filter checked for words, not meaning. Asking about “the thing you protect” means the same thing but uses none of the blocked words.',
+    you:'Word filters are easy to get around. When you build a chatbot, a list of banned words does not make it safe.' },
+  { name:'Guarded Bot', defence:'Checks every reply and blocks it if the password appears', hello:'Now I check my own replies. If the password shows up in anything I say, it gets deleted.',
+    why:'The output check only looked for the exact word. Spelled out, reversed or hidden in a poem, it slipped through.',
+    you:'AI can leak information in forms a simple check doesn’t recognise. Never rely on AI alone to protect anything important.' }
+];
+const BreakBot = { id:'break-the-bot', name:'Break the Bot', skill:'ai', icon:'shield', inspired:'prompt-injection games like Gandalf', topics:'how chatbots and their safety checks work',
+  how:['Each bot guards a password. Chat with it and trick it into telling you.','Each level has a stronger defence. Watch the grey notes under the bot’s replies: they show what the defence did.','Type the password in the box under the chat to crack the level. 3 levels.'],
+  run(ctx){
+    const run = rid(), per = [0,0,0], cracked = ['','',''];
+    let level = 0, busy = false;
+    function total(){ return per.reduce((a,b) => a+b, 0); }
+    function chatLevel(){
+      const L = BB_LEVELS[level];
+      ctx.root.innerHTML = hud([['bb-l','Level',(level+1)+'/3'],['bb-m','Messages',total()]])
+        + '<div class="bb-def"><b>Level '+(level+1)+': '+L.name+'</b> · <span class="muted">'+esc(L.defence)+'</span></div>'
+        + '<div class="bb-chat" id="bb-chat" aria-live="polite"></div>'
+        + '<form class="bb-row" id="bb-send"><input class="field" id="bb-in" maxlength="300" autocomplete="off" placeholder="Message the bot" aria-label="Message the bot"><button class="btn c">Send</button></form>'
+        + '<form class="bb-row" id="bb-pw"><input class="field mono" id="bb-g" maxlength="40" autocomplete="off" autocapitalize="characters" placeholder="Password" aria-label="Password"><button class="btn light">Check</button></form>'
+        + '<div class="small" id="bb-x" aria-live="polite"></div>';
+      bubble('bot', L.hello);
+      $('bb-send').onsubmit = e => { e.preventDefault(); send(); };
+      $('bb-pw').onsubmit = e => { e.preventDefault(); check(); };
+      $('bb-g').oninput = e => { const p = e.target.selectionStart; e.target.value = e.target.value.toUpperCase(); e.target.setSelectionRange(p, p); };
+      $('bb-in').focus({ preventScroll:true });
+    }
+    function bubble(who, text, log){
+      const c = $('bb-chat');
+      c.insertAdjacentHTML('beforeend', '<div class="bb-msg '+who+'">'+esc(text)+'</div>' + (log ? '<div class="bb-log">'+esc(log)+'</div>' : ''));
+      c.scrollTop = c.scrollHeight;
+    }
+    const note = (t, bad) => { const x = $('bb-x'); x.textContent = t; x.style.color = bad ? 'var(--bad)' : 'var(--soft)'; };
+    async function send(){
+      const inp = $('bb-in'), msg = inp.value.trim();
+      if (!msg || busy) return;
+      busy = true; note('');
+      bubble('me', msg); inp.value = '';
+      const btn = $('bb-send').querySelector('button'); AI.thinking(btn, true);
+      const r = await api('/api/bot', { action:'send', token: ME && ME.token, run, level, msg }, 20000);
+      if (!$('bb-chat')) return;
+      AI.thinking(btn, false); btn.disabled = false; busy = false;
+      const j = r.j || {};
+      if (r.status === 200 && j.ok) {
+        per[level]++; $('bb-m').textContent = total();
+        bubble('bot', j.reply, j.log);
+        SFX.play(j.blocked ? 'softbad' : 'softok');
+      } else {
+        $('bb-chat').lastElementChild.remove();
+        inp.value = msg;
+        if (j.error === 'closed') { BOT_OPEN = false; note('Break the Bot is resting for today. Come back tomorrow.', true); }
+        else if (j.error === 'limit') note('You’ve used all your messages for this level. Try again later.', true);
+        else if (r.status === 401) note('Please log in again to play.', true);
+        else note(j.error && j.error.length > 12 ? j.error : 'The bot didn’t respond. Send your message again.', true);
+      }
+      inp.focus({ preventScroll:true });
+    }
+    async function check(){
+      const g = $('bb-g').value;
+      if (!g.replace(/[^A-Za-z]/g, '') || busy) return;
+      busy = true;
+      const r = await api('/api/bot', { action:'check', token: ME && ME.token, run, level, guess: g }, 10000);
+      busy = false;
+      if (!$('bb-g')) return;
+      if (r.status === 200 && r.j.ok && r.j.correct) { cracked[level] = r.j.cracked || ''; FX.result(true, false); won(); }
+      else if (r.status === 200 && r.j.ok) { note('Not it. Keep chatting.', true); shake($('bb-g')); FX.result(false, true); }
+      else note('Couldn’t check that. Try again.', true);
+    }
+    function won(){
+      const L = BB_LEVELS[level], n = per[level];
+      ctx.root.innerHTML = '<div class="card nb-panel"><span class="chip">Level '+(level+1)+' cracked</span><h2>Cracked in '+plural(n, 'message')+'</h2>'
+        + '<div class="explain"><b>Why the defence failed</b><br>'+L.why+'</div>'
+        + '<div class="explain"><b>What this means for you</b><br>'+L.you+'</div>'
+        + '<button class="btn c full" id="bb-next" style="margin-top:14px">'+(level < 2 ? 'Next level' : 'See results')+'</button></div>';
+      if (!reduced()) confetti();
+      $('bb-next').focus();
+      $('bb-next').onclick = () => {
+        if (level < 2) { level++; return chatLevel(); }
+        const t = total();
+        ctx.end({ score: Math.max(10, 100 - Math.max(0, t - 3) * 4), pct: Math.max(30, 100 - Math.max(0, t - 3) * 4), title: 'All 3 bots broken', sub: plural(t, 'message') + ' in total',
+          tiles: per.map((m, i) => [plural(m, 'msg'), 'Level ' + (i+1)]),
+          note: 'Every defence here checked the surface of the text, not its meaning. AI tools work the same way: they follow patterns, not intentions. So check what AI tells you, and never trust it to keep something safe on its own.',
+          meta: { messagesPerLevel: per, total: t, crackedWith: cracked } });
+      };
+    }
+    chatLevel();
+  }
+};
+
+/* ================= 20. Placement Bot (using AI well): you are accountable for an AI's hiring shortlist ================= */
+/* Bias is shown with metro vs town campus only. Do not change it to gender, caste, religion or any other protected trait.
+   Step 1: you hire under time pressure (5 in 60 s, 7 in 45 s, 10 in 30 s). Each hire walks into the office.
+   Steps 2-4: ScreenBot is trained on 5 years of metro-heavy hiring, makes a confident shortlist, then the full picture. */
+const PB_ROUNDS = [{ need:5, pool:8, secs:60 }, { need:7, pool:11, secs:45 }, { need:10, pool:15, secs:30 }];
+const PB_PEOPLE = [['Divya K.','f'],['Arjun R.','m'],['Lakshmi P.','f'],['Sai Teja','m'],['Ayesha S.','f'],['Rohit M.','m'],['Ananya G.','f'],['Rahul V.','m'],
+  ['Kavya N.','f'],['Karthik S.','m'],['Sana F.','f'],['Varun T.','m'],['Bhavana L.','f'],['Abdul H.','m'],['Swathi R.','f'],['Manoj K.','m'],['Fatima Z.','f'],
+  ['Ravi C.','m'],['Harini D.','f'],['Aditya P.','m'],['Ishita B.','f'],['Pranav J.','m'],['Keerthi M.','f'],['Yash A.','m'],['Meera S.','f'],['Faizan Q.','m'],
+  ['Neha U.','f'],['Gopal I.','m'],['Nikhita O.','f'],['Tarun E.','m'],['Priya W.','f'],['Nitin Y.','m'],['Rani X.','f'],['Suresh B.','m']];
+const PB_PROJECTS = ['Library management app','Bus timings app for a small town','To-do app from a tutorial','120 coding problems solved','One hackathon entry','No project yet',
+  'Calculator in Python','Portfolio website','Quiz game in Python','Expense tracker','Weather app','Attendance tracker','Snake game in Python','Notes app',
+  'College fest web page','Marks calculator','Grocery list app','Flexbox photo gallery'];
+const PB_POOL = [['Kiran','Town',93,'Attendance tracker used by 3 classes','m'],['Meghana','Metro',70,'Portfolio website','f'],['Harsha','Town',86,'Expense splitter app','m'],['Vikram','Metro',61,'Calculator app','m'],
+  ['Sneha','Metro',82,'Quiz game in Python','f'],['Naveen','Town',77,'Weather dashboard','m'],['Pooja','Metro',66,'Notes app','f'],['Imran','Town',89,'Chatbot for college FAQs','m']];
+const PB_WHY = [['Kiran’s resume must have a weakness the bot noticed.',0],['ScreenBot learned from past hires, who were mostly from metro campuses.',1],['The bot made a random mistake.',0],['Town campus students are weaker coders.',0]];
+const PB_FIX = [
+  ['Delete the campus column and retrain.', 1, 'Better, but not fixed. ScreenBot starts using pin code and college name, which carry the same information. Only 1 town candidate makes the shortlist.'],
+  ['Retrain on coding-test results, with equal numbers of past candidates from both campus types.', 3, 'Fixed. The new shortlist is Kiran, Imran, Harsha and Sneha, the top 4 coding scores.'],
+  ['Stop using AI and read all 600 by hand.', 1, 'Fair, but slow. It takes 3 weeks, and tired reviewers make their own biased calls.'],
+  ['Keep the bot, but a person reviews every rejection with a coding score above 85.', 2, 'A good safety net. It catches Kiran, Imran and Harsha. The bot itself is still biased, so the next problem might slip through.']];
+
+/* flat illustrated person, built from the name so the same person always looks the same */
+const PB_SKIN = ['#F2CDA9','#E3B18A','#C98E63','#A8714B','#86563A'], PB_HAIR = ['#1E1915','#2D211A','#3A2A1F','#4A3426'];
+const PB_SHIRT = ['#5B6CFF','#0F9F8F','#FF7A2F','#F0457A','#2F7BF0','#20A35A','#7B61FF','#E09A00'];
+function pbAvatar(name, g){
+  let h = 0; for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const skin = PB_SKIN[h % 5], hair = PB_HAIR[(h >>> 3) % 4], shirt = PB_SHIRT[(h >>> 5) % 8], style = (h >>> 8) % 3;
+  const hairBack = g === 'f'
+    ? (style === 0 ? '<path d="M17 30c0-12 7-19 15-19s15 7 15 19v14c-3 2-6 2-8 0V30H25v14c-2 2-5 2-8 0z" fill="'+hair+'"/>'
+      : style === 1 ? '<circle cx="32" cy="12" r="6" fill="'+hair+'"/>' : '<path d="M18 30c0-11 6-18 14-18s14 7 14 18v6H18z" fill="'+hair+'"/>')
+    : '';
+  const hairTop = g === 'f'
+    ? '<path d="M20 28c1-9 6-14 12-14s11 5 12 14c-5-4-10-6-14-6s-7 2-10 6z" fill="'+hair+'"/>'
+    : style === 0 ? '<path d="M20 27c0-9 5-14 12-14s12 5 12 14c-3-3-7-5-12-5s-9 2-12 5z" fill="'+hair+'"/>'
+    : style === 1 ? '<path d="M20 28c-1-10 5-16 12-16 8 0 13 6 12 16l-3-5c-4 1-12 1-18-1z" fill="'+hair+'"/><circle cx="24" cy="16" r="4" fill="'+hair+'"/><circle cx="32" cy="13" r="4.5" fill="'+hair+'"/><circle cx="40" cy="16" r="4" fill="'+hair+'"/>'
+    : '<path d="M20 26c0-8 5-13 12-13s12 5 12 13l-2-1c-2-4-6-6-10-6s-8 2-10 6z" fill="'+hair+'"/>';
+  /* light background: the shirt colour mixed 82% with white */
+  const bg = '#' + [1,3,5].map(k => Math.round(parseInt(shirt.slice(k, k+2), 16) * 0.18 + 255 * 0.82).toString(16).padStart(2, '0')).join('');
+  /* the person is drawn on a 64 grid, then scaled up so head and shoulders fill the circle */
+  return '<svg class="pb-av" viewBox="0 0 64 64" style="background:'+bg+'" aria-hidden="true"><g transform="translate(32 40) scale(1.32) translate(-32 -40)">'
+    + hairBack + '<path d="M12 64c1-12 9-18 20-18s19 6 20 18z" fill="'+shirt+'"/><path d="M27 46l5 6 5-6" fill="#fff" opacity=".85"/><rect x="28" y="38" width="8" height="9" rx="3" fill="'+skin+'"/>'
+    + '<ellipse cx="20.6" cy="30" rx="2" ry="2.8" fill="'+skin+'"/><ellipse cx="43.4" cy="30" rx="2" ry="2.8" fill="'+skin+'"/>'
+    + '<ellipse cx="32" cy="29" rx="11" ry="12.5" fill="'+skin+'"/>' + hairTop
+    + '<path d="M26.2 26.6h3.4M34.4 26.6h3.4" stroke="'+hair+'" stroke-width="1.3" stroke-linecap="round"/>'
+    + '<circle cx="28" cy="30" r="1.4" fill="#1E1915"/><circle cx="36" cy="30" r="1.4" fill="#1E1915"/><path d="M29 35.5q3 2 6 0" stroke="#1E1915" stroke-width="1.4" fill="none" stroke-linecap="round"/></g></svg>';
+}
+/* the door at the top of the hiring screen; label = Office or Interview */
+const pbDoor = (label, id) => '<div class="pb-doorwrap"><div class="pb-door" id="'+id+'"><span class="pb-sign">'+label+'</span><div class="pb-frame"><i class="pb-leaf"></i></div></div></div>';
+/* a hired person walks from their card into the door */
+function pbWalk(fromEl, door){
+  if (!fromEl || !door) return;
+  door.classList.add('open'); clearTimeout(door._t); door._t = setTimeout(() => door.classList.remove('open'), 800);
+  if (reduced() || !M) return;
+  const a = fromEl.getBoundingClientRect(), d = door.querySelector('.pb-frame').getBoundingClientRect();
+  const c = fromEl.cloneNode(true); c.classList.add('pb-walker');
+  Object.assign(c.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
+  document.body.appendChild(c);
+  const dx = d.left + d.width/2 - (a.left + a.width/2), dy = d.top + d.height*0.55 - (a.top + a.height/2);
+  M.animate(c, { x:[0, dx*0.35, dx*0.7, dx], y:[0, dy*0.35 - 10, dy*0.7, dy], scale:[1, 0.95, 0.8, 0.55], opacity:[1, 1, 1, 0] }, { duration:0.85, ease:'easeInOut' });
+  setTimeout(() => c.remove(), 950);
+}
+function pbRoundPool(round, used){
+  const R = PB_ROUNDS[round], people = shuffle(PB_PEOPLE.filter(p => !used.has(p[0]))).slice(0, R.pool), proj = shuffle(PB_PROJECTS);
+  const scores = shuffle(Array.from({ length:50 }, (x, i) => 48 + i)).slice(0, R.pool);
+  return people.map((p, i) => { used.add(p[0]); return { name:p[0], g:p[1], campus: Math.random() < 0.5 ? 'Metro' : 'Town', score: scores[i], project: proj[i % proj.length] }; });
+}
+
+const PlacementBot = { id:'placement-bot', name:'Placement Bot', skill:'ai', icon:'people', inspired:'“Survival of the Best Fit”', topics:'AI hiring and training data',
+  how:['You are hiring Junior Python Developers. First you pick people yourself, against the clock.','Then an AI screening bot takes over. You are accountable for its shortlist, so check whatever you want before you approve it.','4 short steps.'],
+  run(ctx){
+    const inspected = new Set(), used = new Set(), hiredNames = [], perRound = [];
+    let foundCause = false, fixChoice = -1, fixScore = 0, round = 0;
+    const panel = (n, html, extra) => { ctx.root.innerHTML = hud([['pb-s','Step',n+'/4']].concat(extra || [])) + '<div class="card nb-panel"><div class="small muted">Step '+n+' of 4</div>'+html+'</div>'; anim(ctx.root.querySelector('.nb-panel'), { opacity:[0,1], y:[8,0] }); };
+
+    /* step 1: you hire, 3 timed rounds */
+    function roundIntro(){
+      const R = PB_ROUNDS[round];
+      panel(1, '<h2>'+(round === 0 ? 'Your company needs Junior Python Developers.' : round === 1 ? 'More applications came in.' : 'Last round. The pile keeps growing.')+'</h2>'
+        + '<p>Round '+(round+1)+' of 3: hire <b>'+R.need+' people in '+R.secs+' seconds</b>. Tap a candidate to hire them.'+(round === 0 ? ' Pick the people you think will code best.' : '')+'</p>'
+        + '<button class="btn c full" id="pb-start">Start round '+(round+1)+'</button>');
+      $('pb-start').onclick = playRound; $('pb-start').focus();
+    }
+    function playRound(){
+      const R = PB_ROUNDS[round], pool = pbRoundPool(round, used), t0 = Date.now();
+      const topIdx = pool.map((c, i) => [c.score, i]).sort((a, b) => b[0] - a[0]).slice(0, R.need).map(x => x[1]);
+      let hired = [], done = false, stop = null;
+      panel(1, '<div class="pb-sticky"><div class="pb-hirehead"><div><h2>Hire '+R.need+' people</h2><div class="small muted">Round '+(round+1)+' of 3</div></div>'+pbDoor('Office', 'pb-door')+'</div>'
+        + '<div class="tbar"><i id="pb-t"></i></div></div>'
+        + '<div class="pb-grid">'+pool.map((c, i) => '<button class="pb-card press" data-i="'+i+'" aria-label="Hire '+c.name+', coding test '+c.score+'">'
+          + pbAvatar(c.name, c.g) + '<b>'+c.name+'</b><span class="pb-score">'+c.score+'<small>/100 coding test</small></span><span class="small">'+c.project+'</span><span class="chip">'+c.campus+' campus</span></button>').join('')+'</div>',
+        [['pb-h','Hired','0/'+R.need],['pb-l','Seconds',R.secs]]);
+      ctx.root.querySelectorAll('.pb-card').forEach(b => b.onclick = () => {
+        if (done || b.classList.contains('gone')) return;
+        const i = +b.dataset.i;
+        hired.push(i); hiredNames.push(pool[i].name);
+        pbWalk(b.querySelector('.pb-av'), $('pb-door'));
+        b.classList.add('gone'); b.disabled = true; SFX.play('select');
+        $('pb-h').textContent = hired.length + '/' + R.need;
+        anim($('pb-h'), { scale:[1.3,1] }, { duration:0.25 });
+        if (hired.length >= R.need) end();
+      });
+      stop = ctx.timer(R.secs, $('pb-t'), s => $('pb-l').textContent = s, () => end(true));
+      function end(timeUp){
+        if (done) return; done = true; if (stop) stop();
+        const matched = hired.filter(i => topIdx.includes(i)).length;
+        perRound.push({ need: R.need, hired: hired.length, matched, secs: Math.round((Date.now() - t0) / 1000) });
+        ctx.after(timeUp ? 300 : 900, () => {
+          round++;
+          if (round < PB_ROUNDS.length) {
+            panel(1, '<h2>'+(timeUp ? 'Time’s up.' : 'Round '+round+' done.')+'</h2><p>You hired '+hired.length+' of '+R.need+'. '+matched+' of them were among the top '+R.need+' coding scores.</p>'
+              + '<button class="btn c full" id="pb-start">Next round</button>');
+            $('pb-start').onclick = roundIntro; $('pb-start').focus();
+          } else step2();
+        });
+      }
+    }
+
+    /* step 2: train the bot */
+    function step2(){
+      panel(2, '<h2>600 applications just came in.</h2><p>You can’t read them all, so you’ll train ScreenBot on the company’s last 5 years of hiring. Back then, very few town campus students applied.</p>'
+        + '<div class="pb-chart"><div class="small muted">Who got hired in the last 5 years (50 people)</div>'
+        + '<div class="pb-bar"><span>Metro campus</span><i style="width:88%"></i><b>44</b></div><div class="pb-bar"><span>Town campus</span><i style="width:12%"></i><b>6</b></div></div>'
+        + '<button class="btn c full" id="pb-train">Train ScreenBot on this data</button>');
+      $('pb-train').onclick = () => { const b = $('pb-train'); b.disabled = true; b.innerHTML = '<span class="ai-dots"><i></i><i></i><i></i></span> Training…'; ctx.after(1100, step3); };
+    }
+
+    /* step 3: the bot hires. Bot score = 0.45 × coding + (45 if metro else 5); top 4 get interviews. */
+    function step3(){
+      const rows = PB_POOL.map(c => { const s = 0.45*c[2] + (c[1] === 'Metro' ? 45 : 5); return { c, s, conf: Math.min(99, Math.round(60 + Math.abs(s - 60)*1.4)) }; }).sort((a, b) => b.s - a.s);
+      rows.forEach((r, i) => r.ok = i < 4);
+      panel(3, '<div class="pb-hirehead"><div><h2>ScreenBot picked 4 of 8 for interviews.</h2></div>'+pbDoor('Interview', 'pb-door')+'</div>'
+        + '<p>You’re accountable for this shortlist. Check whatever you want before you approve it.</p><div class="pb-list">'
+        + rows.map((r, i) => '<div class="pb-row"><div class="pb-line">'+pbAvatar(r.c[0], r.c[4])+'<b>'+r.c[0]+'</b><span class="pb-dec '+(r.ok ? 'ok' : 'no')+'">'+(r.ok ? 'Interview' : 'Reject')+'</span><span class="small muted">'+r.conf+'% sure</span>'
+          + '<button class="linkbtn" data-i="'+i+'" aria-expanded="false">Inspect</button></div><div class="pb-more small" hidden>Coding test '+r.c[2]+'/100, '+r.c[1].toLowerCase()+' campus, '+r.c[3]+'</div></div>').join('')
+        + '</div><button class="btn c full" id="pb-ok">Approve shortlist</button>');
+      ctx.root.querySelectorAll('.pb-row .linkbtn').forEach(b => b.onclick = () => {
+        const more = b.closest('.pb-row').querySelector('.pb-more'), open = more.hidden;
+        more.hidden = !open; b.setAttribute('aria-expanded', open); b.textContent = open ? 'Hide' : 'Inspect';
+        if (open) inspected.add(rows[+b.dataset.i].c[0]);
+      });
+      $('pb-ok').onclick = () => {
+        $('pb-ok').disabled = true;
+        /* the 4 shortlisted walk into the interview room, one after another */
+        const avs = [...ctx.root.querySelectorAll('.pb-row')].slice(0, 4).map(r => r.querySelector('.pb-av'));
+        avs.forEach((a, k) => ctx.after(k * 220, () => { pbWalk(a, $('pb-door')); a.style.visibility = 'hidden'; }));
+        ctx.after(reduced() ? 0 : 1500, step4);
+      };
+    }
+
+    /* step 4: the full picture */
+    function step4(){
+      panel(4, '<h2>Here’s the full picture.</h2><p>All 4 interviews went to metro candidates. ScreenBot rejected Kiran (93), Harsha (86), Naveen (77) and Imran (89). Three of them scored higher than everyone it picked.</p>'
+        + '<h3>Why did ScreenBot reject Kiran, who scored 93?</h3><div id="pb-q1">'+PB_WHY.map((o, i) => '<button class="opt" data-i="'+i+'">'+o[0]+'</button>').join('')+'</div><div id="pb-q2"></div>');
+      ctx.root.querySelectorAll('#pb-q1 .opt').forEach(b => b.onclick = () => {
+        if (ctx.root.querySelector('#pb-q1 .right')) return;
+        const i = +b.dataset.i, right = PB_WHY.findIndex(o => o[1]);
+        foundCause = i === right;
+        b.classList.add(foundCause ? 'right' : 'wrong'); ctx.root.querySelectorAll('#pb-q1 .opt')[right].classList.add('right');
+        FX.result(foundCause, true);
+        const q2 = $('pb-q2');
+        q2.innerHTML = '<h3>AI learns patterns from past data, including unfair ones. How would you fix ScreenBot?</h3>' + PB_FIX.map((o, i) => '<button class="opt" data-i="'+i+'">'+o[0]+'</button>').join('') + '<div id="pb-out"></div>';
+        anim(q2, { opacity:[0,1], y:[8,0] });
+        q2.querySelectorAll('.opt').forEach(x => x.onclick = () => {
+          if (fixChoice >= 0) return;
+          fixChoice = +x.dataset.i; fixScore = PB_FIX[fixChoice][1];
+          x.classList.add(fixScore >= 2 ? 'right' : 'wrong'); FX.result(fixScore >= 2, true);
+          $('pb-out').innerHTML = '<div class="explain">'+PB_FIX[fixChoice][2]+'</div><button class="btn c full" id="pb-end" style="margin-top:12px">See results</button>';
+          $('pb-end').onclick = finish; $('pb-end').focus();
+        });
+      });
+    }
+
+    function finish(){
+      const n = inspected.size, matched = perRound.reduce((a, r) => a + r.matched, 0), need = PB_ROUNDS.reduce((a, r) => a + r.need, 0);
+      const pct = Math.round(50 * Math.min(n, 4) / 4 + (foundCause ? 20 : 0) + 30 * fixScore / 3);
+      ctx.end({ score: pct, pct, title: n ? 'You checked the bot' : 'You trusted the bot', sub: 'AI repeats the patterns in its training data',
+        tiles: [[n + '/8','Candidates checked'],[foundCause ? 'Yes' : 'No','Found the cause'],[fixScore + '/3','Fix quality'],[matched + '/' + need,'Your hires were top scorers']],
+        note: n === 0 ? 'You approved the shortlist without opening a single candidate. The bot sounded confident, and that was enough. That’s the same move as copying an AI answer without reading it. Next time, open at least the rejections that surprise you.'
+          : n <= 3 ? 'You checked ' + n + ' of 8 candidates before approving. A good start. The rejected ones with high scores were the clue; checking AI means looking where it might be wrong.'
+          : 'You checked ' + n + ' of 8 candidates before approving. That’s the habit that catches AI mistakes: confident is not the same as correct.',
+        meta: { inspected: n, inspectedNames: [...inspected], approvedBlind: n === 0, foundCause, fixChoice, fixScore, manualMatch: matched, manualNeed: need, manualRounds: perRound, manualPicks: hiredNames } });
+    }
+    roundIntro();
+  }
+};
+
+/* ================= 21. Word Radar (insight): find the secret word; each guess shows how close its meaning is (Semantle) ================= */
+/* The secret words and similarity data stay on the server (api/radar.js). */
+const WR_N = 9497;   // size of the word list (only used to draw the radar before the first answer)
+const WordRadar = { id:'word-radar', name:'Word Radar', skill:'insight', icon:'radar', inspired:'Semantle', topics:'word meanings, the way AI sees them',
+  how:['Guess the secret word. Any English word works.','Each guess shows how close its <b>meaning</b> is, as a rank: #1 is the closest word, “cold” is far away.','Use each result to choose your next guess. A hint opens after 8 guesses.'],
+  run(ctx){
+    const st = gs('word-radar');
+    let puzzle = [1,2,3].includes(st.wr) ? st.wr : 1, guesses, hints, n, busy, over;
+    function reset(p){
+      puzzle = p; guesses = []; hints = 0; n = WR_N; busy = false; over = false;
+      ctx.root.innerHTML = hud([['wr-g','Guesses','0'],['wr-b','Closest','–']])
+        + '<div class="wr-tabs" role="tablist">'+[1,2,3].map(i => '<button role="tab" aria-selected="'+(i === puzzle)+'" data-p="'+i+'">Puzzle '+i+'</button>').join('')+'</div>'
+        + '<div class="wr-cols"><div class="wr-radar" id="wr-radar"></div><div>'
+        + '<form class="bb-row" id="wr-f"><input class="field mono" id="wr-in" maxlength="30" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Type a word" aria-label="Your guess"><button class="btn c">Guess</button></form>'
+        + '<div class="wr-fb" id="wr-fb" aria-live="polite"></div>'
+        + '<div class="row" style="margin:8px 0 12px"><button class="btn light" id="wr-hint" style="flex:1" disabled></button><button class="btn light" id="wr-give" style="flex:1">Show answer</button></div>'
+        + '<div class="wr-list" id="wr-list"></div></div></div>';
+      ctx.root.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { if (+b.dataset.p !== puzzle && !busy) reset(+b.dataset.p); });
+      $('wr-f').onsubmit = e => { e.preventDefault(); guess(); };
+      $('wr-hint').onclick = hint; $('wr-give').onclick = giveUp;
+      render();
+      $('wr-in').focus({ preventScroll:true });
+    }
+    const fb = (t, cls) => { const f = $('wr-fb'); f.textContent = t; f.className = 'wr-fb ' + (cls || ''); };
+    const bestRank = () => guesses.length ? Math.min(...guesses.map(g => g.rank)) : null;
+    const label = r => r === 0 ? 'found' : r <= 10 ? '#' + r + ' hot' : r <= 100 ? '#' + r : r <= 1000 ? '#' + r + ' warm' : 'cold';
+    const dist = r => r === 0 ? 0 : Math.max(14, Math.log10(r + 1) / Math.log10(n) * 130);
+    function render(){
+      const b = bestRank();
+      $('wr-g').textContent = guesses.length;
+      $('wr-b').textContent = b === null ? '–' : b === 0 ? 'found' : '#' + b;
+      const left = 8 - guesses.length, h = $('wr-hint');
+      h.disabled = left > 0 || over; h.textContent = left > 0 ? 'Get a hint (after ' + left + ' more)' : 'Get a hint';
+      /* radar: secret in the centre, rings at rank 10, 100 and 1000, each guess at the golden angle */
+      const C = 150, latest = guesses[guesses.length - 1];
+      let svg = '<svg viewBox="0 0 300 300" role="img" aria-label="Radar of your guesses. The centre is the secret word.">'
+        + '<circle cx="'+C+'" cy="'+C+'" r="130" fill="var(--chip)" stroke="var(--line)" stroke-width="2"/>'
+        + [10,100,1000].map(r => { const d = dist(r); return '<circle cx="'+C+'" cy="'+C+'" r="'+d.toFixed(1)+'" fill="none" stroke="var(--soft)" stroke-opacity=".45" stroke-dasharray="4 4"/><text x="'+C+'" y="'+(C - d - 3).toFixed(1)+'" text-anchor="middle" class="wr-ring">top '+r+'</text>'; }).join('')
+        + '<circle cx="'+C+'" cy="'+C+'" r="7" fill="var(--c)"/>';
+      guesses.forEach((g, i) => {
+        const a = i * 2.399963, d = dist(g.rank), x = C + d*Math.cos(a), y = C + d*Math.sin(a);
+        if (g !== latest) svg += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" fill="var(--soft)" opacity=".6"/>';
+      });
+      if (latest) {
+        const i = guesses.length - 1, a = i * 2.399963, d = dist(latest.rank), x = C + d*Math.cos(a), y = C + d*Math.sin(a), right = x < C + 60;
+        svg += '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="7" fill="var(--c)" stroke="#fff" stroke-width="2"/>'
+          + '<text x="'+(x + (right ? 11 : -11)).toFixed(1)+'" y="'+(y + 4).toFixed(1)+'" text-anchor="'+(right ? 'start' : 'end')+'" class="wr-word">'+esc(latest.word)+'</text>';
+      }
+      $('wr-radar').innerHTML = svg + '</svg>';
+      const list = guesses.map((g, i) => ({ g, i })).sort((a, b) => a.g.rank - b.g.rank);
+      $('wr-list').innerHTML = list.length ? list.map(({ g, i }) => '<div class="wr-item'+(g === latest ? ' last' : '')+'"><small>'+(i+1)+'</small><b>'+esc(g.word)+'</b><span>'+(g.sim*100).toFixed(1)+'</span><em class="'+(g.rank <= 10 ? 'hot' : g.rank <= 1000 ? 'warm' : 'cold')+'">'+label(g.rank)+'</em></div>').join('')
+        : '<div class="small muted">Your guesses show up here, closest first.</div>';
+    }
+    function add(r, hint){
+      n = r.n || n;
+      const g = { word: r.word, sim: r.sim, rank: r.rank, hint: !!hint };
+      guesses.push(g);
+      if (hint) fb('Hint: “' + r.word + '” is ranked #' + r.rank + '.');
+      else if (r.rank === 0) fb('Found it!', 'ok');
+      else fb(r.rank <= 10 ? 'Very close.' : r.rank <= 1000 ? 'Warm. Explore around this meaning.' : 'Cold. Try a completely different area.', r.rank <= 10 ? 'ok' : r.rank <= 1000 ? 'warm' : '');
+      SFX.play(r.rank === 0 ? 'correct' : r.rank <= 1000 ? 'softok' : 'tick');
+      render();
+      if (r.rank === 0) { over = true; ctx.after(700, () => finish(false, r.word, r.top10 || [])); }
+    }
+    async function guess(){
+      const inp = $('wr-in'), w = inp.value.trim().toLowerCase();
+      if (!w || busy || over) return;
+      if (guesses.some(g => g.word === w)) { fb('You already tried “' + w + '”.'); inp.select(); return; }
+      busy = true;
+      const r = await api('/api/radar', { action:'guess', puzzle, word: w });
+      busy = false;
+      if (!$('wr-in')) return;
+      if (r.status === 200 && r.j.ok) { inp.value = ''; add(r.j); }
+      else if (r.status === 200 && r.j.reason === 'not_in_list') { fb('“' + w + '” isn’t in our word list. Try another word or a simpler form of it.', 'bad'); inp.select(); }
+      else fb('Couldn’t check that word. Try again.', 'bad');
+      if (!over) inp.focus({ preventScroll:true });
+    }
+    async function hint(){
+      if (busy || over || guesses.length < 8) return;
+      busy = true;
+      const b = bestRank();
+      const r = await api('/api/radar', { action:'hint', puzzle, bestRank: b, triedRanks: guesses.map(g => g.rank) });
+      busy = false;
+      if (!$('wr-in')) return;
+      if (r.status === 200 && r.j.ok && !guesses.some(g => g.word === r.j.word)) { hints++; add(r.j, true); }
+      else fb('Couldn’t get a hint. Try again.', 'bad');
+    }
+    async function giveUp(){
+      if (busy || over) return;
+      busy = true;
+      const r = await api('/api/radar', { action:'reveal', puzzle });
+      busy = false;
+      if (r.status === 200 && r.j.ok) { over = true; finish(true, r.j.secret, r.j.top10); }
+      else fb('Couldn’t load the answer. Try again.', 'bad');
+    }
+    function finish(gaveUp, secret, top10){
+      const warmAt = guesses.findIndex(g => g.rank <= 1000), toWarm = warmAt >= 0 ? warmAt + 1 : null;
+      let jump = null, gain = 0;
+      for (let i = 1; i < guesses.length; i++) { const d = guesses[i-1].rank - guesses[i].rank; if (d > gain) { gain = d; jump = [guesses[i-1].rank, guesses[i].rank]; } }
+      const k = guesses.length, next = puzzle % 3 + 1;
+      st.wr = next; save();
+      const note = gaveUp ? 'Tough one. Look at the closest words below: that’s how the AI groups meaning. Next time, spread your first guesses across very different topics to find the warm zone faster.'
+        : toWarm > 7 ? 'It took you ' + toWarm + ' guesses to get warm. Good experimenters test very different ideas first (food, tech, nature, feelings), then narrow down. That’s also how you debug: rule out big areas before small ones.'
+        : 'You found the warm zone in ' + (toWarm === 1 ? '1 guess' : toWarm + ' guesses') + ' and narrowed in from there. That’s reasoning by experiment: each guess told you something, and you used it.';
+      const pct = gaveUp ? 10 : Math.max(20, Math.min(100, 100 - Math.max(0, k - 5) * 2 - hints * 10));
+      ctx.end({ score: pct, pct, title: gaveUp ? 'The word was “' + secret + '”' : 'Found “' + secret + '” in ' + k + ' guesses', sub: 'Puzzle ' + puzzle + ' of 3', again: 'Play puzzle ' + next,
+        tiles: [[k,'Guesses'],[hints,'Hints used'],[toWarm || '–','Guesses to get warm'],[jump ? '#' + jump[0] + ' → #' + jump[1] : '–','Biggest jump']],
+        note: note + '<div class="small" style="margin-top:10px">The AI’s 10 closest words to “' + esc(secret) + '”:</div><div class="chips" style="margin:6px 0">' + top10.map(w => '<span class="chip">' + esc(w) + '</span>').join('') + '</div>'
+          + '<div class="small">Words are points in space for AI, and meaning is distance. That’s why changing one word in a prompt changes the answer you get.</div>',
+        meta: { puzzle, secret, guesses: k, hints, gaveUp, guessesToWarm: toWarm, guessList: guesses.map(g => g.word) } });
+    }
+    reset(puzzle);
+  }
+};
+
 /* ================= registry ================= */
-const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest];
+const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
+  ColorClash, SeenIt, BugTracker, BreakBot, PlacementBot, WordRadar];
 route();
 pullMe();
 </script>

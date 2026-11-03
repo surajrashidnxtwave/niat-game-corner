@@ -23,13 +23,15 @@ const uniOf = pilot => (UNIS.find(([p]) => pilot.startsWith(p)) || [, 'Other'])[
 // Game -> brain muscle. Keep in step with the `skill` field of each game in public/index.html.
 const GAME_SKILL = {
   'word-spread': 'creativity', 'beat-the-7': 'creativity',
-  'missing-link': 'insight', 'link-grid': 'insight', 'wiki-hop': 'insight',
-  'recall-rebuild': 'memory', 'back-track': 'memory',
-  'symbol-sprint': 'focus',
+  'missing-link': 'insight', 'link-grid': 'insight', 'wiki-hop': 'insight', 'word-radar': 'insight',
+  'recall-rebuild': 'memory', 'back-track': 'memory', 'seen-it': 'memory',
+  'symbol-sprint': 'focus', 'color-clash': 'focus', 'bug-tracker': 'focus',
   'fallacy-hunt': 'reasoning', 'argue-back': 'reasoning',
   'rule-switch': 'flexibility',
   'robot-path': 'planning',
-  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai'
+  'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai', 'placement-bot': 'ai'
+  // 'break-the-bot' is left out on purpose: everyone cracks all 3 bots, so its score says nothing about
+  // whether a student checks AI. Counting it would push every student's "Using AI well" score up.
 };
 const SKILL_KEYS = ['creativity', 'insight', 'memory', 'focus', 'reasoning', 'flexibility', 'planning', 'ai'];
 const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2); };
@@ -82,10 +84,14 @@ const CSV = {
                COALESCE(SUM(p.active), 0) / 60 AS minutes, COALESCE(SUM(p.plays), 0) AS rounds, COALESCE(SUM(p.vol), 0) AS kg_lifted,
                COALESCE(SUM(FLOOR(p.active / 6) + p.plays * 10), 0) AS points
              FROM students s LEFT JOIN progress p ON p.student_id = s.id GROUP BY s.id ORDER BY s.pilot, points DESC, s.name`,
-  plays: `SELECT pl.played_at, s.name, s.roll AS niat_id, s.pilot AS batch, pl.game_id, pl.score, pl.pct, pl.lift
+  plays: `SELECT pl.played_at, s.name, s.roll AS niat_id, s.pilot AS batch, pl.game_id, pl.score, pl.pct, pl.lift, pl.secs, pl.meta
           FROM plays pl JOIN students s ON s.id = pl.student_id ORDER BY pl.played_at`,
   feedback: `SELECT f.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, f.kind, f.game_id, f.rating, f.difficulty, f.fair, f.comment, f.meta
              FROM feedback f JOIN students s ON s.id = f.student_id ORDER BY f.created_at`,
+  starts: `SELECT st.started_at, s.name, s.roll AS niat_id, s.pilot AS batch, st.game_id
+           FROM starts st JOIN students s ON s.id = st.student_id ORDER BY st.started_at`,
+  bot: `SELECT b.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, b.run, b.level + 1 AS level, b.msg, b.reply, b.log, b.blocked, b.cracked, b.cost
+        FROM bot_log b JOIN students s ON s.id = b.student_id ORDER BY b.created_at`,
   progress: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, p.game_id, p.active / 60 AS minutes, p.plays AS rounds, p.best, p.best_pct, p.vol AS kg_lifted, p.updated_at
              FROM progress p JOIN students s ON s.id = p.student_id ORDER BY s.pilot, s.roll, p.game_id`
 };
@@ -132,10 +138,14 @@ export default async function handler(req, res) {
                              COUNT(*) FILTER (WHERE difficulty = 'easy')::int AS easy, COUNT(*) FILTER (WHERE difficulty = 'right')::int AS just_right,
                              COUNT(*) FILTER (WHERE difficulty = 'hard')::int AS hard,
                              COUNT(*) FILTER (WHERE kind = 'verdict' AND fair = false)::int AS unfair
-                      FROM feedback WHERE game_id IS NOT NULL GROUP BY game_id)
+                      FROM feedback WHERE game_id IS NOT NULL GROUP BY game_id),
+               st AS (SELECT game_id, COUNT(*)::int AS starts FROM starts GROUP BY game_id),
+               tm AS (SELECT game_id, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY secs))::numeric)::int AS med_secs
+                      FROM plays WHERE secs IS NOT NULL GROUP BY game_id)
           SELECT COALESCE(pr.game_id, fb.game_id) AS game_id, pr.players, pr.rounds, pr.minutes, pr.med_best,
-                 fb.rating, fb.ratings, fb.easy, fb.just_right, fb.hard, fb.unfair
-          FROM pr FULL JOIN fb ON fb.game_id = pr.game_id ORDER BY pr.minutes DESC NULLS LAST`,
+                 fb.rating, fb.ratings, fb.easy, fb.just_right, fb.hard, fb.unfair, st.starts, tm.med_secs
+          FROM pr FULL JOIN fb ON fb.game_id = pr.game_id LEFT JOIN st ON st.game_id = COALESCE(pr.game_id, fb.game_id)
+               LEFT JOIN tm ON tm.game_id = COALESCE(pr.game_id, fb.game_id) ORDER BY pr.minutes DESC NULLS LAST`,
       sql`SELECT to_char(played_at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') AS day, COUNT(*)::int AS rounds,
                  COUNT(DISTINCT student_id)::int AS students
           FROM plays WHERE played_at > now() - interval '14 days' GROUP BY 1 ORDER BY 1`,

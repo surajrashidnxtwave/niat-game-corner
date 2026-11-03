@@ -1,7 +1,7 @@
 // POST /api/student
 //   { action: "join", roll (NIAT ID), name (first name) } -> { ok, token, student }
 //   { action: "me", token }                          -> { ok, student, progress }
-//   { action: "sync", token, games: {...}, plays: [...] } -> { ok }
+//   { action: "sync", token, games: {...}, plays: [...], starts: [...] } -> { ok }
 // Progress values only ever go up, so a stale device can't erase newer progress.
 import { db, GAME_IDS, newToken, hashToken, studentFor, limited, ipOf, int, text, dbReady, nameParts, callName } from './_lib/db.js';
 
@@ -87,14 +87,37 @@ async function sync(res, me, b) {
       [me.id, col(0), col(1), col(2), col(3), col(4), col(5)]);
   }
   // finished rounds; client_id makes a retried upload harmless
+  // meta = game-specific results (max 4 KB), secs = seconds from Play to the results screen
   const p = Array.isArray(b.plays) ? b.plays.slice(0, 50).filter(x => x && text(x.cid, 40) && GAME_IDS.includes(x.game)
-    && int(x.score, 0, 100_000) && int(x.pct, 0, 100) && int(x.lift, 0, 100) && int(x.at, 1_600_000_000_000, Date.now() + 86_400_000)) : [];
+    && int(x.score, 0, 100_000) && int(x.pct, 0, 100) && int(x.lift, 0, 100) && int(x.at, 1_600_000_000_000, Date.now() + 86_400_000)
+    && (x.secs == null || int(x.secs, 0, 86_400)) && (x.meta == null || (typeof x.meta === 'object' && JSON.stringify(x.meta).length <= 4000))) : [];
   if (p.length) {
-    await sql.query(
-      `INSERT INTO plays (client_id, student_id, game_id, score, pct, lift, played_at)
-       SELECT c, $1, g, s, p, l, to_timestamp(t / 1000.0) FROM unnest($2::text[], $3::text[], $4::int[], $5::int[], $6::int[], $7::bigint[]) AS u(c, g, s, p, l, t)
-       ON CONFLICT (client_id) DO NOTHING`,
-      [me.id, p.map(x => me.id + ':' + x.cid), p.map(x => x.game), p.map(x => x.score), p.map(x => x.pct), p.map(x => x.lift), p.map(x => x.at)]);
+    const args = [me.id, p.map(x => me.id + ':' + x.cid), p.map(x => x.game), p.map(x => x.score), p.map(x => x.pct), p.map(x => x.lift), p.map(x => x.at)];
+    try {
+      await sql.query(
+        `INSERT INTO plays (client_id, student_id, game_id, score, pct, lift, played_at, secs, meta)
+         SELECT c, $1, g, s, p, l, to_timestamp(t / 1000.0), sc, m::jsonb FROM unnest($2::text[], $3::text[], $4::int[], $5::int[], $6::int[], $7::bigint[], $8::int[], $9::text[]) AS u(c, g, s, p, l, t, sc, m)
+         ON CONFLICT (client_id) DO NOTHING`,
+        [...args, p.map(x => x.secs ?? null), p.map(x => x.meta ? JSON.stringify(x.meta) : null)]);
+    } catch (e) {
+      // database not migrated yet (no meta/secs columns): save the round without them
+      if (e.code !== '42703') throw e;
+      await sql.query(
+        `INSERT INTO plays (client_id, student_id, game_id, score, pct, lift, played_at)
+         SELECT c, $1, g, s, p, l, to_timestamp(t / 1000.0) FROM unnest($2::text[], $3::text[], $4::int[], $5::int[], $6::int[], $7::bigint[]) AS u(c, g, s, p, l, t)
+         ON CONFLICT (client_id) DO NOTHING`, args);
+    }
+  }
+  // Play presses (to count games opened but not finished); skipped if the table doesn't exist yet
+  const st = Array.isArray(b.starts) ? b.starts.slice(0, 50).filter(x => x && text(x.cid, 40) && GAME_IDS.includes(x.game) && int(x.at, 1_600_000_000_000, Date.now() + 86_400_000)) : [];
+  if (st.length) {
+    try {
+      await sql.query(
+        `INSERT INTO starts (client_id, student_id, game_id, started_at)
+         SELECT c, $1, g, to_timestamp(t / 1000.0) FROM unnest($2::text[], $3::text[], $4::bigint[]) AS u(c, g, t)
+         ON CONFLICT (client_id) DO NOTHING`,
+        [me.id, st.map(x => me.id + ':' + x.cid), st.map(x => x.game), st.map(x => x.at)]);
+    } catch (e) { if (e.code !== '42P01') throw e; }
   }
   // active seconds per day (last 14 days only); like totals, they only go up
   const h = b.hist && typeof b.hist === 'object' ? b.hist : {};
