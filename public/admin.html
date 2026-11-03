@@ -120,6 +120,38 @@ select{flex:0 1 280px}
 /* tooltip and toast */
 #tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:6px 9px;border-radius:8px;white-space:pre-line;max-width:260px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;font-size:13px;z-index:30;max-width:calc(100% - 32px);text-align:center}
+/* skill profiles */
+.skrow{display:grid;grid-template-columns:170px 1fr 44px;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.skrow:last-child{border-bottom:0}
+.skrow .nm b{display:block}
+.skrow .nm small{color:var(--soft);font-weight:600}
+.skrow .tr{height:10px;border-radius:5px;background:var(--chip);overflow:hidden}
+.skrow .tr b{display:block;height:100%;border-radius:5px;background:var(--brand)}
+.skrow.low .tr b{background:var(--bad)}
+.skrow .v{text-align:right;font-size:16px;font-weight:900}
+.tag{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;font-size:11px;font-weight:800;background:#FDECEA;color:var(--bad)}
+.sc{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.sc i{display:block;width:44px;height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
+.sc i b{display:block;height:100%;background:var(--brand)}
+.sc.lo span{color:var(--bad)} .sc.lo i b{background:var(--bad)}
+.sc.hi span{color:var(--ok)} .sc.hi i b{background:var(--ok)}
+tr.all td{background:#F7F6FF;font-weight:800}
+/* quadrants */
+.qwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
+@media (max-width:860px){.qwrap{grid-template-columns:1fr}}
+.qgrid{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 0 22px}
+.qcell{border-radius:12px;padding:14px;min-height:118px;display:flex;flex-direction:column;background:var(--chip);border-top:4px solid var(--qc)}
+.qcell b{font-size:28px;font-weight:900;line-height:1.1}
+.qcell .pc{font-size:12px;color:var(--soft)}
+.qcell .nm{margin-top:auto;font-weight:800;font-size:13.5px}
+.qcell small{color:var(--soft);font-size:12px;line-height:1.35}
+.qax-y{position:absolute;left:-22px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font-size:11.5px;color:var(--soft);font-weight:800}
+.qax-x{text-align:center;font-size:11.5px;color:var(--soft);font-weight:800;margin:6px 0 0 22px}
+.qrow{display:grid;grid-template-columns:minmax(0,190px) 1fr 52px;gap:10px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer}
+.qrow:hover{background:#FAFAFD}
+.qrow.sel{background:#F1EFFF}
+.qrow .split{height:14px;border-radius:7px}
+.qrow .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 details summary{cursor:pointer}
 pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,monospace}
 @media (max-width:640px){.kpi .value{font-size:24px}.brand span{display:none}.card{padding:14px}}
@@ -181,6 +213,10 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         </div>
       </div>
       <div class="card">
+        <div class="head"><div><h2>Brain muscles, all universities</h2><p class="sub">Median score out of 100. A student's score on a muscle is their best on any game for it.</p></div><button class="btn" data-goto="unis">Compare universities →</button></div>
+        <div id="c-skills"></div>
+      </div>
+      <div class="card">
         <div class="head"><div><h2>Top universities</h2><p class="sub">By number of students who have logged in.</p></div><button class="btn" data-goto="unis">See all universities →</button></div>
         <div class="scroll"><table id="t-topunis"></table></div>
       </div>
@@ -193,13 +229,24 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         <div class="controls"><input type="search" id="u-q" placeholder="Search university…" aria-label="Search university"></div>
         <div class="scroll"><table id="t-unis"></table></div>
       </div>
+      <div class="card">
+        <div class="head"><div><h2>Skill profiles</h2><p class="sub">Median score out of 100 for each brain muscle. <span style="color:var(--ok)">Green</span> = 10+ above the all-university median, <span style="color:var(--bad)">red</span> = 10+ below. “–” means fewer than 5 students trained it. Click a column title to sort.</p></div></div>
+        <div class="scroll"><table id="t-skills"></table></div>
+      </div>
+      <div class="card">
+        <div class="head"><div><h2>Thinking profiles</h2><p class="sub">How much they lean on AI × how well they think on their own. Strong own thinking = median of the non-AI muscles is 60 or more. Leans on AI = “Using AI well” score under 60 (trusts AI without catching its mistakes). Only students with 3+ non-AI muscles and 1+ AI game are counted. Click a university to see its grid.</p></div></div>
+        <div class="qwrap">
+          <div><select id="q-uni" aria-label="University for the grid" style="width:100%"></select><div id="q-grid"></div></div>
+          <div><div class="legend" id="q-legend"></div><div id="q-bars"></div></div>
+        </div>
+      </div>
     </section>
 
     <!-- GAMES -->
     <section data-panel="games" hidden>
       <div class="card">
         <h2>Games</h2>
-        <p class="sub">All time. Rating is out of 5. Difficulty comes from students' after-game feedback.</p>
+        <p class="sub">All time. Best score and rating are medians (rating out of 5). Difficulty comes from students' after-game feedback.</p>
         <div class="legend"><span><i style="background:var(--brand-3)"></i>Too easy</span><span><i style="background:var(--brand-2)"></i>Just right</span><span><i style="background:var(--brand)"></i>Too hard</span></div>
         <div class="scroll"><table id="t-games"></table></div>
       </div>
@@ -348,9 +395,11 @@ function render(){
   const sum = k => U.reduce((a, u) => a + u[k], 0);
   const roster = sum('on_roster'), joined = sum('joined'), a1 = sum('active1'), a7 = sum('active7'), mins = sum('minutes'), rounds = sum('rounds');
   const today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' });
-  const g0 = (d.goal || []).find(g => g.day === today) || { trained:0, hit_goal:0, avg_min:0 };
+  const g0 = (d.goal || []).find(g => g.day === today) || { trained:0, hit_goal:0 };
   const st = d.stars || [], rated = st.reduce((a, r) => a + r.n, 0);
-  const avgStars = rated ? (st.reduce((a, r) => a + r.stars * r.n, 0) / rated).toFixed(1) : '–';
+  /* median stars: walk the 1..11 counts to the middle session(s) */
+  const starAt = i => { let c = 0; for (const r of st) { c += r.n; if (c > i) return r.stars; } return 0; };
+  const medStars = rated ? +((starAt((rated - 1) >> 1) + starAt(rated >> 1)) / 2).toFixed(1) : '–';
   const back = rated ? Math.round(st.filter(r => r.stars >= 7).reduce((a, r) => a + r.n, 0) / rated * 100) + '%' : '–';
   const activeUnis = U.filter(u => u.joined).length;
 
@@ -361,19 +410,19 @@ function render(){
     ['', 'Active today', fmt(a1), fmt(g0.hit_goal) + ' hit the 15-minute goal'],
     ['', 'Active in last 7 days', fmt(a7), pctTxt(a7, joined) + ' of students who logged in'],
     ['', 'Minutes trained', fmt(mins), fmt(rounds) + ' rounds played'],
-    ['', 'Session rating', avgStars + (rated ? ' / 11' : ''), rated ? back + ' rated 7+ (“I’ll be back”)' : 'no ratings yet']
+    ['', 'Median session rating', medStars + (rated ? ' / 11' : ''), rated ? back + ' rated 7+ (“I’ll be back”)' : 'no ratings yet']
   ];
   $('kpis').innerHTML = K.map(k => '<div class="kpi ' + k[0] + '"><div class="label">' + k[1] + '</div><div class="value">' + esc(k[2]) + '</div><div class="note">' + esc(k[3]) + '</div></div>').join('');
 
   /* daily chart: last 14 days, oldest first, gaps filled */
   const byDay = new Map((d.goal || []).map(g => [g.day, g])), days = [];
   for (let i = 13; i >= 0; i--) {
-    const k = new Date(Date.now() - i * 864e5).toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), g = byDay.get(k) || { trained:0, hit_goal:0, avg_min:0 };
-    days.push({ day:k, hit:g.hit_goal, under:g.trained - g.hit_goal, trained:g.trained, avg:g.avg_min });
+    const k = new Date(Date.now() - i * 864e5).toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), g = byDay.get(k) || { trained:0, hit_goal:0, med_min:0 };
+    days.push({ day:k, hit:g.hit_goal, under:g.trained - g.hit_goal, trained:g.trained, med:g.med_min });
   }
   bars($('c-daily'), days, [{ key:'hit', color:'var(--brand)' }, { key:'under', color:'var(--brand-3)' }],
     r => dayLabel(r.day).replace(' ', ' '),
-    r => dayLabel(r.day) + '\n' + r.trained + ' trained · ' + r.hit + ' hit 15 min' + (r.trained ? '\nAvg ' + (r.avg || 0) + ' min each' : ''));
+    r => dayLabel(r.day) + '\n' + r.trained + ' trained · ' + r.hit + ' hit 15 min' + (r.trained ? '\nMedian ' + (r.med || 0) + ' min' : ''));
   if (window.innerWidth < 640) $('c-daily').querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; });
 
   /* stars chart */
@@ -390,11 +439,26 @@ function render(){
   table($('t-topunis'), uniCols.map(c => c[0] === 'University' ? ['University', u => esc(u.uni)] : c), top, 'No student has logged in yet.');
   UNI.rows = U; UNI.cols = uniCols; drawUnis();
 
+  /* skill profiles */
+  const SP = d.skills || [], all = SP.find(x => x.uni === 'All universities');
+  if (!all || !all.students) $('c-skills').innerHTML = '<p class="empty">No games played yet.</p>';
+  else {
+    const ranked = SKILLS.filter(k => all[k.k].median != null).sort((a, b) => all[b.k].median - all[a.k].median);
+    const lows = new Set(ranked.length > 3 ? ranked.slice(-2).map(k => k.k) : []);
+    $('c-skills').innerHTML = ranked.map((k, i) => { const m = all[k.k];
+      return '<div class="skrow' + (lows.has(k.k) ? ' low' : '') + '" data-tip="' + esc(k.name + ': ' + k.what + '\n' + fmt(m.n) + ' students trained it') + '"><div class="nm"><b>' + esc(k.name)
+        + (i === 0 ? ' <span class="pill">Strongest</span>' : lows.has(k.k) ? '<span class="tag">Work on this</span>' : '') + '</b><small>' + fmt(m.n) + ' students</small></div>'
+        + '<div class="tr"><b style="width:' + m.median + '%"></b></div><div class="v num">' + m.median + '</div></div>'; }).join('')
+      + (SKILLS.length > ranked.length ? '<p class="muted small" style="margin:8px 0 0">Not trained yet: ' + esc(SKILLS.filter(k => all[k.k].median == null).map(k => k.name).join(', ')) + '</p>' : '');
+  }
+  SKP.rows = SP; drawSkills();
+  QD.rows = SP; drawQuad();
+
   /* games */
   const games = (d.games || []).slice().sort((a, b) => (b.minutes || 0) - (a.minutes || 0));
   table($('t-games'), [
     ['Game', g => '<b>' + esc(gname(g.game_id)) + '</b>'], ['Players', g => fmt(g.players), 'n'], ['Rounds', g => fmt(g.rounds), 'n'], ['Minutes', g => fmt(g.minutes), 'n'],
-    ['Avg best score', g => g.avg_best == null ? '–' : g.avg_best + '%', 'n'], ['Rating', g => g.ratings ? g.rating + ' <span class="muted">(' + g.ratings + ')</span>' : '–', 'n'],
+    ['Median best score', g => g.med_best == null ? '–' : g.med_best + '%', 'n'], ['Median rating', g => g.ratings ? g.rating + ' <span class="muted">(' + g.ratings + ')</span>' : '–', 'n'],
     ['Difficulty', g => { const e = g.easy || 0, j = g.just_right || 0, h = g.hard || 0, t = e + j + h; if (!t) return '<span class="muted">–</span>';
       return '<div class="split" data-tip="' + esc('Too easy ' + e + ' · Just right ' + j + ' · Too hard ' + h) + '">' + [[e,'var(--brand-3)'],[j,'var(--brand-2)'],[h,'var(--brand)']].filter(x => x[0]).map(x => '<i style="width:' + (x[0] / t * 100) + '%;background:' + x[1] + '"></i>').join('') + '</div>'; }],
     ['AI unfair', g => g.unfair ? '<span class="pill">' + g.unfair + '</span>' : '<span class="muted">0</span>', 'n']
@@ -436,6 +500,69 @@ function render(){
   sel.innerHTML = '<option value="">All universities</option>' + [...new Set((d.students || []).map(s => s.uni))].sort().map(u => '<option>' + esc(u) + '</option>').join('');
   sel.value = cur; STU.page = 0; drawStudents();
 }
+
+/* brain muscles, same names as the Brain muscles page in the game */
+const SKILLS = [
+  { k:'creativity', name:'Creativity', what:'Coming up with many different ideas.' },
+  { k:'insight', name:'Insight', what:'Spotting the hidden link that solves a puzzle.' },
+  { k:'memory', name:'Memory', what:'Holding facts in your head and using them.' },
+  { k:'focus', name:'Focus', what:'Staying quick and accurate when time is short.' },
+  { k:'reasoning', name:'Reasoning', what:'Telling a strong argument from a weak one.' },
+  { k:'flexibility', name:'Flexibility', what:'Switching rules without getting stuck.' },
+  { k:'planning', name:'Planning', what:'Thinking a few steps ahead before you move.' },
+  { k:'ai', name:'Using AI well', what:'Knowing when to trust AI and when to check it.' }
+];
+const MIN_N = 5;   // fewer students than this: too few to show a median
+
+/* skill profiles table: one row per university, sortable */
+const SKP = { rows:[], sort:'students', dir:-1 };
+function drawSkills(){
+  const all = SKP.rows.find(x => x.uni === 'All universities'), el = $('t-skills');
+  if (!all || !all.students) { el.innerHTML = '<tbody><tr><td class="empty">No games played yet.</td></tr></tbody>'; return; }
+  const val = (u, k) => k === 'uni' ? u.uni : k === 'students' ? u.students : (u[k].n >= MIN_N ? u[k].median : -1);
+  const rows = SKP.rows.filter(u => u !== all).sort((a, b) => { const x = val(a, SKP.sort), y = val(b, SKP.sort); return (typeof x === 'string' ? x.localeCompare(y) : x - y) * SKP.dir || a.uni.localeCompare(b.uni); });
+  const cell = (u, s) => { const m = u[s.k], base = all[s.k].median;
+    if (m.n < MIN_N) return '<span class="muted" data-tip="' + esc(m.n + ' student' + (m.n === 1 ? '' : 's') + ' trained ' + s.name + '. Need ' + MIN_N + '+.') + '">–</span>';
+    const cls = u === all || base == null ? '' : m.median >= base + 10 ? ' hi' : m.median <= base - 10 ? ' lo' : '';
+    return '<span class="sc' + cls + '" data-tip="' + esc(s.name + ': median ' + m.median + '\n' + fmt(m.n) + ' students trained it') + '"><span class="num">' + m.median + '</span><i><b style="width:' + m.median + '%"></b></i></span>'; };
+  const keys = ['uni', 'students', ...SKILLS.map(s => s.k)], heads = ['University', 'Students', ...SKILLS.map(s => s.name)];
+  const tr = (u, cls) => '<tr' + (cls ? ' class="' + cls + '"' : '') + '><td>' + esc(u.uni) + '</td><td class="n">' + fmt(u.students) + '</td>' + SKILLS.map(s => '<td class="n">' + cell(u, s) + '</td>').join('') + '</tr>';
+  el.innerHTML = '<thead><tr>' + heads.map((h, i) => '<th class="sort' + (i ? ' n' : '') + '" data-k="' + keys[i] + '"' + (i > 1 ? ' data-tip="' + esc(SKILLS[i - 2].what) + '"' : '') + '>' + esc(h) + (SKP.sort === keys[i] ? (SKP.dir > 0 ? ' ▲' : ' ▼') : '') + '</th>').join('') + '</tr></thead>'
+    + '<tbody>' + tr(all, 'all') + rows.map(u => tr(u)).join('') + '</tbody>';
+}
+$('t-skills').onclick = e => {
+  const th = e.target.closest('th[data-k]'); if (!th) return;
+  const k = th.dataset.k; SKP.dir = SKP.sort === k ? -SKP.dir : (k === 'uni' ? 1 : -1); SKP.sort = k; drawSkills();
+};
+
+/* quadrants: grid for one university + one stacked bar per university */
+const QUADS = [
+  { k:'independent', q:'Q1', name:'Independent thinker', what:'Thinks well and checks AI before trusting it.', c:'#13875C' },
+  { k:'autopilot', q:'Q2', name:'Autopilot thinker', what:'Thinks well, but goes on autopilot with AI and trusts it as easily as Offloaders do.', c:'#5B4BFF' },
+  { k:'offloader', q:'Q3', name:'Offloader', what:'Own thinking is weak and trusts AI without checking.', c:'#E8590C' },
+  { k:'still_building', q:'Q4', name:'Still building', what:'Checks AI more than Offloaders, but own thinking is still weak.', c:'#9CA3AF' }
+];
+const QD = { rows:[], sel:'All universities' };
+function drawQuad(){
+  const rows = QD.rows.filter(u => u.quad).sort((a, b) => (b.uni === 'All universities') - (a.uni === 'All universities') || b.quad.qualified - a.quad.qualified), sel = $('q-uni');
+  if (!rows.length || !rows[0].quad.qualified) { $('q-grid').innerHTML = '<p class="empty">No student has played enough games yet.</p>'; $('q-bars').innerHTML = ''; sel.hidden = true; return; }
+  sel.hidden = false;
+  if (!rows.some(u => u.uni === QD.sel)) QD.sel = 'All universities';
+  sel.innerHTML = rows.map(u => '<option' + (u.uni === QD.sel ? ' selected' : '') + '>' + esc(u.uni) + '</option>').join('');
+  const u = rows.find(x => x.uni === QD.sel), q = u.quad, Q = Object.fromEntries(QUADS.map(x => [x.k, x]));
+  const cellQ = k => '<div class="qcell" style="--qc:' + Q[k].c + '" data-tip="' + esc(Q[k].what) + '"><b class="num">' + fmt(q[k]) + '</b><span class="pc">' + pctTxt(q[k], q.qualified) + ' · ' + Q[k].q + '</span><span class="nm">' + esc(Q[k].name) + '</span><small>' + esc(Q[k].what) + '</small></div>';
+  $('q-grid').innerHTML = q.qualified < MIN_N ? '<p class="empty">Only ' + q.qualified + ' student' + (q.qualified === 1 ? '' : 's') + ' here played enough games. Need ' + MIN_N + '+.</p>'
+    : '<div class="qgrid"><span class="qax-y">Thinks better on own →</span>' + ['autopilot', 'independent', 'offloader', 'still_building'].map(cellQ).join('') + '</div>'
+      + '<div class="qax-x">Relies on AI less →</div><p class="muted small" style="margin:8px 0 0 22px">' + fmt(q.qualified) + ' of ' + fmt(u.students) + ' students who played are counted.</p>';
+  $('q-legend').innerHTML = QUADS.map(x => '<span><i style="background:' + x.c + '"></i>' + esc(x.name) + '</span>').join('');
+  $('q-bars').innerHTML = rows.map(r => { const t = r.quad.qualified;
+    const bar = t < MIN_N ? '<span class="muted small">Too few students yet</span>'
+      : '<div class="split">' + QUADS.filter(x => r.quad[x.k]).map(x => '<i style="width:' + (r.quad[x.k] / t * 100) + '%;background:' + x.c + '"></i>').join('') + '</div>';
+    const tip = r.uni + ' · ' + t + ' counted\n' + QUADS.map(x => x.name + ': ' + r.quad[x.k] + ' (' + pctTxt(r.quad[x.k], t) + ')').join('\n');
+    return '<div class="qrow' + (r.uni === QD.sel ? ' sel' : '') + '" data-u="' + esc(r.uni) + '" data-tip="' + esc(tip) + '"><span class="nm">' + esc(r.uni) + '</span>' + bar + '<span class="num muted small" style="text-align:right">' + fmt(t) + '</span></div>'; }).join('');
+}
+$('q-uni').onchange = e => { QD.sel = e.target.value; drawQuad(); };
+$('q-bars').onclick = e => { const r = e.target.closest('.qrow'); if (r) { QD.sel = r.dataset.u; drawQuad(); } };
 
 /* universities table: sort + expand */
 const UNI = { rows:[], cols:[], sort:'joined', dir:-1, open:new Set() };
