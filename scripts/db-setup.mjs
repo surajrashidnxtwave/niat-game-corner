@@ -96,7 +96,42 @@ const steps = [
      game_id     text NOT NULL,
      started_at  timestamptz NOT NULL
    )`,
-  `CREATE INDEX IF NOT EXISTS starts_game_idx ON starts (game_id, started_at)`
+  `CREATE INDEX IF NOT EXISTS starts_game_idx ON starts (game_id, started_at)`,
+  // ---------- Drive School (separate points, streak and data from Brain Gym) ----------
+  // one row per student who has opened Drive School; memo = small facts later lessons need (Day 1 guess, plans, ...)
+  `CREATE TABLE IF NOT EXISTS drive_students (
+     student_id  int PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE,
+     started_on  date NOT NULL,
+     points      int NOT NULL DEFAULT 0,
+     memo        jsonb NOT NULL DEFAULT '{}',
+     created_at  timestamptz NOT NULL DEFAULT now(),
+     updated_at  timestamptz NOT NULL DEFAULT now()
+   )`,
+  // first completion of each day; ist_date = the India calendar day it counts toward (3-a-day cap, streak)
+  `CREATE TABLE IF NOT EXISTS drive_days (
+     student_id    int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     day           smallint NOT NULL,
+     completed_at  timestamptz NOT NULL,
+     ist_date      date NOT NULL,
+     points        int NOT NULL DEFAULT 0,
+     secs          int,
+     PRIMARY KEY (student_id, day)
+   )`,
+  `CREATE INDEX IF NOT EXISTS drive_days_date_idx ON drive_days (student_id, ist_date)`,
+  // everything a student does in a lesson: answers, predictions, plans, stands, reflections, game choices, scales
+  `CREATE TABLE IF NOT EXISTS drive_events (
+     id          bigserial PRIMARY KEY,
+     client_id   text NOT NULL UNIQUE,
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     day         smallint NOT NULL,
+     kind        text NOT NULL,
+     screen      text,
+     data        jsonb NOT NULL DEFAULT '{}',
+     replay      boolean NOT NULL DEFAULT false,
+     created_at  timestamptz NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS drive_events_student_idx ON drive_events (student_id, day)`,
+  `CREATE INDEX IF NOT EXISTS drive_events_kind_idx ON drive_events (kind, day)`
 ];
 
 for (const s of steps) await sql.query(s);

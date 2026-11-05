@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Brain Gym</title>
+<title>Game Corner</title>
 <meta name="theme-color" content="#141B34">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="drive/drive.css?v=14" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
@@ -650,6 +651,9 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
   .side-brand b{display:block;font:800 24px/1 var(--display)}
   .side-brand small{display:block;margin-top:2px;color:var(--soft);font-size:12px;font-weight:700}
   .tabbar .side-foot{margin-top:auto}
+  #tab-out[hidden]{display:none}
+  #tab-out .tab-lab{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0;line-height:1.2}
+  .tab-who{font-size:12px;font-weight:700;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
   .toast{left:calc(50% + 132px);bottom:32px}
   .combo{left:calc(50% + 132px)}
 
@@ -837,7 +841,7 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
   <div class="top">
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
     <div style="flex:1;min-width:0"><h2><span class="m-only">Brain Gym</span><span class="d-only" id="h-hi">Welcome back</span></h2><span class="coin"><i>C</i><span id="h-points">0</span> pt</span></div>
-    <button class="musc press" data-go="muscles">💪 <span class="lg">Brain </span>muscles</button>
+    <button class="musc press" data-go="muscles">📊 <span class="lg">My </span>profiles</button>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
 
@@ -884,15 +888,15 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
     <img class="hero3d" src="assets/3d/dumbbell.webp" width="512" height="512" alt="" decoding="async">
     <div class="w3d-slot w3d-opt joinslot" data-model="dumbbell" aria-hidden="true"></div>
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
-    <h1>Welcome to Brain Gym</h1>
-    <p>Short daily workouts for your brain. Log in to save your progress and climb your batch leaderboard.</p>
+    <h1>Welcome to Game Corner</h1>
+    <p>Brain Gym games and Drive School, a few minutes a day. Log in to save your progress and climb your batch leaderboard.</p>
   </div>
   <form class="card joinform" id="join-form" novalidate>
     <label>NIAT ID<input class="field" id="j-roll" autocomplete="username" autocapitalize="characters" spellcheck="false" maxlength="30" placeholder="Your NIAT ID" required></label>
     <label>First name<input class="field" id="j-name" autocomplete="given-name" maxlength="40" placeholder="e.g. Keerthi" required></label>
     <p class="jerr" id="j-err" role="alert" hidden></p>
     <button class="btn c full" id="j-go" style="--c:var(--ink)">Log in</button>
-    <p class="small muted" style="margin:0">We save your scores, time played and feedback to run this pilot and improve Brain Gym. Classmates see only your first name and initial on the leaderboard.</p>
+    <p class="small muted" style="margin:0">We save your scores, time played and feedback to run this pilot and improve Game Corner. Classmates see only your first name and initial on the leaderboard.</p>
   </form>
 </section>
 
@@ -907,10 +911,15 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 <section class="view" id="view-muscles">
   <div class="gtop">
     <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
-    <h1 style="flex:1;font-size:24px">Brain muscles</h1>
+    <h1 style="flex:1;font-size:24px">My Profiles</h1>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
-  <div class="mgrid">
+  <div class="ptabs" role="tablist" aria-label="Profiles">
+    <button role="tab" id="pt-thinking" data-ptab="thinking" aria-selected="true" aria-controls="m-thinking">Thinking Profile</button>
+    <button role="tab" id="pt-drive" data-ptab="drive" aria-selected="false" aria-controls="m-drive">Drive Profile</button>
+  </div>
+  <div id="m-drive" role="tabpanel" aria-labelledby="pt-drive" hidden></div>
+  <div class="mgrid" id="m-thinking" role="tabpanel" aria-labelledby="pt-thinking">
     <div class="mcol mleft">
       <div class="card scan" id="m-scan"></div>
       <div class="mcall" id="m-call"></div>
@@ -935,7 +944,13 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
   <div class="stage" id="stage"></div>
 </section>
 
+<section class="view" id="view-drive"><div id="drive-root"></div></section>
+
 <section class="view" id="view-leaderboard">
+  <div class="lbtoggle" role="tablist" aria-label="Which leaderboard">
+    <button role="tab" data-board="gym" aria-selected="true">Brain Gym</button>
+    <button role="tab" data-board="drive" aria-selected="false">Drive School</button>
+  </div>
   <div class="lbhead">
     <div class="w3d-slot w3d-opt lbslot" data-model="trophy" data-tier="gold" aria-hidden="true"></div>
     <h1>Leaderboard</h1>
@@ -950,12 +965,14 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 
 <nav class="tabbar" aria-label="Main">
   <div class="inner">
-    <div class="side-brand side-only"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></span><span><b>Brain Gym</b><small>Train your mind daily</small></span></div>
-    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Workouts</button>
+    <div class="side-brand side-only"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></span><span><b>Game Corner</b><small>Train your mind daily</small></span></div>
+    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Brain Gym</button>
+    <button class="tab" data-go="drive" id="tab-drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v6.5M4.5 16.5l5.4-3M19.5 16.5l-5.4-3"/></svg><span class="tab-lab">Drive School</span><img class="tab-turbo" src="assets/turbo/turbo-idle.svg" width="40" height="40" alt="" decoding="async"><small class="tab-new" id="tab-drive-new">New</small></button>
     <button class="tab" data-go="leaderboard" id="tab-lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>Leaderboard</button>
-    <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>Brain muscles</button>
+    <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>My Profiles</button>
     <button class="tab side-only" data-go="feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Feedback</button>
     <button class="tab side-only side-foot" data-report>🐞 Report a problem</button>
+    <button class="tab side-only" type="button" id="tab-out" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg><span class="tab-lab">Log out<small class="tab-who" id="tab-who"></small></span></button>
     <button class="tab side-only t3d" data-t3d hidden></button>
   </div>
 </nav>
@@ -975,6 +992,7 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 <script src="content/rt.js" onerror="0"></script>
 <script src="content/st.js" onerror="0"></script>
 <script src="content/aiq.js" onerror="0"></script>
+<script src="drive/drive.js?v=12" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -1275,7 +1293,8 @@ let view = null, curGame = null, cleanup = null;
 function route(){
   const hs = location.hash.slice(1), prev = view;
   let next = 'home', gid = null;
-  if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback') next = hs;
+  if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback' || hs === 'drive') next = hs;
+  else if (hs === 'profiles') next = 'muscles';
   else if (hs.startsWith('g-') && GAMES.find(g => g.id === hs.slice(2))) { next = 'game'; gid = hs.slice(2); }
   if (!ME) { next = 'join'; gid = null; }
   if (next !== 'game') { CIRCUIT = false; W3('tint', '#7B61FF'); }
@@ -1283,6 +1302,7 @@ function route(){
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   view = next; curGame = gid;
   document.body.classList.toggle('joining', view === 'join');
+  { const o = $('tab-out'); if (o) { o.hidden = !ME; if (ME) $('tab-who').textContent = ME.name + ' · ' + ME.roll; } }
   document.body.classList.toggle('ingame', view === 'game');
   if (view !== 'game') FS.off();
   if (view === 'feedback') renderGeneralFeedback();
@@ -1296,7 +1316,9 @@ function route(){
     else moodCheck();
   }
   if (view === 'leaderboard') renderBoard();
-  if (view === 'muscles') renderMuscles();
+  if (view === 'muscles') { renderMuscles(); if (window.Drive) Drive.profileTab(); }
+  if (view === 'drive' && window.Drive) Drive.render();
+  if (view !== 'drive' && window.Drive) Drive.leave();
   if (view === 'game') showIntro(GAMES.find(g => g.id === gid));
   window.scrollTo(0,0); syncMute();
   anim($('view-' + view), { opacity:[0,1], y:[10,0] });
@@ -3098,6 +3120,7 @@ async function pullMe(){
   syncNow();
 }
 function signOut(expired){
+  if (window.Drive && Drive.reset) Drive.reset();
   ME = null; BOARD = null; CIRCUIT = false; SESS = newSess(); pendingRate = null;
   try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(KEY); } catch(e){}
   S = { g:{}, days:[], hist:{}, badges:[], sess: SESS };
@@ -3105,6 +3128,14 @@ function signOut(expired){
   route();
   if (expired) { $('j-err').textContent = 'Please log in again to keep saving your progress.'; $('j-err').hidden = false; }
 }
+function askLogout(){
+  openModal('<h3 id="mtitle">Log out?</h3><p style="margin:0">Your progress is saved. It comes back when you log in again.</p>'
+    + '<button type="button" class="btn full" id="lo-yes" style="background:var(--ink);color:#fff">Log out</button>'
+    + '<button type="button" class="mclose" id="lo-no">Cancel</button>');
+  $('lo-no').onclick = () => closeModal();
+  $('lo-yes').onclick = () => { closeModal(); syncNow().finally(() => signOut(false)); };
+}
+$('tab-out').onclick = askLogout;
 $('join-form').addEventListener('submit', async e => {
   e.preventDefault();
   const err = $('j-err'), go = $('j-go');
@@ -3115,7 +3146,7 @@ $('join-form').addEventListener('submit', async e => {
   const r = await api('/api/student', { action:'join', name, roll });
   go.disabled = false; go.textContent = 'Log in';
   if (r.status !== 200 || !r.j.ok) {
-    err.textContent = r.j.error || 'Could not reach Brain Gym. Check your internet and try again.';
+    err.textContent = r.j.error || 'Could not reach Game Corner. Check your internet and try again.';
     err.hidden = false; return;
   }
   ME = Object.assign({ token: r.j.token }, r.j.student);
@@ -3139,6 +3170,7 @@ async function loadBoard(){
 const coin = p => '<span class="coin"><i>C</i>' + p.toLocaleString('en-IN') + ' pt</span>';
 const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 function renderBoard(){
+  if (window.Drive && Drive.boardOn()) return Drive.renderBoard();
   if (Date.now() - boardAt > 60000) loadBoard();
   const head = document.querySelector('.lbhead');
   if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+slot3d('trophy', '', img3d('trophy', 112), 'gold')+'<p class="muted">Loading your batch…</p></div>'; return; }
@@ -3186,12 +3218,12 @@ function feedbackForm(box, o){
   send.onclick = async () => {
     send.disabled = true; send.textContent = 'Sending…';
     const ok = await sendFeedback({ kind: o.kind, game: o.game || null, rating, difficulty: diff, comment: ta.value.trim() || null });
-    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Brain Gym. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
+    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Game Corner. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
     else { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; }
   };
 }
 function renderGeneralFeedback(){
-  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Brain Gym so far?', placeholder:'What do you like? What should we change or add?' });
+  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Game Corner so far?', placeholder:'What do you like? What should we change or add?' });
 }
 
 /* pop-up sheet shared by the mood check-in and the problem report */
@@ -3307,7 +3339,7 @@ const STAR_ASK = {
         chips:['Boring or repetitive','Too hard','Too easy','Rules were confusing','Bugs or slow','Not useful for my studies'] },
   mid:{ q:'What one change would make it a 7, so you can’t wait for tomorrow?', ph:'Your idea (optional)',
         chips:['More new games','Harder challenges','Compete with friends','Better rewards','Shorter sets','Connect it to my classes'] },
-  high:{ q:'What would make Brain Gym an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
+  high:{ q:'What would make Game Corner an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
 };
 /* 11 at the top: climbing is better. Grouped so the baseline (5) and "beyond 5" are obvious. */
 function ladderHtml(){
@@ -3371,7 +3403,7 @@ function endSession(phase){
       if (!ok) { send.disabled = false; send.classList.remove('busy'); send.textContent = 'Couldn’t send. Try again'; return; }
       sent = true;
       box.innerHTML = '<div class="reward"><div class="big">'+(stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️')+'</div><h3>Thank you!</h3>'
-        + '<p class="muted">Every answer is read by the Brain Gym team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
+        + '<p class="muted">Every answer is read by the Game Corner team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
       setTimeout(closeModal, 1700);
     };
     more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
@@ -3712,7 +3744,7 @@ function renderWho(){
   const w = $('h-who'); if (!w || !ME) return;
   $('h-hi').textContent = 'Welcome back, ' + (ME.call || ME.name.split(' ')[0]) + ' 👋';
   w.innerHTML = 'Logged in as <b>'+esc(ME.name)+'</b> · '+esc(ME.roll)+(ME.pilot && ME.pilot !== 'ALL' ? ' · '+esc(ME.pilot) : '')+'. <button class="linkbtn" id="h-out">Not you?</button>';
-  $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
+  $('h-out').onclick = askLogout;
 }
 
 /* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker =================

@@ -22,3 +22,16 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Before changing any game content, check it: one correct answer per puzzle, Indian context, Sem 1 topics only. Run Python snippets to confirm outputs.
 - When a judging mistake is found, add it to `scripts/gold.mjs` first, then adjust the prompt, then re-run `npm run test:judge`.
 - Keep plain, simple English in anything students read.
+
+## Drive School (branch drive-school)
+- Spec: `Mindset/Drive School — Build Handoff for Claude Code.md`. Days 1–3 started from its POC; their copy was rewritten casual in Nov 2026, and Day 3 now uses the original ship story.
+- Code: `public/drive/drive.js` + `drive.css` (engine, home, player, Drive Profile tab, Drive leaderboard), lessons as data in `public/content/drive/dayN.js`, Turbo in `public/assets/turbo/`, server in `api/drive.js`, tables `drive_*` in `scripts/db-setup.mjs`.
+- To add a day: write `dayN.js`, then raise `BUILT` in `drive.js` AND `DRIVE_LAST_BUILT` in `api/drive.js` (both must match).
+- Take a Stand is never judged or scored. Peer split only at 20+ answers. Drive points never mix with Brain Gym points.
+- Day 0 uses our own mindset and stick-with-it questions (not the published Dweck/Grit-S scales, so no permission needed). Don't compare them with published norms. Students aren't told about the Day 56 re-check.
+- Days 0 and 4–7 were written by Claude and are marked FOR TEAM REVIEW in their file headers.
+- Day 0 is required: Drive School shows only a quiet Day 0 start screen until it's done, and Day 1 needs Day 0 (client and server). Turbo introduces himself on Day 0's first screen ("Meet Turbo"), not before.
+- Turbo talks: info screens are chat bubbles typed word by word, in step with recorded clips (Kokoro af_heart, normal pitch, 100% speed, short pauses between phrases). Clips live in `public/assets/voice/` with `manifest.json`. Lines without a clip type silently. Copy is short and casual for Gen Z students.
+- After ANY change to Turbo's lines (lesson body/guide/wrap text, or the TURBO_LINES block in `drive.js`), run `python scripts/turbo-voice.py`. It records only new or changed lines and deletes unused clips. Needs kokoro-onnx + model files in `~/.cache/kokoro` (see the script header).
+- Test accounts = batch DEMO (demo login 1234): every built day unlocked, no Day 0 gate, no order, no daily cap (drive.js tester() and api/drive.js finish).
+- Test accounts can jump to any screen from the console: `Drive.open(day, screenIndex)` (index after review sets expand).
