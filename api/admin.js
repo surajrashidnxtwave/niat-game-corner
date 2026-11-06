@@ -1,7 +1,9 @@
 // GET /api/admin?view=summary           -> pilot report as JSON
-// GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress)
+// GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress | starts | drive_students | drive_events)
+// GET /api/admin?view=drive             -> Drive School report as JSON (test batch DEMO left out)
 // Needs header  x-admin-key: <ADMIN_KEY>. Read-only: the roster is loaded directly into the database.
 import { db, sameSecret, limited, ipOf, dbReady } from './_lib/db.js';
+import { DRIVE_LAST_BUILT } from './drive.js';
 
 // Batch name (students.pilot) -> university, longest prefix first. Used to group the report by university.
 const UNIS = [
@@ -89,8 +91,112 @@ const CSV = {
   starts: `SELECT st.started_at, s.name, s.roll AS niat_id, s.pilot AS batch, st.game_id
            FROM starts st JOIN students s ON s.id = st.student_id ORDER BY st.started_at`,
   progress: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, p.game_id, p.active / 60 AS minutes, p.plays AS rounds, p.best, p.best_pct, p.vol AS kg_lifted, p.updated_at
-             FROM progress p JOIN students s ON s.id = p.student_id ORDER BY s.pilot, s.roll, p.game_id`
+             FROM progress p JOIN students s ON s.id = p.student_id ORDER BY s.pilot, s.roll, p.game_id`,
+  drive_students: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.started_on, ds.points,
+                     COUNT(dd.day)::int AS days_done, MAX(dd.day) AS last_day, MAX(dd.completed_at) AS last_done_at, ds.memo
+                   FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN drive_days dd ON dd.student_id = ds.student_id
+                   GROUP BY s.id, ds.student_id ORDER BY s.pilot, days_done DESC, s.name`,
+  drive_events: `SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, e.kind, e.screen, e.replay, e.data
+                 FROM drive_events e JOIN students s ON s.id = e.student_id ORDER BY e.created_at`
 };
+
+// Day 0 scales: a student's score = mean of the items on 1-5, reverse-scored items flipped (higher = more "can grow" / more stick-with-it).
+// Only each student's first answer counts (replays are skipped by the query).
+function scaleScores(rows){
+  const per = { mindset: [], grit: [] }, items = { mindset: [], grit: [] };
+  for (const r of rows) {
+    const d = r.data || {}, raw = d.raw, rev = d.reverse || [], top = (d.points || 5) + 1;
+    if (!per[d.scale] || !Array.isArray(raw) || !raw.length || raw.some(v => !Number.isInteger(v) || v < 1 || v >= top)) continue;
+    const vals = raw.map((v, i) => rev[i] ? top - v : v);
+    per[d.scale].push({ uni: uniOf(r.pilot), score: vals.reduce((a, b) => a + b, 0) / vals.length });
+    raw.forEach((v, i) => { const c = items[d.scale][i] = items[d.scale][i] || Array(top - 1).fill(0); c[v - 1]++; });
+  }
+  const out = {};
+  for (const k of Object.keys(per)) {
+    const groups = new Map([['All universities', []]]);
+    for (const x of per[k]) { groups.get('All universities').push(x.score); if (!groups.has(x.uni)) groups.set(x.uni, []); groups.get(x.uni).push(x.score); }
+    out[k] = {
+      unis: [...groups].map(([uni, v]) => ({ uni, n: v.length, mean: v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : null,
+        low: v.filter(x => x < 2.5).length, mid: v.filter(x => x >= 2.5 && x < 3.5).length, high: v.filter(x => x >= 3.5).length })),
+      items: items[k]                                  // per item: how many picked option 1..5 (raw, before flipping)
+    };
+  }
+  return out;
+}
+
+// Drive School report. Test accounts (batch DEMO) are left out everywhere.
+async function driveReport(sql){
+  const REAL = `s.pilot NOT LIKE 'DEMO%'`;
+  const DD = `dd AS (SELECT student_id, COUNT(*) FILTER (WHERE day > 0)::int AS lessons, BOOL_OR(day = 0) AS setup, MAX(completed_at) AS last FROM drive_days GROUP BY student_id)`;
+  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students] = await Promise.all([
+    sql.query(`WITH ${DD}
+      SELECT COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
+             COUNT(*) FILTER (WHERE dd.lessons >= ${DRIVE_LAST_BUILT})::int AS all_done,
+             COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7,
+             COUNT(*) FILTER (WHERE dd.last > now() - interval '1 day')::int AS active1,
+             COALESCE(SUM(ds.points), 0)::int AS points
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id WHERE ${REAL}`),
+    // per day: who opened it, who finished it, median minutes and points of first finishes
+    sql.query(`WITH op AS (SELECT e.day, COUNT(DISTINCT e.student_id)::int AS opened FROM drive_events e JOIN students s ON s.id = e.student_id WHERE e.kind = 'open' AND ${REAL} GROUP BY e.day),
+           fi AS (SELECT d.day, COUNT(*)::int AS finished, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY d.secs) / 60.0)::numeric, 1)::float AS med_min,
+                         ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY d.points))::numeric)::int AS med_pts
+                  FROM drive_days d JOIN students s ON s.id = d.student_id WHERE ${REAL} GROUP BY d.day)
+      SELECT g.day, COALESCE(op.opened, 0) AS opened, COALESCE(fi.finished, 0) AS finished, fi.med_min, fi.med_pts
+      FROM generate_series(0, ${DRIVE_LAST_BUILT}) AS g(day) LEFT JOIN op ON op.day = g.day LEFT JOIN fi ON fi.day = g.day ORDER BY g.day`),
+    // per India calendar day, last 14 days: active = did anything in Drive School (opened or finished a lesson);
+    // finished = finished a lesson for the first time; minutes = their lesson time that day (first finishes; replay time isn't recorded)
+    sql.query(`WITH act AS (SELECT DISTINCT (e.created_at AT TIME ZONE 'Asia/Kolkata')::date AS day, e.student_id FROM drive_events e JOIN students s ON s.id = e.student_id
+                            WHERE ${REAL} AND e.created_at > now() - interval '15 days'),
+                fin AS (SELECT d.ist_date AS day, d.student_id, COUNT(*)::int AS lessons, SUM(d.secs) AS secs FROM drive_days d JOIN students s ON s.id = d.student_id
+                            WHERE ${REAL} AND d.ist_date > current_date - 15 GROUP BY 1, 2),
+                u AS (SELECT COALESCE(act.day, fin.day) AS day, COALESCE(act.student_id, fin.student_id) AS sid, fin.lessons, fin.secs
+                      FROM act FULL JOIN fin ON fin.day = act.day AND fin.student_id = act.student_id)
+      SELECT to_char(day, 'YYYY-MM-DD') AS day, COUNT(*)::int AS active, COUNT(lessons)::int AS students, COALESCE(SUM(lessons), 0)::int AS lessons,
+             ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) / 60.0)::numeric, 1)::float AS med_min
+      FROM u WHERE day > (now() AT TIME ZONE 'Asia/Kolkata')::date - 14 GROUP BY day ORDER BY day`),
+    // first-try answers per question (replays left out)
+    sql.query(`SELECT e.day, e.screen, MIN(e.data->>'dim') AS dim, COUNT(*)::int AS n, COUNT(*) FILTER (WHERE (e.data->>'correct')::boolean)::int AS correct
+      FROM drive_events e JOIN students s ON s.id = e.student_id
+      WHERE e.kind = 'attempt' AND e.replay = false AND ${REAL} GROUP BY e.day, e.screen ORDER BY e.day, e.screen`),
+    sql.query(`SELECT DISTINCT ON (e.student_id, e.data->>'scale') s.pilot, e.data FROM drive_events e JOIN students s ON s.id = e.student_id
+      WHERE e.kind = 'scale' AND e.replay = false AND ${REAL} ORDER BY e.student_id, e.data->>'scale', e.created_at`),
+    sql.query(`SELECT x.habit, COUNT(DISTINCT e.student_id)::int AS n
+      FROM drive_events e JOIN students s ON s.id = e.student_id CROSS JOIN LATERAL jsonb_array_elements_text(e.data->'picked') AS x(habit)
+      WHERE e.kind = 'study' AND e.data->>'key' = 'study' AND e.replay = false AND ${REAL} GROUP BY 1 ORDER BY 2 DESC`),
+    sql.query(`WITH h AS (SELECT DISTINCT ON (e.student_id) (e.data->>'value')::float AS v FROM drive_events e JOIN students s ON s.id = e.student_id
+                        WHERE e.kind = 'study' AND e.data->>'key' = 'studyHours' AND e.replay = false AND ${REAL} ORDER BY e.student_id, e.created_at),
+                a AS (SELECT COUNT(DISTINCT e.student_id)::int AS n FROM drive_events e JOIN students s ON s.id = e.student_id
+                        WHERE e.kind = 'study' AND e.data->>'key' = 'study' AND e.replay = false AND ${REAL})
+      SELECT COUNT(*)::int AS n, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY v))::numeric, 1)::float AS med,
+             COUNT(*) FILTER (WHERE v = 0)::int AS zero, COUNT(*) FILTER (WHERE v >= 10)::int AS ten_plus, (SELECT n FROM a) AS answered_habits FROM h`),
+    sql.query(`SELECT e.day, e.data->>'sideName' AS side, COUNT(DISTINCT e.student_id)::int AS n,
+             COUNT(DISTINCT e.student_id) FILTER (WHERE e.data->'self'->>'choice' = 'revise')::int AS revised
+      FROM drive_events e JOIN students s ON s.id = e.student_id WHERE e.kind = 'stand' AND e.replay = false AND ${REAL} GROUP BY 1, 2 ORDER BY 1, 3 DESC`),
+    // what students wrote: reflections, plans, stands (latest 300)
+    sql.query(`SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, e.kind, e.data
+      FROM drive_events e JOIN students s ON s.id = e.student_id
+      WHERE e.kind IN ('reflect', 'plan', 'stand') AND e.replay = false AND ${REAL} ORDER BY e.created_at DESC LIMIT 300`),
+    sql.query(`WITH ${DD}
+      SELECT s.pilot, COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
+             COALESCE(SUM(dd.lessons), 0)::int AS lessons, COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id WHERE ${REAL} GROUP BY s.pilot`),
+    sql.query(`WITH ${DD}
+      SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.points, to_char(ds.started_on, 'YYYY-MM-DD') AS started_on,
+             COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id
+      WHERE ${REAL} ORDER BY lessons DESC, ds.points DESC, s.name LIMIT 3000`)
+  ]);
+  const um = new Map();                                // batches -> universities
+  for (const p of unis) {
+    const name = uniOf(p.pilot), u = um.get(name) || { uni: name, started: 0, setup_done: 0, lesson1: 0, lessons: 0, active7: 0 };
+    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7']) u[k] += p[k];
+    um.set(name, u);
+  }
+  for (const st of students) st.uni = uniOf(st.batch);
+  for (const t of texts) t.uni = uniOf(t.batch);
+  return { ok: true, built: DRIVE_LAST_BUILT, kpi: kpi[0], funnel, daily, acc, scales: scaleScores(scales), study, hours: hours[0], stands, texts,
+           unis: [...um.values()].sort((a, b) => b.started - a.started), students };
+}
 
 const cell = v => {
   if (v == null) return '';
@@ -115,9 +221,11 @@ export default async function handler(req, res) {
       const cols = rows.length ? Object.keys(rows[0]) : [];
       const body = [cols.join(','), ...rows.map(r => cols.map(c => cell(r[c])).join(','))].join('\r\n');
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="brain-gym-${t}.csv"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${t.startsWith('drive_') ? 'drive-school-' + t.slice(6) : 'brain-gym-' + t}.csv"`);
       return res.status(200).send('\uFEFF' + body);
     }
+
+    if (q.get('view') === 'drive') return res.status(200).json(await driveReport(sql));
 
     const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, best] = await Promise.all([
       sql`WITH pr AS (SELECT student_id, SUM(active)::int AS active, SUM(plays)::int AS plays FROM progress GROUP BY student_id)

@@ -14,7 +14,7 @@ import { db, studentFor, limited, ipOf, int, text, dbReady } from './_lib/db.js'
 export const DRIVE_LAST_BUILT = 7;      // highest day with content in this release
 const DAILY_MAX = 3;
 const MAX_PTS = 400;                    // generous cap per lesson; real lessons give about 100–250
-const KINDS = ['attempt', 'predict', 'recall', 'plan', 'rewrite', 'reflect', 'stand', 'game', 'scale', 'study', 'pairs', 'theory', 'sort', 'review'];
+const KINDS = ['attempt', 'predict', 'recall', 'plan', 'rewrite', 'reflect', 'stand', 'game', 'scale', 'study', 'pairs', 'theory', 'sort', 'review', 'story'];
 const DIMS = ['strategy', 'motivation', 'voice'];
 const SPLIT_MIN = 20;
 

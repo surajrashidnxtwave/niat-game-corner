@@ -34,4 +34,5 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Turbo talks: info screens are chat bubbles typed word by word, in step with recorded clips (Kokoro af_heart, normal pitch, 100% speed, short pauses between phrases). Clips live in `public/assets/voice/` with `manifest.json`. Lines without a clip type silently. Copy is short and casual for Gen Z students.
 - After ANY change to Turbo's lines (lesson body/guide/wrap text, or the TURBO_LINES block in `drive.js`), run `python scripts/turbo-voice.py`. It records only new or changed lines and deletes unused clips. Needs kokoro-onnx + model files in `~/.cache/kokoro` (see the script header).
 - Test accounts = batch DEMO (demo login 1234): every built day unlocked, no Day 0 gate, no order, no daily cap (drive.js tester() and api/drive.js finish).
+- Admin: the "Drive School" tab in `public/admin.html` loads `/api/admin?view=drive` (batch DEMO left out) and reads question text from the lesson files. CSVs: drive_students, drive_events.
 - Test accounts can jump to any screen from the console: `Drive.open(day, screenIndex)` (index after review sets expand).
