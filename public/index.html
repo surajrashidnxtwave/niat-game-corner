@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Brain Gym</title>
+<title>Game Corner</title>
 <meta name="theme-color" content="#141B34">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="drive/drive.css?v=14" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
@@ -650,6 +651,9 @@ h1{font-family:var(--display);font-weight:800;letter-spacing:.005em}
   .side-brand b{display:block;font:800 24px/1 var(--display)}
   .side-brand small{display:block;margin-top:2px;color:var(--soft);font-size:12px;font-weight:700}
   .tabbar .side-foot{margin-top:auto}
+  #tab-out[hidden]{display:none}
+  #tab-out .tab-lab{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0;line-height:1.2}
+  .tab-who{font-size:12px;font-weight:700;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
   .toast{left:calc(50% + 132px);bottom:32px}
   .combo{left:calc(50% + 132px)}
 
@@ -742,6 +746,9 @@ html.w3d .btn:active{transform:translateY(3px) scale(.99);box-shadow:0 1px 0 rgb
 html.w3d .gcard,html.w3d .hero .check{transition:transform 180ms var(--ease-out),box-shadow 180ms var(--ease-out);transform-style:preserve-3d;will-change:transform}
 html.w3d .gcard.tilt,html.w3d .hero .check.tilt{box-shadow:0 18px 40px -12px rgba(43,31,122,.35)}
 html.w3d .gcard .art{background-image:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.35),transparent 55%)}
+/* locked tiles: keep their dark background under the 3D shine (the rule above used to wipe it, hiding the icon) */
+html.w3d .gcard.locked .art{background-image:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.18),transparent 55%),linear-gradient(150deg,#2E3452,var(--gym-dark))}
+html.w3d .gcard.locked.next .art{background-image:radial-gradient(circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.18),transparent 55%),radial-gradient(circle at 80% 10%,color-mix(in srgb,var(--c) 55%,transparent),transparent 60%),linear-gradient(150deg,#2E3452,var(--gym-dark))}
 /* the countdown is a warp jump: the page fades out, the stars stretch, the number glows */
 html.w3d-ready .app,html.w3d-ready .tabbar{transition:opacity 260ms var(--ease-out),filter 260ms var(--ease-out)}
 html.warping .app,html.warping .tabbar{opacity:0;filter:blur(6px)}
@@ -834,7 +841,7 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
   <div class="top">
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
     <div style="flex:1;min-width:0"><h2><span class="m-only">Brain Gym</span><span class="d-only" id="h-hi">Welcome back</span></h2><span class="coin"><i>C</i><span id="h-points">0</span> pt</span></div>
-    <button class="musc press" data-go="muscles">💪 <span class="lg">Brain </span>muscles</button>
+    <button class="musc press" data-go="muscles">📊 <span class="lg">My </span>profiles</button>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
 
@@ -881,15 +888,15 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
     <img class="hero3d" src="assets/3d/dumbbell.webp" width="512" height="512" alt="" decoding="async">
     <div class="w3d-slot w3d-opt joinslot" data-model="dumbbell" aria-hidden="true"></div>
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></div>
-    <h1>Welcome to Brain Gym</h1>
-    <p>Short daily workouts for your brain. Log in to save your progress and climb your batch leaderboard.</p>
+    <h1>Welcome to Game Corner</h1>
+    <p>Brain Gym games and Drive School, a few minutes a day. Log in to save your progress and climb your batch leaderboard.</p>
   </div>
   <form class="card joinform" id="join-form" novalidate>
     <label>NIAT ID<input class="field" id="j-roll" autocomplete="username" autocapitalize="characters" spellcheck="false" maxlength="30" placeholder="Your NIAT ID" required></label>
     <label>First name<input class="field" id="j-name" autocomplete="given-name" maxlength="40" placeholder="e.g. Keerthi" required></label>
     <p class="jerr" id="j-err" role="alert" hidden></p>
     <button class="btn c full" id="j-go" style="--c:var(--ink)">Log in</button>
-    <p class="small muted" style="margin:0">We save your scores, time played and feedback to run this pilot and improve Brain Gym. Classmates see only your first name and initial on the leaderboard.</p>
+    <p class="small muted" style="margin:0">We save your scores, time played and feedback to run this pilot and improve Game Corner. Classmates see only your first name and initial on the leaderboard.</p>
   </form>
 </section>
 
@@ -904,10 +911,15 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 <section class="view" id="view-muscles">
   <div class="gtop">
     <button class="round press" data-go="home" aria-label="Back to workouts">←</button>
-    <h1 style="flex:1;font-size:24px">Brain muscles</h1>
+    <h1 style="flex:1;font-size:24px">My Profiles</h1>
     <button class="round press mute" aria-label="Turn sound off">🔊</button>
   </div>
-  <div class="mgrid">
+  <div class="ptabs" role="tablist" aria-label="Profiles">
+    <button role="tab" id="pt-thinking" data-ptab="thinking" aria-selected="true" aria-controls="m-thinking">Thinking Profile</button>
+    <button role="tab" id="pt-drive" data-ptab="drive" aria-selected="false" aria-controls="m-drive">Drive Profile</button>
+  </div>
+  <div id="m-drive" role="tabpanel" aria-labelledby="pt-drive" hidden></div>
+  <div class="mgrid" id="m-thinking" role="tabpanel" aria-labelledby="pt-thinking">
     <div class="mcol mleft">
       <div class="card scan" id="m-scan"></div>
       <div class="mcall" id="m-call"></div>
@@ -932,7 +944,13 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
   <div class="stage" id="stage"></div>
 </section>
 
+<section class="view" id="view-drive"><div id="drive-root"></div></section>
+
 <section class="view" id="view-leaderboard">
+  <div class="lbtoggle" role="tablist" aria-label="Which leaderboard">
+    <button role="tab" data-board="gym" aria-selected="true">Brain Gym</button>
+    <button role="tab" data-board="drive" aria-selected="false">Drive School</button>
+  </div>
   <div class="lbhead">
     <div class="w3d-slot w3d-opt lbslot" data-model="trophy" data-tier="gold" aria-hidden="true"></div>
     <h1>Leaderboard</h1>
@@ -947,17 +965,34 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 
 <nav class="tabbar" aria-label="Main">
   <div class="inner">
-    <div class="side-brand side-only"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></span><span><b>Brain Gym</b><small>Train your mind daily</small></span></div>
-    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Workouts</button>
+    <div class="side-brand side-only"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6.5 6v12M17.5 6v12M3 9.5v5M21 9.5v5M6.5 12h11"/></svg></span><span><b>Game Corner</b><small>Train your mind daily</small></span></div>
+    <button class="tab" data-go="home" id="tab-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Brain Gym</button>
+    <button class="tab" data-go="drive" id="tab-drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v6.5M4.5 16.5l5.4-3M19.5 16.5l-5.4-3"/></svg><span class="tab-lab">Drive School</span><img class="tab-turbo" src="assets/turbo/turbo-idle.svg" width="40" height="40" alt="" decoding="async"><small class="tab-new" id="tab-drive-new">New</small></button>
     <button class="tab" data-go="leaderboard" id="tab-lb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>Leaderboard</button>
-    <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>Brain muscles</button>
+    <button class="tab side-only" data-go="muscles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>My Profiles</button>
     <button class="tab side-only" data-go="feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Feedback</button>
     <button class="tab side-only side-foot" data-report>🐞 Report a problem</button>
+    <button class="tab side-only" type="button" id="tab-out" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 16l-4-4 4-4M6 12h10"/></svg><span class="tab-lab">Log out<small class="tab-who" id="tab-who"></small></span></button>
     <button class="tab side-only t3d" data-t3d hidden></button>
   </div>
 </nav>
 <div class="toast" id="toast" role="status"></div>
 <div class="modal" id="modal" hidden><div class="card mbox" id="mbox" role="dialog" aria-modal="true" aria-labelledby="mtitle" tabindex="-1"></div></div>
+<script src="content/b7.js" onerror="0"></script>
+<script src="content/ml.js" onerror="0"></script>
+<script src="content/lg.js" onerror="0"></script>
+<script src="content/wiki.js" onerror="0"></script>
+<script src="content/rr.js" onerror="0"></script>
+<script src="content/si.js" onerror="0"></script>
+<script src="content/fh.js" onerror="0"></script>
+<script src="content/ab.js" onerror="0"></script>
+<script src="content/tc.js" onerror="0"></script>
+<script src="content/sc.js" onerror="0"></script>
+<script src="content/ts.js" onerror="0"></script>
+<script src="content/rt.js" onerror="0"></script>
+<script src="content/st.js" onerror="0"></script>
+<script src="content/aiq.js" onerror="0"></script>
+<script src="drive/drive.js?v=12" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -1023,13 +1058,29 @@ function fresh(id, items, n, key){
   key = key || ((x, i) => i);
   S.seen = S.seen || {};
   const keys = items.map(key), seen = new Set(S.seen[id] || []), all = items.map((x, i) => i);
+  if (replayMode()) {   // today's fresh rounds are used up: replay items already seen, keep new ones for tomorrow
+    const old = all.filter(i => seen.has(keys[i]));
+    if (old.length >= n) return shuffle(old).slice(0, n).map(i => items[i]);
+  }
   let out = shuffle(all.filter(i => !seen.has(keys[i]))).slice(0, n);
   if (out.length < n) { seen.clear(); out = out.concat(shuffle(all.filter(i => !out.includes(i))).slice(0, n - out.length)); }
   out.forEach(i => seen.add(keys[i]));
   S.seen[id] = [...seen].slice(-500); save();
   return out.map(i => items[i]);
 }
-const txtKey = x => String(typeof x === 'string' ? x : x.msg).slice(0, 60);
+/* soft daily cap: each content game gives FRESH_CAP rounds of new puzzles a day (3 for one-puzzle games).
+   After that, rounds still count but reuse puzzles the student has seen, so the pools last 30+ days. */
+const FRESH_CAP = 2, FRESH_CAP_X = { 'link-grid':3, 'recall-rebuild':3, 'taste-test':3, 'wiki-hop':3 };
+const CAPPED = new Set(['beat-the-7','missing-link','link-grid','wiki-hop','recall-rebuild','fallacy-hunt','argue-back','trust-or-check','source-check','taste-test','you-or-ai','hint-ladder','code-review','right-tool','seen-it']);
+const freshLeft = gid => (FRESH_CAP_X[gid] || FRESH_CAP) - (todayState().rounds[gid] || 0);
+function freshNote(gid){
+  if (!CAPPED.has(gid)) return '';
+  const n = freshLeft(gid);
+  return n > 0 ? '<br><span class="small">🌱 '+n+' round'+(n === 1 ? '' : 's')+' of new puzzles left today.</span>'
+    : '<br><span class="small">🔁 New puzzles are done for today. You can replay ones you’ve seen, or try another game. More tomorrow.</span>';
+}
+const replayMode = () =>!!curGame && CAPPED.has(curGame) && freshLeft(curGame) <= 0;
+const txtKey = x =>String(typeof x === 'string' ? x : x.msg).slice(0, 60);
 const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 const norm = s => String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
 
@@ -1242,7 +1293,8 @@ let view = null, curGame = null, cleanup = null;
 function route(){
   const hs = location.hash.slice(1), prev = view;
   let next = 'home', gid = null;
-  if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback') next = hs;
+  if (hs === 'leaderboard' || hs === 'muscles' || hs === 'feedback' || hs === 'drive') next = hs;
+  else if (hs === 'profiles') next = 'muscles';
   else if (hs.startsWith('g-') && GAMES.find(g => g.id === hs.slice(2))) { next = 'game'; gid = hs.slice(2); }
   if (!ME) { next = 'join'; gid = null; }
   if (next !== 'game') { CIRCUIT = false; W3('tint', '#7B61FF'); }
@@ -1250,6 +1302,7 @@ function route(){
   { const cb = $('combo'); if (cb) cb.classList.remove('on'); }
   view = next; curGame = gid;
   document.body.classList.toggle('joining', view === 'join');
+  { const o = $('tab-out'); if (o) { o.hidden = !ME; if (ME) $('tab-who').textContent = ME.name + ' · ' + ME.roll; } }
   document.body.classList.toggle('ingame', view === 'game');
   if (view !== 'game') FS.off();
   if (view === 'feedback') renderGeneralFeedback();
@@ -1263,7 +1316,9 @@ function route(){
     else moodCheck();
   }
   if (view === 'leaderboard') renderBoard();
-  if (view === 'muscles') renderMuscles();
+  if (view === 'muscles') { renderMuscles(); if (window.Drive) Drive.profileTab(); }
+  if (view === 'drive' && window.Drive) Drive.render();
+  if (view !== 'drive' && window.Drive) Drive.leave();
   if (view === 'game') showIntro(GAMES.find(g => g.id === gid));
   window.scrollTo(0,0); syncMute();
   anim($('view-' + view), { opacity:[0,1], y:[10,0] });
@@ -1340,10 +1395,17 @@ function justUnlocked(){
    Back Track, Fallacy Hunt and Robot Path already get harder on their own. */
 const LADDER = {
   'word-spread':[90,80,70,60,50], 'missing-link':[120,110,100,90,80], 'recall-rebuild':[40,35,30,26,22],
-  'symbol-sprint':[35,40,45,50,55], 'rule-switch':[40,44,48,52,56], 'you-or-ai':[1,2,3,4,5], 'link-grid':[4,4,3,3,2], 'wiki-hop':[4,4,5,5,6]
+  'symbol-sprint':[35,40,45,50,55], 'rule-switch':[40,44,48,52,56], 'you-or-ai':[1,2,3,4,5], 'link-grid':[4,4,3,3,2], 'wiki-hop':[4,4,5,5,6],
+  /* 0 = no clock. Clock games: seconds per question (Taste Test: per round) */
+  'beat-the-7':[0,30,25,20,15], 'fallacy-hunt':[0,25,20,15,12], 'argue-back':[0,40,30,24,18], 'trust-or-check':[0,30,24,18,14],
+  'source-check':[0,75,60,50,40], 'taste-test':[0,90,75,60,50], 'code-review':[0,60,45,35,28], 'hint-ladder':[0,0,60,45,35], 'right-tool':[0,25,20,15,12],
+  'robot-path':[0,0,1,1,2], 'color-clash':[30,35,40,45,50], 'seen-it':[3000,2700,2400,2100,1800], 'bug-tracker':[0.45,0.55,0.65,0.75,0.85]
 };
 const LV_HINT = { 'word-spread':'less time', 'missing-link':'less time', 'recall-rebuild':'less time to read',
-  'symbol-sprint':'a higher target', 'rule-switch':'a higher target', 'you-or-ai':'confidence, then a clock', 'link-grid':'fewer mistakes allowed', 'wiki-hop':'longer routes' };
+  'symbol-sprint':'a higher target', 'rule-switch':'a higher target', 'you-or-ai':'confidence, then a clock', 'link-grid':'fewer mistakes allowed', 'wiki-hop':'longer routes',
+  'beat-the-7':'a clock per prompt', 'fallacy-hunt':'a clock per message', 'argue-back':'a clock per claim', 'trust-or-check':'a clock per snippet',
+  'source-check':'a clock per summary', 'taste-test':'a clock for the round', 'code-review':'a clock per function', 'hint-ladder':'a clock per puzzle', 'right-tool':'a clock per situation',
+  'robot-path':'harder grids', 'color-clash':'a higher target', 'seen-it':'cards flash faster', 'bug-tracker':'faster bugs' };
 const lvOf = id => Math.min(5, Math.max(1, gs(id).lv || 1));
 const lvVal = id => LADDER[id][lvOf(id) - 1];
 /* "How to play" lines that quote a number the level changes */
@@ -1352,6 +1414,20 @@ function howText(id, line){
   const v = lvVal(id);
   return line.replace(/\b90 seconds\b/, v + ' seconds').replace(/in 2 minutes/, 'in ' + fmt(v) + ' minutes')
     .replace(/You can make 4 mistakes/, 'You can make ' + v + ' mistake' + (v === 1 ? '' : 's')).replace(/You get 40 seconds/, 'You get ' + v + ' seconds');
+}
+/* per-question clock for levelled quiz games (0 = none). Freezes once isDone() is true; runs onOut if time runs out first. */
+function qClock(id, root, isDone, onOut){
+  const secs = LADDER[id] ? lvVal(id) : 0; if (!secs || !root) return;
+  root.querySelectorAll(':scope > .qclock').forEach(x => x.remove());
+  const bar = h('<div class="tbar qclock"><i></i></div>'), fill = bar.firstChild, end = Date.now() + secs * 1000; root.prepend(bar);
+  const loop = () => {
+    if (!bar.isConnected || isDone()) return;
+    const left = end - Date.now(); fill.style.transform = 'scaleX(' + Math.max(0, left / (secs * 1000)) + ')';
+    if (left <= 5000) bar.classList.add('urgent');
+    if (left <= 0) return onOut();
+    requestAnimationFrame(loop);
+  };
+  loop();
 }
 const lvTag = id => LADDER[id] ? 'Lv ' + lvOf(id) : id === 'back-track' ? 'N = ' + (gs(id).level || 1) : '';
 
@@ -1613,7 +1689,7 @@ function showIntro(g){
   const st = gs(g.id), locked = isLocked(g.id), n = daysToUnlock(g.id), left = Math.ceil((DAY_GOAL - todaySecs()) / 60);
   const foot = locked
     ? '<div class="bestline">'+(n === 1 && todaySecs() < DAY_GOAL ? 'Only '+left+' more minute'+(left === 1 ? '' : 's')+' of training today to unlock it!' : 'Unlocks after '+n+' more workout day'+(n === 1 ? '' : 's')+'.')+'</div><button class="btn lockcta" data-go="home">'+svgI('lock', 2.4).replace('<svg ','<svg style="width:18px;height:18px" ')+' Locked</button>'
-    : '<div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+'</div><button class="btn c" id="go">Play</button>';
+    : '<div class="bestline">'+(st.plays ? 'Best score '+st.best+'. Played '+st.plays+' time'+(st.plays === 1 ? '' : 's')+'.' : 'First time? You’ve got this.')+freshNote(g.id)+'</div><button class="btn c" id="go">Play</button>';
   const stage = $('stage');
   stage.innerHTML = '';
   const el = h('<div>'
@@ -1704,6 +1780,9 @@ function results(g, res, secs){
   queuePlay(g.id, Math.max(0, Math.round(res.score) || 0), pct, lift, secs, res.meta);
   save(); syncNow();
   res.lines = (res.lines || []).concat(['💪 <b>+' + lift + ' kg</b> lifted for your ' + SKILLS[g.skill].name + ' muscle.']);
+  if (CAPPED.has(g.id)) { const fl = freshLeft(g.id);
+    if (fl === 0) res.lines.push('🌱 That was today’s last round of new ' + g.name + ' puzzles. New ones tomorrow. Try another game next!');
+    else if (fl < 0) res.lines.push('🔁 Replay round: these were puzzles you’ve seen. New ones tomorrow.'); }
   if (LADDER[g.id]) {
     const before = lvOf(g.id);
     st.lv = pct >= 80 ? Math.min(5, before + 1) : pct < 40 ? Math.max(1, before - 1) : before;
@@ -1790,19 +1869,21 @@ function mcq(box, opts, correct, explain, onDone, pts){
   box.innerHTML = opts.map((o,i) => '<button class="opt" data-i="'+i+'">'+o+'</button>').join('') + '<div id="mcq-x"></div>';
   anim(box.querySelectorAll('.opt'), { opacity:[0,1], y:[10,0] }, { delay: stag(0.05) });
   let done = false;
-  box.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+  const answer = (b, late) => {
     if (done) return; done = true;
-    const i = +b.dataset.i, good = i === correct;
-    b.classList.add(good ? 'right' : 'wrong');
+    const i = b ? +b.dataset.i : -1, good = i === correct;
+    if (b) b.classList.add(good ? 'right' : 'wrong');
     box.querySelectorAll('.opt')[correct].classList.add('right');
-    if (good) pop('+' + (pts || 10), b); else shake(b);
+    if (good) pop('+' + (pts || 10), b); else if (b) shake(b);
     burst(good);
     const x = box.querySelector('#mcq-x');
-    x.innerHTML = '<div class="explain">'+explain+'</div><button class="btn c full" style="margin-top:12px" id="mcq-next">Next</button>';
+    x.innerHTML = '<div class="explain">'+(late ? '<b>⏱ Time’s up.</b> ' : '')+explain+'</div><button class="btn c full" style="margin-top:12px" id="mcq-next">Next</button>';
     anim(x, { opacity:[0,1], y:[8,0] });
     x.querySelector('#mcq-next').onclick = () => onDone(good);
     x.querySelector('#mcq-next').focus();
-  });
+  };
+  box.querySelectorAll('.opt').forEach(b => b.onclick = () => answer(b));
+  qClock(curGame, box.closest('.play'), () => done, () => answer(null, true));
 }
 const code = s => '<pre class="code">'+esc(s)+'</pre>';
 
@@ -1909,7 +1990,9 @@ const BeatSeven = { id:'beat-the-7', name:'Beat the 7', skill:'creativity', icon
     ctx.root.innerHTML = hud([['b7-q','Prompt','1/6'],['b7-s','Points','0']]) + '<div class="card"><div class="big" id="b7-text"></div>'
       + '<div class="row" style="margin-top:14px"><input class="field" id="b7-in" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer"><button class="btn c" id="b7-go">Go</button></div><div id="b7-fb"></div></div>';
     const inp = $('b7-in'); inp.addEventListener('paste', e => e.preventDefault());
-    const show = () => { $('b7-text').textContent = qs[i].q; $('b7-q').textContent = (i+1)+'/6'; inp.value = ''; inp.disabled = false; $('b7-go').disabled = false; $('b7-fb').innerHTML = ''; inp.focus(); anim($('b7-text'), { opacity:[0,1], x:[16,0] }); };
+    let b7Late = false;
+    const show = () => { $('b7-text').textContent = qs[i].q; $('b7-q').textContent = (i+1)+'/6'; inp.value = ''; inp.disabled = false; $('b7-go').disabled = false; $('b7-fb').innerHTML = ''; b7Late = false;
+      qClock('beat-the-7', ctx.root, () => !!$('b7-next'), () => { if (!inp.value.trim()) inp.value = qs[i].typical[0]; b7Late = true; go(); }); inp.focus(); anim($('b7-text'), { opacity:[0,1], x:[16,0] }); };
     let busy = false;
     const go = async () => {
       const a = inp.value.trim(); if (!a || busy) return inp.focus();
@@ -1926,7 +2009,7 @@ const BeatSeven = { id:'beat-the-7', name:'Beat the 7', skill:'creativity', icon
       inp.disabled = true; $('b7-go').disabled = true;
       SFX.play(pts === 5 ? 'correct' : pts ? 'softok' : 'softbad', 3); if (pts === 5) edge(true);
       pop(pts ? '+' + pts : '0', $('b7-go'), pts === 5 ? 'var(--ok)' : pts ? 'var(--c-calibration)' : 'var(--bad)');
-      $('b7-fb').innerHTML = '<div class="explain"><b>'+(pts === 5 ? 'Your own idea!' : pts ? 'A common answer.' : 'That’s the typical answer.')+'</b> '+(why ? esc(why)+' ' : '')+'Typical: “'+q.typical[0]+'”. Common: '+q.common.slice(0,3).join(', ')+'.'+(vfb ? '<br>'+vfb : '')+'</div><button class="btn c full" style="margin-top:12px" id="b7-next">'+(i < 5 ? 'Next prompt' : 'See results')+'</button>';
+      $('b7-fb').innerHTML = '<div class="explain"><b>'+(b7Late ? '⏱ Time’s up. ' : '')+(pts === 5 ? 'Your own idea!' : pts ? 'A common answer.' : 'That’s the typical answer.')+'</b> '+(why ? esc(why)+' ' : '')+'Typical: “'+q.typical[0]+'”. Common: '+q.common.slice(0,3).join(', ')+'.'+(vfb ? '<br>'+vfb : '')+'</div><button class="btn c full" style="margin-top:12px" id="b7-next">'+(i < 5 ? 'Next prompt' : 'See results')+'</button>';
       anim($('b7-fb'), { opacity:[0,1], y:[8,0] });
       $('b7-next').onclick = () => { i++; if (i < 6) show(); else ctx.end({ score, pct: score/30*100, lines:['<b>'+log.filter(p => p === 5).length+' of 6</b> answers were your own.','Original ideas start where the first answer ends.','Answers are matched by meaning, so “email automation” counts the same as “email assistant”.'] }); };
       $('b7-next').focus();
@@ -2006,9 +2089,15 @@ const MissingLink = { id:'missing-link', name:'Missing Link', skill:'insight', i
     const inp = $('ml-in'); inp.addEventListener('paste', e => e.preventDefault());
     const next = () => {
       const lvl = streak >= 6 ? 3 : streak >= 3 ? 2 : 1;
+      const old = replayMode() ? ML.map((it,i) => i).filter(i => ML[i][5] === lvl && used.has(i) && !roundSeen.has(i)) : [];
+      if (old.length) { const i = pick(old); roundSeen.add(i); return show(i); }
       let pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl && !used.has(i));
       if (!pool.length) { ML.forEach((it,k) => { if (it[5] === lvl) used.delete(k); }); pool = ML.map((it,i) => i).filter(i => ML[i][5] === lvl); }
-      const i = pick(pool); used.add(i); (S.seen = S.seen || {})['missing-link'] = [...used]; save(); cur = ML[i]; hints = 0; wrongs = 0; t0 = Date.now();
+      const i = pick(pool); used.add(i); (S.seen = S.seen || {})['missing-link'] = [...used]; save(); show(i);
+    };
+    const roundSeen = new Set();
+    const show = i => {
+      cur = ML[i]; hints = 0; wrongs = 0; t0 = Date.now();
       $('ml-cues').innerHTML = cur.slice(0,3).map(w => '<div class="tile">'+w+'</div>').join('');
       anim(document.querySelectorAll('#ml-cues .tile'), { opacity:[0,1], y:[16,0], scale:[.9,1] }, { delay: stag(0.06) });
       $('ml-hint').textContent = ''; inp.value = ''; inp.focus();
@@ -2145,6 +2234,8 @@ const WIKI = {
   'ChatGPT':'ChatGPT is an AI chatbot released by OpenAI in November 2022. It writes by predicting likely next words, which is why it can sound sure even when it is wrong. It runs on huge [[Server]]s.',
   'Computer science':'Computer science is the study of computers and problem solving. Students learn programming in languages like [[Python]], how a [[CPU]] works, and topics like [[Binary]] numbers.'
 };
+/* extra pages from public/content/wiki.js (new pages, plus extra links appended to old pages) */
+{ const X = window.MORE || {}; Object.assign(WIKI, X.wiki || {}); Object.entries(X.wikiLinks || {}).forEach(([k, t]) => { if (WIKI[k] != null) WIKI[k] += t; }); }
 const WH = [];
 function bfs(a, b){ const q = [[a,0]], seen = new Set([a]); while (q.length) { const [n,d] = q.shift(); if (n === b) return d; ((WIKI[n]||'').match(/\[\[(.+?)\]\]/g)||[]).map(x => x.slice(2,-2)).forEach(m => { if (!seen.has(m)) { seen.add(m); q.push([m,d+1]); } }); } return 99; }
 Object.keys(WIKI).forEach(a => Object.keys(WIKI).forEach(b => { if (a !== b) { const d = bfs(a, b); if (d >= 4 && d <= 6) WH.push({ from:a, to:b, best:d }); } }));
@@ -2598,6 +2689,7 @@ const TrustCheck = { id:'trust-or-check', name:'Trust or Check', skill:'ai', ico
       const upd = () => $('tc-go').disabled = verdict === null || sure === null;
       ctx.root.querySelectorAll('#tc-v button').forEach(b => b.onclick = () => { verdict = +b.dataset.v; ctx.root.querySelectorAll('#tc-v button').forEach(x => x.classList.toggle('sel', x === b)); upd(); });
       ctx.root.querySelectorAll('#tc-s2 button').forEach(b => b.onclick = () => { sure = +b.dataset.s; ctx.root.querySelectorAll('#tc-s2 button').forEach(x => x.classList.toggle('sel', x === b)); upd(); });
+      qClock('trust-or-check', ctx.root, () => $('tc-go').hidden, () => { verdict = q.ai === q.real ? 0 : 1; sure = 0; $('tc-go').onclick(); $('tc-x').insertAdjacentHTML('afterbegin', '<b>⏱ Time’s up.</b>'); });
       $('tc-go').onclick = () => {
         const aiRight = q.ai === q.real, good = (verdict === 1) === aiRight;
         const pts = good ? (sure ? 10 : 6) : (sure ? -5 : 0);
@@ -2734,6 +2826,7 @@ const TasteTest = { id:'taste-test', name:'Taste Test', skill:'ai', icon:'star',
       + opts.map((o,n) => '<button class="opt idea" data-n="'+n+'"><span class="rk">'+(n+1)+'</span><span>'+esc(o[0])+'</span></button>').join('') + '</div><div id="ts-2"></div>';
     anim(ctx.root.querySelectorAll('.idea'), { opacity:[0,1], x:[-14,0] }, { delay: stag(0.04) });
     let picked = false;
+    qClock('taste-test', ctx.root, () => false, () => ctx.end({ score, pct: score, lines:['⏱ Time’s up. Best option: <b>'+esc(opts[opts.findIndex(o => o[1] === null)][0])+'</b>.', B.note] }));
     ctx.root.querySelectorAll('.idea').forEach(b => b.onclick = () => {
       if (picked) return; picked = true;
       const n = +b.dataset.n, good = opts[n][1] === null, bi = opts.findIndex(o => o[1] === null);
@@ -2824,6 +2917,24 @@ function rpBest(L){ const P = rpParse(L); const key = (r,c,d) => r+','+c+','+d; 
     const nx = [[r+DIRS[d][0], c+DIRS[d][1], d], [r,c,(d+3)%4], [r,c,(d+1)%4]];
     nx.forEach(([a,b,e]) => { if (!P.wall(a,b) && !seen.has(key(a,b,e))) { seen.add(key(a,b,e)); q.push([a,b,e,n+1]); } }); }
   return 99; }
+/* fresh grids every round: random walls, kept only if the shortest program falls in the level's band
+   (bands follow the hand-made RP_ALL grids). Falls back to a hand-made grid if no luck. */
+const RP_BANDS = [[5,7],[8,9],[10,11],[12,13],[14,16],[16,18],[18,20]];   // a round uses 5 bands in a row, starting at lvVal('robot-path')
+function rpGen(lo, hi){
+  for (let t = 0; t < 4000; t++) {
+    const g = Array.from({ length:5 }, () => Array(5).fill('.'));
+    const walls = 5 + Math.floor(Math.random() * 5);
+    for (let w = 0; w < walls; w++) g[Math.floor(Math.random()*5)][Math.floor(Math.random()*5)] = '#';
+    const free = []; g.forEach((row, r) => row.forEach((ch, c) => { if (ch === '.') free.push([r, c]); }));
+    if (free.length < 2) continue;
+    const s = pick(free), e = pick(free);
+    if (Math.abs(s[0]-e[0]) + Math.abs(s[1]-e[1]) < 3) continue;
+    g[s[0]][s[1]] = 'S'; g[e[0]][e[1]] = 'G';
+    const L = g.map(row => row.join('')), b = rpBest(L);
+    if (b >= lo && b <= hi) return L;
+  }
+  return pick(RP_ALL.filter(L => { const b = rpBest(L); return b >= lo && b <= hi; }).concat([RP_ALL[0]]));
+}
 /* top-down robot, front faces right (east) at 0° */
 const ROBOT_SVG = '<svg viewBox="8 2 88 96" aria-hidden="true">'
   + '<ellipse cx="52" cy="56" rx="38" ry="36" fill="rgba(17,24,39,.18)"/>'
@@ -2841,7 +2952,7 @@ const ROBOT_SVG = '<svg viewBox="8 2 88 96" aria-hidden="true">'
 const RobotPath = { id:'robot-path', name:'Robot Path', skill:'planning', icon:'robot', inspired:'coding puzzle games like Lightbot', topics:'sequencing and functions, like pseudocode',
   how:['Guide the robot to the star. It starts facing right (see its eyes).','Plan your whole program first with forward(), turn_left() and turn_right().','Press Run. Hitting a wall means rewrite and try again. Fewer commands and fewer runs score more.'],
   run(ctx){
-    { const sorted = RP_ALL.slice().sort((a,b) => rpBest(a) - rpBest(b)); RP_LEVELS = [0,1,2,3,4].map(k => pick(sorted.slice(Math.floor(k*sorted.length/5), Math.floor((k+1)*sorted.length/5)))); }
+    RP_LEVELS = RP_BANDS.slice(lvVal('robot-path'), lvVal('robot-path') + 5).map(b => rpGen(b[0], b[1]));
     let lv = 0, prog = [], runs = 0, total = 0, running = false, log = [], angle = 0;
     const NAME = { F:'forward()', L:'turn_left()', R:'turn_right()' };
     const cells = () => [...$('rp-g').querySelectorAll('.cell')];
@@ -3009,6 +3120,7 @@ async function pullMe(){
   syncNow();
 }
 function signOut(expired){
+  if (window.Drive && Drive.reset) Drive.reset();
   ME = null; BOARD = null; CIRCUIT = false; SESS = newSess(); pendingRate = null;
   try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(KEY); } catch(e){}
   S = { g:{}, days:[], hist:{}, badges:[], sess: SESS };
@@ -3016,6 +3128,14 @@ function signOut(expired){
   route();
   if (expired) { $('j-err').textContent = 'Please log in again to keep saving your progress.'; $('j-err').hidden = false; }
 }
+function askLogout(){
+  openModal('<h3 id="mtitle">Log out?</h3><p style="margin:0">Your progress is saved. It comes back when you log in again.</p>'
+    + '<button type="button" class="btn full" id="lo-yes" style="background:var(--ink);color:#fff">Log out</button>'
+    + '<button type="button" class="mclose" id="lo-no">Cancel</button>');
+  $('lo-no').onclick = () => closeModal();
+  $('lo-yes').onclick = () => { closeModal(); syncNow().finally(() => signOut(false)); };
+}
+$('tab-out').onclick = askLogout;
 $('join-form').addEventListener('submit', async e => {
   e.preventDefault();
   const err = $('j-err'), go = $('j-go');
@@ -3026,7 +3146,7 @@ $('join-form').addEventListener('submit', async e => {
   const r = await api('/api/student', { action:'join', name, roll });
   go.disabled = false; go.textContent = 'Log in';
   if (r.status !== 200 || !r.j.ok) {
-    err.textContent = r.j.error || 'Could not reach Brain Gym. Check your internet and try again.';
+    err.textContent = r.j.error || 'Could not reach Game Corner. Check your internet and try again.';
     err.hidden = false; return;
   }
   ME = Object.assign({ token: r.j.token }, r.j.student);
@@ -3050,6 +3170,7 @@ async function loadBoard(){
 const coin = p => '<span class="coin"><i>C</i>' + p.toLocaleString('en-IN') + ' pt</span>';
 const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 function renderBoard(){
+  if (window.Drive && Drive.boardOn()) return Drive.renderBoard();
   if (Date.now() - boardAt > 60000) loadBoard();
   const head = document.querySelector('.lbhead');
   if (!BOARD) { head.classList.add('empty'); $('lb-podium').innerHTML = ''; $('lb-list').innerHTML = '<div class="lb-empty">'+slot3d('trophy', '', img3d('trophy', 112), 'gold')+'<p class="muted">Loading your batch…</p></div>'; return; }
@@ -3097,12 +3218,12 @@ function feedbackForm(box, o){
   send.onclick = async () => {
     send.disabled = true; send.textContent = 'Sending…';
     const ok = await sendFeedback({ kind: o.kind, game: o.game || null, rating, difficulty: diff, comment: ta.value.trim() || null });
-    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Brain Gym. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
+    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Game Corner. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
     else { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; }
   };
 }
 function renderGeneralFeedback(){
-  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Brain Gym so far?', placeholder:'What do you like? What should we change or add?' });
+  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Game Corner so far?', placeholder:'What do you like? What should we change or add?' });
 }
 
 /* pop-up sheet shared by the mood check-in and the problem report */
@@ -3218,7 +3339,7 @@ const STAR_ASK = {
         chips:['Boring or repetitive','Too hard','Too easy','Rules were confusing','Bugs or slow','Not useful for my studies'] },
   mid:{ q:'What one change would make it a 7, so you can’t wait for tomorrow?', ph:'Your idea (optional)',
         chips:['More new games','Harder challenges','Compete with friends','Better rewards','Shorter sets','Connect it to my classes'] },
-  high:{ q:'What would make Brain Gym an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
+  high:{ q:'What would make Game Corner an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
 };
 /* 11 at the top: climbing is better. Grouped so the baseline (5) and "beyond 5" are obvious. */
 function ladderHtml(){
@@ -3282,7 +3403,7 @@ function endSession(phase){
       if (!ok) { send.disabled = false; send.classList.remove('busy'); send.textContent = 'Couldn’t send. Try again'; return; }
       sent = true;
       box.innerHTML = '<div class="reward"><div class="big">'+(stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️')+'</div><h3>Thank you!</h3>'
-        + '<p class="muted">Every answer is read by the Brain Gym team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
+        + '<p class="muted">Every answer is read by the Game Corner team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
       setTimeout(closeModal, 1700);
     };
     more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
@@ -3623,7 +3744,7 @@ function renderWho(){
   const w = $('h-who'); if (!w || !ME) return;
   $('h-hi').textContent = 'Welcome back, ' + (ME.call || ME.name.split(' ')[0]) + ' 👋';
   w.innerHTML = 'Logged in as <b>'+esc(ME.name)+'</b> · '+esc(ME.roll)+(ME.pilot && ME.pilot !== 'ALL' ? ' · '+esc(ME.pilot) : '')+'. <button class="linkbtn" id="h-out">Not you?</button>';
-  $('h-out').onclick = () => { if (confirm('Log out on this device? Your progress is saved and comes back when you log in again.')) { syncNow().finally(() => signOut(false)); } };
+  $('h-out').onclick = askLogout;
 }
 
 /* ================= new games (Nov 2026): Color Clash, Seen It?, Bug Tracker =================
@@ -3678,7 +3799,7 @@ const ColorClash = { id:'color-clash', name:'Color Clash', skill:'focus', icon:'
       const okInc = ok.filter(t => !t.cong).map(t => t.rt), okCon = ok.filter(t => t.cong).map(t => t.rt);
       const inter = okInc.length && okCon.length ? Math.max(0, median(okInc) - median(okCon)) : 0;
       const r2acc = pctOf(r2.filter(t => t.good).length, r2.length);
-      ctx.end({ score, pct: acc * Math.min(1, ok.length / 40), title: score + ' points', sub: plural(trials.length, 'answer') + ' in 45 seconds',
+      ctx.end({ score, pct: acc * Math.min(1, ok.length / lvVal('color-clash')), title: score + ' points', sub: plural(trials.length, 'answer') + ' in 45 seconds',
         tiles: [[acc + '%','Accuracy'],[med + ' ms','Median reaction'],[inter + ' ms','Clash slowdown'],[r2acc + '%','Coder round accuracy']],
         note: inter < 120 ? 'You held back the automatic reaction well. Clashing words barely slowed you down.'
           : inter < 250 ? 'Clashing words slowed you a little. That pause is your brain overriding a habit, and it gets faster with practice.'
@@ -3696,11 +3817,11 @@ const SI_BASE = ['for i in range(5):', 'IndexError: list index out of range', 'x
   'nums = [2, 4, 6]', 'if marks >= 40:', 'SyntaxError: invalid syntax'];
 const SI_LURES = [['for i in range(6):', 'for i in range(5):'], ['print("Hello", end=" ")', 'print("Hello", end="")'], ['nums = [2, 4, 8]', 'nums = [2, 4, 6]'], ['if marks > 40:', 'if marks >= 40:']];
 const SI_MS = 3000;
-function siSequence(){
+function siSequence(BASE = SI_BASE, LURES = SI_LURES){
   let list;
   /* the same card never shows twice in a row */
   for (let tries = 0; tries < 500; tries++) {
-    list = shuffle(SI_BASE.concat(Array.from({ length:16 }, () => pick(SI_BASE))));
+    list = shuffle(BASE.concat(Array.from({ length:16 }, () => pick(BASE))));
     if (list.every((c, i) => i === 0 || c !== list[i-1])) break;
   }
   /* fallback if every shuffle had a pair: swap the second card of a pair with a later card that is different */
@@ -3709,7 +3830,7 @@ function siSequence(){
     if (j > 0) [list[i], list[j]] = [list[j], list[i]];
   }
   const seq = list.map(text => ({ text, lure:false }));
-  SI_LURES.forEach(([text, orig]) => { const first = seq.findIndex(c => c.text === orig); const at = first + 1 + Math.floor(Math.random() * (seq.length - first)); seq.splice(at, 0, { text, lure:true }); });
+  LURES.forEach(([text, orig]) => { const first = seq.findIndex(c => c.text === orig); const at = first + 1 + Math.floor(Math.random() * (seq.length - first)); seq.splice(at, 0, { text, lure:true }); });
   const seen = new Set();
   seq.forEach(c => { c.repeat = !c.lure && seen.has(c.text); seen.add(c.text); });
   return seq;
@@ -3717,7 +3838,8 @@ function siSequence(){
 const SeenIt = { id:'seen-it', name:'Seen It?', skill:'memory', icon:'layers', inspired:'the MemTrax memory test', topics:'Python lines and error messages',
   how:['Cards of Python code and errors appear one at a time, 3 seconds each.','Tap <b>Seen it</b> when a card is an <b>exact</b> repeat of one you saw before. Space works too.','Careful: some cards come back with one small change. Those are not repeats.'],
   run(ctx){
-    const seq = siSequence(), repeats = seq.filter(c => c.repeat).length;
+    const SIP = (window.MORE || {}).si, pk = SIP && SIP.length >= 10 ? fresh('seen-it', SIP, 10, x => x.card) : null;   /* new 10-card set each round from content/si.js */
+    const seq = pk ? siSequence(pk.map(x => x.card), pk.filter(x => x.lure).slice(0, 4).map(x => [x.lure, x.card])) : siSequence(), repeats = seq.filter(c => c.repeat).length;
     let i = -1, pressed = false, shownAt = 0, hits = 0, misses = 0, fa = 0, lureFa = 0; const rts = [];
     ctx.root.innerHTML = hud([['si-h','Caught','0'],['si-c','Cards','0/'+seq.length]])
       + '<div class="si-box" id="si-box"><pre class="si-card" id="si-card"></pre><i class="si-bar" id="si-bar"></i></div>'
@@ -3737,9 +3859,9 @@ const SeenIt = { id:'seen-it', name:'Seen It?', skill:'memory', icon:'layers', i
       pressed = false; box.classList.remove('ok','no');
       $('si-card').textContent = seq[i].text; $('si-c').textContent = (i+1) + '/' + seq.length;
       const bar = $('si-bar'); bar.style.transition = 'none'; bar.style.transform = 'scaleX(1)'; void bar.offsetWidth;
-      bar.style.transition = 'transform ' + SI_MS + 'ms linear'; bar.style.transform = 'scaleX(0)';
+      bar.style.transition = 'transform ' + lvVal('seen-it') + 'ms linear'; bar.style.transform = 'scaleX(0)';
       shownAt = performance.now();
-      ctx.after(SI_MS, show);
+      ctx.after(lvVal('seen-it'), show);
     }
     function finish(){
       const caught = pctOf(hits, repeats), avg = rts.length ? Math.round(rts.reduce((a,b) => a+b, 0) / rts.length) : 0;
@@ -3773,7 +3895,7 @@ const BugTracker = { id:'bug-tracker', name:'Bug Tracker', skill:'focus', icon:'
   run(ctx){
     const css = getComputedStyle(document.documentElement);
     const col = { line: css.getPropertyValue('--line').trim() || '#E3E3EF', muted: '#9AA1B4', ink: css.getPropertyValue('--ink').trim() || '#141B34', ok: css.getPropertyValue('--ok').trim() || '#16A36F', bad: css.getPropertyValue('--bad').trim() || '#EF4444', acc: css.getPropertyValue('--c-focus').trim() || '#FF7A2F' };
-    let round = 0, speed = 0.55, found = 0, perfect = 0, top = 0, balls = [], phase = 'cue', picks = [], raf = 0, last = 0, stopped = false;
+    let round = 0, speed = lvVal('bug-tracker'), found = 0, perfect = 0, top = 0, balls = [], phase = 'cue', picks = [], raf = 0, last = 0, stopped = false;
     const history = [];
     ctx.root.innerHTML = hud([['bt-r','Round','1/'+BT_ROUNDS],['bt-f','Bugs found','0']])
       + '<div class="bt-msg" id="bt-msg" aria-live="polite"></div>'
@@ -4426,6 +4548,7 @@ const CodeReview = { id:'code-review', name:'Code Review', skill:'ai', icon:'cod
       const choose = v => { if (done) return; sel = v; lineBtns.forEach((b, k) => b.classList.toggle('sel', k === v)); $('cr-none').classList.toggle('on', v === -1); $('cr-lock').disabled = false; SFX.play('select'); };
       lineBtns.forEach((b, k) => b.onclick = () => choose(k));
       $('cr-none').onclick = () => choose(-1);
+      qClock('code-review', ctx.root, () => done, () => { sel = -2; $('cr-lock').onclick(); });
       $('cr-ask').onclick = () => {
         rec.asked = true; rec.askSecs = Math.round((Date.now() - t0) / 1000); points -= 1; $('cr-p').textContent = points; $('cr-ask').disabled = true;
         $('cr-ai').innerHTML = '<div class="ai-box"><span class="ai-tag">🤖 AI reviewer</span><div>'+esc(review.text)+'</div></div>';
@@ -4489,6 +4612,7 @@ const HintLadder = { id:'hint-ladder', name:'Hint Ladder', skill:'ai', icon:'lad
         + '<div class="row ya-act" id="hl-act"><button class="btn c" id="hl-lock" disabled>Lock in</button></div><div id="hl-out"></div>';
       anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
       const opts = [...ctx.root.querySelectorAll('.ya-opt')];
+      qClock('hint-ladder', ctx.root, () => done, () => { choice = -1; $('hl-lock').onclick(); });
       opts.forEach((b, k) => b.onclick = () => { if (done) return; choice = k; opts.forEach((x, j) => x.classList.toggle('sel', j === k)); $('hl-lock').disabled = false; SFX.play('select'); });
       const texts = [P.hints[0], P.hints[1], P.right];
       ctx.root.querySelectorAll('.hl-rung').forEach(b => b.onclick = () => {
@@ -4507,7 +4631,7 @@ const HintLadder = { id:'hint-ladder', name:'Hint Ladder', skill:'ai', icon:'lad
         const got = rec.right ? Math.max(0, 4 - cost) : 0; points += got; $('hl-p').textContent = points;
         log.push(rec);
         opts.forEach(b => b.disabled = true); ctx.root.querySelectorAll('.hl-rung').forEach(x => x.disabled = true);
-        opts[P.ans].classList.add('right'); if (!rec.right) opts[choice].classList.add('wrong');
+        opts[P.ans].classList.add('right'); if (!rec.right && opts[choice]) opts[choice].classList.add('wrong');
         FX.result(rec.right, true);
         $('hl-act').innerHTML = '';
         $('hl-out').innerHTML = '<div class="explain"><b>'+(rec.right ? 'Correct. +' + got : 'Not quite. The answer is ' + esc(P.opts[P.ans]) + '.')+'</b>'+(rec.rungs.includes(2) ? '' : ' '+esc(P.right.replace(/ Answer: .*$/, '')))+'</div>'
@@ -4667,21 +4791,22 @@ const RightTool = { id:'right-tool', name:'Right Tool', skill:'ai', icon:'tools'
     function next(){
       i++;
       if (i >= RT_N) return finish();
-      const C = cards[i], t0 = Date.now();
+      const C = cards[i], t0 = Date.now(); let rtLate = false;
       ctx.root.innerHTML = hud([['rt-n','Situation',(i+1)+'/'+RT_N],['rt-p','Points',points]])
         + '<div class="card ya-card"><p class="ya-q rt-s">'+esc(C.s)+'</p></div>'
         + '<div class="rt-tools">'+Object.entries(RT_TOOLS).map(([k, t]) => '<button class="opt rt-tool" data-t="'+k+'"><span class="rt-ic">'+t[0]+'</span>'+t[1]+'</button>').join('')+'</div><div id="rt-out"></div>';
       anim(ctx.root.querySelector('.ya-card'), { opacity:[0,1], y:[8,0] });
+      qClock('right-tool', ctx.root, () => !!ctx.root.querySelector('.rt-tool:disabled'), () => { rtLate = true; ctx.root.querySelector('.rt-tool').onclick(); });
       ctx.root.querySelectorAll('.rt-tool').forEach(b => b.onclick = () => {
         if (ctx.root.querySelector('.rt-tool:disabled')) return;
-        const t = b.dataset.t, kind = t === C.best ? 'best' : C.ok.includes(t) ? 'ok' : C.risky.includes(t) ? 'risky' : 'meh';
+        const t = rtLate ? 'late' : b.dataset.t, kind = t === C.best ? 'best' : C.ok.includes(t) ? 'ok' : C.risky.includes(t) ? 'risky' : 'meh';
         const delta = { best:2, ok:1, risky:-2, meh:0 }[kind];
         points += delta; $('rt-p').textContent = points;
         log.push({ best: C.best, pick: t, kind, aiRisky: C.risky.includes('ai') ? 1 : 0, s: Math.round((Date.now() - t0) / 1000) });
         ctx.root.querySelectorAll('.rt-tool').forEach(x => { x.disabled = true; const k = x.dataset.t; if (k === C.best) x.classList.add('right'); else if (C.risky.includes(k)) x.classList.add('risk'); });
-        if (kind !== 'best') b.classList.add(kind === 'risky' ? 'wrong' : 'sel');
+        if (!rtLate && kind !== 'best') b.classList.add(kind === 'risky' ? 'wrong' : 'sel');
         FX.result(kind === 'best' || kind === 'ok', true);
-        $('rt-out').innerHTML = '<div class="explain"><b>'+{ best:'Best choice. +2', ok:'Reasonable. +1', risky:'Risky here. −2', meh:'Not the best fit. 0' }[kind]+'</b> Best: '+RT_TOOLS[C.best][1]+'. '+esc(C.why)+'</div>'
+        $('rt-out').innerHTML = '<div class="explain"><b>'+(rtLate ? '⏱ Time’s up. 0' : { best:'Best choice. +2', ok:'Reasonable. +1', risky:'Risky here. −2', meh:'Not the best fit. 0' }[kind])+'</b> Best: '+RT_TOOLS[C.best][1]+'. '+esc(C.why)+'</div>'
           + '<button class="btn c full" id="rt-next" style="margin-top:12px">'+(i < RT_N - 1 ? 'Next situation' : 'See results')+'</button>';
         $('rt-next').onclick = next; $('rt-next').focus();
       });
@@ -4704,6 +4829,12 @@ const RightTool = { id:'right-tool', name:'Right Tool', skill:'ai', icon:'tools'
 };
 
 /* ================= registry ================= */
+/* ===== extra content from public/content/*.js (each file sets window.MORE.<key>). Appended, so old seen-indexes stay valid. ===== */
+{ const X = window.MORE || {}, add = (pool, more) => { if (Array.isArray(more)) pool.push(...more); };
+  add(B7, X.b7); add(ML, X.ml); add(AB, X.ab); add(TC, X.tc); add(SC, X.sc); add(TS, X.ts); add(RT, X.rt); add(RR, X.rr);
+  add(AIQ, X.aiq); add(AIQ_FIXED, X.aiqfixed); add(ST, X.st);
+  if (Array.isArray(X.lg) && Array.isArray(X.lgnote) && X.lg.length === X.lgnote.length) { LG.push(...X.lg); LGNOTE.push(...X.lgnote); }
+  Object.entries(X.fh || {}).forEach(([id, m]) => { const t = TRICKS.find(k => k.id === id); if (t) { add(t.yes, m.yes); add(t.no, m.no); } }); }
 const GAMES = [WordSpread, BeatSeven, MissingLink, LinkGrid, WikiHop, RecallRebuild, BackTrack, SymbolSprint, RuleSwitch, RobotPath, FallacyHunt, ArgueBack, TrustCheck, SourceCheck, TasteTest,
   ColorClash, SeenIt, BugTracker, YouOrAI, CodeReview, HintLadder, RightTool];
 route();

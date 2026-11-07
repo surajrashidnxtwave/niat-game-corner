@@ -1,4 +1,5 @@
 // GET /api/leaderboard?pilot=BATCH -> { ok, rows: [{ id, n, p }] }  (only students who have logged in)
+// GET /api/leaderboard?pilot=BATCH&board=drive -> Drive School points only (separate from Brain Gym)
 // Points use the same formula as the page: 1 per 6 active seconds + 10 per finished round.
 // Cached at the CDN for 60 s, so 200 students opening it costs about one query a minute.
 import { db, BATCH_RE, dbReady, shortName } from './_lib/db.js';
@@ -8,8 +9,15 @@ export default async function handler(req, res) {
   if (!dbReady(res)) return;
   const pilot = String(req.query?.pilot || new URL(req.url, 'http://x').searchParams.get('pilot') || '').trim().toUpperCase();
   if (!BATCH_RE.test(pilot)) return res.status(400).json({ ok: false, error: 'bad pilot' });
+  const board = String(req.query?.board || new URL(req.url, 'http://x').searchParams.get('board') || 'gym');
   try {
     const sql = db();
+    if (board === 'drive') {
+      const rows = await sql`SELECT s.id, s.name, d.points AS pts FROM drive_students d JOIN students s ON s.id = d.student_id
+          WHERE s.pilot = ${pilot} AND d.points > 0 ORDER BY d.points DESC, s.id LIMIT 500`;
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=60');
+      return res.status(200).json({ ok: true, rows: rows.map(r => ({ id: r.id, n: shortName(r.name), p: r.pts })) });
+    }
     const [rows, live] = await Promise.all([
       sql`SELECT s.id, s.name, COALESCE(SUM(FLOOR(p.active / 6) + p.plays * 10), 0)::int AS pts
           FROM students s LEFT JOIN progress p ON p.student_id = s.id

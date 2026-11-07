@@ -1,0 +1,51 @@
+/* Drive School · Day 1 · Strategy · The forgetting curve.
+   Based on the POC; copy rewritten in a short, casual voice for Gen Z students (Nov 2026). Facts unchanged. */
+(function(){
+const KEYWORDS = ['def','return','while','break','lambda','yield','global','assert','pass','import','except','finally'];
+window.DRIVE_KEYWORDS = KEYWORDS;   // Day 7 retests the same 12
+window.DRIVE_LESSONS[1] = { screens: [
+  { type:'info', kicker:'Day 1 · Strategy', title:'Your brain is deleting stuff', visual:['📚 🌙 ➡️ 😶', '🧠 🧠 🧠', '🧪 📉 🛠️', '⏱️ 10 min'],
+    body:['POV: you studied all evening. Next week? Blank. 😶','That’s not you being dumb. Every brain does it.','Today: a quick memory test, why it happens, and the one habit that fixes it.'],
+    guide:'10 minutes. Let’s go.', cta:'Start' },
+  { type:'memorize', title:'Memorise these 12 Python keywords', words:KEYWORDS, secs:30, minSecs:15, guide:'Read them a few times. They vanish when you continue.' },
+  { type:'predict', q:'No peeking: how many of the 12 will you still remember in 7 days?', guide:'Guess. We check it on Day 7. 👀' },
+  { type:'estimate', id:'d1est', kicker:'Guess the number', q:'A scientist learned a list, then tested himself a day later. Roughly how much was still in his head?',
+    min:0, max:100, value:50, unit:'%', answer:34,
+    why:'About a third: 34%. Two-thirds gone in one day. That’s why the first review matters so much.', guide:'Drag to guess. Go with your gut.' },
+  { type:'info', kicker:'Name it', title:'The forgetting curve', visual:'curve',
+    body:['Right after learning, memory drops <b>fast</b>. Most of it goes in the first day.','After that, it drops slower.','A guy called Ebbinghaus tested this on himself in the 1880s. It has a name: the forgetting curve.'],
+    guide:'Your 12 keywords are sliding down it right now.' },
+  { type:'curve', guide:'Tap “Add 3 reviews” and watch.' },
+  { type:'info', kicker:'Prove it', title:'130 years later, still true', visual:['1885 ➡️ 2015', '✅ 🧠'],
+    facts:[['1885','first forgetting curve'],['2015','scientists in Amsterdam re-ran it'],['Same','result, almost exactly']],
+    body:['People thought it might be outdated. They tested it again. Nope. Same curve.'],
+    note:'Source: Murre & Dros, PLOS ONE, 2015.', guide:'Brains haven’t changed. Good news: the fix works too.' },
+  { type:'quiz', id:'d1q1', kicker:'Use it', q:'You learn loops on Monday. Exam is next Monday. When’s your first review?',
+    opts:[['Sunday night, the day before',false,'By Sunday most of it is gone. You’d be relearning from zero.'],
+          ['Tuesday, within a day',true,'Yes. One day later catches it before the big drop.'],
+          ['Saturday, so it’s fresh for Monday',false,'Better than Sunday, but you lose most of it in the 5 days before.'],
+          ['No review if you understood it',false,'Understanding today doesn’t stop forgetting tomorrow.']],
+    why:'The curve drops hardest in the first 24 hours. A 10-minute review then saves hours later.' },
+  { type:'quiz', id:'d1q2', kicker:'Use it', q:'Two students give a topic 3 hours each. Who remembers more a month later?',
+    opts:[['Asha: 3 hours straight, the night before',false,'Cramming works for tomorrow. Then the curve hits.'],
+          ['Ben: 1 hour on Day 1, Day 3 and Day 7',true,'Right. Each review resets the curve, and it falls slower every time.'],
+          ['Same, the hours are equal',false,'Same hours, different result. When you study matters.'],
+          ['Asha, hers is fresher',false,'Fresh for a day. Gone in a week.']],
+    why:'This is spacing. Same hours, spread out, last way longer.' },
+  { type:'quiz', id:'d1q3', kicker:'Use it', q:'Ravi: “I understood everything in class, so I’ll remember it.” What’s wrong?',
+    opts:[['Understanding now ≠ remembering later',true,'Exactly. Feeling sure today says little about next week.'],
+          ['He should rewrite his notes neatly',false,'Feels productive, does little. Testing himself would help more.'],
+          ['He should only study the hard topics',false,'Easy topics fade too.'],
+          ['Nothing, understood ideas stay forever',false,'Brains aren’t hard drives. Unused stuff fades.']],
+    why:'Understanding and remembering are different things. No review = fade.' },
+  { type:'rank', id:'d1rank', kicker:'Rank it', q:'Same 3 hours of study. Rank them by how much you’ll remember a month later.',
+    items:[['1 hour each on Day 1, Day 3 and Day 6','three reviews, each one resets the curve'],['1.5 hours each on Day 1 and Day 6','two reviews, better than one'],['All 3 hours the night before the exam','one big block, then the curve hits']],
+    ends:['Remember most','Remember least'], why:'More, spaced-out sessions beat one big block, even with the same total time.', guide:'Tap them from best to worst.' },
+  { type:'recall', key:'d1', title:'Type every keyword you remember from the start', words:KEYWORDS, guide:'No scrolling back. What’s still in there?' },
+  { type:'recallResult', words:KEYWORDS },
+  { type:'commit', key:'d1', q:'Pick one review habit to try this week.',
+    opts:['If I finish a lecture, then I’ll quiz myself on it the next evening.','If it’s Sunday, then I’ll redo 3 questions from this week’s classes.','If I open my notes, then I’ll first write what I remember before reading.'],
+    guide:'Small and specific beats big and vague.' },
+  { type:'wrap', lines:['You just beat the forgetting curve’s first trick. 🧠','Day 7: same 12 keywords, no warning. Let’s see if your guess was right.'] }
+]};
+})();
