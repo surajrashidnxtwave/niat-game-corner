@@ -4,6 +4,7 @@
 //   { action: "finish",  token, day, cid, at, pts, secs, events: [...], memo: {...} } -> { ok, first, state }
 //   { action: "split",   token, day }                             -> { ok, n, split|null }  (batch side split, only at 20+)
 //   { action: "profile", token }                                  -> { ok, profile }
+//   { action: "rate",    token, day, stars, why, best, text, secs, late } -> { ok }   (11-star lesson rating, once per student per day)
 // Rules the server enforces (the page shows the same rules, but this is the copy that counts):
 //   - Day N needs Day N-1 done (Day 0 setup and Day 1 are always open)
 //   - at most 3 first completions per India calendar day (Day 0 setup doesn't count)
@@ -31,6 +32,7 @@ export default async function handler(req, res) {
     if (b.action === 'finish') return await finish(res, me, b);
     if (b.action === 'split') return await split(res, me, b);
     if (b.action === 'profile') return res.status(200).json({ ok: true, profile: await profile(me) });
+    if (b.action === 'rate') return await rate(res, me, b);
     return res.status(400).json({ ok: false, error: 'bad action' });
   } catch (e) {
     console.error('[drive]', e.message);
@@ -132,6 +134,25 @@ async function finish(res, me, b) {
       [me.id, day, !first, at, ev.map((e, i) => me.id + ':' + b.cid + ':' + i), ev.map(e => e.kind), ev.map(e => e.screen || null), ev.map(e => JSON.stringify(e.data))]);
   }
   return res.status(200).json({ ok: true, first, blocked, state: await state(me) });
+}
+
+// End-of-lesson "11-star" rating, asked once after each first finish (the page doesn't let a student move on without it).
+// Stored as a drive_events row (kind 'rate'), one per student per day: a second rating of the same day is ignored.
+// Needs the day to be finished first; if the finish is still in the offline queue, the page keeps the rating and resends it later.
+const RATE_LIST = v => Array.isArray(v) ? v.filter(x => text(x, 60)).slice(0, 8) : [];
+async function rate(res, me, b) {
+  if (!int(b.day, 0, DRIVE_LAST_BUILT) || !int(b.stars, 1, 11)) return res.status(400).json({ ok: false, error: 'bad rating' });
+  const sql = db();
+  const done = await sql`SELECT 1 FROM drive_days WHERE student_id = ${me.id} AND day = ${b.day}`;
+  if (!done.length) return res.status(409).json({ ok: false, error: 'finish first' });
+  const data = {
+    stars: b.stars, why: RATE_LIST(b.why), best: RATE_LIST(b.best),
+    text: typeof b.text === 'string' ? b.text.trim().slice(0, 500) : '',
+    secs: int(b.secs, 0, 86_400) ? b.secs : null, late: b.late === true
+  };
+  await sql.query(`INSERT INTO drive_events (client_id, student_id, day, kind, data) VALUES ($1, $2, $3, 'rate', $4::jsonb) ON CONFLICT (client_id) DO NOTHING`,
+    [me.id + ':rate:' + b.day, me.id, b.day, JSON.stringify(data)]);
+  return res.status(200).json({ ok: true });
 }
 
 // how the batch split on a Take a Stand day; null until SPLIT_MIN students have answered (never show made-up numbers)

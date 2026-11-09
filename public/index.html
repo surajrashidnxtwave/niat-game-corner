@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="drive/drive.css?v=14" rel="stylesheet">
+<link href="drive/drive.css?v=15" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
@@ -992,7 +992,7 @@ body.ingame .app{max-width:960px;padding-top:max(12px, env(safe-area-inset-top, 
 <script src="content/rt.js" onerror="0"></script>
 <script src="content/st.js" onerror="0"></script>
 <script src="content/aiq.js" onerror="0"></script>
-<script src="drive/drive.js?v=12" defer></script>
+<script src="drive/drive.js?v=13" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -3342,9 +3342,11 @@ const STAR_ASK = {
   high:{ q:'What would make Game Corner an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
 };
 /* 11 at the top: climbing is better. Grouped so the baseline (5) and "beyond 5" are obvious. */
-function ladderHtml(){
-  const rung = n => '<button type="button" class="rung" role="radio" aria-checked="false" data-s="'+n+'"><span class="n">'+n+'<i>★</i></span><span class="t">'+STAR_TXT[n-1]+'</span></button>';
-  return '<div class="ladder" role="radiogroup" aria-label="Session rating, 1 to 11 stars"><span class="pick" aria-hidden="true"></span>'
+/* Drive School passes its own 11 lines (txt) and label */
+function ladderHtml(txt, label){
+  txt = txt || STAR_TXT;
+  const rung = n => '<button type="button" class="rung" role="radio" aria-checked="false" data-s="'+n+'"><span class="n">'+n+'<i>★</i></span><span class="t">'+txt[n-1]+'</span></button>';
+  return '<div class="ladder" role="radiogroup" aria-label="'+(label || 'Session rating')+', 1 to 11 stars"><span class="pick" aria-hidden="true"></span>'
     + '<div class="zone hi"><small>Beyond 5 ✨ What great looks like</small>'+[11,10,9,8,7,6].map(rung).join('')+'</div>'
     + '<div class="zone mid"><small>The baseline</small>'+rung(5)+'</div>'
     + '<div class="zone lo"><small>Not there yet</small>'+[4,3,2,1].map(rung).join('')+'</div></div>';

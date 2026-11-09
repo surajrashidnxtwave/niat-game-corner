@@ -114,6 +114,7 @@ async function pull(force){
   if (!force && Date.now() - pulledAt < 60000 && DS) return;
   pulling = (async () => {
     await flush();
+    await flushRates();
     const r = await api('/api/drive', { action: 'state', token: ME.token });
     if (r.status === 200 && r.j.ok) { applyServer(r.j.state); pulledAt = Date.now(); }
   })();
@@ -152,7 +153,7 @@ async function flush(){
     cacheSave();
   } finally { flushing = false; }
 }
-setInterval(() => { if (ME && queue().length) flush().then(refresh); }, 60000);
+setInterval(() => { if (ME && queue().length) flush().then(refresh); if (ME && rates().some(x => x.ans)) flushRates(); }, 60000);
 window.addEventListener('online', () => { if (ME && queue().length) flush().then(refresh); });
 
 /* re-render whatever Drive School screen is showing */
@@ -427,6 +428,8 @@ document.addEventListener('input', e => {
 
 async function openLesson(d, at){
   if (L) return;
+  const owed = ME && unrated();
+  if (owed && !(await rateLater(owed))) return;
   let lesson;
   try { lesson = await loadDay(d); } catch (e) { toast('Couldn’t load this lesson. Check your internet.'); return; }
   const S = st(), info = dayInfo(d);
@@ -446,6 +449,7 @@ async function openLesson(d, at){
 function askClose(){
   if (!L) return;
   const last = L.i >= L.screens.length - 1;
+  if (L.mustRate) { if (!L.rating) rateNow(); toast('One quick rating, then you’re done.'); return; }
   if (L.i === 0 || last || L.finished) return closeLesson();
   openModal('<h3 id="mtitle">Leave this lesson?</h3><p style="margin:0">Progress inside this lesson won’t be saved. You can start it again any time.</p>'
     + '<button type="button" class="btn full" id="dl-stay" style="background:var(--ink);color:#fff">Keep going</button>'
@@ -1348,17 +1352,25 @@ function finish(a, quiet){
   }
   guide(first ? '+' + L.pts + ' points. Nice work.' : 'Replay done. Points count only the first time.', 'ok', null, quiet, first ? 'Nice work! Lesson done.' : null);
   sfx('fanfare'); confetti(); W3('celebrate', L.c);
-  const nx = nextDay(), ns = nx ? dayState(nx.d) : '';
-  const extra = L.d === 0 && dayState(1) === 'open' && !S.done[1] ? '<button class="dbtn ghost" id="dp-next" data-d="1">Start Day 1</button>'
-    : nx && ns === 'open' ? '<button class="dbtn ghost" id="dp-next" data-d="' + nx.d + '">Start Day ' + nx.d + '</button>' : '';
-  actions(extra + '<button class="dbtn okb" id="dp-main">Back to Drive School</button>');
-  qs('#dp-main').onclick = closeLesson;
-  const nb = qs('#dp-next'); if (nb) nb.onclick = () => { const d = +nb.dataset.d; closeLesson(); openLesson(d); };
-  const left = DAILY_MAX - firstToday();
-  if (L.d > 0) {
-    if (nx && ns === 'limit') a.card.appendChild(frag('<p class="dnote dcenter" style="margin-top:12px">That’s 3 lessons today. Day ' + nx.d + ' unlocks tomorrow.</p>'));
-    else if (nx && ns === 'open') a.card.appendChild(frag('<p class="dnote dcenter" style="margin-top:12px">' + plural(left, 'more lesson') + ' available today.</p>'));
-  }
+  // the usual way out (next lesson / back home); after a first finish it shows only once the lesson is rated
+  L.after = card => {
+    const nx = nextDay(), ns = nx ? dayState(nx.d) : '';
+    const extra = L.d === 0 && dayState(1) === 'open' && !st().done[1] ? '<button class="dbtn ghost" id="dp-next" data-d="1">Start Day 1</button>'
+      : nx && ns === 'open' ? '<button class="dbtn ghost" id="dp-next" data-d="' + nx.d + '">Start Day ' + nx.d + '</button>' : '';
+    actions(extra + '<button class="dbtn okb" id="dp-main">Back to Drive School</button>');
+    qs('#dp-main').onclick = closeLesson;
+    const nb = qs('#dp-next'); if (nb) nb.onclick = () => { const d = +nb.dataset.d; closeLesson(); openLesson(d); };
+    const left = DAILY_MAX - firstToday();
+    if (L.d > 0) {
+      if (nx && ns === 'limit') card.appendChild(frag('<p class="dnote dcenter" style="margin-top:12px">That’s 3 lessons today. Day ' + nx.d + ' unlocks tomorrow.</p>'));
+      else if (nx && ns === 'open') card.appendChild(frag('<p class="dnote dcenter" style="margin-top:12px">' + plural(left, 'more lesson') + ' available today.</p>'));
+    }
+  };
+  if (first && ME) {
+    rateOwed(L.d, body.secs); L.mustRate = true;
+    actions('<button class="dbtn" id="dp-main">Rate today’s lesson</button>');
+    qs('#dp-main').onclick = rateNow;
+  } else L.after(a.card);
   // send it now; if it fails, it waits in the queue and goes on the next sync
   if (!ME) return Promise.resolve();
   return (async () => {
@@ -1367,6 +1379,107 @@ function finish(a, quiet){
     else if (r.status !== 400 && r.status !== 401) { queueSet(queue().concat(body)); }
     pulledAt = Date.now();
   })();
+}
+
+/* ================= end-of-lesson "11-star" rating =================
+   Same idea as Brain Gym's end-of-session rating (Airbnb's 11-star exercise): 5 means "it worked", 6-11 say what great looks like,
+   and the follow-up asks what would push it higher. Asked once after every first finish (not replays). Stars are required, the rest is optional.
+   The student can't leave the lesson or start the next one without rating. If the tab closes first, it's asked before the next lesson.
+   Answers wait in localStorage until the server has them (offline, or the finish is still queued). Server copy: /api/drive action "rate". */
+const RK = 'ds_rate';
+const STARS = ['Waste of my time', 'Didn’t enjoy it', 'Meh', 'Okay, but I’ll forget it', 'It was fine. Nothing special',
+  'Better than I expected', 'I’ll be back for the next lesson', 'I’d tell my friends about it', 'I’d pick this over scrolling reels',
+  'I’ll use this in my studies this week', 'It changed how I think about learning'];
+const RATE_ASK = {
+  low:  { q: 'What got in the way?', ph: 'Tell us what to fix (optional)',
+          chips: ['Too long', 'Boring', 'Confusing', 'Too much typing', 'Bugs or slow', 'Not useful for me'] },
+  mid:  { q: 'What one change would make it a 7, so you come back for the next one?', ph: 'Your idea (optional)',
+          chips: ['Shorter lesson', 'More games', 'Examples from my college life', 'Less typing', 'Harder questions', 'See what my batch thinks'] },
+  high: { q: 'What would make Drive School an 11, something you’d tell every friend about?', ph: 'Dream big. No idea is too crazy. (optional)', chips: [] }
+};
+const BEST = ['Turbo', 'The story', 'The questions', 'The game', 'Take a Stand', 'Tips I can use'];
+function rates(){ try { const q = JSON.parse(localStorage.getItem(RK)); if (q && ME && q.id === ME.id) return q.items || []; } catch (e) {} return []; }
+function ratesSet(items){ try { if (items.length) localStorage.setItem(RK, JSON.stringify({ id: ME && ME.id, items })); else localStorage.removeItem(RK); } catch (e) {} }
+const unrated = () => rates().find(x => !x.ans);
+function rateOwed(day, secs){ if (!rates().some(x => x.day === day)) ratesSet(rates().concat({ day, secs })); }
+async function sendRate(item){
+  const r = await api('/api/drive', Object.assign({ action: 'rate', token: ME.token, day: item.day, secs: item.secs }, item.ans), 10000);
+  if ((r.status === 200 && r.j.ok) || r.status === 400) ratesSet(rates().filter(x => x.day !== item.day));   // saved (or bad data: never resend)
+}
+let ratesBusy = false;
+async function flushRates(){
+  if (!ME || ratesBusy) return;
+  ratesBusy = true;
+  try { for (const x of rates().filter(x => x.ans)) await sendRate(x); } finally { ratesBusy = false; }
+}
+/* the rating form; box = where it goes, scroller = what scrolls to the follow-up, done(box) runs once it's answered */
+function rateUI(box, day, late, done, scroller){
+  let stars = 0, why = [], best = [];
+  box.innerHTML = '<div class="drate">'
+    + '<p class="dkicker">' + (late ? 'Before your next lesson' : 'One last thing') + '</p>'
+    + '<h3 id="mtitle">How high does Day ' + day + ' go?</h3>'
+    + '<p class="dnote" style="margin:0 0 10px">' + (late ? 'You left Day ' + day + ' before rating it. ' : '') + 'Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you.</p>'
+    + ladderHtml(STARS, 'Lesson rating') + '<div class="smore" id="dr-more"></div></div>';
+  const chipRow = (k, list) => '<div class="chips2" data-k="' + k + '">' + list.map(c => '<button type="button" aria-pressed="false">' + c + '</button>').join('') + '</div>';
+  const follow = () => {
+    const band = stars >= 7 ? 'high' : stars >= 5 ? 'mid' : 'low', a = RATE_ASK[band], more = qs('#dr-more', box);
+    if (more.dataset.band === band) return;
+    more.dataset.band = band; why = []; best = [];
+    more.innerHTML = '<h4>' + a.q + '</h4>' + (a.chips.length ? chipRow('why', a.chips) : '')
+      + '<textarea class="field" id="dr-text" maxlength="500" rows="3" placeholder="' + a.ph + '"></textarea>'
+      + (band !== 'low' ? '<h4>Best part today <span class="dnote">(optional)</span></h4>' + chipRow('best', BEST) : '')
+      + '<button type="button" class="dbtn" id="dr-send">' + (late ? 'Send' : 'Send and finish') + '</button>';
+    qa('.chips2 button', more).forEach(b => b.onclick = () => {
+      const on = b.getAttribute('aria-pressed') !== 'true', k = b.parentNode.dataset.k; b.setAttribute('aria-pressed', on);
+      const list = k === 'why' ? why : best, t = b.textContent;
+      if (on) list.push(t); else list.splice(list.indexOf(t), 1);
+    });
+    qs('#dr-send', more).onclick = () => {
+      const ans = { stars, why, best, text: qs('#dr-text', more).value.trim(), late: !!late };
+      ratesSet(rates().map(x => x.day === day ? Object.assign(x, { ans }) : x));   // kept until the server has it
+      const item = rates().find(x => x.day === day);
+      if (ME && item) sendRate(item);
+      sfx(stars >= 8 ? 'correct' : 'select');
+      box.innerHTML = '<div class="reward dcenter"><div class="big" style="font-size:52px">' + (stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️') + '</div><h3>Thank you!</h3>'
+        + '<p class="dnote">The Drive School team reads every answer. ' + (stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make the next lesson better.') + '</p></div>';
+      done(box);
+    };
+    more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
+  };
+  qa('.rung', box).forEach(b => b.onclick = () => {
+    stars = +b.dataset.s;
+    pickRung(box, b);
+    sfx(stars >= 8 ? 'correct' : 'select');
+    if (stars >= 10 && !reduced()) confetti();
+    const first = !qs('#dr-more', box).dataset.band;
+    follow();
+    if (first && scroller) setTimeout(() => {
+      const m = qs('#dr-more', box);
+      scroller.scrollTo({ top: m.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16, behavior: reduced() ? 'auto' : 'smooth' });
+    }, 120);
+  });
+}
+/* inside the lesson, right after a first finish */
+function rateNow(){
+  if (!L || L.rating) return;
+  L.rating = true;
+  Voice.stop(); guide('');
+  const stage = qs('#dp-stage'), card = document.createElement('div'); card.className = 'dcard';
+  stage.innerHTML = ''; stage.appendChild(card); qs('#dp-scroll').scrollTop = 0;
+  qs('#dp-fill').style.width = '100%'; qs('#dp-car').style.left = '100%';
+  actions('');
+  rateUI(card, L.d, false, box => { if (!L) return; L.mustRate = false; guide('Thanks! That helps a lot.', 'ok', null, true); L.after(box); }, qs('#dp-scroll'));
+  anim(card, { opacity: [0, 1], y: [12, 0] }, { duration: 0.3 });
+}
+/* a lesson finished but not rated (tab closed): asked in a sheet. Resolves true once rated */
+function rateLater(item){
+  let sent = false;
+  const p = openModal('<div id="dr-box"></div><button type="button" class="mclose">Not now</button>');
+  rateUI(qs('#dr-box'), item.day, true, () => { sent = true; setTimeout(closeModal, 1400); }, qs('#mbox'));
+  return p.then(() => {
+    if (!sent) toast('Rate Day ' + item.day + ' to start your next lesson.');
+    return sent;
+  });
 }
 
 /* batch split for a Take a Stand day: shown only once 20+ students have answered */
@@ -1474,7 +1587,12 @@ function renderBoard(){
 }
 
 /* ================= wiring ================= */
-function render2(){ if (!ME) return; renderHome(); pull(); }
+let askedLate = false;
+function render2(){
+  if (!ME) return; renderHome(); pull();
+  const owed = unrated();
+  if (owed && !askedLate && !L && !(typeof modalOpen === 'function' && modalOpen())) { askedLate = true; rateLater(owed); }
+}
 function leave(){ if (!L) Voice.stop(); /* lessons are an overlay and keep running */ }
 /* on logout: forget this student's Drive state so the next login starts clean */
 function reset(){ if (L) closeLesson(); Voice.stop(); DS = null; pulledAt = 0; PROF = null; profAt = 0; DBOARD = null; dboardAt = 0; const r = qs('#drive-root'); if (r) r.innerHTML = ''; }

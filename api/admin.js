@@ -1,5 +1,5 @@
 // GET /api/admin?view=summary           -> pilot report as JSON
-// GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress | starts | drive_students | drive_events)
+// GET /api/admin?view=csv&table=<name>  -> CSV download (students | plays | feedback | progress | starts | drive_students | drive_events | drive_ratings)
 // GET /api/admin?view=drive             -> Drive School report as JSON (test batch DEMO left out)
 // Needs header  x-admin-key: <ADMIN_KEY>. Read-only: the roster is loaded directly into the database.
 import { db, sameSecret, limited, ipOf, dbReady } from './_lib/db.js';
@@ -96,6 +96,9 @@ const CSV = {
                      COUNT(dd.day)::int AS days_done, MAX(dd.day) AS last_day, MAX(dd.completed_at) AS last_done_at, ds.memo
                    FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN drive_days dd ON dd.student_id = ds.student_id
                    GROUP BY s.id, ds.student_id ORDER BY s.pilot, days_done DESC, s.name`,
+  drive_ratings: `SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, (e.data->>'stars')::int AS stars,
+                   e.data->'why' AS what_got_in_the_way_or_make_it_better, e.data->'best' AS best_part, e.data->>'text' AS comment, (e.data->>'late')::boolean AS rated_later
+                 FROM drive_events e JOIN students s ON s.id = e.student_id WHERE e.kind = 'rate' ORDER BY e.created_at`,
   drive_events: `SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, e.kind, e.screen, e.replay, e.data
                  FROM drive_events e JOIN students s ON s.id = e.student_id ORDER BY e.created_at`
 };
@@ -128,7 +131,8 @@ function scaleScores(rows){
 async function driveReport(sql){
   const REAL = `s.pilot NOT LIKE 'DEMO%'`;
   const DD = `dd AS (SELECT student_id, COUNT(*) FILTER (WHERE day > 0)::int AS lessons, BOOL_OR(day = 0) AS setup, MAX(completed_at) AS last FROM drive_days GROUP BY student_id)`;
-  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students] = await Promise.all([
+  const RATE = `e.kind = 'rate' AND ${REAL}`, STARS = `(e.data->>'stars')::int`;
+  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students, week, rates, rateTexts, chips] = await Promise.all([
     sql.query(`WITH ${DD}
       SELECT COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
              COUNT(*) FILTER (WHERE dd.lessons >= ${DRIVE_LAST_BUILT})::int AS all_done,
@@ -176,26 +180,56 @@ async function driveReport(sql){
     sql.query(`SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, e.kind, e.data
       FROM drive_events e JOIN students s ON s.id = e.student_id
       WHERE e.kind IN ('reflect', 'plan', 'stand') AND e.replay = false AND ${REAL} ORDER BY e.created_at DESC LIMIT 300`),
-    sql.query(`WITH ${DD}
+    sql.query(`WITH ${DD},
+           rt AS (SELECT e.student_id, COUNT(*)::int AS n, COUNT(*) FILTER (WHERE ${STARS} >= 7)::int AS hi, SUM(${STARS})::int AS sum
+                  FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
       SELECT s.pilot, COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
-             COALESCE(SUM(dd.lessons), 0)::int AS lessons, COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7
-      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id WHERE ${REAL} GROUP BY s.pilot`),
-    sql.query(`WITH ${DD}
+             COALESCE(SUM(dd.lessons), 0)::int AS lessons, COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7,
+             COALESCE(SUM(rt.n), 0)::int AS rated, COALESCE(SUM(rt.hi), 0)::int AS rated_hi, COALESCE(SUM(rt.sum), 0)::int AS stars_sum
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
+      WHERE ${REAL} GROUP BY s.pilot`),
+    sql.query(`WITH ${DD},
+           rt AS (SELECT e.student_id, ROUND(AVG(${STARS})::numeric, 1)::float AS stars FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
       SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.points, to_char(ds.started_on, 'YYYY-MM-DD') AS started_on,
-             COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at
-      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id
-      WHERE ${REAL} ORDER BY lessons DESC, ds.points DESC, s.name LIMIT 3000`)
+             COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at, rt.stars
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
+      WHERE ${REAL} ORDER BY lessons DESC, ds.points DESC, s.name LIMIT 3000`),
+    // this week (last 7 days) vs the 7 days before, for the trend arrows
+    sql.query(`SELECT
+        (SELECT COUNT(DISTINCT e.student_id) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${REAL} AND e.created_at > now() - interval '7 days')::int AS active_w,
+        (SELECT COUNT(DISTINCT e.student_id) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${REAL} AND e.created_at <= now() - interval '7 days' AND e.created_at > now() - interval '14 days')::int AS active_pw,
+        (SELECT COUNT(*) FROM drive_days d JOIN students s ON s.id = d.student_id WHERE ${REAL} AND d.day > 0 AND d.completed_at > now() - interval '7 days')::int AS lessons_w,
+        (SELECT COUNT(*) FROM drive_days d JOIN students s ON s.id = d.student_id WHERE ${REAL} AND d.day > 0 AND d.completed_at <= now() - interval '7 days' AND d.completed_at > now() - interval '14 days')::int AS lessons_pw,
+        (SELECT COUNT(*) FROM drive_students ds JOIN students s ON s.id = ds.student_id WHERE ${REAL} AND ds.started_on > current_date - 7)::int AS new_w,
+        (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND e.created_at > now() - interval '7 days')::int AS rated_w,
+        (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND ${STARS} >= 7 AND e.created_at > now() - interval '7 days')::int AS hi_w,
+        (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND e.created_at <= now() - interval '7 days' AND e.created_at > now() - interval '14 days')::int AS rated_pw,
+        (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND ${STARS} >= 7 AND e.created_at <= now() - interval '7 days' AND e.created_at > now() - interval '14 days')::int AS hi_pw`),
+    // end-of-lesson 11-star ratings: how many of each star level, per day
+    sql.query(`SELECT e.day, ${STARS} AS stars, COUNT(*)::int AS n FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} GROUP BY 1, 2 ORDER BY 1, 2`),
+    // ratings that came with words or picked reasons (latest 300)
+    sql.query(`SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, e.data
+      FROM drive_events e JOIN students s ON s.id = e.student_id
+      WHERE ${RATE} AND (COALESCE(e.data->>'text', '') <> '' OR jsonb_array_length(COALESCE(e.data->'why', '[]')) > 0 OR jsonb_array_length(COALESCE(e.data->'best', '[]')) > 0)
+      ORDER BY e.created_at DESC LIMIT 300`),
+    // the tap-to-pick reasons: what got in the way (1-4), what would make it a 7 (5-6), best part (5+)
+    sql.query(`SELECT x.k, x.chip, CASE WHEN ${STARS} >= 7 THEN 'high' WHEN ${STARS} >= 5 THEN 'mid' ELSE 'low' END AS band, COUNT(*)::int AS n
+      FROM drive_events e JOIN students s ON s.id = e.student_id
+      CROSS JOIN LATERAL (SELECT 'why' AS k, w AS chip FROM jsonb_array_elements_text(COALESCE(e.data->'why', '[]')) w
+                          UNION ALL SELECT 'best', b FROM jsonb_array_elements_text(COALESCE(e.data->'best', '[]')) b) x
+      WHERE ${RATE} GROUP BY 1, 2, 3 ORDER BY 4 DESC`)
   ]);
   const um = new Map();                                // batches -> universities
   for (const p of unis) {
     const name = uniOf(p.pilot), u = um.get(name) || { uni: name, started: 0, setup_done: 0, lesson1: 0, lessons: 0, active7: 0 };
-    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7']) u[k] += p[k];
+    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7', 'rated', 'rated_hi', 'stars_sum']) u[k] = (u[k] || 0) + p[k];
     um.set(name, u);
   }
   for (const st of students) st.uni = uniOf(st.batch);
   for (const t of texts) t.uni = uniOf(t.batch);
-  return { ok: true, built: DRIVE_LAST_BUILT, kpi: kpi[0], funnel, daily, acc, scales: scaleScores(scales), study, hours: hours[0], stands, texts,
-           unis: [...um.values()].sort((a, b) => b.started - a.started), students };
+  for (const t of rateTexts) t.uni = uniOf(t.batch);
+  return { ok: true, built: DRIVE_LAST_BUILT, kpi: kpi[0], week: week[0], funnel, daily, acc, scales: scaleScores(scales), study, hours: hours[0], stands, texts,
+           rates, rateTexts, chips, unis: [...um.values()].sort((a, b) => b.started - a.started), students };
 }
 
 const cell = v => {
@@ -227,7 +261,7 @@ export default async function handler(req, res) {
 
     if (q.get('view') === 'drive') return res.status(200).json(await driveReport(sql));
 
-    const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, best] = await Promise.all([
+    const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, best, week] = await Promise.all([
       sql`WITH pr AS (SELECT student_id, SUM(active)::int AS active, SUM(plays)::int AS plays FROM progress GROUP BY student_id)
           SELECT s.pilot, COUNT(*)::int AS on_roster, COUNT(s.joined_at)::int AS joined,
                  COUNT(*) FILTER (WHERE s.last_seen > now() - interval '7 days')::int AS active7,
@@ -280,12 +314,24 @@ export default async function handler(req, res) {
           WHERE f.kind = 'session' AND (f.comment IS NOT NULL OR jsonb_array_length(COALESCE(f.meta->'why', '[]'::jsonb)) > 0)
           ORDER BY f.created_at DESC LIMIT 200`,
       // every student's best % per game, for the skill profiles
-      sql`SELECT s.pilot, p.student_id, p.game_id, p.best_pct FROM progress p JOIN students s ON s.id = p.student_id WHERE p.plays > 0`
+      sql`SELECT s.pilot, p.student_id, p.game_id, p.best_pct FROM progress p JOIN students s ON s.id = p.student_id WHERE p.plays > 0`,
+      // this week (last 7 India days) vs the 7 days before, for the Summary page's trend arrows
+      sql`SELECT COUNT(DISTINCT d.student_id) FILTER (WHERE d.day > current_date - 7)::int AS active_w,
+                 COUNT(DISTINCT d.student_id) FILTER (WHERE d.day <= current_date - 7)::int AS active_pw,
+                 (COALESCE(SUM(d.active) FILTER (WHERE d.day > current_date - 7), 0) / 60)::int AS minutes_w,
+                 (COALESCE(SUM(d.active) FILTER (WHERE d.day <= current_date - 7), 0) / 60)::int AS minutes_pw,
+                 (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at > now() - interval '7 days')::int AS rated_w,
+                 (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND f.rating >= 7 AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at > now() - interval '7 days')::int AS hi_w,
+                 (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at <= now() - interval '7 days' AND f.created_at > now() - interval '14 days')::int AS rated_pw,
+                 (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND f.rating >= 7 AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at <= now() - interval '7 days' AND f.created_at > now() - interval '14 days')::int AS hi_pw,
+                 (SELECT COUNT(*) FROM feedback f WHERE f.kind = 'bug' AND f.created_at > now() - interval '7 days')::int AS bugs_w
+          FROM daily d JOIN students s ON s.id = d.student_id
+          WHERE d.active > 0 AND d.day > current_date - 14 AND s.pilot NOT LIKE 'DEMO%'`
     ]);
     for (const p of pilots) p.uni = uniOf(p.pilot);
     for (const st of students) st.uni = uniOf(st.batch);
     const skills = skillProfiles(best);
-    return res.status(200).json({ ok: true, pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, skills });
+    return res.status(200).json({ ok: true, pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, skills, week: week[0] });
   } catch (e) {
     console.error('[admin]', e.message);
     return res.status(500).json({ ok: false, error: 'server error' });

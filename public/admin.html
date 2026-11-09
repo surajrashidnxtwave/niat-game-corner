@@ -159,7 +159,55 @@ tr.all td{background:#F7F6FF;font-weight:800}
 .qrow .nm{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 details summary{cursor:pointer}
 pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,monospace}
-@media (max-width:640px){.kpi .value{font-size:24px}.brand span{display:none}.card{padding:14px}}
+/* trend chips: last 7 days vs the 7 before */
+.delta{display:inline-block;vertical-align:middle;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:800;background:var(--chip);color:var(--ink2);line-height:1.4}
+.delta.up{background:#E7F6EF;color:var(--ok)}
+.delta.down{background:#FDECEA;color:var(--bad)}
+.kpi.hero .delta{background:rgba(255,255,255,.14);color:#fff}
+/* summary */
+.brief{background:linear-gradient(135deg,#141B34,#2B2F6B);color:#fff}
+.brief h2{font-size:20px}
+.brief p{margin:6px 0 0;color:#D6D8EA;font-size:15px;max-width:80ch}
+.brief p b{color:#fff}
+.prod .head{margin-bottom:12px}
+.prod h2 small{display:block;font-size:12.5px;color:var(--soft);font-weight:700}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.m{background:var(--chip);border-radius:12px;padding:12px 14px;min-width:0}
+.m .label{font-size:12.5px;color:var(--soft);font-weight:700}
+.m .value{font-size:24px;font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums}
+.m .note{font-size:12px;color:var(--soft)}
+.attn{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:20px}
+.attn h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--soft)}
+.attn ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.att{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:12px;background:var(--chip)}
+.att .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--soft)}
+.att.bad .dot{background:var(--bad)} .att.warn .dot{background:#F79009} .att.good .dot{background:var(--ok)} .att.info .dot{background:var(--brand)}
+.att .tx{flex:1;min-width:0}
+.att .tx small{display:block;color:var(--soft);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}
+.att .btn{padding:4px 10px;font-size:12px}
+/* funnel: one bar per day */
+.frow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 92px 70px;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.frow:last-child{border-bottom:0}
+.frow .fl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frow .fb{height:12px;border-radius:6px;background:var(--chip);overflow:hidden}
+.frow .fb i{display:block;height:100%;border-radius:6px}
+.frow .fv{text-align:right;font-weight:800}
+.frow .fk{text-align:right;font-size:12px}
+@media (max-width:640px){.frow{grid-template-columns:minmax(0,1fr) 80px 60px}.frow .fb{grid-column:1/-1;order:5}}
+/* tapped reasons */
+.chipcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:22px}
+.chipcols h3{margin:0 0 6px;font-size:14px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) 90px 36px;gap:8px;align-items:center;padding:5px 0;font-size:13px}
+.crow .tr{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.crow .tr b{display:block;height:100%;border-radius:4px}
+.crow .v{text-align:right;font-weight:800}
+.rstat{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+.rstat b{font-size:26px;font-weight:900;display:block;line-height:1.1}
+.rstat span{font-size:12px;color:var(--soft)}
+.stars3{display:inline-flex;height:6px;width:60px;border-radius:3px;overflow:hidden;background:var(--chip);vertical-align:middle;margin-left:6px}
+.stars3 i{display:block;height:100%}
+.tabs[hidden]{display:none}
+@media (max-width:640px){.kpi .value{font-size:24px}.brand span{display:none}.card{padding:14px}.mgrid{grid-template-columns:1fr 1fr}.m .value{font-size:20px}}
 </style>
 </head>
 <body>
@@ -176,7 +224,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
   <header>
     <div class="bar">
       <div class="brand"><div class="logo">🎮</div><div><h1>Game Corner progress</h1><span id="stamp"></span></div></div>
-      <div class="sections" role="group" aria-label="Section"><button data-sec="bg" aria-pressed="true">🏋️ Brain Gym</button><button data-sec="dv" aria-pressed="false">🚗 Drive School</button></div>
+      <div class="sections" role="group" aria-label="Section"><button data-sec="sum" aria-pressed="true">📊 Summary</button><button data-sec="bg" aria-pressed="false">🏋️ Brain Gym</button><button data-sec="dv" aria-pressed="false">🚗 Drive School</button></div>
       <button class="btn" id="refresh">↻ Refresh</button>
       <div class="menu">
         <button class="btn" id="dl-btn" aria-haspopup="true" aria-expanded="false">⬇ Download</button>
@@ -187,6 +235,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           <button data-sec="bg" data-csv="feedback">Feedback<small>ratings, comments, reports</small></button>
           <button data-sec="bg" data-csv="starts">Starts<small>every Play press, to see who quit early</small></button>
           <button data-sec="dv" data-csv="drive_students">Drive School students<small>per student: days done, points, saved answers</small></button>
+          <button data-sec="dv" data-csv="drive_ratings">Drive School ratings<small>every lesson rating, with what they picked and said</small></button>
           <button data-sec="dv" data-csv="drive_events">Drive School answers<small>everything students did in lessons</small></button>
         </div>
       </div>
@@ -197,22 +246,42 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
 
   <main class="wrap">
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-sec="bg" data-tab="overview" aria-selected="true">Overview</button>
-      <button class="tab" role="tab" data-sec="bg" data-tab="unis">Universities</button>
-      <button class="tab" role="tab" data-sec="bg" data-tab="games">Games</button>
-      <button class="tab" role="tab" data-sec="bg" data-tab="voice">Student voice</button>
-      <button class="tab" role="tab" data-sec="bg" data-tab="issues">Issues <span class="count" id="issues-count">0</span></button>
-      <button class="tab" role="tab" data-sec="bg" data-tab="students">Students</button>
+      <button class="tab" role="tab" data-sec="sum" data-tab="sum" aria-selected="true">Summary</button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="overview" hidden>Overview</button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="unis" hidden>Universities</button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="games" hidden>Games</button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="voice" hidden>Student voice</button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="issues" hidden>Issues <span class="count" id="issues-count">0</span></button>
+      <button class="tab" role="tab" data-sec="bg" data-tab="students" hidden>Students</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-overview" hidden>Overview</button>
-      <button class="tab" role="tab" data-sec="dv" data-tab="dv-start" hidden>Starting point</button>
-      <button class="tab" role="tab" data-sec="dv" data-tab="dv-questions" hidden>Questions</button>
+      <button class="tab" role="tab" data-sec="dv" data-tab="dv-lessons" hidden>Lessons</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-voice" hidden>Student voice</button>
+      <button class="tab" role="tab" data-sec="dv" data-tab="dv-start" hidden>Starting point</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-unis" hidden>Universities</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-students" hidden>Students</button>
     </nav>
 
+    <!-- SUMMARY: both products on one page, for a quick weekly check -->
+    <section data-panel="sum">
+      <div class="card brief"><h2 id="sum-title">This week at a glance</h2><p id="sum-line"></p></div>
+      <div class="grid2">
+        <div class="card prod"><div class="head"><h2>🏋️ Brain Gym<small>Daily brain workouts, 15 minutes a day</small></h2><button class="btn" data-goto="overview">Open Brain Gym →</button></div><div class="mgrid" id="sum-bg"></div></div>
+        <div class="card prod"><div class="head"><h2>🚗 Drive School<small>Daily mindset lessons, about 10 minutes each</small></h2><button class="btn" data-goto="dv-overview">Open Drive School →</button></div><div class="mgrid" id="sum-dv"></div></div>
+      </div>
+      <div class="card">
+        <h2>What to look at</h2>
+        <p class="sub">Picked out from the numbers. Trends compare the last 7 days with the 7 days before. Small groups (under 10 students or ratings) are left out so one person doesn’t set off an alert.</p>
+        <div class="attn"><div><h3>Needs attention</h3><ul id="sum-bad"></ul></div><div><h3>Going well</h3><ul id="sum-good"></ul></div></div>
+      </div>
+      <div class="card">
+        <div class="head"><div><h2>Universities</h2><p class="sub">Both products side by side. Shares are out of students who logged in. Click a column title to sort.</p></div></div>
+        <div class="controls"><input type="search" id="sum-q" placeholder="Search university…" aria-label="Search university"></div>
+        <div class="scroll"><table id="sum-unis"></table></div>
+      </div>
+    </section>
+
     <!-- OVERVIEW -->
-    <section data-panel="overview">
+    <section data-panel="overview" hidden>
       <div class="kpis" id="kpis"></div>
       <div class="grid2">
         <div class="card">
@@ -319,18 +388,71 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
     <div id="dv-body" hidden>
     <section data-panel="dv-overview" hidden>
       <div class="kpis" id="dv-kpis"></div>
-      <div class="card">
-        <h2>Active students each day</h2>
-        <p class="sub">Last 14 days (IST). Active = opened or finished a lesson that day. Median time = lesson minutes of students who finished a lesson that day (first finishes; replay time isn’t recorded).</p>
-        <div class="legend"><span><i style="background:var(--brand)"></i>Finished a lesson</span><span><i style="background:var(--brand-3)"></i>Opened, didn’t finish</span></div>
-        <div id="dv-daily"></div>
-        <details open style="margin-top:12px"><summary class="muted small" style="cursor:pointer">Table</summary><div class="scroll"><table id="dv-daily-t"></table></div></details>
+      <div class="grid2">
+        <div class="card">
+          <div class="head"><div><h2>How far students get</h2><p class="sub">Students who finished each day, out of everyone who opened Drive School. Kept = of those who finished the day before, the share who finished this one. Students can do at most 3 lessons a day, so later days fill up over time.</p></div><button class="btn" data-goto="dv-lessons">Lesson details →</button></div>
+          <div id="dv-funnel-c"></div>
+        </div>
+        <div class="card">
+          <div class="head"><div><h2>How students rate a lesson</h2><p class="sub">Asked after every lesson, 1 to 11 stars, before they can move on. 7 means “I’ll be back for the next lesson”.</p></div><button class="btn" data-goto="dv-voice">What they said →</button></div>
+          <div class="rstat" id="dv-rate-sum"></div>
+          <div class="legend"><span><i style="background:var(--bad)"></i>1–4 Not there yet</span><span><i style="background:#C9CCE0"></i>5–6 Fine</span><span><i style="background:var(--brand)"></i>7–11 Would come back</span></div>
+          <div id="dv-stars"></div>
+        </div>
       </div>
       <div class="card">
-          <h2>Day by day</h2>
-          <p class="sub">Opened = students who started the lesson. Finished = first finishes (replays not counted). Finish rate = finished ÷ opened. Times and points are medians.</p>
-          <div class="scroll"><table id="dv-funnel"></table></div>
+        <h2>Active students each day</h2>
+        <p class="sub">Last 14 days (IST). Active = opened, finished or rated a lesson that day. Median time = lesson minutes of students who finished a lesson that day (first finishes; replay time isn’t recorded).</p>
+        <div class="legend"><span><i style="background:var(--brand)"></i>Finished a lesson</span><span><i style="background:var(--brand-3)"></i>Opened, didn’t finish</span></div>
+        <div id="dv-daily"></div>
+        <details style="margin-top:12px"><summary class="muted small" style="cursor:pointer">Show as a table</summary><div class="scroll"><table id="dv-daily-t"></table></div></details>
+      </div>
+    </section>
+
+    <section data-panel="dv-lessons" hidden>
+      <div class="card">
+        <h2>Lessons</h2>
+        <p class="sub">One row per day. Opened = students who started it. Finished = first finishes (replays not counted). Finish rate = finished ÷ opened. Time is the median. Rating = median stars out of 11 and the share who gave 7 or more. Hard questions = right on the first try by under half of students (click to see them).</p>
+        <div class="scroll"><table id="dv-funnel"></table></div>
+      </div>
+      <div class="card" id="dv-qcard">
+        <h2>Questions</h2>
+        <p class="sub">Right on the first try (replays not counted). Under 50% is marked: the question may be too hard or unclear. Hover a question to see all of it.</p>
+        <div class="controls"><select id="dv-qday" aria-label="Filter questions by day"><option value="">All days</option></select></div>
+        <div class="scroll"><table id="dv-acc"></table></div>
+      </div>
+    </section>
+
+    <section data-panel="dv-voice" hidden>
+      <div class="card">
+        <h2>What students tapped when rating a lesson</h2>
+        <p class="sub">Each rating asks a follow-up that depends on the stars. Students can pick more than one reason, or none.</p>
+        <div class="chipcols" id="dv-chips"></div>
+      </div>
+      <div class="card">
+        <h2>What students said when rating a lesson</h2>
+        <p class="sub">1–4 stars were asked what got in the way. 5–6 were asked what would make it a 7. 7+ were asked what would make it an 11. Only ratings with words or picked reasons. Latest 300.</p>
+        <div class="controls">
+          <input type="search" id="dv-rq" placeholder="Search name, NIAT ID or text…" aria-label="Search lesson ratings">
+          <select id="dv-rd" aria-label="Filter by day"><option value="">All days</option></select>
+          <select id="dv-rb" aria-label="Filter by stars"><option value="">All stars</option><option value="low">1–4 stars</option><option value="mid">5–6 stars</option><option value="high">7–11 stars</option></select>
         </div>
+        <div class="scroll"><table id="dv-rtexts"></table></div>
+      </div>
+      <div class="card">
+        <h2>What students wrote in lessons</h2>
+        <p class="sub">Reflections, if-then plans and stands. Latest 300.</p>
+        <div class="controls">
+          <input type="search" id="dv-tq" placeholder="Search name, NIAT ID or text…" aria-label="Search what students wrote">
+          <select id="dv-tk" aria-label="Filter by kind"><option value="">Everything</option><option value="reflect">Reflections</option><option value="plan">Plans</option><option value="stand">Stands</option></select>
+        </div>
+        <div class="scroll"><table id="dv-texts"></table></div>
+      </div>
+      <div class="card">
+        <h2>Take a Stand</h2>
+        <p class="sub">Which side students picked. Never judged or scored. Revised = changed their reason after seeing the other side.</p>
+        <div class="scroll"><table id="dv-stands"></table></div>
+      </div>
     </section>
 
     <section data-panel="dv-start" hidden>
@@ -347,36 +469,10 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         </div>
     </section>
 
-    <section data-panel="dv-questions" hidden>
-      <div class="card">
-          <h2>Questions</h2>
-          <p class="sub">Right on the first try (replays not counted). Under 50% is marked: the question may be too hard or unclear. Hover a question to see all of it.</p>
-          <div class="controls"><select id="dv-qday" aria-label="Filter questions by day"><option value="">All days</option></select></div>
-          <div class="scroll"><table id="dv-acc"></table></div>
-        </div>
-    </section>
-
-    <section data-panel="dv-voice" hidden>
-      <div class="card">
-          <h2>Take a Stand</h2>
-          <p class="sub">Which side students picked. Never judged or scored. Revised = changed their reason after seeing the other side.</p>
-          <div class="scroll"><table id="dv-stands"></table></div>
-        </div>
-      <div class="card">
-          <h2>What students wrote</h2>
-          <p class="sub">Reflections, if-then plans and stands. Latest 300.</p>
-          <div class="controls">
-            <input type="search" id="dv-tq" placeholder="Search name, NIAT ID or text…" aria-label="Search what students wrote">
-            <select id="dv-tk" aria-label="Filter by kind"><option value="">Everything</option><option value="reflect">Reflections</option><option value="plan">Plans</option><option value="stand">Stands</option></select>
-          </div>
-          <div class="scroll"><table id="dv-texts"></table></div>
-        </div>
-    </section>
-
     <section data-panel="dv-unis" hidden>
       <div class="card">
           <h2>Universities</h2>
-          <p class="sub">Started = opened Drive School. Lessons per student = lessons finished ÷ students who started.</p>
+          <p class="sub">Started = opened Drive School. Lessons per student = lessons finished ÷ students who started. Rating = average stars out of 11. Click a column title to sort.</p>
           <div class="scroll"><table id="dv-unis"></table></div>
         </div>
     </section>
@@ -450,24 +546,66 @@ function bars(el, rows, series, xlab, tipOf){
     + '<div class="xlab">' + rows.map(r => '<span>' + esc(xlab(r)) + '</span>').join('') + '</div>';
 }
 
-/* tabs */
-/* two sections (Brain Gym, Drive School), each with its own pages; the last page of each is remembered */
-const LAST = { bg:'overview', dv:'dv-overview' };
+/* three sections (Summary, Brain Gym, Drive School), each with its own pages; the last page of each is remembered */
+const LAST = { sum:'sum', bg:'overview', dv:'dv-overview' };
 function show(tab){
-  const btn = document.querySelector('.tab[data-tab="' + tab + '"]') || document.querySelector('.tab[data-tab="overview"]');
+  const btn = document.querySelector('.tab[data-tab="' + tab + '"]') || document.querySelector('.tab[data-tab="sum"]');
   tab = btn.dataset.tab; const sec = btn.dataset.sec; LAST[sec] = tab;
   document.querySelectorAll('.sections button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sec === sec));
   document.querySelectorAll('.tab').forEach(t => { t.hidden = t.dataset.sec !== sec; t.setAttribute('aria-selected', t.dataset.tab === tab); });
-  document.querySelectorAll('.menu-list [data-sec]').forEach(b => b.hidden = b.dataset.sec !== sec);
+  document.querySelector('.tabs').hidden = sec === 'sum';
+  document.querySelectorAll('.menu-list [data-sec]').forEach(b => b.hidden = sec !== 'sum' && b.dataset.sec !== sec);
   document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== tab);
   $('dv-body').hidden = sec !== 'dv' || !DV.data;
   $('dv-status').hidden = sec !== 'dv' || !!DV.data;
   try { sessionStorage.setItem('bg_tab', tab); } catch (e) {}
-  if (sec === 'dv' && !DV.data && !DV.busy && KEY) loadDrive();
+  if (!DV.data && !DV.busy && KEY && D) loadDrive();
 }
 document.querySelectorAll('.sections button').forEach(b => b.onclick = () => { show(LAST[b.dataset.sec]); scrollTo(0, 0); });
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(t.dataset.tab));
-document.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => { show(b.dataset.goto); scrollTo(0, 0); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-goto]'); if (!b) return;
+  show(b.dataset.goto);
+  if (b.dataset.day != null && $('dv-qday')) { $('dv-qday').value = b.dataset.day; drawAcc(); $('dv-qcard').scrollIntoView({ behavior:'smooth' }); }
+  else scrollTo(0, 0);
+});
+
+/* trend chip: this week vs last week. pts() is for shares (difference in percentage points) */
+function delta(now, prev){
+  if (prev == null || now == null || (!now && !prev)) return '';
+  if (!prev) return '<span class="delta up" data-tip="Nothing the 7 days before">new</span>';
+  const p = Math.round((now - prev) / prev * 100);
+  return '<span class="delta' + (p > 0 ? ' up' : p < 0 ? ' down' : '') + '" data-tip="' + esc('Last 7 days: ' + fmt(now) + '\nThe 7 days before: ' + fmt(prev)) + '">' + (p > 0 ? '▲ ' : p < 0 ? '▼ ' : '') + Math.abs(p) + '%</span>';
+}
+function pts(a, an, b, bn){
+  if (!an || !bn) return '';
+  const d = Math.round(a / an * 100 - b / bn * 100);
+  return '<span class="delta' + (d > 0 ? ' up' : d < 0 ? ' down' : '') + '" data-tip="' + esc('Last 7 days: ' + pctTxt(a, an) + ' of ' + an + '\nThe 7 days before: ' + pctTxt(b, bn) + ' of ' + bn) + '">' + (d > 0 ? '▲ ' : d < 0 ? '▼ ' : '') + Math.abs(d) + ' pts</span>';
+}
+const kpiTile = x => '<div class="kpi ' + x[0] + '"><div class="label">' + x[1] + '</div><div class="value">' + esc(x[2]) + (x[4] || '') + '</div><div class="note">' + esc(x[3]) + '</div></div>';
+const mTile = x => '<div class="m"><div class="label">' + x[0] + '</div><div class="value">' + esc(x[1]) + (x[3] || '') + '</div><div class="note">' + esc(x[2]) + '</div></div>';
+
+/* 11-star ratings from counts [{stars, n}]: median, share 7+, share 1-4 */
+function rateStats(rows){
+  const c = Array(11).fill(0); for (const r of rows || []) if (r.stars >= 1 && r.stars <= 11) c[r.stars - 1] += r.n;
+  const n = c.reduce((a, b) => a + b, 0), at = i => { let t = 0; for (let k = 0; k < 11; k++) { t += c[k]; if (t > i) return k + 1; } return 0; };
+  return { c, n, hi: c.slice(6).reduce((a, b) => a + b, 0), mid: c[4] + c[5], lo: c.slice(0, 4).reduce((a, b) => a + b, 0), med: n ? (at((n - 1) >> 1) + at(n >> 1)) / 2 : null };
+}
+const STARC = { lo:'var(--bad)', mid:'#C9CCE0', hi:'var(--brand)' };
+const rateCell = r => !r || !r.n ? '<span class="muted">–</span>'
+  : '<span data-tip="' + esc(r.n + ' rating' + (r.n === 1 ? '' : 's') + '\n7–11: ' + r.hi + ' · 5–6: ' + r.mid + ' · 1–4: ' + r.lo) + '"><b>' + r.med + '★</b> <span class="muted small">' + pctTxt(r.hi, r.n) + ' 7+ · ' + r.n + '</span>'
+    + '<span class="stars3">' + [['lo', r.lo], ['mid', r.mid], ['hi', r.hi]].filter(x => x[1]).map(x => '<i style="width:' + (x[1] / r.n * 100) + '%;background:' + STARC[x[0]] + '"></i>').join('') + '</span></span>';
+
+/* sortable table. cols: { k, h, r(row) -> html, v(row) -> sort value, cls, tip } */
+function sortable(el, cols, rows, st, redraw, empty, foot){
+  const col = cols.find(c => c.k === st.sort) || cols[0];
+  const sorted = rows.slice().sort((a, b) => { const x = col.v(a), y = col.v(b);
+    return (typeof x === 'string' ? x.localeCompare(y) : (x ?? -1) - (y ?? -1)) * st.dir || String(cols[0].v(a)).localeCompare(String(cols[0].v(b))); });
+  el.innerHTML = '<thead><tr>' + cols.map(c => '<th class="sort' + (c.cls ? ' ' + c.cls : '') + '" data-k="' + c.k + '"' + (c.tip ? ' data-tip="' + esc(c.tip) + '"' : '') + '>' + c.h + (st.sort === c.k ? (st.dir > 0 ? ' ▲' : ' ▼') : '') + '</th>').join('') + '</tr></thead><tbody>'
+    + (sorted.length ? sorted.map(r => '<tr>' + cols.map(c => '<td' + (c.cls ? ' class="' + c.cls + '"' : '') + '>' + c.r(r) + '</td>').join('') + '</tr>').join('')
+                     : '<tr><td colspan="' + cols.length + '" class="empty">' + (empty || 'Nothing yet.') + '</td></tr>') + '</tbody>' + (foot || '');
+  el.onclick = e => { const th = e.target.closest('th[data-k]'); if (!th) return; const k = th.dataset.k; st.dir = st.sort === k ? -st.dir : (k === 'uni' ? 1 : -1); st.sort = k; redraw(); };
+}
 
 /* ---------- load ---------- */
 async function load(){
@@ -481,7 +619,7 @@ async function load(){
   $('login').hidden = true; $('app').hidden = false;
   $('stamp').textContent = 'Updated ' + when(Date.now());
   render();
-  let tab = 'overview'; try { tab = sessionStorage.getItem('bg_tab') || tab; } catch (e) {}
+  let tab = 'sum'; try { tab = sessionStorage.getItem('bg_tab') || tab; } catch (e) {}
   show(tab);
 }
 
@@ -605,6 +743,7 @@ function render(){
   const sel = $('s-uni'), cur = sel.value;
   sel.innerHTML = '<option value="">All universities</option>' + [...new Set((d.students || []).map(s => s.uni))].sort().map(u => '<option>' + esc(u) + '</option>').join('');
   sel.value = cur; STU.page = 0; drawStudents();
+  renderSummary();
 }
 
 /* brain muscles, same names as the Brain muscles page in the game */
@@ -765,29 +904,57 @@ async function loadDrive(){
   DV.labels = await lessonScripts(d.built);
   DV.data = d;
   renderDrive();
+  renderSummary();
   const on = document.querySelector('.sections [aria-pressed=true]');
   if (on && on.dataset.sec === 'dv') show(LAST.dv);
 }
 
+const TRACKC = { 'Setup':'#7C4DFF', 'Strategy':'#11A37A', 'Motivation':'#FF7A2F', 'Think & Speak':'#5B5BF0', 'Review & Reflect':'#E2407F' };
+/* bar list (label, bar, count) for the tapped reasons */
+function chipList(rows, color){
+  if (!rows.length) return '<p class="muted small">Nothing picked yet.</p>';
+  const max = Math.max(...rows.map(r => r.n));
+  return rows.map(r => '<div class="crow"><span>' + esc(r.chip) + '</span><span class="tr"><b style="width:' + (r.n / max * 100) + '%;background:' + color + '"></b></span><span class="v num">' + fmt(r.n) + '</span></div>').join('');
+}
+/* Drive School numbers used by both the Drive pages and the Summary */
+function driveStats(){
+  const d = DV.data, byDay = {};
+  for (const r of d.rates) (byDay[r.day] = byDay[r.day] || []).push(r);
+  const rd = {}; for (const k in byDay) rd[k] = rateStats(byDay[k]);
+  const hard = {}; for (const a of d.acc) if (a.n >= MIN_N && a.correct / a.n < .5) hard[a.day] = (hard[a.day] || 0) + 1;
+  return { all: rateStats(d.rates), rd, hard };
+}
+
 function renderDrive(){
-  const d = DV.data, k = d.kpi, LB = DV.labels, day = n => LB.days[n] || {};
-  const K = [
-    ['hero', 'Students in Drive School', fmt(k.started), 'opened it at least once'],
-    ['', 'Finished Day 0 setup', fmt(k.setup_done), pctTxt(k.setup_done, k.started) + ' of those who opened it'],
-    ['', 'Finished Day 1+', fmt(k.lesson1), pctTxt(k.lesson1, k.setup_done) + ' of those who did the setup'],
-    ['', 'Finished all ' + d.built + ' days', fmt(k.all_done), 'every lesson built so far'],
-    ['', 'Active in last 7 days', fmt(k.active7), fmt(k.active1) + ' finished a lesson today'],
-    ['', 'Drive points', fmt(k.points), 'separate from Brain Gym points']
-  ];
-  $('dv-kpis').innerHTML = K.map(x => '<div class="kpi ' + x[0] + '"><div class="label">' + x[1] + '</div><div class="value">' + esc(x[2]) + '</div><div class="note">' + esc(x[3]) + '</div></div>').join('');
+  const d = DV.data, k = d.kpi, w = d.week || {}, LB = DV.labels, day = n => LB.days[n] || {}, S = driveStats();
+  const U = D ? universities() : [], joined = U.reduce((a, u) => a + u.joined, 0);
+  const R = S.all;
+  $('dv-kpis').innerHTML = [
+    ['hero', 'Students in Drive School', fmt(k.started), (joined ? pctTxt(k.started, joined) + ' of students who logged in · ' : '') + fmt(w.new_w) + ' new this week'],
+    ['', 'Active this week', fmt(w.active_w), 'opened, finished or rated a lesson in the last 7 days', delta(w.active_w, w.active_pw)],
+    ['', 'Lessons finished this week', fmt(w.lessons_w), 'first finishes, Day 1 onward', delta(w.lessons_w, w.lessons_pw)],
+    ['', 'Lesson rating', R.n ? R.med + ' / 11' : '–', R.n ? pctTxt(R.hi, R.n) + ' gave 7+ (“I’ll be back”) · ' + fmt(R.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)],
+    ['', 'Went on to Day 1', pctTxt(k.lesson1, k.setup_done), fmt(k.lesson1) + ' of ' + fmt(k.setup_done) + ' who finished the Day 0 setup'],
+    ['', 'Finished all ' + d.built + ' days', fmt(k.all_done), 'every lesson built so far']
+  ].map(kpiTile).join('');
 
-  table($('dv-funnel'), [
-    ['Day', f => '<b>' + f.day + '</b>', 'n'], ['Lesson', f => esc(day(f.day).title || '') + '<div class="muted small">' + esc(day(f.day).track || '') + '</div>'],
-    ['Opened', f => fmt(f.opened), 'n'], ['Finished', f => fmt(f.finished), 'n'], ['Finish rate', f => f.opened ? meter(f.finished, f.opened) : '<span class="muted">–</span>', 'n'],
-    ['Share of all students', f => k.started ? meter(f.finished, k.started) : '<span class="muted">–</span>', 'n'],
-    ['Time', f => f.med_min == null ? '–' : f.med_min + ' min', 'n'], ['Points', f => f.med_pts == null ? '–' : fmt(f.med_pts), 'n']
-  ], d.funnel);
+  /* how far students get */
+  $('dv-funnel-c').innerHTML = k.started ? d.funnel.map((f, i) => {
+    const prev = i ? d.funnel[i - 1].finished : 0, t = day(f.day);
+    return '<div class="frow" data-tip="' + esc('Day ' + f.day + ': ' + (t.title || '') + '\nOpened ' + f.opened + ' · finished ' + f.finished + (f.med_min != null ? '\nMedian ' + f.med_min + ' min' : '')) + '">'
+      + '<span class="fl"><b>Day ' + f.day + '</b> <span class="muted">' + esc(t.title || '') + '</span></span>'
+      + '<span class="fb"><i style="width:' + pct(f.finished, k.started).toFixed(1) + '%;background:' + (TRACKC[t.track] || 'var(--brand)') + '"></i></span>'
+      + '<span class="fv num">' + fmt(f.finished) + ' <span class="muted small">' + pctTxt(f.finished, k.started) + '</span></span>'
+      + '<span class="fk muted">' + (i && prev ? pctTxt(f.finished, prev) + ' kept' : '') + '</span></div>';
+  }).join('') : '<p class="empty">No student has opened Drive School yet.</p>';
 
+  /* ratings */
+  $('dv-rate-sum').innerHTML = R.n ? '<div><b>' + R.med + '<span class="muted small"> / 11</span></b><span>median</span></div><div><b>' + pctTxt(R.hi, R.n) + '</b><span>gave 7 or more</span></div><div><b>' + pctTxt(R.lo, R.n) + '</b><span>gave 1 to 4</span></div><div><b>' + fmt(R.n) + '</b><span>ratings</span></div>' : '';
+  bars($('dv-stars'), R.n ? R.c.map((n, i) => ({ s:i + 1, [i >= 6 ? 'hi' : i >= 4 ? 'mid' : 'lo']: n })) : [],
+    [{ key:'lo', color:STARC.lo }, { key:'mid', color:STARC.mid }, { key:'hi', color:STARC.hi }], r => r.s + '★',
+    r => { const n = R.c[r.s - 1]; return r.s + ' stars: ' + n + ' rating' + (n === 1 ? '' : 's') + ' (' + pctTxt(n, R.n) + ')'; });
+
+  /* active each day */
   const byDay = new Map(d.daily.map(x => [x.day, x])), days = [];
   for (let i = 13; i >= 0; i--) {
     const t = new Date(Date.now() - i * 864e5).toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), x = Object.assign({ day:t, active:0, students:0, lessons:0, med_min:null }, byDay.get(t));
@@ -798,6 +965,14 @@ function renderDrive(){
   table($('dv-daily-t'), [['Day', r => esc(dayLabel(r.day))], ['Active', r => fmt(r.active), 'n'], ['Finished a lesson', r => fmt(r.students), 'n'],
     ['Lessons finished', r => fmt(r.lessons), 'n'], ['Median time', r => r.med_min == null ? '–' : r.med_min + ' min', 'n']], days.slice().reverse().filter(r => r.active));
   if (window.innerWidth < 640) $('dv-daily').querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; });
+
+  /* lessons */
+  table($('dv-funnel'), [
+    ['Day', f => '<b>' + f.day + '</b>', 'n'], ['Lesson', f => esc(day(f.day).title || '') + '<div class="muted small">' + esc(day(f.day).track || '') + '</div>'],
+    ['Opened', f => fmt(f.opened), 'n'], ['Finished', f => fmt(f.finished), 'n'], ['Finish rate', f => f.opened ? meter(f.finished, f.opened) : '<span class="muted">–</span>', 'n'],
+    ['Time', f => f.med_min == null ? '–' : f.med_min + ' min', 'n'], ['Rating', f => rateCell(S.rd[f.day]), 'n'],
+    ['Hard questions', f => S.hard[f.day] ? '<button class="btn" style="padding:3px 10px" data-goto="dv-lessons" data-day="' + f.day + '">' + S.hard[f.day] + ' to check</button>' : '<span class="muted">0</span>', 'n']
+  ], d.funnel);
 
   /* study habits */
   const h = d.hours || {}, nh = h.answered_habits || 0, habits = day(0).habits || d.study.map(x => x.habit), got = new Map(d.study.map(x => [x.habit, x.n]));
@@ -831,21 +1006,154 @@ function renderDrive(){
   qd.innerHTML = '<option value="">All days</option>' + [...new Set(d.acc.map(a => a.day))].map(n => '<option value="' + n + '">Day ' + n + '</option>').join(''); qd.value = cur;
   drawAcc();
 
+  /* student voice: tapped reasons, rating comments, writing, stands */
+  const chips = (kk, band) => d.chips.filter(c => c.k === kk && (!band || c.band === band));
+  const merged = rows => { const m = new Map(); for (const r of rows) m.set(r.chip, (m.get(r.chip) || 0) + r.n); return [...m].map(([chip, n]) => ({ chip, n })).sort((a, b) => b.n - a.n); };
+  $('dv-chips').innerHTML = '<div><h3>What got in the way <span class="muted small">(1–4 stars)</span></h3>' + chipList(chips('why', 'low'), STARC.lo) + '</div>'
+    + '<div><h3>What would make it a 7 <span class="muted small">(5–6 stars)</span></h3>' + chipList(chips('why', 'mid'), '#9B90FF') + '</div>'
+    + '<div><h3>Best part of the lesson <span class="muted small">(5+ stars)</span></h3>' + chipList(merged(chips('best')), 'var(--ok)') + '</div>';
+  const rd = $('dv-rd'), rcur = rd.value;
+  rd.innerHTML = '<option value="">All days</option>' + [...new Set(d.rateTexts.map(t => t.day))].sort((a, b) => a - b).map(n => '<option value="' + n + '">Day ' + n + '</option>').join(''); rd.value = rcur;
+  drawRateTexts();
+
   table($('dv-stands'), [
     ['Day', s => '<b>' + s.day + '</b>', 'n'], ['Lesson', s => esc(day(s.day).title || '')], ['Side', s => esc(s.side || '–')], ['Students', s => fmt(s.n), 'n'],
     ['Share of the day', s => meter(s.n, d.stands.filter(x => x.day === s.day).reduce((a, x) => a + x.n, 0)), 'n'], ['Revised', s => fmt(s.revised), 'n']
   ], d.stands, 'No stands yet.');
-
   drawTexts();
-  table($('dv-unis'), [
-    ['University', u => esc(u.uni)], ['Started', u => fmt(u.started), 'n'], ['Did setup', u => meter(u.setup_done, u.started), 'n'], ['Did Day 1+', u => meter(u.lesson1, u.started), 'n'],
-    ['Lessons per student', u => u.started ? (u.lessons / u.started).toFixed(1) : '–', 'n'], ['Active 7 days', u => fmt(u.active7), 'n']
-  ], d.unis, 'No student has opened Drive School yet.');
 
+  drawDriveUnis();
   const sel = $('dv-su'), cu = sel.value;
   sel.innerHTML = '<option value="">All universities</option>' + [...new Set(d.students.map(s => s.uni))].sort().map(u => '<option>' + esc(u) + '</option>').join('');
   sel.value = cu; DV.page = 0; drawDriveStudents();
 }
+
+const DVU = { sort:'started', dir:-1 };
+function drawDriveUnis(){
+  const avg = u => u.rated ? u.stars_sum / u.rated : null;
+  sortable($('dv-unis'), [
+    { k:'uni', h:'University', r:u => esc(u.uni), v:u => u.uni },
+    { k:'started', h:'Started', r:u => fmt(u.started), v:u => u.started, cls:'n' },
+    { k:'setup', h:'Did setup', r:u => meter(u.setup_done, u.started), v:u => pct(u.setup_done, u.started), cls:'n' },
+    { k:'l1', h:'Did Day 1+', r:u => meter(u.lesson1, u.started), v:u => pct(u.lesson1, u.started), cls:'n' },
+    { k:'lps', h:'Lessons per student', r:u => u.started ? (u.lessons / u.started).toFixed(1) : '–', v:u => u.started ? u.lessons / u.started : null, cls:'n' },
+    { k:'a7', h:'Active 7 days', r:u => fmt(u.active7) + ' <span class="muted small">' + pctTxt(u.active7, u.started) + '</span>', v:u => pct(u.active7, u.started), cls:'n' },
+    { k:'rate', h:'Rating', r:u => u.rated ? '<b>' + avg(u).toFixed(1) + '★</b> <span class="muted small">' + pctTxt(u.rated_hi, u.rated) + ' 7+ · ' + u.rated + '</span>' : '<span class="muted">–</span>', v:avg, cls:'n' }
+  ], DV.data.unis, DVU, drawDriveUnis, 'No student has opened Drive School yet.');
+}
+
+function drawRateTexts(){
+  const q = $('dv-rq').value.trim().toLowerCase(), dd = $('dv-rd').value, b = $('dv-rb').value, LB = DV.labels;
+  const band = s => s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low', ASK = { low:'What got in the way', mid:'Make it a 7', high:'Make it an 11' };
+  const rows = DV.data.rateTexts.filter(t => (dd === '' || String(t.day) === dd) && (!b || band(t.data.stars) === b)
+    && (!q || (t.name + ' ' + t.niat_id + ' ' + (t.data.text || '') + ' ' + (t.data.why || []).join(' ')).toLowerCase().includes(q)));
+  table($('dv-rtexts'), [
+    ['When', t => '<span class="muted small">' + esc(when(t.created_at)) + '</span>'], ['Student', t => who(t.name, t.niat_id) + '<div class="muted small">' + esc(t.uni) + '</div>'],
+    ['Lesson', t => '<b>Day ' + t.day + '</b><div class="muted small">' + esc((LB.days[t.day] || {}).title || '') + '</div>'],
+    ['Stars', t => '<span class="pill" style="' + (t.data.stars >= 7 ? 'background:#ECEAFF' : t.data.stars <= 4 ? 'background:#FDECEA' : '') + '">' + t.data.stars + '★</span>', 'n'],
+    ['Asked', t => '<span class="small">' + esc(ASK[band(t.data.stars)]) + '</span>'], ['Picked', t => esc((t.data.why || []).join(', '))],
+    ['What they said', t => esc(t.data.text || ''), 'text'], ['Best part', t => '<span class="small">' + esc((t.data.best || []).join(', ')) + '</span>']
+  ], rows, q || dd || b ? 'Nothing matches.' : 'No lesson ratings with words yet.');
+}
+$('dv-rq').oninput = $('dv-rd').onchange = $('dv-rb').onchange = drawRateTexts;
+
+/* ---------- Summary: both products, what to look at, universities ---------- */
+const SUM = { sort:'joined', dir:-1 };
+function renderSummary(){
+  if (!D) return;
+  const U = universities(), sum = k => U.reduce((a, u) => a + u[k], 0);
+  const roster = sum('on_roster'), joined = sum('joined'), a1 = sum('active1');
+  const bw = D.week || {}, BR = rateStats((D.stars || []).map(r => ({ stars:r.stars, n:r.n })));
+  const today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), g0 = (D.goal || []).find(g => g.day === today) || { trained:0, hit_goal:0 };
+  const dv = DV.data, w = dv ? dv.week || {} : {}, DS = dv ? driveStats() : null;
+
+  $('sum-line').innerHTML = '<b>' + fmt(joined) + '</b> of ' + fmt(roster) + ' students on the list have logged in (' + pctTxt(joined, roster) + ') across ' + U.filter(u => u.joined).length + ' universities. '
+    + 'In the last 7 days <b>' + fmt(bw.active_w) + '</b> trained in Brain Gym'
+    + (dv ? ' and <b>' + fmt(w.active_w) + '</b> worked on Drive School lessons (' + fmt(w.lessons_w) + ' lessons finished).' : '. Drive School is loading…');
+
+  $('sum-bg').innerHTML = [
+    ['Active this week', fmt(bw.active_w), pctTxt(bw.active_w, joined) + ' of students who logged in', delta(bw.active_w, bw.active_pw)],
+    ['Minutes trained this week', fmt(bw.minutes_w), bw.active_w ? Math.round(bw.minutes_w / bw.active_w) + ' min per active student' : '', delta(bw.minutes_w, bw.minutes_pw)],
+    ['Active today', fmt(a1), fmt(g0.hit_goal) + ' hit the 15-minute goal'],
+    ['Session rating', BR.n ? BR.med + ' / 11' : '–', BR.n ? pctTxt(BR.hi, BR.n) + ' gave 7+ · ' + fmt(BR.n) + ' ratings' : 'no ratings yet', pts(bw.hi_w, bw.rated_w, bw.hi_pw, bw.rated_pw)]
+  ].map(mTile).join('');
+  $('sum-dv').innerHTML = !dv ? '<p class="muted">Loading…</p>' : [
+    ['Active this week', fmt(w.active_w), pctTxt(w.active_w, joined) + ' of students who logged in', delta(w.active_w, w.active_pw)],
+    ['Lessons finished this week', fmt(w.lessons_w), w.active_w ? (w.lessons_w / w.active_w).toFixed(1) + ' per active student' : '', delta(w.lessons_w, w.lessons_pw)],
+    ['Students started', fmt(dv.kpi.started), pctTxt(dv.kpi.started, joined) + ' of students who logged in · ' + fmt(w.new_w) + ' new this week'],
+    ['Lesson rating', DS.all.n ? DS.all.med + ' / 11' : '–', DS.all.n ? pctTxt(DS.all.hi, DS.all.n) + ' gave 7+ · ' + fmt(DS.all.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)]
+  ].map(mTile).join('');
+
+  /* what to look at: plain rules on the numbers, with a minimum group size */
+  const bad = [], good = [], N = 10;
+  const add = (list, lvl, where, txt, go, extra) => list.push('<li class="att ' + lvl + '"><span class="dot"></span><span class="tx"><small>' + where + '</small>' + txt + '</span>' + (go ? '<button class="btn" data-goto="' + go + '"' + (extra || '') + '>Open →</button>' : '') + '</li>');
+  const trend = (where, now, prev, what, go) => {
+    if (prev < N) return;
+    const p = Math.round((now - prev) / prev * 100);
+    if (p <= -20) add(bad, 'bad', where, what + ' fell ' + Math.abs(p) + '% vs the week before (' + fmt(prev) + ' → ' + fmt(now) + ').', go);
+    else if (p >= 10) add(good, 'good', where, what + ' rose ' + p + '% vs the week before (' + fmt(prev) + ' → ' + fmt(now) + ').', go);
+  };
+  // Brain Gym
+  trend('Brain Gym', bw.active_w, bw.active_pw, 'Active students', 'overview');
+  if (bw.bugs_w) add(bad, 'warn', 'Brain Gym', fmt(bw.bugs_w) + ' problem report' + (bw.bugs_w === 1 ? '' : 's') + ' this week from the “Something’s off” button.', 'issues');
+  const unfair = (D.unfair || []).filter(u => Date.now() - new Date(u.created_at) < 7 * 864e5).length;
+  if (unfair) add(bad, 'warn', 'Brain Gym', fmt(unfair) + ' AI answer' + (unfair === 1 ? ' was' : 's were') + ' marked unfair this week. Check the judge.', 'issues');
+  const G = (D.games || []).map(g => ({ g, t:(g.easy || 0) + (g.just_right || 0) + (g.hard || 0) }));
+  const tooHard = G.filter(x => x.t >= N && x.g.hard / x.t > .5).map(x => gname(x.g.game_id) + ' (' + pctTxt(x.g.hard, x.t) + ')');
+  if (tooHard.length) add(bad, 'warn', 'Brain Gym', 'Most students say these games are too hard: ' + esc(tooHard.join(', ')) + '.', 'games');
+  const lowGames = (D.games || []).filter(g => g.ratings >= N && g.rating <= 3).map(g => gname(g.game_id) + ' (' + g.rating + '/5)');
+  if (lowGames.length) add(bad, 'warn', 'Brain Gym', 'Low-rated games: ' + esc(lowGames.join(', ')) + '.', 'games');
+  const topGame = (D.games || []).filter(g => g.ratings >= N).sort((a, b) => b.rating - a.rating || b.ratings - a.ratings)[0];
+  if (topGame && topGame.rating >= 4) add(good, 'good', 'Brain Gym', 'Best-rated game: ' + esc(gname(topGame.game_id)) + ' (' + topGame.rating + '/5 from ' + topGame.ratings + ').', 'games');
+  if (BR.n >= 20) { const s = BR.hi / BR.n; if (s >= .6) add(good, 'good', 'Brain Gym', pctTxt(BR.hi, BR.n) + ' of sessions are rated 7+ (“I’ll be back tomorrow”).', 'voice'); else if (s < .4) add(bad, 'warn', 'Brain Gym', 'Only ' + pctTxt(BR.hi, BR.n) + ' of sessions are rated 7+. Read what students asked for.', 'voice'); }
+  const lowUnis = U.filter(u => u.on_roster >= 50 && u.joined / u.on_roster < .2).sort((a, b) => b.on_roster - a.on_roster);
+  if (lowUnis.length) add(bad, 'warn', 'Adoption', lowUnis.length + ' universit' + (lowUnis.length === 1 ? 'y has' : 'ies have') + ' under 20% of students logged in: ' + esc(lowUnis.slice(0, 4).map(u => u.uni + ' (' + pctTxt(u.joined, u.on_roster) + ')').join(', ')) + (lowUnis.length > 4 ? ' and ' + (lowUnis.length - 4) + ' more' : '') + '.');
+  const bestUni = U.filter(u => u.joined >= 20).sort((a, b) => b.active7 / b.joined - a.active7 / a.joined)[0];
+  if (bestUni) add(good, 'good', 'Adoption', 'Most active university this week: ' + esc(bestUni.uni) + ' (' + pctTxt(bestUni.active7, bestUni.joined) + ' of its logged-in students trained).');
+  // Drive School
+  if (dv) {
+    const k = dv.kpi, L = DV.labels.days, title = n => 'Day ' + n + (L[n] && L[n].title ? ' (' + L[n].title + ')' : '');
+    trend('Drive School', w.active_w, w.active_pw, 'Active students', 'dv-overview');
+    trend('Drive School', w.lessons_w, w.lessons_pw, 'Lessons finished', 'dv-overview');
+    if (k.setup_done >= N && k.lesson1 / k.setup_done < .7) add(bad, 'warn', 'Drive School', 'Only ' + pctTxt(k.lesson1, k.setup_done) + ' of students who finish the Day 0 setup go on to finish Day 1.', 'dv-lessons');
+    const leaky = dv.funnel.filter(f => f.opened >= N && f.finished / f.opened < .7).sort((a, b) => a.finished / a.opened - b.finished / b.opened);
+    if (leaky.length) add(bad, 'warn', 'Drive School', 'Students quit in the middle of ' + esc(leaky.slice(0, 2).map(f => title(f.day) + ': ' + pctTxt(f.finished, f.opened) + ' finish').join('; ')) + '.', 'dv-lessons');
+    const rated = Object.entries(DS.rd).filter(([, r]) => r.n >= N).map(([d, r]) => ({ d:+d, r })).sort((a, b) => a.r.hi / a.r.n - b.r.hi / b.r.n);
+    if (rated.length && rated[0].r.hi / rated[0].r.n < .5) add(bad, 'warn', 'Drive School', 'Lowest-rated lesson: ' + esc(title(rated[0].d)) + ', median ' + rated[0].r.med + '★, ' + pctTxt(rated[0].r.hi, rated[0].r.n) + ' gave 7+.', 'dv-lessons');
+    if (rated.length > 1 || (rated.length && rated[0].r.hi / rated[0].r.n >= .5)) { const t = rated[rated.length - 1]; add(good, 'good', 'Drive School', 'Best-rated lesson: ' + esc(title(t.d)) + ', median ' + t.r.med + '★, ' + pctTxt(t.r.hi, t.r.n) + ' gave 7+.', 'dv-lessons'); }
+    const nh = Object.values(DS.hard).reduce((a, b) => a + b, 0);
+    if (nh) add(bad, 'warn', 'Drive School', nh + ' question' + (nh === 1 ? ' is' : 's are') + ' answered right on the first try by under half of students. They may be unclear.', 'dv-lessons');
+    const top = (kk, band) => dv.chips.filter(c => c.k === kk && (!band || c.band === band)).sort((a, b) => b.n - a.n)[0];
+    const tLow = top('why', 'low'), tMid = top('why', 'mid'), tBest = top('best');
+    if (tLow && tLow.n >= 5) add(bad, 'warn', 'Drive School', 'Top reason for low lesson ratings: “' + esc(tLow.chip) + '” (' + tLow.n + ' students).', 'dv-voice');
+    if (tMid && tMid.n >= 5) add(bad, 'info', 'Drive School', 'Top ask from students who rated 5–6: “' + esc(tMid.chip) + '” (' + tMid.n + ').', 'dv-voice');
+    if (tBest && tBest.n >= 5) add(good, 'good', 'Drive School', 'Students’ favourite part of lessons: “' + esc(tBest.chip) + '” (' + tBest.n + ').', 'dv-voice');
+    if (DS.all.n >= 20 && DS.all.hi / DS.all.n >= .6) add(good, 'good', 'Drive School', pctTxt(DS.all.hi, DS.all.n) + ' of lesson ratings are 7+ (“I’ll be back for the next lesson”).', 'dv-voice');
+  }
+  const rank = h => h.includes('att bad') ? 0 : h.includes('att warn') ? 1 : 2;   // red first, then amber, then ideas
+  bad.sort((x, y) => rank(x) - rank(y));
+  $('sum-bad').innerHTML = bad.join('') || '<li class="att good"><span class="dot"></span><span class="tx">Nothing stands out right now' + (dv ? '' : ' (Drive School still loading)') + '.</span></li>';
+  $('sum-good').innerHTML = good.join('') || '<li class="att"><span class="dot"></span><span class="tx">Not enough data yet to call anything out.</span></li>';
+  drawSumUnis();
+}
+
+/* one row per university: both products */
+function drawSumUnis(){
+  const dvU = new Map(((DV.data || {}).unis || []).map(u => [u.uni, u])), q = $('sum-q').value.trim().toLowerCase();
+  const rows = universities().filter(u => !q || u.uni.toLowerCase().includes(q)).map(u => Object.assign({ dv: dvU.get(u.uni) || { started:0, lessons:0, active7:0, rated:0, stars_sum:0, rated_hi:0 } }, u));
+  const dash = '<span class="muted">–</span>', ld = DV.data ? '' : ' <span class="muted small">loading</span>';
+  sortable($('sum-unis'), [
+    { k:'uni', h:'University', r:u => '<b>' + esc(u.uni) + '</b>', v:u => u.uni },
+    { k:'on_roster', h:'On list', r:u => fmt(u.on_roster), v:u => u.on_roster, cls:'n' },
+    { k:'joined', h:'Logged in', r:u => fmt(u.joined) + ' <span class="muted small">' + pctTxt(u.joined, u.on_roster) + '</span>', v:u => u.joined, cls:'n', tip:'Logged in to Game Corner at least once, and the share of the list' },
+    { k:'bg7', h:'Brain Gym active 7 days', r:u => u.joined ? fmt(u.active7) + ' <span class="muted small">' + pctTxt(u.active7, u.joined) + '</span>' : dash, v:u => u.joined ? u.active7 / u.joined : null, cls:'n' },
+    { k:'dvs', h:'Drive started', r:u => u.joined ? fmt(u.dv.started) + ' <span class="muted small">' + pctTxt(u.dv.started, u.joined) + '</span>' + ld : dash, v:u => u.joined ? u.dv.started / u.joined : null, cls:'n' },
+    { k:'dv7', h:'Drive active 7 days', r:u => u.dv.started ? fmt(u.dv.active7) + ' <span class="muted small">' + pctTxt(u.dv.active7, u.dv.started) + '</span>' : dash, v:u => u.dv.started ? u.dv.active7 / u.dv.started : null, cls:'n', tip:'Finished a Drive School lesson in the last 7 days, as a share of students who started' },
+    { k:'dvl', h:'Lessons per student', r:u => u.dv.started ? (u.dv.lessons / u.dv.started).toFixed(1) : dash, v:u => u.dv.started ? u.dv.lessons / u.dv.started : null, cls:'n' },
+    { k:'dvr', h:'Lesson rating', r:u => u.dv.rated ? '<b>' + (u.dv.stars_sum / u.dv.rated).toFixed(1) + '★</b> <span class="muted small">' + u.dv.rated + '</span>' : dash, v:u => u.dv.rated ? u.dv.stars_sum / u.dv.rated : null, cls:'n', tip:'Average Drive School lesson rating out of 11, and how many ratings' }
+  ], rows, SUM, drawSumUnis, q ? 'No university matches.' : 'No universities yet.');
+}
+$('sum-q').oninput = drawSumUnis;
 
 function drawAcc(){
   const d = DV.data, f = $('dv-qday').value, Q = DV.labels.qs;
@@ -878,6 +1186,7 @@ function drawDriveStudents(){
     ['Student', s => who(s.name, s.niat_id)], ['University', s => esc(s.uni) + '<div class="muted small">' + esc(s.batch) + '</div>'],
     ['Started', s => '<span class="small">' + esc(dayLabel(s.started_on)) + '</span>'], ['Setup', s => s.setup ? '✅' : '<span class="muted">–</span>', 'n'],
     ['Lessons done', s => fmt(s.lessons) + '<span class="muted small"> / ' + DV.data.built + '</span>', 'n'], ['Points', s => fmt(s.points), 'n'],
+    ['Avg rating', s => s.stars == null ? '<span class="muted">–</span>' : s.stars + '★', 'n'],
     ['Last finish', s => '<span class="small">' + esc(when(s.last_at)) + '</span>']
   ], rows.slice(DV.page * DV.size, (DV.page + 1) * DV.size), q || u ? 'No student matches.' : 'No student has opened Drive School yet.');
   $('dv-sinfo').textContent = rows.length ? 'Showing ' + (DV.page * DV.size + 1) + '–' + Math.min(rows.length, (DV.page + 1) * DV.size) + ' of ' + fmt(rows.length) : '';

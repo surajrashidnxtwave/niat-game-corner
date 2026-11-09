@@ -438,3 +438,9 @@ html.w3d .dfoot{background:linear-gradient(to top,rgba(253,234,244,.95) 70%,rgba
   .dvis-curve path{transition:none}
   .dfiles i.new{transform:none}
 }
+
+/* end-of-lesson 11-star rating (ladder, chips and .smore styles come from index.html) */
+.drate .ladder{margin:4px 0 10px}
+.drate h4{margin:4px 0 0}
+#dr-send{width:100%;margin-top:6px}
+.drate textarea.field{min-height:84px}
