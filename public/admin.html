@@ -463,7 +463,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           </div>
       <div class="card">
           <h2>Starting point (Day 0)</h2>
-          <p class="sub">Our own 6-item checks, not the published scales, so don’t compare with published norms. Score = average of the 6 answers on 1–5, with the reverse items flipped, so a higher score is better. Low = under 2.5, high = 3.5 or more. Students are not told about the later re-check.</p>
+          <p class="sub">Our own 6-item checks, not the published scales, so don’t compare with published norms. A student’s score = average of their 6 answers on 1–5, with the reverse items flipped, so a higher score is better. Low = under 2.5, high = 3.5 or more. Students are not told about the later re-check.</p>
           <div class="grid2" id="dv-scales"></div>
           <div class="scroll"><table id="dv-scale-unis"></table></div>
         </div>
@@ -472,7 +472,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
     <section data-panel="dv-unis" hidden>
       <div class="card">
           <h2>Universities</h2>
-          <p class="sub">Started = opened Drive School. Lessons per student = lessons finished ÷ students who started. Rating = average stars out of 11. Click a column title to sort.</p>
+          <p class="sub">Started = opened Drive School. Lessons per student = median lessons finished by students who started. Rating = median stars out of 11. Click a column title to sort.</p>
           <div class="scroll"><table id="dv-unis"></table></div>
         </div>
     </section>
@@ -992,12 +992,12 @@ function renderDrive(){
       return '<div style="padding:7px 0;border-top:1px solid var(--line)"><div class="small">' + esc((i + 1) + '. ' + (texts[i] || 'Item ' + (i + 1))) + '</div>'
         + '<div class="split" style="margin-top:5px" data-tip="' + esc(opts.map((o, j) => o + ': ' + c[j]).join('\n')) + '">' + c.map((n, j) => n ? '<i style="width:' + (n / t * 100) + '%;background:' + COL[j] + '"></i>' : '').join('') + '</div></div>'; }).join('');
     return '<div><h3 style="margin:0">' + esc(name) + ' <span class="muted small">“' + esc(ask) + '”</span></h3>'
-      + '<div class="kpi" style="box-shadow:none;padding:6px 0 0"><div class="value">' + (all.mean == null ? '–' : all.mean.toFixed(2)) + '<span class="muted small"> / 5</span></div><div class="note">' + fmt(all.n) + ' students</div></div>'
+      + '<div class="kpi" style="box-shadow:none;padding:6px 0 0"><div class="value">' + (all.med == null ? '–' : all.med.toFixed(2)) + '<span class="muted small"> / 5</span></div><div class="note">median of ' + fmt(all.n) + ' students</div></div>'
       + band + (items ? '<div class="legend" style="margin-top:4px">' + opts.map((o, j) => '<span><i style="background:' + COL[j] + '"></i>' + esc(o) + '</span>').join('') + '</div>' + items : '<p class="empty">No answers yet.</p>') + '</div>';
   }).join('');
   const su = new Map();
   for (const [key] of SC) for (const u of (d.scales[key] || { unis:[] }).unis) if (u.uni !== 'All universities') su.set(u.uni, Object.assign(su.get(u.uni) || { uni:u.uni }, { [key]: u }));
-  const cellOf = u => !u || u.n < MIN_N ? '<span class="muted">–</span>' : u.mean.toFixed(2) + ' <span class="muted small">(' + u.n + ')</span>';
+  const cellOf = u => !u || u.n < MIN_N ? '<span class="muted">–</span>' : u.med.toFixed(2) + ' <span class="muted small">(' + u.n + ')</span>';
   table($('dv-scale-unis'), [['University', u => esc(u.uni)], ['Growth mindset', u => cellOf(u.mindset), 'n'], ['Sticking with it', u => cellOf(u.grit), 'n']],
     [...su.values()].sort((a, b) => ((b.mindset || {}).n || 0) - ((a.mindset || {}).n || 0)), 'No answers yet. “–” means fewer than ' + MIN_N + ' students.');
 
@@ -1030,15 +1030,14 @@ function renderDrive(){
 
 const DVU = { sort:'started', dir:-1 };
 function drawDriveUnis(){
-  const avg = u => u.rated ? u.stars_sum / u.rated : null;
   sortable($('dv-unis'), [
     { k:'uni', h:'University', r:u => esc(u.uni), v:u => u.uni },
     { k:'started', h:'Started', r:u => fmt(u.started), v:u => u.started, cls:'n' },
     { k:'setup', h:'Did setup', r:u => meter(u.setup_done, u.started), v:u => pct(u.setup_done, u.started), cls:'n' },
     { k:'l1', h:'Did Day 1+', r:u => meter(u.lesson1, u.started), v:u => pct(u.lesson1, u.started), cls:'n' },
-    { k:'lps', h:'Lessons per student', r:u => u.started ? (u.lessons / u.started).toFixed(1) : '–', v:u => u.started ? u.lessons / u.started : null, cls:'n' },
+    { k:'lps', h:'Lessons per student', r:u => u.med_lessons == null ? '–' : u.med_lessons, v:u => u.med_lessons, cls:'n', tip:'Median lessons finished by students who started' },
     { k:'a7', h:'Active 7 days', r:u => fmt(u.active7) + ' <span class="muted small">' + pctTxt(u.active7, u.started) + '</span>', v:u => pct(u.active7, u.started), cls:'n' },
-    { k:'rate', h:'Rating', r:u => u.rated ? '<b>' + avg(u).toFixed(1) + '★</b> <span class="muted small">' + pctTxt(u.rated_hi, u.rated) + ' 7+ · ' + u.rated + '</span>' : '<span class="muted">–</span>', v:avg, cls:'n' }
+    { k:'rate', h:'Rating', r:u => u.rated ? '<b>' + u.med_stars + '★</b> <span class="muted small">' + pctTxt(u.rated_hi, u.rated) + ' 7+ · ' + u.rated + '</span>' : '<span class="muted">–</span>', v:u => u.med_stars, cls:'n', tip:'Median lesson rating out of 11' }
   ], DV.data.unis, DVU, drawDriveUnis, 'No student has opened Drive School yet.');
 }
 
@@ -1073,13 +1072,13 @@ function renderSummary(){
 
   $('sum-bg').innerHTML = [
     ['Active this week', fmt(bw.active_w), pctTxt(bw.active_w, joined) + ' of students who logged in', delta(bw.active_w, bw.active_pw)],
-    ['Minutes trained this week', fmt(bw.minutes_w), bw.active_w ? Math.round(bw.minutes_w / bw.active_w) + ' min per active student' : '', delta(bw.minutes_w, bw.minutes_pw)],
+    ['Minutes trained this week', fmt(bw.minutes_w), bw.med_min_w != null ? 'median ' + bw.med_min_w + ' min per active student' : '', delta(bw.minutes_w, bw.minutes_pw)],
     ['Active today', fmt(a1), fmt(g0.hit_goal) + ' hit the 15-minute goal'],
     ['Session rating', BR.n ? BR.med + ' / 11' : '–', BR.n ? pctTxt(BR.hi, BR.n) + ' gave 7+ · ' + fmt(BR.n) + ' ratings' : 'no ratings yet', pts(bw.hi_w, bw.rated_w, bw.hi_pw, bw.rated_pw)]
   ].map(mTile).join('');
   $('sum-dv').innerHTML = !dv ? '<p class="muted">Loading…</p>' : [
     ['Active this week', fmt(w.active_w), pctTxt(w.active_w, joined) + ' of students who logged in', delta(w.active_w, w.active_pw)],
-    ['Lessons finished this week', fmt(w.lessons_w), w.active_w ? (w.lessons_w / w.active_w).toFixed(1) + ' per active student' : '', delta(w.lessons_w, w.lessons_pw)],
+    ['Lessons finished this week', fmt(w.lessons_w), w.med_lessons_w != null ? 'median ' + w.med_lessons_w + ' per active student' : '', delta(w.lessons_w, w.lessons_pw)],
     ['Students started', fmt(dv.kpi.started), pctTxt(dv.kpi.started, joined) + ' of students who logged in · ' + fmt(w.new_w) + ' new this week'],
     ['Lesson rating', DS.all.n ? DS.all.med + ' / 11' : '–', DS.all.n ? pctTxt(DS.all.hi, DS.all.n) + ' gave 7+ · ' + fmt(DS.all.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)]
   ].map(mTile).join('');
@@ -1140,7 +1139,7 @@ function renderSummary(){
 /* one row per university: both products */
 function drawSumUnis(){
   const dvU = new Map(((DV.data || {}).unis || []).map(u => [u.uni, u])), q = $('sum-q').value.trim().toLowerCase();
-  const rows = universities().filter(u => !q || u.uni.toLowerCase().includes(q)).map(u => Object.assign({ dv: dvU.get(u.uni) || { started:0, lessons:0, active7:0, rated:0, stars_sum:0, rated_hi:0 } }, u));
+  const rows = universities().filter(u => !q || u.uni.toLowerCase().includes(q)).map(u => Object.assign({ dv: dvU.get(u.uni) || { started:0, lessons:0, active7:0, rated:0, rated_hi:0, med_lessons:null, med_stars:null } }, u));
   const dash = '<span class="muted">–</span>', ld = DV.data ? '' : ' <span class="muted small">loading</span>';
   sortable($('sum-unis'), [
     { k:'uni', h:'University', r:u => '<b>' + esc(u.uni) + '</b>', v:u => u.uni },
@@ -1149,8 +1148,8 @@ function drawSumUnis(){
     { k:'bg7', h:'Brain Gym active 7 days', r:u => u.joined ? fmt(u.active7) + ' <span class="muted small">' + pctTxt(u.active7, u.joined) + '</span>' : dash, v:u => u.joined ? u.active7 / u.joined : null, cls:'n' },
     { k:'dvs', h:'Drive started', r:u => u.joined ? fmt(u.dv.started) + ' <span class="muted small">' + pctTxt(u.dv.started, u.joined) + '</span>' + ld : dash, v:u => u.joined ? u.dv.started / u.joined : null, cls:'n' },
     { k:'dv7', h:'Drive active 7 days', r:u => u.dv.started ? fmt(u.dv.active7) + ' <span class="muted small">' + pctTxt(u.dv.active7, u.dv.started) + '</span>' : dash, v:u => u.dv.started ? u.dv.active7 / u.dv.started : null, cls:'n', tip:'Finished a Drive School lesson in the last 7 days, as a share of students who started' },
-    { k:'dvl', h:'Lessons per student', r:u => u.dv.started ? (u.dv.lessons / u.dv.started).toFixed(1) : dash, v:u => u.dv.started ? u.dv.lessons / u.dv.started : null, cls:'n' },
-    { k:'dvr', h:'Lesson rating', r:u => u.dv.rated ? '<b>' + (u.dv.stars_sum / u.dv.rated).toFixed(1) + '★</b> <span class="muted small">' + u.dv.rated + '</span>' : dash, v:u => u.dv.rated ? u.dv.stars_sum / u.dv.rated : null, cls:'n', tip:'Average Drive School lesson rating out of 11, and how many ratings' }
+    { k:'dvl', h:'Lessons per student', r:u => u.dv.started ? u.dv.med_lessons : dash, v:u => u.dv.started ? u.dv.med_lessons : null, cls:'n', tip:'Median Drive School lessons finished by students who started' },
+    { k:'dvr', h:'Lesson rating', r:u => u.dv.rated ? '<b>' + u.dv.med_stars + '★</b> <span class="muted small">' + u.dv.rated + '</span>' : dash, v:u => u.dv.rated ? u.dv.med_stars : null, cls:'n', tip:'Median Drive School lesson rating out of 11, and how many ratings' }
   ], rows, SUM, drawSumUnis, q ? 'No university matches.' : 'No universities yet.');
 }
 $('sum-q').oninput = drawSumUnis;
@@ -1186,7 +1185,7 @@ function drawDriveStudents(){
     ['Student', s => who(s.name, s.niat_id)], ['University', s => esc(s.uni) + '<div class="muted small">' + esc(s.batch) + '</div>'],
     ['Started', s => '<span class="small">' + esc(dayLabel(s.started_on)) + '</span>'], ['Setup', s => s.setup ? '✅' : '<span class="muted">–</span>', 'n'],
     ['Lessons done', s => fmt(s.lessons) + '<span class="muted small"> / ' + DV.data.built + '</span>', 'n'], ['Points', s => fmt(s.points), 'n'],
-    ['Avg rating', s => s.stars == null ? '<span class="muted">–</span>' : s.stars + '★', 'n'],
+    ['Median rating', s => s.stars == null ? '<span class="muted">–</span>' : s.stars + '★', 'n'],
     ['Last finish', s => '<span class="small">' + esc(when(s.last_at)) + '</span>']
   ], rows.slice(DV.page * DV.size, (DV.page + 1) * DV.size), q || u ? 'No student matches.' : 'No student has opened Drive School yet.');
   $('dv-sinfo').textContent = rows.length ? 'Showing ' + (DV.page * DV.size + 1) + '–' + Math.min(rows.length, (DV.page + 1) * DV.size) + ' of ' + fmt(rows.length) : '';

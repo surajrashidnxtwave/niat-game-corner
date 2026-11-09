@@ -34,6 +34,13 @@ const GAME_SKILL = {
   'trust-or-check': 'ai', 'source-check': 'ai', 'taste-test': 'ai', 'right-tool': 'ai', 'hint-ladder': 'ai', 'code-review': 'ai', 'you-or-ai': 'ai'
 };
 const SKILL_KEYS = ['creativity', 'insight', 'memory', 'focus', 'reasoning', 'flexibility', 'planning', 'ai'];
+// median from counts: hist = Map(value -> how many). Middle two averaged, 1 decimal. null when empty.
+function medHist(hist){
+  const v = [...hist].filter(([, n]) => n > 0).sort((a, b) => a[0] - b[0]), n = v.reduce((a, [, c]) => a + c, 0);
+  if (!n) return null;
+  const at = i => { let t = 0; for (const [x, c] of v) { t += c; if (t > i) return x; } return 0; };
+  return Math.round((at((n - 1) >> 1) + at(n >> 1)) / 2 * 10) / 10;
+}
 const median = a => { if (!a.length) return null; const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return Math.round(s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2); };
 
 // Skill profile per university: a student's score on a muscle = their best % on any game for that muscle
@@ -119,7 +126,7 @@ function scaleScores(rows){
     const groups = new Map([['All universities', []]]);
     for (const x of per[k]) { groups.get('All universities').push(x.score); if (!groups.has(x.uni)) groups.set(x.uni, []); groups.get(x.uni).push(x.score); }
     out[k] = {
-      unis: [...groups].map(([uni, v]) => ({ uni, n: v.length, mean: v.length ? +(v.reduce((a, b) => a + b, 0) / v.length).toFixed(2) : null,
+      unis: [...groups].map(([uni, v]) => ({ uni, n: v.length, med: v.length ? (() => { const s = v.slice().sort((a, b) => a - b), m = s.length >> 1; return +(s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2).toFixed(2); })() : null,
         low: v.filter(x => x < 2.5).length, mid: v.filter(x => x >= 2.5 && x < 3.5).length, high: v.filter(x => x >= 3.5).length })),
       items: items[k]                                  // per item: how many picked option 1..5 (raw, before flipping)
     };
@@ -132,7 +139,7 @@ async function driveReport(sql){
   const REAL = `s.pilot NOT LIKE 'DEMO%'`;
   const DD = `dd AS (SELECT student_id, COUNT(*) FILTER (WHERE day > 0)::int AS lessons, BOOL_OR(day = 0) AS setup, MAX(completed_at) AS last FROM drive_days GROUP BY student_id)`;
   const RATE = `e.kind = 'rate' AND ${REAL}`, STARS = `(e.data->>'stars')::int`;
-  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students, week, rates, rateTexts, chips] = await Promise.all([
+  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students, week, rates, rateTexts, chips, lessonHist, rateHist] = await Promise.all([
     sql.query(`WITH ${DD}
       SELECT COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
              COUNT(*) FILTER (WHERE dd.lessons >= ${DRIVE_LAST_BUILT})::int AS all_done,
@@ -181,15 +188,15 @@ async function driveReport(sql){
       FROM drive_events e JOIN students s ON s.id = e.student_id
       WHERE e.kind IN ('reflect', 'plan', 'stand') AND e.replay = false AND ${REAL} ORDER BY e.created_at DESC LIMIT 300`),
     sql.query(`WITH ${DD},
-           rt AS (SELECT e.student_id, COUNT(*)::int AS n, COUNT(*) FILTER (WHERE ${STARS} >= 7)::int AS hi, SUM(${STARS})::int AS sum
+           rt AS (SELECT e.student_id, COUNT(*)::int AS n, COUNT(*) FILTER (WHERE ${STARS} >= 7)::int AS hi
                   FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
       SELECT s.pilot, COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
              COALESCE(SUM(dd.lessons), 0)::int AS lessons, COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7,
-             COALESCE(SUM(rt.n), 0)::int AS rated, COALESCE(SUM(rt.hi), 0)::int AS rated_hi, COALESCE(SUM(rt.sum), 0)::int AS stars_sum
+             COALESCE(SUM(rt.n), 0)::int AS rated, COALESCE(SUM(rt.hi), 0)::int AS rated_hi
       FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
       WHERE ${REAL} GROUP BY s.pilot`),
     sql.query(`WITH ${DD},
-           rt AS (SELECT e.student_id, ROUND(AVG(${STARS})::numeric, 1)::float AS stars FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
+           rt AS (SELECT e.student_id, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY ${STARS}))::numeric, 1)::float AS stars FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
       SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.points, to_char(ds.started_on, 'YYYY-MM-DD') AS started_on,
              COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at, rt.stars
       FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
@@ -201,6 +208,9 @@ async function driveReport(sql){
         (SELECT COUNT(*) FROM drive_days d JOIN students s ON s.id = d.student_id WHERE ${REAL} AND d.day > 0 AND d.completed_at > now() - interval '7 days')::int AS lessons_w,
         (SELECT COUNT(*) FROM drive_days d JOIN students s ON s.id = d.student_id WHERE ${REAL} AND d.day > 0 AND d.completed_at <= now() - interval '7 days' AND d.completed_at > now() - interval '14 days')::int AS lessons_pw,
         (SELECT COUNT(*) FROM drive_students ds JOIN students s ON s.id = ds.student_id WHERE ${REAL} AND ds.started_on > current_date - 7)::int AS new_w,
+        (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY x.n))::numeric, 1)::float FROM (
+           SELECT a.student_id, (SELECT COUNT(*) FROM drive_days d WHERE d.student_id = a.student_id AND d.day > 0 AND d.completed_at > now() - interval '7 days') AS n
+           FROM (SELECT DISTINCT e.student_id FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${REAL} AND e.created_at > now() - interval '7 days') a) x) AS med_lessons_w,
         (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND e.created_at > now() - interval '7 days')::int AS rated_w,
         (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND ${STARS} >= 7 AND e.created_at > now() - interval '7 days')::int AS hi_w,
         (SELECT COUNT(*) FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} AND e.created_at <= now() - interval '7 days' AND e.created_at > now() - interval '14 days')::int AS rated_pw,
@@ -217,14 +227,25 @@ async function driveReport(sql){
       FROM drive_events e JOIN students s ON s.id = e.student_id
       CROSS JOIN LATERAL (SELECT 'why' AS k, w AS chip FROM jsonb_array_elements_text(COALESCE(e.data->'why', '[]')) w
                           UNION ALL SELECT 'best', b FROM jsonb_array_elements_text(COALESCE(e.data->'best', '[]')) b) x
-      WHERE ${RATE} GROUP BY 1, 2, 3 ORDER BY 4 DESC`)
+      WHERE ${RATE} GROUP BY 1, 2, 3 ORDER BY 4 DESC`),
+    // per batch: how many students finished 0, 1, 2... lessons, and how many ratings of each star level (for per-university medians)
+    sql.query(`WITH ${DD} SELECT s.pilot, COALESCE(dd.lessons, 0) AS v, COUNT(*)::int AS n
+      FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id WHERE ${REAL} GROUP BY 1, 2`),
+    sql.query(`SELECT s.pilot, ${STARS} AS v, COUNT(*)::int AS n FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} GROUP BY 1, 2`)
   ]);
   const um = new Map();                                // batches -> universities
   for (const p of unis) {
     const name = uniOf(p.pilot), u = um.get(name) || { uni: name, started: 0, setup_done: 0, lesson1: 0, lessons: 0, active7: 0 };
-    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7', 'rated', 'rated_hi', 'stars_sum']) u[k] = (u[k] || 0) + p[k];
+    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7', 'rated', 'rated_hi']) u[k] = (u[k] || 0) + p[k];
     um.set(name, u);
   }
+  const medBy = rows => {                              // batches -> university histograms -> median
+    const h = new Map();
+    for (const r of rows) { const u = uniOf(r.pilot), m = h.get(u) || new Map(); m.set(r.v, (m.get(r.v) || 0) + r.n); h.set(u, m); }
+    return u => h.has(u) ? medHist(h.get(u)) : null;
+  };
+  const medL = medBy(lessonHist), medS = medBy(rateHist);
+  for (const u of um.values()) { u.med_lessons = medL(u.uni); u.med_stars = medS(u.uni); }
   for (const st of students) st.uni = uniOf(st.batch);
   for (const t of texts) t.uni = uniOf(t.batch);
   for (const t of rateTexts) t.uni = uniOf(t.batch);
@@ -320,6 +341,9 @@ export default async function handler(req, res) {
                  COUNT(DISTINCT d.student_id) FILTER (WHERE d.day <= current_date - 7)::int AS active_pw,
                  (COALESCE(SUM(d.active) FILTER (WHERE d.day > current_date - 7), 0) / 60)::int AS minutes_w,
                  (COALESCE(SUM(d.active) FILTER (WHERE d.day <= current_date - 7), 0) / 60)::int AS minutes_pw,
+                 (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY w.secs) / 60.0)::numeric)::int FROM (
+                    SELECT d2.student_id, SUM(d2.active) AS secs FROM daily d2 JOIN students s3 ON s3.id = d2.student_id
+                    WHERE d2.active > 0 AND d2.day > current_date - 7 AND s3.pilot NOT LIKE 'DEMO%' GROUP BY 1) w) AS med_min_w,
                  (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at > now() - interval '7 days')::int AS rated_w,
                  (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND f.rating >= 7 AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at > now() - interval '7 days')::int AS hi_w,
                  (SELECT COUNT(*) FROM feedback f JOIN students s2 ON s2.id = f.student_id WHERE f.kind = 'session' AND s2.pilot NOT LIKE 'DEMO%' AND f.created_at <= now() - interval '7 days' AND f.created_at > now() - interval '14 days')::int AS rated_pw,
