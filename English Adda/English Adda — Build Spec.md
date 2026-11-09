@@ -75,9 +75,9 @@ The CEFR column is for the admin only.
 
 | Part | What happens | Measures | Items | Time |
 |---|---|---|---|---|
-| 1. Real or Fake | Swipe 30 words: real words from frequency bands 1k–8k, plus about 10 made-up words | Vocabulary size. Score = hits minus false alarms, a standard yes/no vocabulary test. | 30 | 1.5 min |
-| 2. Fill the gaps | One short passage with missing word endings (C-test). A second passage is picked one band harder or easier based on the first. | Grammar and reading | 2 × 10 gaps | 1.5 min |
-| 3. Catch It | Hear and type 4 sentences that get longer and faster | Listening | 4 | 1.5 min |
+| 1. Real or Fake | Swipe 36 words: 24 real (3 per level, frequency bands) and 12 made-up words that look like real English, both short and long, so word shape is never a clue (LexTALE-style 2:1 ratio) | Vocabulary size. Score = hits minus false alarms, a standard yes/no vocabulary test. | 36 | 2 min |
+| 2. Fill the gaps | One short passage with missing word endings (C-test). A second passage is picked one band harder or easier based on the first. | General proficiency (grammar and vocabulary together); feeds grammar, reading and writing. Literature: C-tests measure general proficiency well (Eckes & Grotjahn 2006) but not one skill alone, and a 2-passage version is a quick estimate that play then corrects. | 2 × 10 gaps | 1.5 min |
+| 3. Catch It | Hear and type 4 sentences that get longer and faster. Each sentence plays only once. | Listening | 4 | 1.5 min |
 | 4. Quick story | One micro-story at the level suggested by parts 1–2, then 2 questions | Reading | 2 | 1 min |
 
 Writing has no part in the check. It starts at the average of grammar and reading, minus 1 (minimum 1), and moves up through play.

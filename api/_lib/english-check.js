@@ -5,17 +5,24 @@
 import { createHash } from 'node:crypto';
 
 // ---------- Part 1: Real or Fake ----------
-// Real words carry a level from their frequency (wordfreq Zipf bands: L1 >= 5.3 ... L8 2.8-3.3).
-// Fake words were checked to have zero frequency in wordfreq's English list.
+// Design follows yes/no vocabulary checks (Meara; LexTALE, Lemhöfer & Broersma 2012): 2 real words for every fake,
+// fakes look like real English (legal spelling, real endings), so "looks weird" is never a clue.
+// No shape shortcut: fakes and real words both come short and long, and both include -ate / -ous / -ive endings.
+// Real words: 3 per level, level from frequency (wordfreq Zipf: L1 >= 5.3, L2 4.9-5.3, L3 4.6-4.9, L4 4.2-4.6,
+// L5 3.9-4.2, L6 3.6-3.9, L7 3.1-3.6, L8 2.4-3.1). L8 avoids "essay words" Indian students often memorise
+// (meticulous, frugal, aloof, obstinate) and words B.Tech students know from another meaning (coax cable).
+// Fakes: zero frequency in wordfreq, and not one letter away from any of the 150,000 commonest English words (checked by script).
+// Reviewed by a separate reviewer agent on 2026-11-09, two rounds, all fixes in (e.g. drabbet dropped: it is a real fabric word).
 export const RF = [
-  { w: 'honest', lv: 3 }, { w: 'grombish', fake: true }, { w: 'water', lv: 1 }, { w: 'reluctant', lv: 6 },
-  { w: 'curious', lv: 4 }, { w: 'vensible', fake: true }, { w: 'simple', lv: 2 }, { w: 'frugal', lv: 8 },
-  { w: 'obsurate', fake: true }, { w: 'eager', lv: 5 }, { w: 'village', lv: 3 }, { w: 'clarnish', fake: true },
-  { w: 'tedious', lv: 7 }, { w: 'rescue', lv: 4 }, { w: 'friend', lv: 1 }, { w: 'prattock', fake: true },
-  { w: 'humble', lv: 5 }, { w: 'answer', lv: 2 }, { w: 'motterly', fake: true }, { w: 'fragile', lv: 6 },
-  { w: 'meticulous', lv: 8 }, { w: 'quemble', fake: true }, { w: 'improve', lv: 3 }, { w: 'anxious', lv: 5 },
-  { w: 'fendrous', fake: true }, { w: 'reliable', lv: 4 }, { w: 'ambiguous', lv: 7 }, { w: 'plorrid', fake: true },
-  { w: 'listen', lv: 2 }, { w: 'dribulous', fake: true }
+  { w: 'honest', lv: 3 }, { w: 'thrisk', fake: true }, { w: 'water', lv: 1 }, { w: 'reluctant', lv: 6 },
+  { w: 'curious', lv: 4 }, { w: 'dribulous', fake: true }, { w: 'brittle', lv: 7 }, { w: 'simple', lv: 2 },
+  { w: 'ponderous', lv: 8 }, { w: 'humble', lv: 5 }, { w: 'fendrous', fake: true }, { w: 'village', lv: 3 },
+  { w: 'tedious', lv: 7 }, { w: 'trusket', fake: true }, { w: 'rescue', lv: 4 }, { w: 'friend', lv: 1 },
+  { w: 'plontive', fake: true }, { w: 'deliberate', lv: 6 }, { w: 'terse', lv: 8 }, { w: 'answer', lv: 2 },
+  { w: 'fluvicate', fake: true }, { w: 'anxious', lv: 5 }, { w: 'brindow', fake: true }, { w: 'improve', lv: 3 },
+  { w: 'wince', lv: 8 }, { w: 'reliable', lv: 4 }, { w: 'scorbulent', fake: true }, { w: 'alleviate', lv: 7 },
+  { w: 'money', lv: 1 }, { w: 'kelmish', fake: true }, { w: 'negotiate', lv: 5 }, { w: 'menticate', fake: true },
+  { w: 'trenchive', fake: true }, { w: 'listen', lv: 2 }, { w: 'prestulous', fake: true }, { w: 'vague', lv: 6 }
 ];
 
 // ---------- Part 2: Fill the gaps (C-test) ----------

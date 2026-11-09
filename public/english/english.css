@@ -189,3 +189,14 @@ html.w3d .eplayer{background:linear-gradient(160deg,#F6F1FF,#FFF4E6)}
 .eres-skills{width:min(460px,100%);text-align:left}
 @media (max-width:640px){.erf-card b{font-size:38px}.epass-text{font-size:17.5px;padding:16px}.erf-btns .ebtn{min-width:120px}}
 .elink{border:0;background:none;padding:0;font:inherit;font-weight:800;color:inherit;text-decoration:underline;cursor:pointer}
+
+/* Yapper's hover bubble (english.js showTip) */
+[data-tip]{cursor:pointer;outline:none}
+[data-tip]:focus-visible{outline:3px solid var(--e-voc,#8B5CF6);outline-offset:4px;border-radius:50%}
+.eyap-tip{position:fixed;z-index:9000;max-width:240px;background:var(--card,#fff);color:var(--ink,#1d1b26);font-weight:700;font-size:15px;line-height:1.35;padding:10px 14px;border-radius:16px;box-shadow:0 10px 28px rgba(40,20,90,.22);pointer-events:none;opacity:0;transform:translateY(6px) scale(.96);transition:opacity .16s ease,transform .18s ease}
+.eyap-tip.on{opacity:1;transform:none}
+.eyap-tip::after{content:"";position:absolute;left:calc(var(--ax,50%) - 8px);top:100%;border:8px solid transparent;border-top-color:var(--card,#fff);border-bottom:0}
+.eyap-tip.below::after{top:auto;bottom:100%;border:8px solid transparent;border-bottom-color:var(--card,#fff);border-top:0}
+.eyap.wiggle{animation:ewiggle .6s ease-in-out}
+@keyframes ewiggle{0%,100%{rotate:0deg}25%{rotate:-6deg}60%{rotate:5deg}}
+@media (prefers-reduced-motion:reduce){.eyap.wiggle{animation:none}.eyap-tip{transition:none}}

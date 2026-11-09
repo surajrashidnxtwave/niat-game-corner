@@ -38,7 +38,7 @@ const gameOf = id => GAMES.find(g => g.id === id);
   rf: ['Part one: Real or Fake. Tap Real only if you know the word. Some words are made up, so don’t guess!'],
   c1: ['Part two: Fill the gaps. Each word has lost its ending. Type the missing letters.'],
   c2: ['Nice! One more short passage.'],
-  catch: ['Part three: Catch it. Listen, then type exactly what you hear. You can play each one twice.'],
+  catch: ['Part three: Catch it. Listen, then type exactly what you hear. Each sentence plays only once, so stay sharp!'],
   story: ['Last part! Read this quick story, then answer two questions.'],
   done: ['Done! Here’s where you start. I’ll pick your games from this.']
 };/*END_YAPPER_LINES*/
@@ -52,7 +52,15 @@ const istDay = t => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'nume
 const sfx = name => { try { SFX.play(name); } catch (e) {} };
 const mins = s => Math.floor(s / 60);
 const tester = () => !!(typeof ME !== 'undefined' && ME && ME.pilot === 'DEMO');
-const yap = (pose, size, cls) => '<img class="' + (cls || 'eyap') + '" src="assets/yapper/yapper-' + pose + '.svg" width="' + size + '" height="' + size + '" alt="" decoding="async">';
+const yap = (pose, size, cls, tip) => '<img class="' + (cls || 'eyap') + '" src="assets/yapper/yapper-' + pose + '.svg" width="' + size + '" height="' + size + '" alt="" decoding="async"' + (tip ? ' data-tip="' + tip + '" tabindex="0" role="button" aria-label="Yapper says hi"' : '') + '>';
+// what Yapper says when you hover over (or tap) him. Text only, no sound.
+const TIPS = {
+  hi: ['Hi, I’m Yapper. Ready to play?', 'Yes, I talk a lot. Let’s play!', 'Words are my snacks. Got any?'],
+  home: ['Hi, I’m Yapper. Ready to play?', '15 minutes. That’s all I ask!', 'Today’s games are picked just for you.', 'Psst… keep that streak alive 🔥'],
+  done: ['Goal done! You’re on fire 🔥', 'Nice work today. Bonus round?'],
+  closed: ['Adda’s closed. See you tomorrow!', 'Rest those brain cells. Back tomorrow?'],
+  wait: ['Not open for you yet. Soon, promise!']
+};
 const ICON = {
   star: '<svg viewBox="0 0 24 24" fill="#F5B82E" aria-hidden="true"><path d="M12 2l2.6 6.6L21 9.3l-5 4.4 1.5 6.8L12 17l-5.5 3.5L8 13.7 3 9.3l6.4-.7z"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
@@ -152,13 +160,13 @@ function render(){
   renderHome(root, S);
 }
 function renderNotOpen(root){
-  root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 200, 'eyap bob') + '</div><div class="ewel-talk">'
+  root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 200, 'eyap bob', 'wait') + '</div><div class="ewel-talk">'
     + '<h1 class="ddisplay">English Adda</h1><p class="ewel-sub">Not open for your batch yet. Yapper is still warming up. Check back soon!</p>'
     + '<button class="ebtn ghost" data-go="home">Back to Brain Gym</button></div></section>';
 }
 /* the level check is required: until it's done, English Adda shows only this start screen. Yapper introduces himself here. */
 function renderWelcome(root){
-  root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 240, 'eyap bob') + '</div>'
+  root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 240, 'eyap bob', 'hi') + '</div>'
     + '<div class="ewel-talk"><span class="etag">New · English Adda</span><h1 class="ddisplay">Hey, I’m Yapper!</h1>'
     + '<div class="ebubble">' + YAPPER_LINES.hello.map(t => '<p>' + esc(t) + '</p>').join('') + '<button class="ehear" data-ehear aria-label="Hear Yapper">🔊 Hear me</button></div>'
     + '<div class="ewel-row"><button class="ebtn" data-echeck>Let’s go</button><span class="enote">About 5 minutes</span></div></div></section>';
@@ -182,7 +190,7 @@ function renderHome(root, S){
     + '<section class="ehero' + (closed ? ' closed' : '') + '">' + ring(t, 128)
     + '<div class="ehero-text"><span class="etag">' + tag + '</span><h2 class="ddisplay">' + esc(h) + '</h2><p>' + esc(p) + '</p>'
     + (btn ? '<div class="ehero-row">' + btn + '</div>' : '') + '</div>'
-    + yap(closed ? 'idle' : done ? 'correct' : 'idle', 140, 'eyap ehero-yap') + '</section>'
+    + yap(closed ? 'idle' : done ? 'correct' : 'idle', 140, 'eyap ehero-yap', closed ? 'closed' : done ? 'done' : 'home') + '</section>'
     + '<div class="egrid"><section class="epanel"><h3>Today’s games</h3><p class="esub">' + (S.placed ? 'Picked for your level. More time goes to the skills you’re building.' : 'Your games appear after the level check.') + '</p>'
     + '<div class="esets">' + (S.placed && S.circuit && S.circuit.length ? ['groups', ...S.circuit].map(gameOf).filter(Boolean) : GAMES.filter(g => !g.always)).map(g => setRow(g)).join('') + '</div></section>'
     + '<aside class="epanel eside"><div class="eyou"><h3>Your skills</h3>'
@@ -236,7 +244,7 @@ const Voice = (() => {
    No marks and no right/wrong feedback during it. The server picks the second passage and the story, scores everything, and saves the levels once. */
 let C = null, CP = null;
 const frag = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
-const UNITS = 30 + 2 + 4 + 1;    // progress bar: 30 words, 2 passages, 4 sentences, 1 story
+const UNITS = 36 + 2 + 4 + 1;    // progress bar: 36 words, 2 passages, 4 sentences, 1 story
 function openCheck(){
   if (!ME || CP) return;
   sfx('tap'); Voice.stop();
@@ -355,7 +363,7 @@ function passage(which){
   };
 }
 
-// ---- part 3: Catch it (hear a sentence, type it; 2 plays each) ----
+// ---- part 3: Catch it (hear a sentence once, type it) ----
 function catchShow(i){
   const list = C.items.catch;
   if (i >= list.length) return intro(4, 'Quick story', YAPPER_LINES.story[0], 'Start', storyShow);
@@ -364,21 +372,21 @@ function catchShow(i){
   let plays = 0, playing = false;
   body().innerHTML = '<div class="ecatch"><p class="ecount">Sentence ' + (i + 1) + ' of ' + list.length + '</p>'
     + '<button class="eplay" aria-label="Play the sentence"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>'
-    + '<p class="esub eplays">Tap to play. You can play it twice.</p>'
+    + '<p class="esub eplays">It plays only once. Get ready…</p>'
     + '<input class="field ecatch-in" maxlength="240" placeholder="Type what you hear" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type the sentence you heard">'
     + '<p class="ehint">About ' + it.words + ' words. Small spelling slips are okay.</p>'
     + '<button class="ebtn" id="ep-next" disabled>Next</button></div>';
   const btn = qs('.eplay', CP), lab = qs('.eplays', CP), inp = qs('.ecatch-in', CP), nx = qs('#ep-next', CP);
   const play = () => {
-    if (playing || plays >= 2) return;
+    if (playing || plays >= 1) return;
     plays++; playing = true; btn.classList.add('on');
     lab.textContent = 'Listen…';
     Voice.clip(it.clip, why => {
       playing = false; if (!CP) return;
       btn.classList.remove('on');
       if (why === 'blocked' || why === 'error') { plays--; lab.textContent = why === 'error' ? 'Couldn’t load the sound. Tap to try again.' : 'Tap to play.'; return; }
-      lab.textContent = plays >= 2 ? 'No plays left. Type what you heard.' : '1 play left.';
-      btn.disabled = plays >= 2; nx.disabled = false;
+      lab.textContent = 'Done. Type what you heard.';
+      btn.disabled = true; nx.disabled = false;
       inp.focus();
     });
   };
@@ -386,7 +394,7 @@ function catchShow(i){
   inp.oninput = () => { if (inp.value.trim()) nx.disabled = false; };
   inp.onkeydown = e => { if (e.key === 'Enter' && !nx.disabled) nx.click(); };
   nx.onclick = () => { sfx('tap'); Voice.stop(); C.catch[i] = inp.value.trim(); C.done++; catchShow(i + 1); };
-  setTimeout(() => { if (CP && !plays) play(); }, 350);
+  setTimeout(() => { if (CP && !plays) play(); }, 1200);
 }
 
 // ---- part 4: Quick story (2 questions) ----
@@ -443,7 +451,41 @@ document.addEventListener('click', e => {
     Voice.say(a, why => { if (why === 'end') Voice.say(b); });
   }
   else if (e.target.closest('[data-eplay]')) { sfx('tap'); toast('The games are being built. Coming soon!'); }
+  else if (e.target.closest('[data-tip]')) showTip(e.target.closest('[data-tip]'), true);
 });
+
+/* ================= Yapper's hover bubble ================= */
+// hover (mouse) or tap/focus (phone, keyboard) on Yapper: a speech bubble pops up above him
+let tipEl = null, tipFor = null, tipTimer = 0, tipLast = '';
+function showTip(img, tapped){
+  const list = TIPS[img.dataset.tip] || TIPS.hi;
+  if (tipFor === img && tipEl && tipEl.classList.contains('on')) { if (tapped) { clearTimeout(tipTimer); tipTimer = setTimeout(hideTip, 2600); } return; }
+  let line = list[0];
+  if (tipFor === img || tipLast) { const rest = list.filter(x => x !== tipLast); line = rest[Math.floor(Math.random() * rest.length)] || list[0]; }
+  tipLast = line; tipFor = img;
+  if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'eyap-tip'; tipEl.setAttribute('role', 'status'); document.body.appendChild(tipEl); }
+  tipEl.textContent = line;
+  const r = img.getBoundingClientRect();
+  tipEl.classList.remove('on', 'below');
+  tipEl.style.left = '0px'; tipEl.style.top = '0px';
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  let x = r.left + r.width / 2 - w / 2, y = r.top - h - 10, below = false;
+  if (y < 8) { y = r.bottom + 10; below = true; }
+  x = Math.max(8, Math.min(innerWidth - w - 8, x));
+  tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+  tipEl.style.setProperty('--ax', (r.left + r.width / 2 - x) + 'px');
+  tipEl.classList.toggle('below', below);
+  requestAnimationFrame(() => tipEl && tipEl.classList.add('on'));
+  img.classList.add('wiggle'); setTimeout(() => img.classList.remove('wiggle'), 600);
+  clearTimeout(tipTimer); if (tapped) tipTimer = setTimeout(hideTip, 2600);
+}
+function hideTip(){ clearTimeout(tipTimer); if (tipEl) tipEl.classList.remove('on'); }
+document.addEventListener('pointerover', e => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t && e.pointerType === 'mouse') showTip(t, false); });
+document.addEventListener('pointerout', e => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t && e.pointerType === 'mouse' && !t.contains(e.relatedTarget)) hideTip(); });
+document.addEventListener('focusin', e => { if (e.target.matches && e.target.matches('[data-tip]')) showTip(e.target, false); });
+document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('[data-tip]')) hideTip(); });
+addEventListener('scroll', hideTip, { passive: true });
+addEventListener('hashchange', hideTip);
 
 /* ================= hooks for index.html ================= */
 // called on every route: shows the tab once the server says this batch can open English Adda
