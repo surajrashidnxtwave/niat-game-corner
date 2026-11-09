@@ -38,3 +38,14 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Admin opens on a Summary page (both products, "What to look at" alerts, universities).
 - Admin: the "Drive School" tab in `public/admin.html` loads `/api/admin?view=drive` (batch DEMO left out) and reads question text from the lesson files. CSVs: drive_students, drive_events, drive_ratings.
 - Test accounts can jump to any screen from the console: `Drive.open(day, screenIndex)` (index after review sets expand).
+
+## English Adda (branch english-adda)
+- Research: `English Adda/English Adda — Research.md`. Build spec: `English Adda/English Adda — Build Spec.md` (HTML copies next to them; regenerate after edits). Follow the spec's build order (§10).
+- Code: `public/english/english.js` + `english.css`, server `api/english.js`, tables `english_*` in `scripts/db-setup.mjs`.
+- Host is **Yapper** (purple chatter-monster, art in `public/assets/yapper/`), not Turbo. Turbo stays in Drive School. Yapper speaks in the same Kokoro af_heart voice; a second free Kokoro voice is allowed for dialogues.
+- Who sees it: batches in env `ENGLISH_BATCHES` (comma list, default `DEMO`, `ALL` = everyone). Pilot is DEMO only until the product owner says go. The tab stays hidden for everyone else.
+- Daily: goal 15 active minutes (own timer, counted only while a game or the level check runs), fresh content closes at 25 minutes (DEMO: no limit). Streak = goal days, one missed day forgiven per 7 days.
+- Adda points never mix with Brain Gym or Drive points. Skill levels (voc, gra, lis, rea, wri; 1–8) are private: never shown to other students or on the leaderboard.
+- No speaking features. English only (no Hindi/Telugu/Tamil hints). Never call anything a "test" in student copy.
+- Content: Claude writes it in bulk, scripts check it, then a separate reviewer agent checks it as a third person before it ships. Follow the Indian English policy in Research §6 (accept / formal-only / correct). Use short English names for student-facing things.
+- Local testing without the Vercel CLI: `npm run dev:local` (scripts/dev-server.mjs serves `public/` and runs `api/*.js` with `.env.local`, the dev DB) on http://127.0.0.1:3000.

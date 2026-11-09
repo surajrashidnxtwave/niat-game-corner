@@ -1,0 +1,1003 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Adda Build Spec</title><style>
+:root{--bg:#fbf8f3;--card:#fff;--ink:#1f1b16;--mute:#6b6257;--line:#e8e0d4;--acc:#c27a12;--accbg:#fdf1de;--code:#f4efe7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17140f;--card:#201c16;--ink:#efe8dd;--mute:#a89d8f;--line:#3a332a;--acc:#f0b04f;--accbg:#2e2416;--code:#2a241c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.wrap{display:grid;grid-template-columns:270px minmax(0,1fr);gap:40px;max-width:1220px;margin:0 auto;padding:32px 24px}
+nav{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:14px}
+nav .toc>ul{padding-left:0}
+nav ul{list-style:none;padding-left:14px;margin:4px 0}
+nav a{color:var(--mute);text-decoration:none;display:block;padding:3px 0}
+nav a:hover{color:var(--acc)}
+nav b{display:block;margin-bottom:10px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;font-size:12px}
+main{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:40px 48px}
+h1{font-size:2.1em;line-height:1.2;margin:0 0 .2em}
+h2{margin-top:2.2em;padding-top:.6em;border-top:1px solid var(--line);font-size:1.5em}
+h3{margin-top:1.6em;font-size:1.15em;color:var(--acc)}
+h1+p em,h1+p{color:var(--mute)}
+a{color:var(--acc)}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--accbg)}
+code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.88em}
+pre{background:var(--code);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{margin:1em 0;padding:.4em 1em;border-left:4px solid var(--acc);background:var(--accbg);border-radius:0 8px 8px 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+li{margin:.25em 0}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;padding:16px}nav{position:static;max-height:none;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--card)}main{padding:24px 18px}}
+</style></head><body><div class="wrap">
+<nav><b>Contents</b><div class="toc">
+<ul>
+<li><a href="#1-what-were-building">1. What we're building</a><ul>
+<li><a href="#11-rules-students-feel-copy-for-the-help-card">1.1 Rules students feel (copy for the help card)</a></li>
+</ul>
+</li>
+<li><a href="#2-skills-and-levels">2. Skills and levels</a><ul>
+<li><a href="#21-five-skill-tracks">2.1 Five skill tracks</a></li>
+<li><a href="#22-level-names-shown-to-the-student">2.2 Level names (shown to the student)</a></li>
+<li><a href="#23-moving-between-levels">2.3 Moving between levels</a></li>
+</ul>
+</li>
+<li><a href="#3-first-visit-find-your-adda-level">3. First visit: "Find your Adda level"</a></li>
+<li><a href="#4-todays-adda-the-daily-circuit">4. Today's Adda (the daily circuit)</a><ul>
+<li><a href="#41-shape">4.1 Shape</a></li>
+<li><a href="#42-recommender">4.2 Recommender</a></li>
+<li><a href="#43-after-15-minutes">4.3 After 15 minutes</a></li>
+<li><a href="#44-at-25-minutes">4.4 At 25 minutes</a></li>
+<li><a href="#45-streak">4.5 Streak</a></li>
+</ul>
+</li>
+<li><a href="#5-the-v1-games">5. The v1 games</a><ul>
+<li><a href="#51-word-groups-daily-puzzle-voc">5.1 Word Groups (daily puzzle) · voc</a></li>
+<li><a href="#52-real-or-fake-voc">5.2 Real or Fake · voc</a></li>
+<li><a href="#53-catch-it-lis">5.3 Catch It · lis</a></li>
+<li><a href="#54-story-rewind-lis-wri">5.4 Story Rewind · lis → wri</a></li>
+<li><a href="#55-jumble-gra">5.5 Jumble · gra</a></li>
+<li><a href="#56-spot-fix-gra">5.6 Spot &amp; Fix · gra</a></li>
+<li><a href="#57-reel-reader-rea-voc">5.7 Reel Reader · rea + voc</a></li>
+<li><a href="#58-vanish-rea-wri-opens-at-reading-level-3">5.8 Vanish · rea → wri (opens at reading level 3)</a></li>
+<li><a href="#59-fix-my-email-wri">5.9 Fix My Email · wri</a></li>
+<li><a href="#510-word-vault-voc-always-open">5.10 Word Vault · voc (always open)</a></li>
+<li><a href="#511-boss-round-all-skills-every-14-days">5.11 Boss Round · all skills (every 14 days)</a></li>
+</ul>
+</li>
+<li><a href="#6-points-leaderboard-profile">6. Points, leaderboard, profile</a><ul>
+<li><a href="#61-adda-points">6.1 Adda points</a></li>
+<li><a href="#62-leaderboard">6.2 Leaderboard</a></li>
+<li><a href="#63-profile">6.3 Profile</a></li>
+</ul>
+</li>
+<li><a href="#7-screens">7. Screens</a><ul>
+<li><a href="#71-navigation">7.1 Navigation</a></li>
+<li><a href="#72-screens">7.2 Screens</a></li>
+<li><a href="#73-audio">7.3 Audio</a></li>
+</ul>
+</li>
+<li><a href="#8-server-and-data">8. Server and data</a><ul>
+<li><a href="#81-tables-scriptsdb-setupmjs-all-prefixed-english_">8.1 Tables (scripts/db-setup.mjs, all prefixed english_)</a></li>
+<li><a href="#82-apienglishjs-post-same-style-as-apidrivejs">8.2 api/english.js (POST, same style as api/drive.js)</a></li>
+<li><a href="#83-ai-judge-writing-modes-only">8.3 AI judge (writing modes only)</a></li>
+<li><a href="#84-admin">8.4 Admin</a></li>
+</ul>
+</li>
+<li><a href="#9-content-plan">9. Content plan</a><ul>
+<li><a href="#91-files">9.1 Files</a></li>
+<li><a href="#92-volumes">9.2 Volumes</a></li>
+<li><a href="#93-content-rules-checklist">9.3 Content rules (checklist)</a></li>
+<li><a href="#94-review-pipeline-for-every-content-batch">9.4 Review pipeline (for every content batch)</a></li>
+</ul>
+</li>
+<li><a href="#10-build-order">10. Build order</a></li>
+<li><a href="#11-risks-to-watch-in-the-pilot">11. Risks to watch in the pilot</a></li>
+</ul>
+</div>
+</nav><main><h1 id="english-adda-build-spec">English Adda — Build Spec</h1>
+<p><em>Nov 9, 2026 · v1 design for Claude Code to build. Read with <code>English Adda — Research.md</code> (the "why"). This doc is the "what".</em></p>
+<hr />
+<h2 id="1-what-were-building">1. What we're building</h2>
+<p><strong>English Adda</strong> is a new section in Game Corner, next to Brain Gym and Drive School. It is a <strong>daily 15-minute English workout made of short games</strong>. It trains reading, writing, listening, vocabulary and grammar. Underneath, every game practises a task type used in campus placement tests (Versant, AMCAT, TCS NQT, Accenture), but it must never look or feel like test prep.</p>
+<table>
+<thead>
+<tr>
+<th>Fixed decision</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Who sees it</td>
+<td><strong>Batch DEMO only</strong> until the product owner tests it and says go.</td>
+</tr>
+<tr>
+<td>Skills in v1</td>
+<td>Vocabulary, grammar, listening, reading, writing. <strong>No speaking.</strong></td>
+</tr>
+<tr>
+<td>Daily time</td>
+<td>Goal <strong>15 active minutes</strong>. Fresh content closes at <strong>25 minutes</strong>. Word Vault review stays open.</td>
+</tr>
+<tr>
+<td>Start</td>
+<td>A <strong>required level check</strong> on the first visit (about 5 min) sets the starting levels and which games each student gets.</td>
+</tr>
+<tr>
+<td>Points</td>
+<td><strong>Adda points</strong>, separate from Brain Gym and Drive School points. Own leaderboard tab.</td>
+</tr>
+<tr>
+<td>Language</td>
+<td>English only. No Hindi, Telugu or Tamil hints.</td>
+</tr>
+<tr>
+<td>Voices</td>
+<td>Kokoro <strong>af_heart</strong> (also used for Turbo) for everything. A second free Kokoro male voice (<strong>am_michael</strong>, to be confirmed by listening) for the second speaker in dialogues only. Everything is pre-recorded and served as static files.</td>
+</tr>
+<tr>
+<td>Host</td>
+<td><strong>Yapper</strong> (locked 2026-11-09): a purple fluffy chatter-monster whose antennae end in quotation marks. "Yapping" is Gen Z slang for talking non-stop. Turbo stays only in Drive School. Art: <code>public/assets/yapper/yapper-{idle,correct,thinking,oops}.svg</code>. Yapper speaks in the Heart voice, the same Kokoro voice as Turbo.</td>
+</tr>
+<tr>
+<td>Content</td>
+<td>Claude writes it in bulk. Scripts check it automatically. A separate reviewer agent checks it as a third person. File headers say <code>FOR TEAM REVIEW</code>.</td>
+</tr>
+<tr>
+<td>Modes</td>
+<td>Must work in both the 2D and 3D versions of Game Corner.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="11-rules-students-feel-copy-for-the-help-card">1.1 Rules students feel (copy for the help card)</h3>
+<ul>
+<li>Play <strong>15 minutes a day</strong> to fill your ring and keep your streak.</li>
+<li>After 25 minutes, Adda closes for the day. Your <strong>Word Vault</strong> stays open.</li>
+<li>No lives, no hearts. Mistakes cost nothing. Every miss gets a hint first.</li>
+<li>Your level is <strong>only yours</strong>. Nobody else sees it.</li>
+<li>The leaderboard counts effort (rounds played, goal days), not who is "best at English".</li>
+</ul>
+<hr />
+<h2 id="2-skills-and-levels">2. Skills and levels</h2>
+<h3 id="21-five-skill-tracks">2.1 Five skill tracks</h3>
+<p>Each student has a private level from 1 to 8 for each skill:</p>
+<table>
+<thead>
+<tr>
+<th>Skill</th>
+<th>Code</th>
+<th>Trained by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vocabulary</td>
+<td><code>voc</code></td>
+<td>Word Groups, Real or Fake, Word Vault, Reel Reader (taps)</td>
+</tr>
+<tr>
+<td>Grammar</td>
+<td><code>gra</code></td>
+<td>Jumble, Spot &amp; Fix</td>
+</tr>
+<tr>
+<td>Listening</td>
+<td><code>lis</code></td>
+<td>Catch It, Story Rewind</td>
+</tr>
+<tr>
+<td>Reading</td>
+<td><code>rea</code></td>
+<td>Reel Reader, Vanish</td>
+</tr>
+<tr>
+<td>Writing</td>
+<td><code>wri</code></td>
+<td>Fix My Email, Vanish (write mode), Story Rewind (write mode)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Overall Adda Level</strong> = the rounded average of the five skill levels. It is shown only to the student.</p>
+<h3 id="22-level-names-shown-to-the-student">2.2 Level names (shown to the student)</h3>
+<p>The CEFR column is for the admin only.</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Name</th>
+<th>CEFR-J (admin only)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>First Sip</td>
+<td>Pre-A1 / A1.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Regular</td>
+<td>A1.2–A1.3</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Chatter</td>
+<td>A2.1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Storyteller</td>
+<td>A2.2</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Debater</td>
+<td>B1.1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Anchor</td>
+<td>B1.2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Headliner</td>
+<td>B2.1</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Adda Legend</td>
+<td>B2.2+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-moving-between-levels">2.3 Moving between levels</h3>
+<ul>
+<li>Every item is tagged with a level from 1 to 8. A round draws items at the student's skill level, with about 20% at one level below (for confidence) and about 10% at one level above (for stretch).</li>
+<li><strong>Up:</strong> at least 80% correct over the last 20 items at the current level, spread across at least 2 different days. When a student goes up, Yapper celebrates and names the skill: "Listening is now Level 4: Storyteller!"</li>
+<li><strong>Down:</strong> never shown. If accuracy drops below 50% over 20 items, the game quietly serves more items from one level below until accuracy recovers. The displayed level never drops.</li>
+<li>The server stores the levels and recomputes them on each round save (see §8). Students can't edit levels from the page.</li>
+</ul>
+<hr />
+<h2 id="3-first-visit-find-your-adda-level">3. First visit: "Find your Adda level"</h2>
+<ul>
+<li>Required. Until it's done, English Adda shows only a quiet start screen, the same pattern as Drive School Day 0.</li>
+<li>Takes about 5 minutes. It is <strong>never called a test</strong>. Yapper: <em>"Quick warm-up so I can pick the right games for you. No marks, no pressure."</em></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What happens</th>
+<th>Measures</th>
+<th>Items</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Real or Fake</td>
+<td>Swipe 30 words: real words from frequency bands 1k–8k, plus about 10 made-up words</td>
+<td>Vocabulary size. Score = hits minus false alarms, a standard yes/no vocabulary test.</td>
+<td>30</td>
+<td>1.5 min</td>
+</tr>
+<tr>
+<td>2. Fill the gaps</td>
+<td>One short passage with missing word endings (C-test). A second passage is picked one band harder or easier based on the first.</td>
+<td>Grammar and reading</td>
+<td>2 × 10 gaps</td>
+<td>1.5 min</td>
+</tr>
+<tr>
+<td>3. Catch It</td>
+<td>Hear and type 4 sentences that get longer and faster</td>
+<td>Listening</td>
+<td>4</td>
+<td>1.5 min</td>
+</tr>
+<tr>
+<td>4. Quick story</td>
+<td>One micro-story at the level suggested by parts 1–2, then 2 questions</td>
+<td>Reading</td>
+<td>2</td>
+<td>1 min</td>
+</tr>
+</tbody>
+</table>
+<p>Writing has no part in the check. It starts at the average of grammar and reading, minus 1 (minimum 1), and moves up through play.</p>
+<p><strong>Result screen:</strong>
+- "You're <strong>Level 3: Chatter</strong>"
+- 5 skill bars
+- "Your strongest: <strong>Reading</strong>. We'll train <strong>Listening</strong> most."
+- Button: <strong>Start today's Adda</strong></p>
+<p><strong>Week 8 re-check:</strong> repeated quietly inside a Boss Round (§6), using equivalent but different items, to measure growth for the admin.</p>
+<p>Saved to <code>english_students.check</code> and <code>levels</code>.</p>
+<hr />
+<h2 id="4-todays-adda-the-daily-circuit">4. Today's Adda (the daily circuit)</h2>
+<h3 id="41-shape">4.1 Shape</h3>
+<p>The circuit is fixed for the day, so home and the player agree. It is seeded by student and date:</p>
+<ol>
+<li><strong>Word Groups</strong>, the shared daily puzzle (about 2 min). It is always first.</li>
+<li><strong>5 sets</strong> picked by the recommender (§4.2), about 2–2.5 min each.</li>
+<li><strong>Word Vault</strong>, only if words are due (about 1 min).</li>
+</ol>
+<p>That is about 15 minutes. A ring fills with <strong>active</strong> seconds only: the tab must be visible and the student must have interacted in the last 30 s, the same rule as Brain Gym's timer.</p>
+<h3 id="42-recommender">4.2 Recommender</h3>
+<ul>
+<li><strong>Weights:</strong> the 1–2 weakest skills by level take 60% of the 5 sets. The rest take 40%. Ties are broken by the skill trained least in the last 3 days.</li>
+<li><strong>Variety:</strong> no game twice in a row, and at least 4 different games in the 5 sets.</li>
+<li><strong>Swap:</strong> once a day, a student can replace one set ("Not feeling it? Swap").</li>
+<li><strong>Unlocks by level:</strong></li>
+<li>Vanish needs reading level 3 or higher.</li>
+<li>Fix My Email write mode needs writing level 5 or higher.</li>
+<li>Below those levels the games still appear, in their easier modes.</li>
+</ul>
+<h3 id="43-after-15-minutes">4.3 After 15 minutes</h3>
+<ul>
+<li>Goal modal: trophy, "Today's Adda done ✓", streak +1.</li>
+<li>Then the <strong>11-star rating</strong>, once a day, before leaving. Reuse the Brain Gym and Drive School component and store it as <code>kind = 'rate'</code> in <code>english_events</code>.</li>
+<li><strong>Bonus sets</strong> keep coming from the same recommender until 25 minutes.</li>
+</ul>
+<h3 id="44-at-25-minutes">4.4 At 25 minutes</h3>
+<ul>
+<li>The round in progress finishes normally. Then a closed screen: <em>"Adda's closed for today. Great work! Come back tomorrow. Your Word Vault is still open."</em></li>
+<li>The server rejects points for fresh rounds once that day's active time is over 25 min plus a 2-minute grace.</li>
+<li><strong>DEMO accounts:</strong> no daily limit, all games unlocked, and they can jump to any game or level from the console (<code>Adda.open(game, level)</code>), like <code>Drive.open</code>.</li>
+</ul>
+<h3 id="45-streak">4.5 Streak</h3>
+<ul>
+<li>A goal day is a day with 15 or more active minutes in English Adda (its own timer, not Brain Gym's).</li>
+<li>Each student gets <strong>1 automatic freeze per 7 days</strong>. A missed day uses the freeze and keeps the streak.</li>
+<li>Shown only to the student, on the home screen.</li>
+</ul>
+<hr />
+<h2 id="5-the-v1-games">5. The v1 games</h2>
+<p>All games share one player shell (§7.2). Every game has:
+- an <strong>intro line</strong> from Yapper (recorded once)
+- a <strong>level knob table</strong>
+- <strong>instant feedback with a hint first</strong>: the first miss gives a hint, and the second shows the answer and a "why"</p>
+<p>Rounds are about 2–2.5 minutes.</p>
+<h3 id="51-word-groups-daily-puzzle-voc">5.1 Word Groups (daily puzzle) · <code>voc</code></h3>
+<ul>
+<li><strong>Play:</strong> 16 word tiles. Find 4 hidden groups of 4. Groups can be synonyms, collocations ("___ a decision"), tech words, Indian English vs global English, and so on.</li>
+<li><strong>Mistakes:</strong> you get 4 mistakes. Using all 4 doesn't end the game: after the 4th, the groups reveal one at a time with explanations.</li>
+<li><strong>Same for everyone:</strong> all DEMO students get the same puzzle on the same day (later, the whole batch).</li>
+<li><strong>Level knob:</strong> 3 difficulty tiers. The student's vocabulary level picks the tier, so there are three daily puzzles: easy, medium and hard.</li>
+<li><strong>Share:</strong> a copyable emoji result grid, no spoilers ("English Adda #12 🟩🟨🟦🟪").</li>
+<li><strong>Content rule:</strong> each word fits <strong>exactly one</strong> group. Check this with a script plus the reviewer agent.</li>
+<li><strong>Placement link:</strong> synonyms and words in context (AMCAT).</li>
+</ul>
+<h3 id="52-real-or-fake-voc">5.2 Real or Fake · <code>voc</code></h3>
+<ul>
+<li><strong>Play:</strong> a word appears. Swipe right if it's real, left if it's fake. 5 s per word, 20 words.</li>
+<li><strong>Fake words</strong> look like English but aren't ("brendle", "obsurate"). A script checks that each has zero frequency in a large word-frequency list.</li>
+<li><strong>After the round:</strong> real words the student missed are offered for the Word Vault, each with a one-line meaning.</li>
+<li><strong>Level knob:</strong> the frequency band of the real words (L1: top 1k … L8: 8k–12k), and how believable the fake words are.</li>
+<li><strong>Placement link:</strong> vocabulary recognition (Duolingo English Test, AMCAT).</li>
+</ul>
+<h3 id="53-catch-it-lis">5.3 Catch It · <code>lis</code></h3>
+<ul>
+<li><strong>Play:</strong> hear a sentence and type it. There is 1 free replay, then a second replay costs a few bonus points. 6 sentences per round.</li>
+<li><strong>Scoring</strong> (word-level alignment):</li>
+<li>case and punctuation are ignored</li>
+<li>contractions are accepted both ways ("don't" = "do not")</li>
+<li>numbers can be digits or words</li>
+<li>a 1-letter slip gets half credit and a "check spelling" hint</li>
+<li>missed words are highlighted in the answer</li>
+<li><strong>Level knob:</strong></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Sentence length</th>
+<th>Speed</th>
+<th>Background</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L1</td>
+<td>4–6 words</td>
+<td>0.85×</td>
+<td>–</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>8–12 words</td>
+<td>1.0×</td>
+<td>–</td>
+</tr>
+<tr>
+<td>L7–8</td>
+<td>14–20 words</td>
+<td>1.1×</td>
+<td>Light canteen or hostel noise</td>
+</tr>
+</tbody>
+</table>
+<p>Each sentence is recorded once, at the speed for its level.
+- <strong>Placement link:</strong> Versant repeats, dictation (Versant Writing), SVAR listening.</p>
+<h3 id="54-story-rewind-lis-wri">5.4 Story Rewind · <code>lis</code> → <code>wri</code></h3>
+<ul>
+<li><strong>Play:</strong> a 30–50 s audio story or dialogue (hostel, cricket, ISRO, a train delay). It plays once, with one replay allowed. Then:</li>
+<li><strong>L1–4:</strong> 3 multiple-choice questions (main idea, a detail, an inference).</li>
+<li><strong>L5–8:</strong> write a 2–3 line retelling. The AI judge checks key-point coverage. If the AI fails, keyword matching on the key points takes over.</li>
+<li>Dialogues use af_heart plus the second voice.</li>
+<li><strong>Placement link:</strong> Versant story retelling, listening comprehension.</li>
+</ul>
+<h3 id="55-jumble-gra">5.5 Jumble · <code>gra</code></h3>
+<ul>
+<li><strong>Play:</strong> drag word chunks into order to build a sentence. 8 sentences, with a combo meter for speed.</li>
+<li><strong>Distractors:</strong> at higher levels, one extra wrong chunk is mixed in (for example "since" vs "for" in "for two years").</li>
+<li><strong>Accepted orders:</strong> every sentence has an allowlist of correct orders (for example adverb positions). A script checks that no other order is correct.</li>
+<li><strong>Level knob:</strong> number of chunks (L1: 4 → L8: 9), and whether there is a distractor (L4 and up).</li>
+<li><strong>Placement link:</strong> Versant sentence builds, the Accenture jumbled-sentence task.</li>
+</ul>
+<h3 id="56-spot-fix-gra">5.6 Spot &amp; Fix · <code>gra</code></h3>
+<ul>
+<li><strong>Play:</strong> a sentence appears. Tap the wrong part, or tap "No error". Then choose the fix from 3 options. 8 sentences.</li>
+<li><strong>Error patterns:</strong> about 30% of sentences are correct, so students learn not to "over-fix". The Research doc §6 rules apply:</li>
+<li><strong>Accept-tier Indianisms are never errors.</strong></li>
+<li><strong>Formal-only items</strong> appear only in "email or interview" context sentences.</li>
+<li><strong>Level knob:</strong> error type (L1: verb forms and plurals → L8: subtle agreement and redundancy), and how many sentences have no error.</li>
+<li><strong>Placement link:</strong> AMCAT error spotting and sentence improvement, TCS sentence completion.</li>
+</ul>
+<h3 id="57-reel-reader-rea-voc">5.7 Reel Reader · <code>rea</code> + <code>voc</code></h3>
+<ul>
+<li><strong>Play:</strong> swipe through 4–6 short vertical "reel cards" that tell one micro-story (60–150 words in total at L1, up to 400 at L8). Topics come from the Research doc §8.2.</li>
+<li><strong>Tap any word</strong> to see a one-line meaning and save it to the Word Vault.</li>
+<li>At the end, 2 quick questions.</li>
+<li><strong>Level control:</strong> at least 95% of the passage's words must be at or below the student's level band, and the rest are glossed. A script checks word coverage and Flesch score.</li>
+<li><strong>Placement link:</strong> AMCAT reading comprehension.</li>
+</ul>
+<h3 id="58-vanish-rea-wri-opens-at-reading-level-3">5.8 Vanish · <code>rea</code> → <code>wri</code> (opens at reading level 3)</h3>
+<ul>
+<li><strong>Play:</strong> read a short passage (40–120 words) for 20–40 s. It vanishes. Then:</li>
+<li><strong>L3–4:</strong> put 4 key-point cards in the right order, then pick the true statement.</li>
+<li><strong>L5–8:</strong> write the main idea in 2–3 lines.</li>
+<li><strong>Write mode:</strong> the AI judge checks key-point coverage. Errors are flagged only by quoting an exact span of what the student wrote, at most 2. The student can revise once, and the score rises.</li>
+<li><strong>Placement link:</strong> Versant passage reconstruction, TCS passage recall.</li>
+</ul>
+<h3 id="59-fix-my-email-wri">5.9 Fix My Email · <code>wri</code></h3>
+<ul>
+<li><strong>Play:</strong> a short email or message to a HOD, warden, recruiter or customer care. Typical problems are "do the needful", "revert back", missing subject, rude tone, a missing request.</li>
+<li><strong>L1–4:</strong> tap the problems, then pick better lines.</li>
+<li><strong>L5–8:</strong> get a situation and write the email (40–90 words). The AI judge checks: subject line, greeting, clear request, polite tone, closing. It flags at most 2 issues, each quoting an exact span. Then one revise round.</li>
+<li><strong>Level knob:</strong> the number and subtlety of problems; write mode at L5 and up.</li>
+<li><strong>Placement link:</strong> Versant email writing, TCS email.</li>
+</ul>
+<h3 id="510-word-vault-voc-always-open">5.10 Word Vault · <code>voc</code> (always open)</h3>
+<ul>
+<li>Words saved from Reel Reader, Real or Fake, Word Groups and Catch It.</li>
+<li><strong>Leitner spacing:</strong> 5 boxes, reviewed after 1, 3, 7, 14 and 30 days.</li>
+<li><strong>Review formats</strong> (rotated):</li>
+<li>Meaning → pick the word</li>
+<li>Word → pick the meaning</li>
+<li>Fill the gap in a new sentence</li>
+<li>Not counted toward the 25-minute limit. It does count toward the 15-minute goal.</li>
+<li>About 1 point per correct review. Profile shows "Words mastered" (box 5).</li>
+</ul>
+<h3 id="511-boss-round-all-skills-every-14-days">5.11 Boss Round · all skills (every 14 days)</h3>
+<ul>
+<li>A mixed 6-minute round: 2 items each of Real or Fake, Jumble, Spot &amp; Fix, Catch It, a micro-story question, and one Fix-the-email choice.</li>
+<li>It feels like a "boss fight", with Yapper's dramatic intro.</li>
+<li>It updates the student's private <strong>Practice Meter</strong> (0–100), with a sparkline over time.</li>
+<li><strong>Never</strong> call it a test. <strong>Never</strong> claim it predicts a real company test. Label: "Practice meter: how ready your English is for placement-style tasks."</li>
+<li>The Day-56 Boss Round includes the quiet re-check items (§3).</li>
+</ul>
+<p><strong>Phase 2 (after the v1 pilot):</strong>
+- Hot &amp; Cold (semantic word guessing)
+- Tone Switch (WhatsApp ↔ formal)
+- Fact or Forward? (critical reading)
+- GD Corner (argument writing)</p>
+<hr />
+<h2 id="6-points-leaderboard-profile">6. Points, leaderboard, profile</h2>
+<h3 id="61-adda-points">6.1 Adda points</h3>
+<p>These reward effort. Difficulty is adaptive, so accuracy at your own level is fair.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Points</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Round completed</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Accuracy bonus</td>
+<td>Up to +10 (scaled from the round's accuracy)</td>
+</tr>
+<tr>
+<td>Word Groups solved</td>
+<td>+5, or +10 if solved with no mistakes</td>
+</tr>
+<tr>
+<td>Word Vault correct review</td>
+<td>1 each, max 20 per day</td>
+</tr>
+<tr>
+<td>Daily goal reached</td>
+<td>+25</td>
+</tr>
+<tr>
+<td>Boss Round completed</td>
+<td>+30</td>
+</tr>
+</tbody>
+</table>
+<p>Limits:
+- The server caps points per round at 25.
+- Rounds after the 25-minute limit give 0 points (DEMO accounts are exempt).</p>
+<h3 id="62-leaderboard">6.2 Leaderboard</h3>
+<ul>
+<li>A new <strong>"English Adda" tab</strong> on the Leaderboard screen, next to Brain Gym and Drive School.</li>
+<li>Ranks by batch on points this week and all time.</li>
+<li>Shows only name and points. <strong>No levels.</strong></li>
+</ul>
+<h3 id="63-profile">6.3 Profile</h3>
+<p>New <strong>English</strong> tab in My Profiles. All of it is private to the student.
+- 5 skill bars with levels and names
+- Practice Meter sparkline
+- Words mastered / words in vault
+- Goal days and streak
+- Rounds per game</p>
+<hr />
+<h2 id="7-screens">7. Screens</h2>
+<h3 id="71-navigation">7.1 Navigation</h3>
+<ul>
+<li>New sidebar tab <strong>English Adda</strong>, using the empty "English" slot.</li>
+<li>Shown only if the student's batch is in <code>ENGLISH_BATCHES</code> (server env var, default <code>DEMO</code>). Hidden otherwise, so there's no "coming soon" teaser before launch.</li>
+<li>The <code>#english</code> hash route opens it, the same pattern as <code>#drive</code>.</li>
+</ul>
+<h3 id="72-screens">7.2 Screens</h3>
+<p><strong>1. Start (before the level check)</strong>
+- Yapper (first meeting, like Turbo's "Meet Turbo"): "Hey, I'm Yapper! Yes, I talk a lot. This is English Adda: 15 minutes a day of word games, stories and quick challenges. First, a quick warm-up so I can pick your games."
+- Button: <strong>Let's go</strong></p>
+<p><strong>2. Level check:</strong> 4 parts with a progress bar, then the result screen (§3).</p>
+<p><strong>3. Home</strong>
+- The <strong>Today ring</strong> (minutes / 15), streak chip and points chip
+- Hero button: <strong>Start today's Adda</strong>, or <strong>Continue</strong> with the next set's name
+- The list of today's sets, ticked when done, with a Swap link
+- A Word Groups card with the puzzle number
+- A Word Vault card with "N words due"
+- A Boss Round card when one is due
+- "Your skills": 5 small private bars
+- A help card with the rules from §1.1</p>
+<p><strong>4. Game player</strong> (one shell for all games)
+- <strong>Top:</strong> close, progress bar, timer ring, mute, points
+- <strong>Centre:</strong> the game card
+- <strong>Bottom:</strong> one main button
+- <strong>Yapper</strong> sits bottom-left with a bubble for the intro, hints and the "why". Lines with a recorded clip are spoken; the rest are typed silently.</p>
+<p><strong>5. Round result</strong>
+- Accuracy, points, words added to the vault, and a level-up banner when one happens
+- Buttons: <strong>Next set</strong> (in the circuit) and <strong>Play again</strong> (bonus or replay)</p>
+<p><strong>6. Goal done:</strong> modal, then the 11-star rating.</p>
+<p><strong>7. Closed for today:</strong> shows the Word Vault button.</p>
+<p><strong>8. Profile English tab, and the leaderboard tab</strong> (§6).</p>
+<p><strong>Look:</strong> reuse Game Corner tokens. Give English Adda its own accent colour (suggest warm "chai" amber <code>#E8A33D</code>) so it reads as a different place from Brain Gym and Drive School. Each game gets an emoji or icon, in the same style as the Brain Gym game cards.</p>
+<h3 id="73-audio">7.3 Audio</h3>
+<ul>
+<li>Every listening clip, game intro and fixed Yapper line is pre-recorded.</li>
+<li>New script <strong><code>scripts/english-voice.py</code></strong>, a sibling of <code>turbo-voice.py</code>, with the same approach:</li>
+<li>hashed file names and <code>manifest.json</code></li>
+<li>records only new or changed lines and deletes unused clips</li>
+<li>a <code>voice</code> field per line (<code>af_heart</code> default, <code>am_michael</code> for the dialogue second speaker)</li>
+<li>a per-line <code>speed</code> field</li>
+<li>Output goes to <code>public/assets/english/voice/</code>, kept separate from Drive's clips.</li>
+<li>The noise bed for L7–8 Catch It is a free ambience track, mixed in the browser with the Web Audio API at low volume, so no extra clips are needed.</li>
+<li>Size budget: about 20 KB per short sentence clip and about 300 KB per story. Load the clips for each round ahead of time, and fetch them lazily per round.</li>
+</ul>
+<hr />
+<h2 id="8-server-and-data">8. Server and data</h2>
+<h3 id="81-tables-scriptsdb-setupmjs-all-prefixed-english_">8.1 Tables (<code>scripts/db-setup.mjs</code>, all prefixed <code>english_</code>)</h3>
+<pre><code class="language-sql">english_students (
+  student_id  int PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE,
+  started_on  date NOT NULL,
+  points      int NOT NULL DEFAULT 0,
+  levels      jsonb NOT NULL DEFAULT '{}',   -- {voc:3, gra:2, lis:2, rea:3, wri:2}
+  check       jsonb,                         -- level-check raw scores + result
+  checked_at  timestamptz,
+  meter       jsonb NOT NULL DEFAULT '[]',   -- Boss Round practice-meter history
+  memo        jsonb NOT NULL DEFAULT '{}',   -- swap used today, freeze dates, etc.
+  updated_at  timestamptz NOT NULL DEFAULT now()
+)
+english_daily (                              -- powers ring, streak, 25-min close
+  student_id  int REFERENCES students(id) ON DELETE CASCADE,
+  day         date NOT NULL,                 -- India calendar day
+  active      int NOT NULL DEFAULT 0,        -- active seconds
+  fresh_rounds int NOT NULL DEFAULT 0,
+  PRIMARY KEY (student_id, day)
+)
+english_rounds (
+  id bigserial PRIMARY KEY, client_id text UNIQUE NOT NULL,
+  student_id int REFERENCES students(id) ON DELETE CASCADE,
+  game text NOT NULL, level smallint NOT NULL,
+  items smallint, correct smallint, points int, secs int,
+  ist_date date NOT NULL, played_at timestamptz NOT NULL, meta jsonb
+)
+english_answers (                            -- per item: finds bad or ambiguous content
+  id bigserial PRIMARY KEY, round_client_id text NOT NULL,
+  student_id int, game text, item_id text, ok boolean, tries smallint,
+  answer text, ms int, at timestamptz
+)
+english_vault (
+  student_id int REFERENCES students(id) ON DELETE CASCADE,
+  word text NOT NULL, box smallint NOT NULL DEFAULT 1, due date NOT NULL,
+  source text, added_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (student_id, word)
+)
+english_events (                             -- rate, swap, boss, levelup
+  id bigserial PRIMARY KEY, client_id text UNIQUE NOT NULL,
+  student_id int, kind text NOT NULL, data jsonb, at timestamptz NOT NULL
+)
+</code></pre>
+<p>Indexes go on <code>(student_id, ist_date)</code>, <code>(game, item_id)</code> and <code>(kind, at)</code>.</p>
+<h3 id="82-apienglishjs-post-same-style-as-apidrivejs">8.2 <code>api/english.js</code> (POST, same style as <code>api/drive.js</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>state</code></td>
+<td>Returns levels, today's active secs, streak, points, the day's circuit (computed on the server from the seed), vault due count, Boss due, and <code>open</code> (whether the batch is allowed)</td>
+</tr>
+<tr>
+<td><code>check</code></td>
+<td>Saves the level-check answers. The server scores them, sets levels, and accepts this once only (DEMO accounts can redo it)</td>
+</tr>
+<tr>
+<td><code>tick</code></td>
+<td>Adds active seconds (batched every 30 s, capped to real time passed)</td>
+</tr>
+<tr>
+<td><code>round</code></td>
+<td>Saves a round and its per-item answers. The server re-scores objective items from the content IDs it knows, caps points, enforces the 25-min close, updates skill levels, and returns a level-up if one happened</td>
+</tr>
+<tr>
+<td><code>vault</code></td>
+<td><code>get</code> due words, <code>add</code> words, <code>review</code> results</td>
+</tr>
+<tr>
+<td><code>boss</code></td>
+<td>Saves a Boss Round and updates the meter</td>
+</tr>
+<tr>
+<td><code>rate</code></td>
+<td>11-star rating, once a day</td>
+</tr>
+<tr>
+<td><code>profile</code></td>
+<td>Data for the profile tab</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gate:</strong> every action checks <code>ENGLISH_BATCHES</code> (default <code>DEMO</code>) and returns 403 for other batches. DEMO accounts skip the daily close, the order of games and level gates.</p>
+<p><strong>Server knows the answers:</strong> the objective answer keys live in <code>api/_lib/english-keys.js</code>, generated from the content files, so a student can't send a fake "correct" result. The content files sent to the browser keep the answers too (that's needed for instant feedback), but the server re-checks before awarding points or levels.</p>
+<h3 id="83-ai-judge-writing-modes-only">8.3 AI judge (writing modes only)</h3>
+<ul>
+<li>New tasks in <code>api/_lib/judge-core.js</code> and <code>prompts.js</code>: <code>adda_retell</code> (Story Rewind), <code>adda_vanish</code>, <code>adda_email</code>.</li>
+<li><strong>Payload:</strong> <code>{ level, keypoints[], studentText }</code>. <code>validatePayload</code> caps the text at 600 characters. The student's text goes only inside <code>&lt;student&gt;</code> tags.</li>
+<li><strong>Output:</strong>
+  <code>{ covered: [keypoint indexes], score: 0-3,
+    issues: [{ quote, fix, type: "grammar|tone|clarity|missing", tier: "correct|formal" }] (max 2),
+    praise: "short line" }</code></li>
+<li><strong><code>validateResult</code> checks:</strong></li>
+<li>every <code>quote</code> is an exact substring of <code>studentText</code> (otherwise that issue is dropped)</li>
+<li><code>covered</code> indexes are in range</li>
+<li>at most 2 issues</li>
+<li>no rewritten full answer</li>
+<li><strong>The prompt contains:</strong></li>
+<li>the Indian English policy (accept / formal-only / correct)</li>
+<li>"British and Indian spellings are correct"</li>
+<li>"Indian names and places are correct"</li>
+<li>"never rewrite the whole text"</li>
+<li><code>temperature: 0</code>.</li>
+<li><strong>Fallback when the AI fails:</strong> keyword or synonym matching on the key points gives the coverage, no grammar issues are shown, and the game continues as normal.</li>
+<li><strong>Gold set:</strong> add about 60 English cases to <code>scripts/gold.mjs</code>:</li>
+<li>good answers</li>
+<li>answers missing key points</li>
+<li>answers with real errors</li>
+<li><strong>traps</strong>: correct Indian English, British spellings, Indian names</li>
+<li>injection attempts</li>
+</ul>
+<p>Run <code>npm run test:judge</code> and keep the cheapest model that passes the CLAUDE.md bar.</p>
+<h3 id="84-admin">8.4 Admin</h3>
+<p>New <strong>English Adda</strong> tab in <code>admin.html</code>, loaded from <code>/api/admin?view=english</code>. It includes batch DEMO while in pilot (the other tabs leave DEMO out).</p>
+<p><strong>Overview</strong>
+- Students started
+- Level check done
+- Median active minutes per day
+- % of days reaching 15 min
+- Return rate on day 2 and day 7</p>
+<p><strong>Skills</strong>
+- Starting level distribution per skill
+- Level moves over time
+- Practice Meter medians</p>
+<p><strong>Games</strong>
+- Rounds, median accuracy, median seconds, drop-offs</p>
+<p><strong>Content quality</strong> (the most important view while content is new)
+- Items with accuracy under 25% or over 98%
+- Items where one wrong option is chosen more than the right one. Likely bad keys or a second correct answer.</p>
+<p><strong>Student voice</strong>
+- Ratings and their text</p>
+<p><strong>CSVs</strong>
+- english_students, english_rounds, english_answers, english_ratings</p>
+<hr />
+<h2 id="9-content-plan">9. Content plan</h2>
+<h3 id="91-files">9.1 Files</h3>
+<p>These live in <code>public/content/english/</code>, one per game. Each file is a data file with a header comment <code>FOR TEAM REVIEW</code> plus the review date.</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Item shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>groups.js</code></td>
+<td><code>{ id, n, tier, groups:[{ name, words[4], why }] }</code></td>
+</tr>
+<tr>
+<td><code>realfake.js</code></td>
+<td>word bank <code>{ w, band, real, meaning? }</code> (generator builds rounds)</td>
+</tr>
+<tr>
+<td><code>catch.js</code></td>
+<td><code>{ id, lv, text, alt:[accepted variants], clip }</code></td>
+</tr>
+<tr>
+<td><code>rewind.js</code></td>
+<td><code>{ id, lv, theme, lines:[{ v:'heart'|'michael', t }], mcq:[...], keypoints:[...] }</code></td>
+</tr>
+<tr>
+<td><code>jumble.js</code></td>
+<td><code>{ id, lv, chunks[], orders:[[...]], distractor? }</code></td>
+</tr>
+<tr>
+<td><code>spotfix.js</code></td>
+<td><code>{ id, lv, s, errSpan|null, fixes[3], ans, why, ctx:'chat'|'formal' }</code></td>
+</tr>
+<tr>
+<td><code>reels.js</code></td>
+<td><code>{ id, lv, theme, cards[], gloss:{word:meaning}, q:[2 mcq] }</code></td>
+</tr>
+<tr>
+<td><code>vanish.js</code></td>
+<td><code>{ id, lv, text, keypoints[], order[4], truths[] }</code></td>
+</tr>
+<tr>
+<td><code>email.js</code></td>
+<td><code>{ id, lv, mode:'fix'|'write', situation, email?, problems:[{span, why, better}], keypoints[] }</code></td>
+</tr>
+<tr>
+<td><code>check.js</code></td>
+<td>the level-check items (kept apart from the daily pools)</td>
+</tr>
+<tr>
+<td><code>boss.js</code></td>
+<td>Boss Round sets, equivalent forms A/B/C…</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-volumes">9.2 Volumes</h3>
+<p><strong>Pilot (DEMO test):</strong> about 10 days of content, so you can play it properly.</p>
+<p><strong>Launch to all:</strong> 30 days without repeats, for a typical student playing about 8 sets a day (5 circuit sets plus about 3 bonus sets).</p>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>Pilot</th>
+<th>Launch (30 days)</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Word Groups</td>
+<td>10 days × 3 tiers = 30 puzzles</td>
+<td>90</td>
+<td>Hand-written</td>
+</tr>
+<tr>
+<td>Real or Fake</td>
+<td>1,500 real + 400 fake words</td>
+<td>3,000 + 800</td>
+<td>NGSL and frequency bands, plus a fake-word generator</td>
+</tr>
+<tr>
+<td>Catch It</td>
+<td>300 sentences (about 40 per level)</td>
+<td>1,200</td>
+<td>Written in bulk</td>
+</tr>
+<tr>
+<td>Story Rewind</td>
+<td>30 stories</td>
+<td>100</td>
+<td>Written</td>
+</tr>
+<tr>
+<td>Jumble</td>
+<td>300 sentences</td>
+<td>1,200</td>
+<td>Built from a shared sentence bank with Catch It and Spot &amp; Fix</td>
+</tr>
+<tr>
+<td>Spot &amp; Fix</td>
+<td>300</td>
+<td>1,200</td>
+<td>Error-pattern templates from Research §6 × themes</td>
+</tr>
+<tr>
+<td>Reel Reader</td>
+<td>30 stories</td>
+<td>100</td>
+<td>Written</td>
+</tr>
+<tr>
+<td>Vanish</td>
+<td>30 passages</td>
+<td>100</td>
+<td>Written</td>
+</tr>
+<tr>
+<td>Fix My Email</td>
+<td>30</td>
+<td>100</td>
+<td>Written</td>
+</tr>
+<tr>
+<td>Level check</td>
+<td>1 full set</td>
+<td>2 sets (A/B, for the re-check)</td>
+<td>Written</td>
+</tr>
+<tr>
+<td>Boss Round</td>
+<td>2 sets</td>
+<td>4 sets</td>
+<td>Built from held-back items</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Unseen items first:</strong> the picker serves unseen items first and only repeats an item once the student has seen all items at their level, like Brain Gym's no-repeat picker.</li>
+<li><strong>Audio:</strong> about 300 Catch It clips + 30 stories + intros. About 10 MB for the pilot and about 40 MB at launch.</li>
+</ul>
+<h3 id="93-content-rules-checklist">9.3 Content rules (checklist)</h3>
+<ul>
+<li>Indian context, Gen Z themes (Research §8.2), all regions represented (names, food, festivals across North, South, East and West), and genders balanced.</li>
+<li>No caste, religion or politics as a joke or a debate topic. No brands in a bad light. No real living private persons.</li>
+<li>Tech content uses Sem 1 topics only.</li>
+<li>Instructions use plain, simple English.</li>
+<li>Objective items have exactly one correct answer.</li>
+<li>Follow the Indian English policy (Research §6).</li>
+</ul>
+<h3 id="94-review-pipeline-for-every-content-batch">9.4 Review pipeline (for every content batch)</h3>
+<p><strong>1. Write.</strong> Claude writes the content batch.</p>
+<p><strong>2. Automatic checks:</strong> <code>node scripts/english-check.mjs</code>. It checks:
+- schema and required fields
+- unique IDs
+- level tags present
+- Jumble: no order outside the allowlist forms a grammatical sentence (a small grammar plus hand-written allowlist; anything suspicious goes to the reviewer)
+- fake words: zero frequency in the word-frequency list
+- Reel and Vanish: at least 95% of words at the level band, and the Flesch score fits the level
+- Spot &amp; Fix: <code>errSpan</code> is inside the sentence, and <code>ans</code> is one of the fixes
+- duplicates and near-duplicates
+- banned-words list
+- length limits</p>
+<p><strong>3. Third-person review.</strong> A separate reviewer agent gets only the batch plus the checklist below, not the writer's notes. For each item it answers:
+- Is exactly one answer correct? Could any wrong option also be defended?
+- Is the answer key right?
+- Is the level tag right (too hard or too easy)?
+- Does it follow the Indian English policy? Is an accepted Indianism marked as an error?
+- Is the English natural, with no typos, in the copy shown to students?
+- Is it Indian context, fair and inclusive, with nothing offensive?
+- For Word Groups: does any word fit two groups?
+- For dialogues and stories: are the questions answerable from the audio alone?</p>
+<p>It returns a list: <code>id → OK | FIX (reason, suggested change) | DROP</code>.</p>
+<p><strong>4. Fix and re-check.</strong> Claude fixes the flagged items. The reviewer re-checks only those. Repeat until the batch is clean.</p>
+<p><strong>5. Record audio:</strong> <code>python scripts/english-voice.py</code>. A listening spot-check (sample about 10% of clips) catches mispronounced names. Fix the spelling given to the voice in the speak map.</p>
+<p><strong>6. After the pilot:</strong> the admin <strong>Content quality</strong> view flags items that real students found confusing. Fix or drop them, and log any judge mistakes in <code>gold.mjs</code> first (CLAUDE.md rule).</p>
+<hr />
+<h2 id="10-build-order">10. Build order</h2>
+<p>Each step ends with automatic checks, a reviewer pass on its content, a browser test on DEMO, and a commit.</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>What</th>
+<th>Done when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Shell:</strong> sidebar tab (DEMO gate), DB tables, <code>api/english.js</code> (<code>state</code>, <code>tick</code>), home with ring, streak, points, and the closed screen; 2D and 3D</td>
+<td>DEMO can open English Adda and the ring fills; other batches don't see it</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Level check + levels + recommender:</strong> <code>check.js</code>, the scoring, the result screen, the daily circuit, Swap</td>
+<td>A new DEMO account goes through the check and gets a sensible circuit</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Objective games:</strong> Real or Fake, Jumble, Spot &amp; Fix, Word Groups, Word Vault, plus <code>english-check.mjs</code> and the server re-scoring</td>
+<td>All 5 playable with pilot content; points and levels move</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Listening:</strong> <code>english-voice.py</code>, Catch It, Story Rewind (multiple-choice mode)</td>
+<td>Clips play on a low-end Android phone and on desktop</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Reading and writing:</strong> Reel Reader, Vanish, Fix My Email, Story Rewind write mode, AI judge tasks, gold set</td>
+<td><code>test:judge</code> passes; the fallback works when the AI is switched off</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Wrap:</strong> Boss Round and Practice Meter, profile tab, leaderboard tab, 11-star rating, admin tab and CSVs</td>
+<td>You can play a full 15-minute day and see it in admin</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Pilot:</strong> you test on DEMO, we fix things, then go-live checklist: content scaled to 30 days, live DB migration (needs your OK), <code>ENGLISH_BATCHES=all</code></td>
+<td>Your go</td>
+</tr>
+</tbody>
+</table>
+<p>Update <code>CLAUDE.md</code> with an "English Adda" section, like the one for Drive School, at step 1.</p>
+<hr />
+<h2 id="11-risks-to-watch-in-the-pilot">11. Risks to watch in the pilot</h2>
+<table>
+<thead>
+<tr>
+<th>Watch</th>
+<th>Signal in admin</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Too hard for weak students</td>
+<td>Level 1–2 accuracy under 60%, drop-offs mid-round</td>
+<td>Easier L1 items, more pictures, slower audio</td>
+</tr>
+<tr>
+<td>Too easy for strong students</td>
+<td>L7–8 accuracy over 95%</td>
+<td>Add harder L8 items and Phase 2 games sooner</td>
+</tr>
+<tr>
+<td>Bad items</td>
+<td>Content quality flags</td>
+<td>Fix or drop; re-review</td>
+</tr>
+<tr>
+<td>Judge false alarms</td>
+<td>Students rate writing feedback low</td>
+<td>Add to the gold set, adjust the prompt</td>
+</tr>
+<tr>
+<td>15 min feels long</td>
+<td>Median active time under 10 min</td>
+<td>More game variety, shorter rounds, more Boss or Puzzle moments</td>
+</tr>
+<tr>
+<td>Audio issues on phones</td>
+<td>"Something's off" reports from Catch It</td>
+<td>Smaller clips, a preload fallback, a "type what you heard" retry</td>
+</tr>
+</tbody>
+</table></main></div></body></html>

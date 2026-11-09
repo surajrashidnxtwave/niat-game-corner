@@ -131,7 +131,82 @@ const steps = [
      created_at  timestamptz NOT NULL DEFAULT now()
    )`,
   `CREATE INDEX IF NOT EXISTS drive_events_student_idx ON drive_events (student_id, day)`,
-  `CREATE INDEX IF NOT EXISTS drive_events_kind_idx ON drive_events (kind, day)`
+  `CREATE INDEX IF NOT EXISTS drive_events_kind_idx ON drive_events (kind, day)`,
+  // ---------- English Adda (own points, timer, streak and levels; separate from Brain Gym and Drive School) ----------
+  // one row per student who has opened English Adda; levels = private skill levels 1-8 {voc, gra, lis, rea, wri}
+  `CREATE TABLE IF NOT EXISTS english_students (
+     student_id  int PRIMARY KEY REFERENCES students(id) ON DELETE CASCADE,
+     started_on  date NOT NULL,
+     points      int NOT NULL DEFAULT 0,
+     levels      jsonb NOT NULL DEFAULT '{}',
+     placement   jsonb,
+     placed_at   timestamptz,
+     meter       jsonb NOT NULL DEFAULT '[]',
+     memo        jsonb NOT NULL DEFAULT '{}',
+     updated_at  timestamptz NOT NULL DEFAULT now()
+   )`,
+  // active seconds per student per India calendar day: the 15-minute ring, the streak and the 25-minute close
+  `CREATE TABLE IF NOT EXISTS english_daily (
+     student_id   int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     day          date NOT NULL,
+     active       int NOT NULL DEFAULT 0,
+     fresh_rounds int NOT NULL DEFAULT 0,
+     updated_at   timestamptz NOT NULL DEFAULT now(),
+     PRIMARY KEY (student_id, day)
+   )`,
+  `CREATE INDEX IF NOT EXISTS english_daily_day_idx ON english_daily (day)`,
+  // one row per finished round of a game
+  `CREATE TABLE IF NOT EXISTS english_rounds (
+     id          bigserial PRIMARY KEY,
+     client_id   text NOT NULL UNIQUE,
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     game        text NOT NULL,
+     level       smallint NOT NULL,
+     items       smallint,
+     correct     smallint,
+     points      int NOT NULL DEFAULT 0,
+     secs        int,
+     ist_date    date NOT NULL,
+     played_at   timestamptz NOT NULL,
+     meta        jsonb
+   )`,
+  `CREATE INDEX IF NOT EXISTS english_rounds_student_idx ON english_rounds (student_id, ist_date)`,
+  `CREATE INDEX IF NOT EXISTS english_rounds_game_idx ON english_rounds (game, played_at)`,
+  // every answer to every item: finds content that is too hard, too easy or has a second right answer
+  `CREATE TABLE IF NOT EXISTS english_answers (
+     id          bigserial PRIMARY KEY,
+     round_cid   text NOT NULL,
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     game        text NOT NULL,
+     item_id     text NOT NULL,
+     ok          boolean NOT NULL,
+     tries       smallint,
+     answer      text,
+     ms          int,
+     at          timestamptz NOT NULL DEFAULT now(),
+     UNIQUE (round_cid, item_id)
+   )`,
+  `CREATE INDEX IF NOT EXISTS english_answers_item_idx ON english_answers (game, item_id)`,
+  // Word Vault: words a student saved, reviewed on a spaced schedule (box 1-5)
+  `CREATE TABLE IF NOT EXISTS english_vault (
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     word        text NOT NULL,
+     box         smallint NOT NULL DEFAULT 1,
+     due         date NOT NULL,
+     source      text,
+     added_at    timestamptz NOT NULL DEFAULT now(),
+     PRIMARY KEY (student_id, word)
+   )`,
+  // everything else: level check, ratings, swaps, level-ups, Boss Rounds
+  `CREATE TABLE IF NOT EXISTS english_events (
+     id          bigserial PRIMARY KEY,
+     client_id   text NOT NULL UNIQUE,
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     kind        text NOT NULL,
+     data        jsonb NOT NULL DEFAULT '{}',
+     at          timestamptz NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS english_events_kind_idx ON english_events (kind, at)`
 ];
 
 for (const s of steps) await sql.query(s);

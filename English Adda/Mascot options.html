@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Adda Mascots</title>
+<style>
+:root{--bg:#fbf8f3;--card:#fff;--ink:#1f1b16;--mute:#6b6257;--line:#e8e0d4;--chip:#f4efe7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17140f;--card:#201c16;--ink:#efe8dd;--mute:#a89d8f;--line:#3a332a;--chip:#2a241c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 60px}
+h1{margin:0 0 4px;font-size:30px}
+.lead{color:var(--mute);margin:0 0 28px;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,540px),1fr));gap:20px}
+@media (max-width:600px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;display:grid;grid-template-columns:170px minmax(0,1fr);gap:18px}
+@media (max-width:600px){.card{grid-template-columns:1fr}}
+.hero{display:flex;align-items:center;justify-content:center;background:var(--chip);border-radius:16px;min-height:190px}
+.hero svg{width:150px;height:150px;animation:bob 2.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+h2{margin:2px 0 6px;font-size:24px}
+p{margin:0 0 10px}
+.say{font-style:italic;color:var(--mute)}
+.alt{font-size:13px;color:var(--mute);margin:-4px 0 6px}
+.poses{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.pose{background:var(--chip);border-radius:12px;text-align:center;padding:6px 4px 4px;font-size:12px;color:var(--mute)}
+.pose svg{width:100%;max-width:72px;height:auto;aspect-ratio:1;display:block;margin:0 auto}
+ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.check{margin-top:10px;font-size:13px;color:var(--mute);background:var(--chip);border-radius:10px;padding:8px 10px}
+.check b{color:var(--ink)}
+.tiny{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12px;color:var(--mute)}
+.tiny .tab{display:flex;align-items:center;gap:6px;background:var(--chip);border-radius:10px;padding:4px 10px 4px 4px;color:var(--ink);font-weight:600;font-size:13px}
+.tiny svg{width:40px;height:40px}.tiny .t24{width:24px;height:24px}
+h3.sec{margin:36px 0 14px;font-size:20px}
+.sec small{font-weight:400;color:var(--mute);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>English Adda: mascot options</h1>
+  <p class="lead">Five new hosts to replace Turbo in English Adda, plus the three earlier ones (the parrot is dropped because it looked too much like Duolingo's green bird). All names are now English. Each is a flat 200×200 SVG in Turbo's style and has the same four poses: idle, correct, thinking and oops. For each, I searched for existing mascots that look alike. Pick one, or mix ideas.</p>
+  <h3 class="sec">New options</h3>
+  <div class="grid" id="grid"></div>
+  <h3 class="sec">Earlier options <small>(renamed; parrot removed)</small></h3>
+  <div class="grid" id="grid2"></div>
+</div>
+<script>
+const D = '#1E1A2E';
+const mood = ['idle', 'correct', 'thinking', 'oops'];
+
+function face(x, y, s, m, o = {}) {
+  const ex = 16 * s; let g = '';
+  const eye = (cx) => {
+    if (m === 'correct') return `<path d="M${cx-7*s},${y+3*s} Q${cx},${y-9*s} ${cx+7*s},${y+3*s}" fill="none" stroke="${D}" stroke-width="${5*s}" stroke-linecap="round"/>`;
+    if (m === 'thinking') return `<ellipse cx="${cx+3*s}" cy="${y-3*s}" rx="${5*s}" ry="${8*s}" fill="${D}"/><circle cx="${cx+5*s}" cy="${y-7*s}" r="${1.8*s}" fill="#fff"/>`;
+    if (m === 'oops') return `<ellipse cx="${cx}" cy="${y+2*s}" rx="${5*s}" ry="${7*s}" fill="${D}"/><circle cx="${cx+2*s}" cy="${y-1*s}" r="${1.6*s}" fill="#fff"/>`;
+    return `<rect x="${cx-5*s}" y="${y-9*s}" width="${10*s}" height="${18*s}" rx="${5*s}" fill="${D}"/><circle cx="${cx+1.5*s}" cy="${y-4*s}" r="${2*s}" fill="#fff"/>`;
+  };
+  g += eye(x - ex) + eye(x + ex);
+  if (m === 'oops') g += `<path d="M${x-ex-8*s},${y-9*s} L${x-ex+6*s},${y-15*s} M${x+ex+8*s},${y-9*s} L${x+ex-6*s},${y-15*s}" stroke="${D}" stroke-width="${3.5*s}" stroke-linecap="round"/>`;
+  if (m === 'thinking') g += `<path d="M${x+ex-6*s},${y-17*s} Q${x+ex+2*s},${y-21*s} ${x+ex+9*s},${y-16*s}" fill="none" stroke="${D}" stroke-width="${3.5*s}" stroke-linecap="round"/>`;
+  if (m === 'idle' || m === 'correct') g += `<circle cx="${x-ex-12*s}" cy="${y+12*s}" r="${6*s}" fill="#FF6F91" fill-opacity=".45"/><circle cx="${x+ex+12*s}" cy="${y+12*s}" r="${6*s}" fill="#FF6F91" fill-opacity=".45"/>`;
+  if (!o.noMouth) {
+    if (m === 'idle') g += `<path d="M${x-12*s},${y+16*s} Q${x},${y+26*s} ${x+12*s},${y+16*s}" fill="none" stroke="${D}" stroke-width="${4.5*s}" stroke-linecap="round"/>`;
+    if (m === 'correct') g += `<path d="M${x-14*s},${y+14*s} Q${x},${y+36*s} ${x+14*s},${y+14*s} Z" fill="${D}"/><ellipse cx="${x}" cy="${y+24*s}" rx="${6*s}" ry="${3.5*s}" fill="#FF6F91"/>`;
+    if (m === 'thinking') g += `<path d="M${x-3*s},${y+20*s} L${x+10*s},${y+18*s}" stroke="${D}" stroke-width="${4.5*s}" stroke-linecap="round"/>`;
+    if (m === 'oops') g += `<path d="M${x-12*s},${y+20*s} q${4*s},${-5*s} ${8*s},0 t${8*s},0 t${8*s},0" fill="none" stroke="${D}" stroke-width="${4*s}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  return g;
+}
+function extras(m, ax, ay) {
+  const star = (cx, cy, r) => `<path d="M${cx},${cy-r} Q${cx},${cy} ${cx+r},${cy} Q${cx},${cy} ${cx},${cy+r} Q${cx},${cy} ${cx-r},${cy} Q${cx},${cy} ${cx},${cy-r} Z" fill="#F6C84C"/>`;
+  if (m === 'correct') return star(ax, ay, 12) + star(ax + 20, ay + 26, 7) + star(200 - ax - 8, ay + 10, 8);
+  if (m === 'thinking') return `<text x="${ax}" y="${ay+12}" font-family="Segoe UI,Arial" font-weight="900" font-size="34" fill="#7B61FF">?</text>`;
+  if (m === 'oops') return `<path d="M${200-ax},${ay-10} Q${200-ax+9},${ay+4} ${200-ax},${ay+9} Q${200-ax-9},${ay+4} ${200-ax},${ay-10} Z" fill="#6EC1FF"/>`;
+  return '';
+}
+const svg = (inner, label) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="${label}">${inner}</svg>`;
+
+/* 2. Chuski: a clay chai cup (kulhad). The adda itself. */
+function chuski(m) {
+  const C = '#C9683A', C2 = '#A7522B';
+  const steam = m === 'correct'
+    ? `<path d="M100,62 C88,50 76,42 86,32 C92,26 100,32 100,38 C100,32 108,26 114,32 C124,42 112,50 100,62 Z" fill="#E9E1D8"/>`
+    : `<path d="M84,64 C74,52 94,46 84,32 M100,62 C90,48 110,42 100,24 M116,64 C106,52 126,46 116,32" fill="none" stroke="#DDD3C8" stroke-width="6" stroke-linecap="round"/>`;
+  const s = `<ellipse cx="100" cy="190" rx="46" ry="6" fill="#000" fill-opacity=".08"/>` + steam
+    + `<path d="M44,78 L156,78 L140,176 Q100,190 60,176 Z" fill="${C}"/>`
+    + `<path d="M150,96 Q176,98 172,124 Q168,146 146,142" fill="none" stroke="${C2}" stroke-width="9" stroke-linecap="round"/>`
+    + `<ellipse cx="100" cy="78" rx="57" ry="13" fill="${C2}"/><ellipse cx="100" cy="78" rx="48" ry="8" fill="#E2A86F"/>`
+    + `<path d="M56,154 Q100,166 144,154" fill="none" stroke="#F3D9B1" stroke-width="4" stroke-linecap="round"/>`
+    + `<g fill="#F3D9B1"><circle cx="72" cy="166" r="2.6"/><circle cx="100" cy="171" r="2.6"/><circle cx="128" cy="166" r="2.6"/></g>`
+    + `<path d="M56,92 L64,150" stroke="#fff" stroke-opacity=".22" stroke-width="7" stroke-linecap="round"/>`
+    + face(100, 114, 1, m);
+  return svg(s + extras(m, 24, 40), 'Sip, ' + m);
+}
+
+/* 3. Bolu: a speech bubble ("bol" means speak). Stands for talking and words. */
+function bolu(m) {
+  const A = '#F0A43A', A2 = '#D4862A';
+  const s = `<ellipse cx="100" cy="190" rx="40" ry="6" fill="#000" fill-opacity=".08"/>`
+    + `<path d="M70,146 L52,182 L104,148 Z" fill="${A2}"/>`
+    + `<rect x="26" y="38" width="148" height="114" rx="52" fill="${A}"/>`
+    + `<ellipse cx="62" cy="60" rx="18" ry="8" fill="#fff" fill-opacity=".3" transform="rotate(-20 62 60)"/>`
+    + `<path d="M140,52 q10,-2 12,8 M150,46 q10,-2 12,8" fill="none" stroke="${A2}" stroke-width="5" stroke-linecap="round"/>`
+    + `<path d="M20,104 q-12,4 -10,18 M180,104 q12,4 10,18" fill="none" stroke="${A2}" stroke-width="7" stroke-linecap="round"/>`
+    + face(100, 92, 1.05, m);
+  return svg(s + extras(m, 14, 22), 'Pop, ' + m);
+}
+
+/* 4. Tuni: a retro transistor radio. Stands for listening; Indian radio nostalgia. */
+function tuni(m) {
+  const T = '#2BB3A3', T2 = '#1E7F74';
+  const wave = m === 'correct' ? `<path d="M168,20 q10,8 0,18 M176,12 q16,14 0,32" fill="none" stroke="#F6C84C" stroke-width="4" stroke-linecap="round"/>` : '';
+  const s = `<ellipse cx="100" cy="190" rx="54" ry="6" fill="#000" fill-opacity=".08"/>`
+    + `<line x1="128" y1="60" x2="158" y2="18" stroke="#2B2F4A" stroke-width="4" stroke-linecap="round"/><circle cx="159" cy="17" r="7" fill="#E5484D"/>` + wave
+    + `<path d="M62,60 Q62,40 82,40 L118,40 Q138,40 138,60" fill="none" stroke="${T2}" stroke-width="9" stroke-linecap="round"/>`
+    + `<rect x="26" y="58" width="148" height="118" rx="28" fill="${T}"/>`
+    + `<rect x="42" y="72" width="116" height="60" rx="20" fill="#F6F1E7"/>`
+    + `<circle cx="70" cy="154" r="15" fill="${T2}"/><g fill="${T}"><circle cx="64" cy="149" r="2.4"/><circle cx="72" cy="147" r="2.4"/><circle cx="76" cy="155" r="2.4"/><circle cx="68" cy="158" r="2.4"/><circle cx="64" cy="156" r="2"/></g>`
+    + `<circle cx="132" cy="154" r="12" fill="#F6C84C"/><line x1="132" y1="154" x2="138" y2="146" stroke="${D}" stroke-width="3" stroke-linecap="round"/>`
+    + `<rect x="98" y="148" width="18" height="5" rx="2.5" fill="${T2}"/><rect x="98" y="157" width="18" height="5" rx="2.5" fill="${T2}"/>`
+    + `<rect x="46" y="174" width="18" height="10" rx="4" fill="${T2}"/><rect x="136" y="174" width="18" height="10" rx="4" fill="${T2}"/>`
+    + `<path d="M36,74 L36,120" stroke="#fff" stroke-opacity=".25" stroke-width="6" stroke-linecap="round"/>`
+    + face(100, 96, .85, m);
+  return svg(s + extras(m, 16, 30), 'Tune, ' + m);
+}
+
+/* ---------- NEW OPTIONS ---------- */
+
+/* Gappu: fluffy chatter-monster ("gappe/gup-shup" = chit-chat); antennae end in quotation marks */
+function gappu(m) {
+  const P = '#8B5CF6', P2 = '#6D3FD9';
+  let fluff = '';
+  for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; fluff += `<circle cx="${(100 + 58 * Math.cos(a)).toFixed(1)}" cy="${(114 + 56 * Math.sin(a)).toFixed(1)}" r="13" fill="${P}"/>`; }
+  const tilt = m === 'thinking' ? 'rotate(-10 70 40)' : '';
+  const s = `<ellipse cx="100" cy="192" rx="46" ry="6" fill="#000" fill-opacity=".08"/>`
+    + `<g transform="${tilt}"><path d="M84,66 Q78,46 70,34" fill="none" stroke="${P2}" stroke-width="5" stroke-linecap="round"/><g fill="#F6C84C"><circle cx="58" cy="44" r="6"/><circle cx="71" cy="44" r="6"/></g><path d="M52.5,45 Q51,31 62,27 M65.5,45 Q64,31 75,27" fill="none" stroke="#F6C84C" stroke-width="4.5" stroke-linecap="round"/></g>`
+    + `<path d="M116,66 Q122,46 130,34" fill="none" stroke="${P2}" stroke-width="5" stroke-linecap="round"/><g fill="#F6C84C"><circle cx="129" cy="34" r="6"/><circle cx="142" cy="34" r="6"/></g><path d="M134.5,33 Q136,47 125,51 M147.5,33 Q149,47 138,51" fill="none" stroke="#F6C84C" stroke-width="4.5" stroke-linecap="round"/>`
+    + `<ellipse cx="80" cy="182" rx="15" ry="8" fill="${P2}"/><ellipse cx="120" cy="182" rx="15" ry="8" fill="${P2}"/>`
+    + fluff + `<circle cx="100" cy="114" r="58" fill="${P}"/>`
+    + `<ellipse cx="100" cy="138" rx="34" ry="26" fill="#B49BFF"/>`
+    + `<ellipse cx="70" cy="80" rx="12" ry="7" fill="#fff" fill-opacity=".25" transform="rotate(-35 70 80)"/>`
+    + face(100, 106, 1.05, m);
+  return svg(s + extras(m, 18, 74), 'Yapper, ' + m);
+}
+
+/* Dabbu: steel tiffin (dabba). Tiers = levels: it can grow a tier when the student levels up */
+function dabbu(m) {
+  const S = '#C9D1DA', S2 = '#9AA6B2', S3 = '#7F8B97';
+  const s = `<ellipse cx="100" cy="192" rx="50" ry="6" fill="#000" fill-opacity=".08"/>`
+    + `<path d="M70,60 Q70,32 100,32 Q130,32 130,60" fill="none" stroke="${S3}" stroke-width="7" stroke-linecap="round"/>`
+    + `<path d="M50,70 Q50,52 100,52 Q150,52 150,70 Z" fill="#DCE2E8"/><circle cx="100" cy="52" r="5" fill="${S3}"/>`
+    + `<rect x="48" y="70" width="104" height="56" rx="8" fill="${S}"/>`
+    + `<rect x="46" y="126" width="108" height="5" rx="2" fill="${S2}"/>`
+    + `<rect x="48" y="131" width="104" height="24" rx="6" fill="${S}"/>`
+    + `<rect x="46" y="155" width="108" height="5" rx="2" fill="${S2}"/>`
+    + `<rect x="48" y="160" width="104" height="24" rx="6" fill="${S}"/>`
+    + `<rect x="58" y="76" width="6" height="44" rx="3" fill="#fff" fill-opacity=".55"/><rect x="58" y="135" width="6" height="16" rx="3" fill="#fff" fill-opacity=".55"/><rect x="58" y="164" width="6" height="16" rx="3" fill="#fff" fill-opacity=".55"/>`
+    + `<rect x="40" y="62" width="9" height="124" rx="4.5" fill="${S3}"/><rect x="151" y="62" width="9" height="124" rx="4.5" fill="${S3}"/>`
+    + `<rect x="110" y="164" width="30" height="16" rx="4" fill="#FF6F91"/><path d="M119,172 l4,4 l8,-8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`
+    + face(100, 96, .85, m);
+  return svg(s + extras(m, 18, 40), 'Stack, ' + m);
+}
+
+/* Pench: Indian fighting kite (patang); "pench" = a kite battle. Tail carries letters */
+function pench(m) {
+  const K1 = '#E8407A', K2 = '#FFC93C', W = '#7A4A2A';
+  const rot = m === 'correct' ? 'rotate(-8 100 100)' : m === 'oops' ? 'rotate(9 100 100)' : '';
+  const s = `<g transform="${rot}">`
+    + `<path d="M100,178 C112,192 132,174 146,190" fill="none" stroke="${W}" stroke-width="2.5" stroke-linecap="round"/>`
+    + `<circle cx="124" cy="182" r="8" fill="#4C6EF5"/><text x="124" y="186" text-anchor="middle" font-family="Segoe UI,Arial" font-weight="800" font-size="11" fill="#fff">a</text>`
+    + `<circle cx="146" cy="190" r="8" fill="#2BB3A3"/><text x="146" y="194" text-anchor="middle" font-family="Segoe UI,Arial" font-weight="800" font-size="11" fill="#fff">b</text>`
+    + `<path d="M91,162 L109,162 L100,182 Z" fill="${K1}"/>`
+    + `<path d="M30,90 Q100,80 170,90 L100,166 Z" fill="${K2}"/>`
+    + `<path d="M100,20 L170,90 Q100,80 30,90 Z" fill="${K1}"/>`
+    + `<path d="M30,90 Q100,62 170,90" fill="none" stroke="${W}" stroke-width="3"/>`
+    + `<path d="M100,20 L100,70 M100,128 L100,166" stroke="${W}" stroke-width="3" stroke-linecap="round"/>`
+    + `<path d="M76,46 L60,62" stroke="#fff" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>`
+    + face(100, 100, .85, m) + `</g>`;
+  return svg(s + extras(m, 18, 30), 'Skye, ' + m);
+}
+
+/* Inku: an ink drop whose tip is a fountain-pen nib. Writing */
+function inku(m) {
+  const I = '#3346C8', I2 = '#24339A';
+  const s = `<ellipse cx="100" cy="186" rx="54" ry="7" fill="${I}" fill-opacity=".3"/>`
+    + `<circle cx="40" cy="176" r="5" fill="${I}"/><circle cx="164" cy="172" r="4" fill="${I}"/>`
+    + `<path d="M100,22 C100,22 40,96 40,130 C40,164 68,186 100,186 C132,186 160,164 160,130 C160,96 100,22 100,22 Z" fill="${I}"/>`
+    + `<path d="M100,22 C96,30 86,44 80,54 L100,74 L120,54 C114,44 104,30 100,22 Z" fill="${I2}"/>`
+    + `<path d="M100,30 L100,62" stroke="#fff" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round"/><circle cx="100" cy="66" r="3.5" fill="#fff" fill-opacity=".7"/>`
+    + `<ellipse cx="66" cy="120" rx="9" ry="20" fill="#fff" fill-opacity=".22" transform="rotate(20 66 120)"/>`
+    + face(100, 134, 1, m);
+  return svg(s + extras(m, 22, 52), 'Blot, ' + m);
+}
+
+/* Rubbu: an eraser ("rubber" in Indian English). Mistakes cost nothing: rub it out, try again */
+function rubbu(m) {
+  const B = '#FFE1D9', B2 = '#F4BFB3', B3 = '#FBD0C6', SL = '#4C6EF5', SL2 = '#3B5BDB';
+  const crumbs = m === 'oops' || m === 'correct' ? `<g fill="${B2}"><circle cx="56" cy="186" r="3"/><circle cx="66" cy="190" r="2"/><circle cx="148" cy="188" r="2.5"/></g>` : '';
+  const s = `<ellipse cx="104" cy="190" rx="54" ry="6" fill="#000" fill-opacity=".08"/>` + crumbs
+    + `<path d="M48,62 L62,48 L176,48 L162,62 Z" fill="${B3}"/>`
+    + `<path d="M162,62 L176,48 L176,164 L162,178 Z" fill="${B2}"/>`
+    + `<rect x="40" y="62" width="122" height="116" rx="14" fill="${B}"/>`
+    + `<rect x="40" y="130" width="122" height="34" fill="${SL}"/><path d="M162,130 L176,116 L176,150 L162,164 Z" fill="${SL2}"/>`
+    + `<path d="M101,138 l3.2,6.6 7.2,1 -5.2,5 1.3,7.2 -6.5,-3.4 -6.5,3.4 1.3,-7.2 -5.2,-5 7.2,-1 Z" fill="#F6C84C"/>`
+    + `<path d="M50,70 L50,120" stroke="#fff" stroke-opacity=".7" stroke-width="6" stroke-linecap="round"/>`
+    + face(101, 96, .9, m);
+  return svg(s + extras(m, 18, 30), 'Undo, ' + m);
+}
+
+const NEW = [
+  { f: gappu, name: 'Yapper', alt: 'Chatter, Gab', what: 'Fluffy chatter-monster', say: '"Okay okay, let me yap for a sec… then it\'s your turn!"',
+    why: ['"Yapping" is Gen Z slang for talking non-stop. It pokes fun at itself, so students won\'t find it cringe.', 'Its antennae end in quotation marks (“ ”), a quiet English touch.', 'A monster isn\'t a "teacher", so it\'s fun and never judges.'],
+    check: '<b>Look-alikes:</b> fuzzy monsters are a common type (Cookie Monster and Little Blue are blue). No "Yapper" mascot found. Purple plus quote-mark antennae keeps it distinct.' },
+  { f: dabbu, name: 'Stack', alt: 'Tiffy, Tier', what: 'Steel tiffin (dabba)', say: '"Fresh words, packed and stacked. Dig in!"',
+    why: ['Every Indian student grew up with one. Instant nostalgia.', '<b>The tiers can be the levels:</b> Stack grows a new tier each time the student levels up. Engineers will also get the "full stack" joke.', 'Steel grey stands out from every other Game Corner colour.'],
+    check: '<b>Look-alikes:</b> no tiffin mascot found. Some kids\' tiffins have cartoon prints (Rabitat, Peppa Pig), but that is a print on a box, not a character.' },
+  { f: pench, name: 'Skye', alt: 'Breeze, Soar', what: 'Indian fighting kite (patang)', say: '"New word unlocked. Watch it fly!"',
+    why: ['Kite flying is a Sankranti and Uttarayan favourite, big in Telangana, AP and Gujarat.', 'The tail carries letters, so new words can "fly up" when a student learns them.', 'Kite battles (pench) suit friendly class-vs-class challenges.'],
+    check: '<b>Look-alikes:</b> no kite mascot found. Note that the trading app Zerodha Kite uses a kite logo (from memory, not checked). Ours is a two-tone patang with a face, which is different, but worth knowing.' },
+  { f: inku, name: 'Blot', alt: 'Nib, Inkwell', what: 'Ink drop with a pen-nib tip', say: '"Write it, fix it, own it. One drop at a time."',
+    why: ['Ink is about writing: emails, retelling, fixing sentences.', 'The tip is a fountain-pen nib (slit and hole), so it reads as ink, not water.', 'Calm deep blue, separate from Turbo\'s pink and Brain Gym\'s colours.'],
+    check: '<b>Look-alikes:</b> water-drop mascots are common (water boards, utilities). The only ink-drop mascot I found is an unbuilt concept (NIBO). The nib tip is what keeps Blot distinct.' },
+  { f: rubbu, name: 'Undo', alt: 'Oops, Rub', what: 'Eraser ("rubber")', say: '"Mistake? Ctrl+Z. Try again!"',
+    why: ['It is the face of our biggest rule: mistakes cost nothing, no hearts, always a retry.', '"Undo" is the Ctrl+Z that every engineering student uses. It is the eraser of the computer world.', 'Leaves crumbs when a student gets something wrong: a funny way to fail.'],
+    check: '<b>Look-alikes:</b> no eraser mascot found. Smiley-face erasers are sold as products, but no brand character.' },
+];
+const OLD = [
+  { f: chuski, name: 'Sip', alt: 'Cutting, Brew', what: 'Clay chai cup (kulhad)', say: '"Chai\'s hot, adda\'s on. Let\'s play!"',
+    why: ['It is the adda: chai and chats with friends.', 'Warm and cosy, which suits shy students.', 'The steam turns into a heart for "correct".'], check: '' },
+  { f: bolu, name: 'Pop', alt: 'Chatty, Quote', what: 'Speech bubble', say: '"Words are my thing. Let\'s find yours."',
+    why: ['It shows words and talking at a glance.', 'Simple shape, easy to read at small sizes.', 'Uses the amber accent colour planned for English Adda.'], check: '' },
+  { f: tuni, name: 'Tune', alt: 'Static, Dial', what: 'Retro transistor radio', say: '"Tuning in… your English station is live!"',
+    why: ['A radio is for listening, India\'s weakest English skill.', 'Reminds people of old Indian radio.', 'The antenna and dial are easy to animate later.'], check: '' },
+];
+const card = (o, label) => `
+  <div class="card">
+    <div class="hero">${o.f('idle')}</div>
+    <div>
+      <span class="tag">${label} · ${o.what}</span>
+      <h2>${o.name}</h2>${o.alt ? `<p class="alt">Other names: ${o.alt}</p>` : ''}
+      <p class="say">${o.say}</p>
+      <ul>${o.why.map(w => `<li>${w}</li>`).join('')}</ul>
+      <div class="poses">${mood.map(m => `<div class="pose">${o.f(m)}${m}</div>`).join('')}</div>
+      <div class="tiny">Small sizes: <span class="tab">${o.f('idle')}English Adda</span>${o.f('idle').replace('<svg ', '<svg class="t24" ')}</div>
+      ${o.check ? `<div class="check">${o.check}</div>` : ''}
+    </div>
+  </div>`;
+document.getElementById('grid').innerHTML = NEW.map((o, i) => card(o, 'New ' + (i + 1))).join('');
+document.getElementById('grid2').innerHTML = OLD.map(o => card(o, 'Earlier')).join('');
+</script>
+</body>
+</html>

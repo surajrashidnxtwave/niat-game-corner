@@ -1,0 +1,1227 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Adda Research</title><style>
+:root{--bg:#fbf8f3;--card:#fff;--ink:#1f1b16;--mute:#6b6257;--line:#e8e0d4;--acc:#c27a12;--accbg:#fdf1de;--code:#f4efe7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17140f;--card:#201c16;--ink:#efe8dd;--mute:#a89d8f;--line:#3a332a;--acc:#f0b04f;--accbg:#2e2416;--code:#2a241c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.wrap{display:grid;grid-template-columns:270px minmax(0,1fr);gap:40px;max-width:1220px;margin:0 auto;padding:32px 24px}
+nav{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:14px}
+nav .toc>ul{padding-left:0}
+nav ul{list-style:none;padding-left:14px;margin:4px 0}
+nav a{color:var(--mute);text-decoration:none;display:block;padding:3px 0}
+nav a:hover{color:var(--acc)}
+nav b{display:block;margin-bottom:10px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;font-size:12px}
+main{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:40px 48px}
+h1{font-size:2.1em;line-height:1.2;margin:0 0 .2em}
+h2{margin-top:2.2em;padding-top:.6em;border-top:1px solid var(--line);font-size:1.5em}
+h3{margin-top:1.6em;font-size:1.15em;color:var(--acc)}
+h1+p em,h1+p{color:var(--mute)}
+a{color:var(--acc)}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--accbg)}
+code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.88em}
+pre{background:var(--code);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{margin:1em 0;padding:.4em 1em;border-left:4px solid var(--acc);background:var(--accbg);border-radius:0 8px 8px 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+li{margin:.25em 0}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;padding:16px}nav{position:static;max-height:none;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--card)}main{padding:24px 18px}}
+</style></head><body><div class="wrap">
+<nav><b>Contents</b><div class="toc">
+<ul>
+<li><a href="#0-decisions-so-far-from-the-product-owner">0. Decisions so far (from the product owner)</a></li>
+<li><a href="#1-summary">1. Summary</a></li>
+<li><a href="#2-who-the-learners-are">2. Who the learners are</a><ul>
+<li><a href="#21-proficiency-data-treat-as-indicative-most-sources-are-vendors">2.1 Proficiency data (treat as indicative; most sources are vendors)</a></li>
+<li><a href="#22-psychology">2.2 Psychology</a></li>
+<li><a href="#23-gen-z-media-habits">2.3 Gen Z media habits</a></li>
+<li><a href="#24-first-year-english-syllabus-aicte-model-curriculum-hsmc101">2.4 First-year English syllabus (AICTE model curriculum HSMC101)</a></li>
+</ul>
+</li>
+<li><a href="#3-what-placement-tests-measure-the-hidden-target">3. What placement tests measure (the hidden target)</a><ul>
+<li><a href="#how-placement-task-types-map-to-english-adda-v1-no-speaking">How placement task types map to English Adda (v1, no speaking)</a></li>
+</ul>
+</li>
+<li><a href="#4-evidence-based-principles-academic-literature">4. Evidence-based principles (academic literature)</a></li>
+<li><a href="#5-market-scan-what-others-do">5. Market scan: what others do</a><ul>
+<li><a href="#51-products">5.1 Products</a></li>
+<li><a href="#52-gaps-we-can-own">5.2 Gaps we can own</a></li>
+</ul>
+</li>
+<li><a href="#6-indian-english-policy-what-we-correct-and-what-we-accept">6. Indian English policy (what we correct and what we accept)</a><ul>
+<li><a href="#40-common-error-patterns">40 common error patterns</a></li>
+</ul>
+</li>
+<li><a href="#7-design-rules-for-english-adda-derived-from-26">7. Design rules for English Adda (derived from §2–§6)</a><ul>
+<li><a href="#71-levels-and-placement">7.1 Levels and placement</a></li>
+<li><a href="#72-gamification-use-and-avoid">7.2 Gamification: use and avoid</a></li>
+<li><a href="#73-content-rules-extends-the-rules-in-claudemd">7.3 Content rules (extends the rules in CLAUDE.md)</a></li>
+<li><a href="#74-feedback-rules">7.4 Feedback rules</a></li>
+<li><a href="#75-measurement-the-evidence-everywhere-is-weak-so-we-generate-our-own">7.5 Measurement (the evidence everywhere is weak, so we generate our own)</a></li>
+</ul>
+</li>
+<li><a href="#8-game-ideas-first-seeds-to-be-refined-in-design">8. Game ideas (first seeds, to be refined in design)</a><ul>
+<li><a href="#81-concept-list">8.1 Concept list</a></li>
+<li><a href="#82-content-themes-gen-z-indian-engineering">8.2 Content themes (Gen Z, Indian, engineering)</a></li>
+</ul>
+</li>
+<li><a href="#9-technology">9. Technology</a><ul>
+<li><a href="#91-v1-no-speaking">9.1 v1 (no speaking)</a></li>
+<li><a href="#92-later-speaking-phase-research-kept-for-when-we-turn-it-on">9.2 Later: speaking phase (research kept for when we turn it on)</a></li>
+</ul>
+</li>
+<li><a href="#10-risks">10. Risks</a></li>
+<li><a href="#11-answered-decisions-what-they-mean-for-the-build-2026-11-09">11. Answered decisions → what they mean for the build (2026-11-09)</a><ul>
+<li><a href="#111-first-visit-level-check-recommended-games">11.1 First-visit level check → recommended games</a></li>
+<li><a href="#112-15-minute-goal-plus-a-daily-limit">11.2 15-minute goal plus a daily limit</a></li>
+<li><a href="#113-audio-turbos-voice-only-af_heart">11.3 Audio: Turbo's voice only (af_heart)</a></li>
+<li><a href="#114-content-review-pipeline-claude-written-third-person-reviewed">11.4 Content review pipeline (Claude-written, third-person reviewed)</a></li>
+<li><a href="#115-final-answers-2026-11-09">11.5 Final answers (2026-11-09)</a></li>
+</ul>
+</li>
+<li><a href="#12-key-sources">12. Key sources</a></li>
+</ul>
+</div>
+</nav><main><h1 id="english-adda-research-doc">English Adda — Research Doc</h1>
+<p><em>Working name. A new section in Game Corner, next to Brain Gym and Drive School.</em>
+<em>Research done 2026-11-09. Use this doc as the reference when designing and building English Adda.</em></p>
+<hr />
+<h2 id="0-decisions-so-far-from-the-product-owner">0. Decisions so far (from the product owner)</h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name</td>
+<td><strong>English Adda</strong> ("adda" = a hangout spot; casual, low pressure)</td>
+</tr>
+<tr>
+<td>Shape</td>
+<td><strong>Hybrid</strong>: a short daily game circuit (like Brain Gym) plus a light level path</td>
+</tr>
+<tr>
+<td>Speaking</td>
+<td><strong>Not in v1.</strong> Build reading, writing and listening first. Speaking research is kept in §9 for later.</td>
+</tr>
+<tr>
+<td>Goal</td>
+<td><strong>Placement prep underneath, fun on the surface.</strong> Every game should quietly train a skill that campus English tests check, but it must never <em>feel</em> like test prep. Combine "placements + confidence" with "general fluency".</td>
+</tr>
+<tr>
+<td>Points</td>
+<td><strong>Separate</strong> from Brain Gym points (like Drive points).</td>
+</tr>
+<tr>
+<td>Language hints</td>
+<td><strong>English only.</strong> No Hindi, Telugu or Tamil hints. Weak learners get help through easier levels, pictures, slower audio and retries instead.</td>
+</tr>
+<tr>
+<td>Audio</td>
+<td><strong>No budget.</strong> All listening audio uses Kokoro <strong>af_heart</strong> (Turbo's voice), pre-recorded offline. No paid Indian-accent voices.</td>
+</tr>
+<tr>
+<td>Level check</td>
+<td><strong>Required on the first visit</strong> (like Drive School Day 0). Its result picks each student's starting level and which games to recommend.</td>
+</tr>
+<tr>
+<td>Daily time</td>
+<td><strong>Goal: 15 minutes a day</strong>, with a <strong>daily limit</strong> on fresh content.</td>
+</tr>
+<tr>
+<td>Content review</td>
+<td><strong>Claude writes content in bulk, then a separate reviewer pass checks it as a third person</strong> (no human team review).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-summary">1. Summary</h2>
+<ol>
+<li><strong>Who we serve.</strong> About 15k first-year B.Tech students aged 17–20. Their English ranges from barely reading a sentence (ASER 2023: about 43% of rural 14–18-year-olds can't read a simple English sentence) to near-fluent. <strong>Listening is India's weakest measured skill</strong> (EF EPI 2025: listening 457 vs reading 494, writing 504). Hyderabad and Chennai students were flagged as needing the most help (Aspiring Minds), which matters because many of our students are from Telangana, AP and Tamil Nadu.</li>
+<li><strong>What placements actually test.</strong> Versant, AMCAT SVAR/English, the Accenture Communication Assessment, TCS NQT Verbal and Wipro NLTH all reuse the same small set of task types: read aloud, repeat what you hear, rebuild a jumbled sentence, retell a story, speak freely, spot errors, complete sentences, dictation or passage recall, and write a short formal email. <strong>Every one of these maps to a game mechanic.</strong> Without speaking, we still cover jumbles, dictation, recall, error-spotting, sentence completion, email writing and written retelling.</li>
+<li><strong>What the research says works.</strong> Spaced, low-stakes retrieval is the core engine. Gamification gives small-to-moderate gains (g ≈ 0.5), and <em>which</em> game elements you use matters: levels, progress, a light story and team goals help, while public individual leaderboards and badge overload can hurt. Reading works best at 95–98% known words. Feedback should focus on 1–2 errors and then ask the student to revise. Aim for being understood, not for a native accent.</li>
+<li><strong>The gap in the market.</strong> Nobody turns placement-test tasks into daily <em>games</em>. Prep sites are dry mock tests. Apps teach generic conversation, put features behind paywalls, and rank students against strangers. We have three things they don't: free access, a campus social layer (college or section leagues, one shared daily puzzle), and content built for engineering students.</li>
+<li><strong>Psychology is the design constraint.</strong> In India, English works as a class marker. Vernacular-medium students fear being judged, and anxiety correlates −0.36 with achievement. So: keep levels private, compare each student only with their own past self, and allow public competition only on effort or totals, never on ability.</li>
+<li><strong>Tech for v1 is cheap and fits our stack.</strong> Pre-recorded TTS clips for listening (Kokoro, which we already use, plus optional Indian-accent voices as a one-time cost). Writing is checked by the existing <code>api/judge.js</code> pattern with an English gold set. Feedback must quote an exact span of the student's text, so the judge can't invent errors.</li>
+</ol>
+<hr />
+<h2 id="2-who-the-learners-are">2. Who the learners are</h2>
+<h3 id="21-proficiency-data-treat-as-indicative-most-sources-are-vendors">2.1 Proficiency data (treat as indicative; most sources are vendors)</h3>
+<ul>
+<li><strong>Aspiring Minds National Spoken English study (2015, about 30k engineers)</strong></li>
+<li>2.9% fluent; 6.8% could respond spontaneously.</li>
+<li>51% were "not employable" on spoken English alone.</li>
+<li>Pronunciation and fluency were the main barriers.</li>
+<li>Hyderabad and Chennai needed the most improvement.</li>
+<li>The drop in level is steeper from tier 2 to tier 3 colleges than from tier 1 to tier 2.</li>
+<li><strong>EF EPI 2025:</strong> India scored 484 (#74, "low" band). Reading 494, <strong>listening 457</strong>, writing 504, speaking 500. EF's sample is self-selected online test-takers.</li>
+<li><strong>ASER 2023 Beyond Basics:</strong> 57.3% of rural 14–18-year-olds can read English sentences, and 73.5% of those can explain the meaning. Many of our tier-3 students were in that group 1–3 years ago.</li>
+<li><strong>Recruiters (Wisdomjobs, 850 recruiters):</strong> about 70% say freshers' communication is below par. Satisfaction is 55% in metros vs 28% outside them.</li>
+<li><strong>NEP 2020 and AICTE:</strong> B.Tech is now allowed in 11+ regional languages, and AICTE requires a compulsory English course for those students. More students will arrive with less English-medium schooling, while hiring stays in English.</li>
+</ul>
+<p><strong>Implication:</strong> the spread of levels is extreme. We need a short placement check, fine levels at the bottom of the scale, and real weight on <strong>listening</strong>.</p>
+<h3 id="22-psychology">2.2 Psychology</h3>
+<ul>
+<li>English is read as a sign of intelligence and class (the English–vernacular divide; films like <em>Hindi Medium</em>). Vernacular-medium and first-generation students report feeling "unwanted and unsuitable" on campus.</li>
+<li>Tamil-medium engineering students report low confidence and hesitant speech. Female students from regional-medium, rural or semi-urban backgrounds report more anxiety.</li>
+<li>Vernacular-medium students also hesitate to <em>write</em> emails, letters and reports (writing anxiety, not just speaking).</li>
+<li>Small studies find private AI or app practice lowers fear of judgment. This is promising but not proven.</li>
+</ul>
+<p><strong>Implication:</strong>
+- Keep it private by default.
+- Make mistakes cheap: no hearts, no lives, unlimited retries.
+- Comparison is "you vs last week's you".
+- Allow mother-tongue hints for weak learners (open question, §11).</p>
+<h3 id="23-gen-z-media-habits">2.3 Gen Z media habits</h3>
+<ul>
+<li>89% of Gen Z use Reels daily. They prefer short videos (under 2 minutes) and regional-language content. Hinglish use is growing, and Tanglish and Tenglish are common.</li>
+<li>Favourite topics: comedy, cricket, films/OTT (Tollywood, Kollywood, Bollywood), BGMI and Free Fire, memes, Shark Tank India, UPI, hostel life.</li>
+<li>Phones: mostly mid-range Android on 4G/5G. Data volume is not the main limit, but hostel network speed varies.</li>
+</ul>
+<p><strong>Implication:</strong>
+- Rounds of 30–120 seconds.
+- Swipeable, reel-like screens for reading.
+- Hooks built from memes, cricket and films.
+- Small, cacheable audio clips.</p>
+<h3 id="24-first-year-english-syllabus-aicte-model-curriculum-hsmc101">2.4 First-year English syllabus (AICTE model curriculum HSMC101)</h3>
+<ol>
+<li><strong>Vocabulary:</strong> roots, prefixes and suffixes, synonyms and antonyms, abbreviations.</li>
+<li><strong>Basic writing:</strong> sentence structure, punctuation, paragraphs.</li>
+<li><strong>Common errors:</strong> agreement, articles, prepositions, redundancy, clichés.</li>
+<li><strong>Writing styles:</strong> describing, defining, classifying.</li>
+<li><strong>Comprehension, précis, essay.</strong></li>
+<li><strong>Language lab:</strong> listening, pronunciation and stress, interviews, presentations.</li>
+</ol>
+<p>University labs (JNTU-affiliated and others) add JAM, role play and group discussion.</p>
+<p><strong>Implication:</strong> English Adda can be mapped to college credits later, which helps adoption by colleges.</p>
+<hr />
+<h2 id="3-what-placement-tests-measure-the-hidden-target">3. What placement tests measure (the hidden target)</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Format</th>
+<th>Skills scored</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Versant English</strong> (Pearson)</td>
+<td>About 17 min, 6 parts: read aloud, repeats, short answers, sentence builds, story retelling, open questions</td>
+<td>Sentence mastery, vocabulary, fluency, pronunciation</td>
+</tr>
+<tr>
+<td><strong>Versant Writing</strong></td>
+<td>Typing, sentence completion, dictation, passage reconstruction, email</td>
+<td>Grammar, vocabulary, tone, organisation, reading</td>
+</tr>
+<tr>
+<td><strong>AMCAT SVAR</strong> (SHL)</td>
+<td>16–20 min: read aloud, listen and repeat, listening comprehension, grammar, error spotting, free speech</td>
+<td>Pronunciation, fluency, listening</td>
+</tr>
+<tr>
+<td><strong>AMCAT English</strong></td>
+<td>Multiple choice: synonyms and antonyms, words in context, error spotting, sentence improvement, reading comprehension</td>
+<td>Written English</td>
+</tr>
+<tr>
+<td><strong>Accenture Communication Assessment</strong></td>
+<td>Versant-like, AI-graded</td>
+<td>Same as Versant, plus listening</td>
+</tr>
+<tr>
+<td><strong>TCS NQT Verbal</strong></td>
+<td>Sentence completion, passage recall, email (whether email is still included is disputed)</td>
+<td>Grammar, recall, formal writing</td>
+</tr>
+<tr>
+<td><strong>Wipro NLTH</strong></td>
+<td>22 English questions (MCQ)</td>
+<td>Written English</td>
+</tr>
+</tbody>
+</table>
+<p>No company publishes its cut-off scores.</p>
+<h3 id="how-placement-task-types-map-to-english-adda-v1-no-speaking">How placement task types map to English Adda (v1, no speaking)</h3>
+<table>
+<thead>
+<tr>
+<th>Placement task</th>
+<th>v1 mechanic</th>
+<th>Skill</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repeats / listen and repeat</td>
+<td><strong>Hear it, type it</strong> (dictation)</td>
+<td>Listening decoding, spelling</td>
+</tr>
+<tr>
+<td>Sentence builds</td>
+<td><strong>Jumble</strong> (rebuild a sentence from chunks, timed)</td>
+<td>Grammar</td>
+</tr>
+<tr>
+<td>Story retelling</td>
+<td><strong>Listen, then retell in 2–3 written lines</strong></td>
+<td>Listening, then writing</td>
+</tr>
+<tr>
+<td>Passage reconstruction / passage recall</td>
+<td><strong>Read it, it vanishes, rebuild it</strong></td>
+<td>Reading memory, writing</td>
+</tr>
+<tr>
+<td>Sentence completion</td>
+<td><strong>Fill the gap</strong> (C-test style, missing letters or words)</td>
+<td>Grammar, vocabulary</td>
+</tr>
+<tr>
+<td>Error spotting / sentence improvement</td>
+<td><strong>Spot and fix</strong></td>
+<td>Grammar</td>
+</tr>
+<tr>
+<td>Email writing</td>
+<td><strong>Fix-the-email, then write-the-email</strong></td>
+<td>Formal register</td>
+</tr>
+<tr>
+<td>Synonyms / words in context</td>
+<td><strong>Word games</strong> (grouping, real-or-fake, hot-and-cold)</td>
+<td>Vocabulary</td>
+</tr>
+<tr>
+<td>Reading comprehension</td>
+<td><strong>Micro-stories</strong> with 2 quick questions</td>
+<td>Reading</td>
+</tr>
+<tr>
+<td>Read aloud, short answers, open questions</td>
+<td><em>Later (speaking phase)</em></td>
+<td>Speaking</td>
+</tr>
+</tbody>
+</table>
+<p>"Fun on top, prep underneath": the student plays "Jumble", and their progress quietly tracks the Versant "sentence builds" skill. An occasional <strong>Boss Round</strong> (a mini mock test) can show "Your placement-readiness meter", without ever calling it a test.</p>
+<hr />
+<h2 id="4-evidence-based-principles-academic-literature">4. Evidence-based principles (academic literature)</h2>
+<p>Effect sizes are from meta-analyses unless stated otherwise. "Secondary" means taken from a summary, not the original paper.</p>
+<ol>
+<li><strong>Spaced, low-stakes retrieval is the core engine.</strong>
+   - Kim &amp; Webb 2022 (<em>Language Learning</em>, 48 experiments): medium-to-large effect, and longer gaps are better for long-term retention.
+   - Adesope et al. 2017: practice tests beat re-studying.
+   - Duolingo's half-life regression (Settles &amp; Meeder 2016) shows spacing scales in a real product.
+   - → Words and sentence patterns a student meets come back on a spaced schedule. Recall and produce, don't just recognise.</li>
+<li><strong>Gamification gives small-to-moderate gains, and which elements you use matters.</strong>
+   - Sailer &amp; Homner 2020: g = 0.49 for learning, which held up in rigorous studies; motivation (0.36) and behaviour (0.25) were less stable.
+   - Narrative and social interaction were moderators of the behaviour effect.
+   - English-specific: Lee &amp; Baek 2023, g = 0.52 (small sample).
+   - In a programming-learning meta-analysis, levels drove most of the gain; badges, points and leaderboards did not (secondary).</li>
+<li><strong>Public individual leaderboards and reward overload can backfire.</strong>
+   - Hanus &amp; Fox 2015: badges, a leaderboard and coins led to <em>lower</em> motivation and lower exam scores.
+   - Almeida et al. 2023: badges and leaderboards were the elements most often linked to negative effects.
+   - Teimouri et al. 2019: anxiety correlates r = −0.36 with achievement.</li>
+<li><strong>Reading at 95–98% known words, with student choice.</strong>
+   - Laufer &amp; Ravenhorst-Kalovski 2010 set these coverage thresholds. Schmitt et al. argue comprehension improves gradually rather than at a cliff.
+   - Extensive reading: d ≈ 0.5, larger for adults, EFL learners and web-based reading (Jeon &amp; Day 2016).</li>
+<li><strong>Teach vocabulary by frequency.</strong> NGSL (about 2,800 words, about 90% of general text) comes first. After that, academic and engineering words.</li>
+<li><strong>Train listening bottom-up for weak learners.</strong>
+   - L2 listeners decode only about 60% of words, against about 95% for native listeners (Field).
+   - Dictation and gap transcription help (small studies).
+   - MALL for listening: g = 0.79 (Li 2023).</li>
+<li><strong>Corrective feedback: focused, then revise.</strong>
+   - Kang &amp; Han 2015: a small-to-moderate positive effect on accuracy.
+   - Feedback works when it is selective and clear (Ferris).
+   - Prompts that ask learners to self-correct beat simply giving the correct form (Lyster &amp; Saito 2010).
+   - Automated writing evaluation: g = 0.59.</li>
+<li><strong>AI feedback helps, but over-corrects and creates over-reliance.</strong>
+   - It over-corrects advanced writers and sometimes invents errors (Zeng et al. 2024).
+   - A study of 180 Indian ESL undergraduates found ChatGPT was "a replacement rather than support".
+   - → Students must act on feedback themselves (revise or choose). AI never rewrites their text for them.</li>
+<li><strong>Aim for being understood, not a native accent</strong> (Munro &amp; Derwing 1995; Jenkins' Lingua Franca Core). Indian English is a legitimate variety (Kachru). This matters most for speaking later, but also for which "errors" we mark (§6).</li>
+<li><strong>Motivation should come from the student and look to their future self.</strong><ul>
+<li>Self-determination theory: autonomous motivation predicts better L2 outcomes (Alamer et al. 2025).</li>
+<li>The ideal L2 self (for example, "me confidently clearing my interview") predicts effort well (r = 0.61) but achievement only weakly (r ≈ 0.20). Use it as a hook, not as a method.</li>
+<li>→ Give students choice of topics and paths, make their growing skill visible, and use the placement-interview self as the story frame.</li>
+</ul>
+</li>
+</ol>
+<p><strong>Where the evidence is weak or mixed</strong> (don't over-claim to stakeholders):
+- Streak effects (only company A/B tests).
+- Shadowing (no meta-analysis).
+- Adaptive difficulty in language apps specifically.
+- "AI lowers anxiety" (small, self-report studies).
+- Duolingo efficacy (mostly company-linked).
+- ASR accuracy on Indian English (no fairness study found).</p>
+<hr />
+<h2 id="5-market-scan-what-others-do">5. Market scan: what others do</h2>
+<h3 id="51-products">5.1 Products</h3>
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Core loop</th>
+<th>What to learn from it</th>
+<th>What users hate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Duolingo</strong> (India was its #5 market by daily users in 2022)</td>
+<td>Short lessons on a path</td>
+<td>Streaks (7-day streak: 2.4× more likely to return), leagues, Friends Quests, placement</td>
+<td>Hearts and energy blocking practice; "gamified but not fluent"</td>
+</tr>
+<tr>
+<td><strong>NYT Wordle / Connections / Spelling Bee</strong> (11.1B plays in 2024)</td>
+<td>One shared daily puzzle</td>
+<td>Same puzzle for everyone, short, spoiler-free share grid, "puzzles are cool" for Gen Z</td>
+<td>Unfair puzzles break streaks</td>
+</tr>
+<tr>
+<td><strong>Contexto / Semantle</strong></td>
+<td>Guess a secret word by "closeness"</td>
+<td>A vocabulary-network game with infinite replay</td>
+<td>Semantle is too hard</td>
+</tr>
+<tr>
+<td><strong>Cambridge Write &amp; Improve</strong></td>
+<td>Write, get a CEFR-linked score, revise, watch the score rise</td>
+<td>The <strong>revise loop</strong></td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Readlang / LingQ</strong></td>
+<td>Tap any word in a real text to see its meaning, which saves a flashcard</td>
+<td>Reading plus collecting vocabulary</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Busuu</strong></td>
+<td>Community corrections</td>
+<td>Correcting others teaches the corrector</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Gimkit / Blooket / Kahoot</strong></td>
+<td>Live class quizzes with in-game money, stealing, tower defence</td>
+<td>Party modes for class events</td>
+<td>Free-tier limits</td>
+</tr>
+<tr>
+<td><strong>ELSA / Speak / Praktika / Stimuler</strong></td>
+<td>Speaking with ASR scoring and AI roleplay</td>
+<td>Fast numeric feedback (Stimuler: under 20 s)</td>
+<td>ELSA "too strict on Indian accents", Speak "too lenient", billing traps, repetitive AI chats</td>
+</tr>
+<tr>
+<td><strong>SpeakX</strong> (India, about 1M monthly learners)</td>
+<td>15 min/day of AI conversation, points, leaderboards, streaks</td>
+<td>Hindi-first scale</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>Seekho / YouTube creators</strong> (Spoken English Guru, 8.2M subscribers)</td>
+<td>Watch short vernacular lessons</td>
+<td>Shows the size of demand for vernacular spoken English</td>
+<td>Passive: watching, no practice</td>
+</tr>
+<tr>
+<td><strong>Josh Skills, Hello English, PlanetSpark</strong></td>
+<td>Vernacular courses, live classes</td>
+<td>Vernacular support is proven at scale</td>
+<td>Dated, or aimed at kids</td>
+</tr>
+<tr>
+<td><strong>PrepInsta / FACE Prep</strong></td>
+<td>Mock placement tests</td>
+<td>They know the test patterns</td>
+<td>Dry</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-gaps-we-can-own">5.2 Gaps we can own</h3>
+<ol>
+<li><strong>Placement task types as daily games.</strong> Nobody does this.</li>
+<li><strong>Free, with no hearts, no trials and no paywall.</strong> This avoids the top complaint in reviews.</li>
+<li><strong>A campus social layer:</strong> college or section leagues on <em>effort</em>, one batch-wide daily puzzle with a share grid, inter-college challenges.</li>
+<li><strong>Engineering content:</strong> stand-up updates, bug-report emails, "explain your project", HR rounds, Sem 1 tech topics used as reading material.</li>
+<li><strong>Measuring transfer, not just streaks:</strong> a monthly Boss Round (mini mock test) shows whether real skill moved, which answers the "gamified but not fluent" criticism.</li>
+<li><strong>Mechanics nobody combines yet:</strong> Connections-style grouping for vocabulary, a Contexto-style daily word, a Write &amp; Improve revise loop for emails, and Readlang-style tap-to-learn reading.</li>
+</ol>
+<hr />
+<h2 id="6-indian-english-policy-what-we-correct-and-what-we-accept">6. Indian English policy (what we correct and what we accept)</h2>
+<p>This policy must be written into every judge prompt and every answer key.</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Rule</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Accept</strong></td>
+<td>Normal Indian English; never mark wrong</td>
+<td>"isn't it?" as a tag, "today itself", "now only", "prepone", "cousin-brother", "out of station", "I have a doubt", British spellings, Indian names and places</td>
+</tr>
+<tr>
+<td><strong>Flag for formal use only</strong></td>
+<td>Fine in chat; in emails and interviews, show a better choice, framed as <em>"for your HR email, try…"</em></td>
+<td>"revert back", "do the needful", "kindly", "PFA", "very much eager", "discuss about"</td>
+</tr>
+<tr>
+<td><strong>Correct</strong></td>
+<td>Breaks the meaning, or interview panels mark it down</td>
+<td>Tense ("I am knowing him since 2020"), "since/from 3 years", subject–verb agreement, articles, question word order ("Why you didn't come?"), "Myself Ravi" in a self-introduction, uncountable plurals ("informations")</td>
+</tr>
+</tbody>
+</table>
+<h3 id="40-common-error-patterns">40 common error patterns</h3>
+<p>These come from the AICTE unit, Sailaja 2009, Bhatt 2000 and style guides. The H/M/L rating is our team's judgement.</p>
+<ul>
+<li><strong>H</strong> = correct</li>
+<li><strong>M</strong> = correct in formal or placement settings</li>
+<li><strong>L</strong> = accept</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Error</th>
+<th>Better</th>
+<th>Tier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>I am having two brothers.</td>
+<td>I have two brothers.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>2</td>
+<td>I am knowing him since 2020.</td>
+<td>I have known him since 2020.</td>
+<td>H</td>
+</tr>
+<tr>
+<td>3</td>
+<td>I am understanding the concept.</td>
+<td>I understand the concept.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>4</td>
+<td>I am studying here since two years.</td>
+<td>I have been studying here for two years.</td>
+<td>H</td>
+</tr>
+<tr>
+<td>5</td>
+<td>I have completed it yesterday.</td>
+<td>I completed it yesterday.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Yesterday I go to college.</td>
+<td>Yesterday I went to college.</td>
+<td>H</td>
+</tr>
+<tr>
+<td>7</td>
+<td>He don't know.</td>
+<td>He doesn't know.</td>
+<td>H</td>
+</tr>
+<tr>
+<td>8</td>
+<td>One of my friend is…</td>
+<td>One of my friends is…</td>
+<td>M</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Each students have…</td>
+<td>Each student has…</td>
+<td>H</td>
+</tr>
+<tr>
+<td>10</td>
+<td>He is engineer. / I went to the Hyderabad.</td>
+<td>He is an engineer. / I went to Hyderabad.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>11</td>
+<td>I am going to home.</td>
+<td>I am going home.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Discuss about the issue.</td>
+<td>Discuss the issue.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Return back / revert back</td>
+<td>Return / reply</td>
+<td>M</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Please revert. (meaning "reply")</td>
+<td>Please reply.</td>
+<td>M</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Do the needful.</td>
+<td>Name the action: "Please send the form by Friday."</td>
+<td>M</td>
+</tr>
+<tr>
+<td>16</td>
+<td>PFA / Kindly find attached</td>
+<td>I've attached…</td>
+<td>L</td>
+</tr>
+<tr>
+<td>17</td>
+<td>Today itself I will send.</td>
+<td>I'll send it today.</td>
+<td>L</td>
+</tr>
+<tr>
+<td>18</td>
+<td>I will come now only.</td>
+<td>I'm coming right now.</td>
+<td>L</td>
+</tr>
+<tr>
+<td>19</td>
+<td>You are coming, isn't it?</td>
+<td>…aren't you? / …right?</td>
+<td>L</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Myself Ravi, from Guntur.</td>
+<td>I'm Ravi, from Guntur.</td>
+<td>H (first impression in a self-intro)</td>
+</tr>
+<tr>
+<td>21</td>
+<td>Where you are going?</td>
+<td>Where are you going?</td>
+<td>M</td>
+</tr>
+<tr>
+<td>22</td>
+<td>Why you didn't come?</td>
+<td>Why didn't you come?</td>
+<td>M</td>
+</tr>
+<tr>
+<td>23</td>
+<td>I have a doubt.</td>
+<td>I have a question.</td>
+<td>L</td>
+</tr>
+<tr>
+<td>24</td>
+<td>Prepone the meeting</td>
+<td>Bring the meeting forward</td>
+<td>L</td>
+</tr>
+<tr>
+<td>25</td>
+<td>Cousin-brother</td>
+<td>cousin</td>
+<td>L</td>
+</tr>
+<tr>
+<td>26</td>
+<td>Out of station</td>
+<td>out of town</td>
+<td>L</td>
+</tr>
+<tr>
+<td>27</td>
+<td>Passed out of college</td>
+<td>graduated</td>
+<td>L</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Good name please?</td>
+<td>May I know your name?</td>
+<td>L</td>
+</tr>
+<tr>
+<td>29</td>
+<td>Too good (meaning "very good")</td>
+<td>very good</td>
+<td>L</td>
+</tr>
+<tr>
+<td>30</td>
+<td>Very much eager</td>
+<td>very eager</td>
+<td>M</td>
+</tr>
+<tr>
+<td>31</td>
+<td>Furnitures / informations / equipments / advices</td>
+<td>furniture / information / equipment / advice</td>
+<td>M</td>
+</tr>
+<tr>
+<td>32</td>
+<td>Explain me / tell to him / reply me</td>
+<td>Explain to me / tell him / reply to me</td>
+<td>M</td>
+</tr>
+<tr>
+<td>33</td>
+<td>Married with her / depend of / good in maths</td>
+<td>married her / depend on / good at maths</td>
+<td>M</td>
+</tr>
+<tr>
+<td>34</td>
+<td>Since 3 years / from 3 years</td>
+<td>for 3 years</td>
+<td>H</td>
+</tr>
+<tr>
+<td>35</td>
+<td>Word stress on the wrong syllable (deVElopment, COMpany)</td>
+<td>correct stress</td>
+<td>H (speaking phase)</td>
+</tr>
+<tr>
+<td>36</td>
+<td>v/w swapped where it changes the word (vest/west)</td>
+<td>a clear contrast</td>
+<td>M (speaking phase)</td>
+</tr>
+<tr>
+<td>37</td>
+<td>"th" said as a soft t/d</td>
+<td>–</td>
+<td>L (it is understood)</td>
+</tr>
+<tr>
+<td>38</td>
+<td>Extra vowel in a consonant cluster ("ischool", "fil-im") / final consonant dropped ("tes")</td>
+<td>school, film, test</td>
+<td>H (speaking phase)</td>
+</tr>
+<tr>
+<td>39</td>
+<td>z said as j ("jero")</td>
+<td>zero</td>
+<td>M (speaking phase)</td>
+</tr>
+<tr>
+<td>40</td>
+<td>Spelling pronunciation ("Wed-nes-day"); rising tone on statements</td>
+<td>WENZ-day; falling tone on statements</td>
+<td>M (speaking phase)</td>
+</tr>
+</tbody>
+</table>
+<p>Rows 35–40 are for the later speaking phase. Rows 1–34 can feed Spot-and-Fix, Fix-the-Email and Jumble in v1.</p>
+<hr />
+<h2 id="7-design-rules-for-english-adda-derived-from-26">7. Design rules for English Adda (derived from §2–§6)</h2>
+<h3 id="71-levels-and-placement">7.1 Levels and placement</h3>
+<ul>
+<li><strong>Placement check</strong> in the first session, about 4 minutes, presented as a warm-up game, not a test:</li>
+<li>Real-or-fake words (vocabulary size)</li>
+<li>A C-test passage (fill missing letters)</li>
+<li>3 dictation sentences</li>
+<li>One micro-story with 2 questions</li>
+<li><strong>Fine levels at the bottom:</strong> CEFR-J style sub-levels (Pre-A1, A1.1–A1.3, A2.1–A2.2, B1.1–B1.2, B2). Shown to the student as <strong>Adda Level 1–8</strong> with friendly names. The CEFR label is visible only to the admin.</li>
+<li><strong>Levels are private.</strong> Other students never see your level.</li>
+<li>Each game adapts its difficulty within a session. A student moves up a level after steady accuracy across several days, and never moves down in public.</li>
+</ul>
+<h3 id="72-gamification-use-and-avoid">7.2 Gamification: use and avoid</h3>
+<table>
+<thead>
+<tr>
+<th>Use</th>
+<th>Avoid</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Levels and visible skill progress (the strongest evidence)</td>
+<td>Hearts, lives or energy limits</td>
+</tr>
+<tr>
+<td>A light story frame: "Road to Placement Day", with a campus map of "addas" (Chai Tapri = vocabulary, Library = reading, Radio Room = listening, Notice Board = writing)</td>
+<td>Global individual leaderboards on ability</td>
+</tr>
+<tr>
+<td>One shared <strong>daily puzzle</strong> with a spoiler-free share grid (WhatsApp-friendly)</td>
+<td>Badge inflation</td>
+</tr>
+<tr>
+<td><strong>Forgiving streaks</strong>: freezes and weekend slack</td>
+<td>Streaks broken by unfair puzzles</td>
+</tr>
+<tr>
+<td>Team and cohort goals: "Section 2B read 500 stories this week"; college vs college on <em>effort</em></td>
+<td>Public display of anyone's mistakes or level</td>
+</tr>
+<tr>
+<td>A personal-best and "you vs last week" graph</td>
+<td>Fake urgency and dark patterns</td>
+</tr>
+<tr>
+<td>A collectible <strong>Word Vault</strong>: words you tap get saved and come back on a spaced schedule</td>
+<td>Long lessons (keep rounds 30–120 s)</td>
+</tr>
+<tr>
+<td>A Boss Round every 2–4 weeks: a mini mock test that shows the placement-readiness meter</td>
+<td>Calling anything an "exam" or a "test"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-content-rules-extends-the-rules-in-claudemd">7.3 Content rules (extends the rules in CLAUDE.md)</h3>
+<ul>
+<li>Indian context, Gen Z topics (see §8.2). Plain English in instructions.</li>
+<li>Objective items have <strong>exactly one correct answer</strong>, and a second person reviews the answer key.</li>
+<li>Tech-themed reading uses only Sem 1 topics (Python up to dicts, HTML/CSS, Git/CLI, number systems, aptitude, GenAI basics).</li>
+<li>Reading passages are tagged by level using a word-frequency check (target 95–98% known words for that level), plus a Flesch readability score computed in JavaScript.</li>
+<li>Use the Indian English policy (§6) in every answer key and judge prompt.</li>
+<li>Vocabulary source: <strong>NGSL (CC BY-SA, verify before use)</strong> or our own level tags. <strong>Do not</strong> use English Vocabulary Profile, CEFR-J or Oxford 3000/5000 lists without a licence.</li>
+</ul>
+<h3 id="74-feedback-rules">7.4 Feedback rules</h3>
+<ul>
+<li>Fix 1–2 things per answer, never a sea of red.</li>
+<li><strong>Prompt before telling:</strong> the first miss gives a hint ("Check the verb tense"), and only the second miss shows the answer.</li>
+<li>AI feedback must <strong>quote an exact span</strong> from the student's text, and code checks that the span exists (this blocks invented errors).</li>
+<li>The AI never rewrites the student's whole answer. The student revises it and the score rises (the Write &amp; Improve loop).</li>
+<li>Feedback tone is warm and short. Praise effort and growth, not talent.</li>
+</ul>
+<h3 id="75-measurement-the-evidence-everywhere-is-weak-so-we-generate-our-own">7.5 Measurement (the evidence everywhere is weak, so we generate our own)</h3>
+<ul>
+<li>Placement check at the start, and an equivalent check at about week 8. Compare by how much each student used English Adda.</li>
+<li>A short anxiety and confidence check-in (3 items) at the start and at week 8.</li>
+<li>Admin metrics: minutes per visit, return rate, accuracy by skill, level moves.</li>
+<li>A 5-question in-app survey at launch: earphone access, mic access, noise, preferred language for hints, topics they like. This also prepares the later speaking phase.</li>
+</ul>
+<hr />
+<h2 id="8-game-ideas-first-seeds-to-be-refined-in-design">8. Game ideas (first seeds, to be refined in design)</h2>
+<p>All of these are original. They borrow genre mechanics, not any specific game's name, look or content.</p>
+<h3 id="81-concept-list">8.1 Concept list</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Working name</th>
+<th>Mechanic</th>
+<th>Skill (placement link)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Daily Adda Puzzle</strong></td>
+<td>Sort 16 words into 4 hidden groups (synonyms, collocations, Indianisms, tech words)</td>
+<td>Vocabulary depth (AMCAT synonyms)</td>
+<td>Same puzzle for everyone; share grid; streak</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Catch It</strong></td>
+<td>Hear a sentence (Indian and global voices, slow to normal speed), type it; scored per word</td>
+<td>Listening decoding (Versant repeats, dictation)</td>
+<td>Fixes the weakest skill; levels change speed and length</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Jumble</strong></td>
+<td>Drag chunks to rebuild a sentence against a timer; combo meter</td>
+<td>Grammar (Versant sentence builds)</td>
+<td>Uses error patterns 1–34 as distractors</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Vanish</strong></td>
+<td>Read a short passage for 20 s; it disappears; rebuild its meaning in 2–3 lines</td>
+<td>Reading memory and writing (passage reconstruction, TCS recall)</td>
+<td>AI judge checks key points covered</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Spot &amp; Fix</strong></td>
+<td>Tap the error in a sentence, then pick or type the fix; fast rounds</td>
+<td>Grammar (AMCAT error spotting)</td>
+<td>Follows the §6 policy, so Indianisms marked "Accept" are never errors</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Fix My Email</strong></td>
+<td>A messy email to a HOD or recruiter: tap the problems, then choose a better tone. Higher levels ask the student to write the email</td>
+<td>Formal register (Versant/TCS email)</td>
+<td>Write &amp; Improve-style revise loop</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Real or Fake?</strong></td>
+<td>Swipe left or right on words in 5 s each, reel style</td>
+<td>Vocabulary size</td>
+<td>Also part of placement; cheap content</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Story Rewind</strong></td>
+<td>A 40-s audio story (hostel, cricket, ISRO); retell it in 3 lines or pick the best summary</td>
+<td>Listening into writing (Versant story retelling)</td>
+<td>Lower levels use multiple choice; higher levels write</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Hot &amp; Cold</strong></td>
+<td>Guess the secret word; each guess shows how close it is</td>
+<td>Vocabulary networks</td>
+<td>Rank lists precomputed offline from embeddings; one shared daily word</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Tone Switch</strong></td>
+<td>Turn a WhatsApp message into a formal email, and back again</td>
+<td>Register awareness</td>
+<td>Fun because of the meme-like source texts</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Reel Reader</strong></td>
+<td>Swipe through micro-stories at your level; tap words to save them to the Word Vault; 2 quick questions at the end</td>
+<td>Reading (AMCAT reading comprehension), vocabulary</td>
+<td>Reading the student chooses, the strongest evidence for reading</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>Word Vault</strong></td>
+<td>Spaced review of saved words through small recall games</td>
+<td>Vocabulary retention</td>
+<td>The spacing engine</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>Fact or Forward?</strong></td>
+<td>Read a "WhatsApp forward" or headline and decide whether it's real, clickbait or fake, with a reason</td>
+<td>Critical reading</td>
+<td>Links to Brain Gym's AI-literacy games</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>GD Corner</strong></td>
+<td>Read a GD topic; pick the strongest opener or counterpoint, or write one</td>
+<td>Argument writing (group-discussion prep)</td>
+<td>Becomes a spoken version later</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>Boss Round</strong></td>
+<td>A mixed mini mock (every 2–4 weeks) using the same task types</td>
+<td>All skills</td>
+<td>Shows the placement-readiness meter</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-content-themes-gen-z-indian-engineering">8.2 Content themes (Gen Z, Indian, engineering)</h3>
+<ol>
+<li>Hostel and mess life</li>
+<li>Cricket and IPL</li>
+<li>Movies and OTT (all film industries)</li>
+<li>BGMI and Free Fire</li>
+<li>Reels and creators</li>
+<li>Memes and Hinglish translation fails (kept kind)</li>
+<li>Placement prep: self-intro, HR questions</li>
+<li>Emails and WhatsApp messages to the HOD, warden or recruiter</li>
+<li>Tech explained simply (Git, APIs, UPI, Sem 1 topics)</li>
+<li>GenAI and jobs (GD topics)</li>
+<li>UPI, money and scam SMS</li>
+<li>Travel home: Tatkal tickets, waitlists, a new city</li>
+<li>Food debates (biryani, chai vs filter coffee)</li>
+<li>Startups and Shark Tank India</li>
+<li>Festivals (Sankranti, Pongal, Ugadi, Diwali, Onam)</li>
+<li>Fitness and exam-season routines</li>
+<li>Fake news and fact-checking</li>
+<li>Internships and LinkedIn</li>
+<li>Campus fests and anchoring scripts</li>
+<li>Indian success stories (ISRO, first-generation founders)</li>
+</ol>
+<hr />
+<h2 id="9-technology">9. Technology</h2>
+<h3 id="91-v1-no-speaking">9.1 v1 (no speaking)</h3>
+<ul>
+<li><strong>Listening audio:</strong> pre-generate every clip offline and serve them as static files, the same way as Turbo.</li>
+<li><strong>Kokoro</strong> (free; US and UK voices; test whether its Hindi voices sound natural reading English).</li>
+<li>For Indian-accent variety, a <strong>one-time</strong> paid batch: Sarvam Bulbul (about ₹15–30 per 10k characters, so about ₹1,500 for 500 passages) or Azure en-IN neural voices (about $8 for the same amount, price unverified).</li>
+<li>Browser <code>speechSynthesis</code> only as a last-resort fallback (en-IN voices vary by device).</li>
+<li>Mixing Indian and global accents is good for learning: real interviewers and clients use both.</li>
+<li><strong>Decision 2026-11-09: no budget, so use af_heart only for now</strong> (see §11.3). The paid options above are kept for later.</li>
+<li><strong>Writing judge:</strong> reuse the <code>api/judge.js</code> pattern (new prompts and task types in <code>prompts.js</code>):</li>
+<li>temperature 0, <code>&lt;student&gt;</code> tags, <code>validatePayload</code> length limits, <code>validateResult</code></li>
+<li>every error must quote an exact span from the student's text</li>
+<li>the Indian English allowlist (§6) is in the prompt</li>
+<li>built-in matching as the fallback, so the games work without the AI</li>
+<li><strong>New English gold set</strong> in <code>scripts/gold.mjs</code>. It must include false-positive traps: correct Indian English, British spellings, and Indian names. Re-run <code>npm run test:judge</code> and pick the cheapest model that passes. Candidates verified live 2026-11-09, price per million tokens, input / output:</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Input</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>upstage/solar-mini</code> (current)</td>
+<td>$0.05</td>
+<td>$0.20</td>
+</tr>
+<tr>
+<td><code>mistral-nemo</code></td>
+<td>$0.029</td>
+<td>$0.03</td>
+</tr>
+<tr>
+<td><code>llama-3.1-8b</code></td>
+<td>$0.02</td>
+<td>$0.04</td>
+</tr>
+<tr>
+<td><code>mistral-small-24b</code></td>
+<td>$0.05</td>
+<td>$0.08</td>
+</tr>
+<tr>
+<td><code>gpt-oss-20b</code></td>
+<td>$0.03</td>
+<td>$0.13</td>
+</tr>
+<tr>
+<td><code>qwen3.7-flash</code></td>
+<td>$0.03</td>
+<td>$0.13</td>
+</tr>
+<tr>
+<td><code>gemma-3-12b</code></td>
+<td>$0.05</td>
+<td>$0.15</td>
+</tr>
+<tr>
+<td>- <strong>Cost:</strong> about $0.00006 per writing check, so pennies per student per month.</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- <strong>Readability and levelling:</strong> Flesch scores and word-frequency coverage computed in JavaScript at build time. Skip LanguageTool in v1: its free API allows 20 requests a minute, and self-hosting needs a Java server.</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- <strong>Hot &amp; Cold:</strong> precompute closeness ranks offline (Python and embeddings) into static JSON. No runtime cost.</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>- <strong>Data:</strong> new <code>english_*</code> tables in <code>scripts/db-setup.mjs</code> and a new <code>api/english.js</code>, following the Drive School pattern. Whether English Adda points mix with Brain Gym points is open (§11).</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-later-speaking-phase-research-kept-for-when-we-turn-it-on">9.2 Later: speaking phase (research kept for when we turn it on)</h3>
+<ul>
+<li><strong>Pipeline:</strong>
+  1. MediaRecorder (opus at 24 kbps, about 180 KB a minute; mp4 on older Safari), push-to-talk, 60 s cap, a noise check first.
+  2. A new <code>api/speak.js</code>.
+  3. Speech-to-text with <strong>Whisper-large-v3-turbo</strong> through OpenRouter's <code>/audio/transcriptions</code> endpoint (about $0.09 per 1,000 thirty-second clips, with word timestamps and <code>keyterms</code>). Fall back to Groq Whisper, then Sarvam (best for Indian and code-mixed speech, about 15–20× the cost).
+  4. Fluency numbers computed in code: words per minute, pauses, fillers, keyword coverage.
+  5. The existing cheap LLM scores against a rubric.</li>
+<li><strong>Cost:</strong> about ₹0.02 per 30-s check, about ₹0.07 per student per day at 5 checks.</li>
+<li><strong>Avoid as a grade:</strong></li>
+<li><strong>Azure Pronunciation Assessment:</strong> 40–90× the cost, its best features are en-US only, and it measures distance from a US accent.</li>
+<li><strong>Web Speech API:</strong> it auto-corrects what students say, sends audio to Google, and is flaky on Android. Use it only for free "did you say the phrase" mini-games.</li>
+<li><strong>Fairness:</strong> Whisper still has about 11% word error rate on Indian English (Svarah benchmark), worse in noisy hostels. Never fail a student on one word, always allow a retry, and never show accent grades or rank students by pronunciation.</li>
+<li><strong>Privacy:</strong></li>
+<li>The DPDP Rules apply from about May 2027. They require verifiable parental consent for students under 18, and some of our students are 17.</li>
+<li>Whether the education exemption covers NxtWave needs a <strong>legal opinion</strong>.</li>
+<li>Voice may count as biometric data.</li>
+<li>Default: process audio in memory, store only the transcript and scores, store audio only with an explicit opt-in, and add a consent screen.</li>
+<li><strong>Mechanics ready for this phase:</strong></li>
+<li>Say-it-back (Versant repeats)</li>
+<li>A JAM spinner (a 30-s topic)</li>
+<li>Self-intro builder</li>
+<li>"Explain your project to a 10-year-old"</li>
+<li>Retell 3 times (4/3/2 repetition)</li>
+<li>Opt-in social games such as describe-and-guess and a bluffer game, only after students feel confident</li>
+</ul>
+<hr />
+<h2 id="10-risks">10. Risks</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>It feels like test prep, so students leave</td>
+<td>Game-first names and visuals, rounds under 2 minutes, the word "test" never used; the placement link shows only as a meter</td>
+</tr>
+<tr>
+<td>Weak students feel ashamed and quit</td>
+<td>Private levels, no hearts, hint before answer, a "you vs you" graph, competition on effort only</td>
+</tr>
+<tr>
+<td>Strong students get bored</td>
+<td>Adaptive difficulty, higher levels with free writing and GD Corner, hard daily puzzles</td>
+</tr>
+<tr>
+<td>AI marks correct Indian English as wrong</td>
+<td>The §6 policy in the prompts, false-positive traps in the gold set, span-quoting enforced in code</td>
+</tr>
+<tr>
+<td>AI invents errors or over-corrects</td>
+<td>Span validation, a cap of 1–2 issues, <code>validateResult</code>, built-in matching as the fallback</td>
+</tr>
+<tr>
+<td>Students paste ChatGPT answers into writing games</td>
+<td>Timed writing, short answers, rounds that reward process (choosing a fix, revising), no reward for length</td>
+</tr>
+<tr>
+<td>Content errors (two correct answers)</td>
+<td>Second-person answer key review; mark Claude-written content FOR TEAM REVIEW, as in Drive School</td>
+</tr>
+<tr>
+<td>Licensing of word lists</td>
+<td>NGSL or our own tags only</td>
+</tr>
+<tr>
+<td>Streaks feel like pressure</td>
+<td>Freezes, weekend slack, one bad puzzle never breaks a streak</td>
+</tr>
+<tr>
+<td>No proof it works</td>
+<td>Placement check at the start and at week 8, Boss Rounds, an admin dashboard</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-answered-decisions-what-they-mean-for-the-build-2026-11-09">11. Answered decisions → what they mean for the build (2026-11-09)</h2>
+<h3 id="111-first-visit-level-check-recommended-games">11.1 First-visit level check → recommended games</h3>
+<ul>
+<li>About 4 minutes, framed as "Find your Adda level" with Turbo. It is required before any game opens.</li>
+<li>It scores four skills separately: vocabulary (real-or-fake words), grammar (a C-test plus 2 jumbles), listening (3 Catch It sentences at rising speed) and reading (one micro-story with 2 questions).</li>
+<li>Output: an overall <strong>Adda Level 1–8</strong> plus a strength and a weakness skill.</li>
+<li><strong>The daily circuit is built from this.</strong> About 60% of the time goes to the student's 1–2 weakest skills, 40% to the rest, so practice is never all weak spots and never all comfort zone.</li>
+<li>Games are <em>recommended</em>, not locked. Students can still swap one game per day ("not feeling it, give me another").</li>
+<li>The levels update from everyday play, not only from the first check. The same check is repeated quietly at about week 8 (via a Boss Round) to measure growth.</li>
+</ul>
+<h3 id="112-15-minute-goal-plus-a-daily-limit">11.2 15-minute goal plus a daily limit</h3>
+<ul>
+<li><strong>Daily circuit, about 15 min:</strong> 5–6 games of about 2–3 min each, picked by §11.1, plus the Daily Adda Puzzle. A ring fills as minutes add up. Reaching 15 min counts as a goal day for the streak (with freezes and weekend slack).</li>
+<li><strong>Daily limit:</strong> once the circuit is done, give <strong>bonus rounds up to about 25 min total</strong> of fresh content, then stop: "Adda's closed for today, see you tomorrow." Word Vault review stays open, because spaced review doesn't use up fresh content.</li>
+<li>Count <em>active</em> minutes only (pause the timer on an idle tab), the same as Brain Gym.</li>
+</ul>
+<h3 id="113-audio-turbos-voice-only-af_heart">11.3 Audio: Turbo's voice only (af_heart)</h3>
+<ul>
+<li>Every listening clip is pre-recorded with Kokoro af_heart. No runtime TTS cost.</li>
+<li>We lose accent variety, so add variety through <strong>speed</strong> (0.8× / 1.0× / 1.15×, recorded separately, not browser playback-rate), sentence length and background "noise" levels (a canteen or hostel ambience track mixed in at higher levels).</li>
+<li>Dialogues need two speakers. <strong>Approved:</strong> use one free male Kokoro voice as the second speaker (§11.5).</li>
+<li>Reuse the <code>turbo-voice.py</code> approach (or a sibling script) to record only new or changed clips.</li>
+</ul>
+<h3 id="114-content-review-pipeline-claude-written-third-person-reviewed">11.4 Content review pipeline (Claude-written, third-person reviewed)</h3>
+<ol>
+<li><strong>Write in bulk</strong> as data files (for example <code>public/content/english/&lt;game&gt;.js</code>), each item tagged with level, skill, theme and the §6 policy tier where relevant.</li>
+<li><strong>Automatic checks</strong> (scripts): one correct answer per objective item, jumble chunks rebuild to exactly one grammatical sentence (an allowlist of accepted orders), word-frequency level of passages, Flesch score, no duplicate items, profanity and sensitive-topic filter, length limits.</li>
+<li><strong>Third-person review round:</strong> a separate reviewer agent that did <em>not</em> write the content gets only the items and a checklist:
+   - Is exactly one answer correct? Is any distractor also defensible?
+   - Is the answer key right?
+   - Does it follow the Indian English policy (§6)?
+   - Is the level right?
+   - Is it in plain English, set in India, and fair to all regions, genders and castes?
+   - Is any tech content limited to Sem 1 topics?</li>
+</ol>
+<p>The reviewer reports problems item by item. Claude fixes them, and the reviewer re-checks only the flagged items.
+4. Mark the files <code>FOR TEAM REVIEW</code> in the header anyway, as in Drive School, so a human can spot-check later.
+5. <strong>Volume estimate:</strong> 15–25 min/day of fresh content is a lot. For about 30 days with no repeats, each game needs roughly 150–300 items per level band. Use generators where possible (for example Jumble built from a sentence bank, Real or Fake built from a word list plus made-up pseudo-words) so bulk content stays reviewable.</p>
+<h3 id="115-final-answers-2026-11-09">11.5 Final answers (2026-11-09)</h3>
+<ol>
+<li><strong>A second Kokoro voice for dialogues: yes.</strong> Heart stays the main voice (and Turbo's). Pick one free male Kokoro voice for the second speaker in dialogues.</li>
+<li><strong>Pilot: batch DEMO only.</strong> The product owner tests it first. Hide English Adda from all other batches until they say go (a server-side flag, as with Drive School's tester checks).</li>
+<li><strong>Speaking: parked.</strong> Don't plan, design or build anything for it now. §9.2 stays only as archived research.</li>
+</ol>
+<hr />
+<h2 id="12-key-sources">12. Key sources</h2>
+<p><strong>Academic</strong>
+- Sailer &amp; Homner 2020, <em>Educational Psychology Review</em> 32 — https://opus.bibliothek.uni-augsburg.de/opus4/frontdoor/index/index/docId/109056
+- Lee &amp; Baek 2023, <em>Sustainability</em> 15(14) — https://www.mdpi.com/2071-1050/15/14/11325
+- Hanus &amp; Fox 2015, <em>Computers &amp; Education</em> 80; Almeida et al. 2023 — https://arxiv.org/abs/2305.08346
+- Kim &amp; Webb 2022, <em>Language Learning</em> 72(1); Settles &amp; Meeder 2016 — https://aclanthology.org/P16-1174
+- Burston &amp; Giannakou 2022, <em>ReCALL</em> (MALL publication bias)
+- Jiang et al. 2021, <em>Foreign Language Annals</em> (Duolingo outcomes)
+- Jeon &amp; Day 2016, <em>Reading in a Foreign Language</em> — https://scholarspace.manoa.hawaii.edu/items/b52a5591-ec04-4026-816f-434361a4e899
+- Laufer &amp; Ravenhorst-Kalovski 2010; NGSL — https://www.newgeneralservicelist.com
+- Kang &amp; Han 2015, <em>Modern Language Journal</em>; Lyster &amp; Saito 2010, <em>SSLA</em>; Ngo et al. 2022 (AWE)
+- Munro &amp; Derwing 1995; Jenkins 2000; Ngo, Chen &amp; Lai 2024, <em>ReCALL</em> — https://doi.org/10.1017/S0958344023000113
+- Teimouri, Goetze &amp; Plonsky 2019, <em>SSLA</em>; Horwitz et al. 1986
+- Al-Hoorie 2018 (ideal L2 self) — https://pressto.amu.edu.pl/index.php/ssllt/article/view/12295
+- Alamer et al. 2025 (SDT) — https://selfdeterminationtheory.org/wp-content/uploads/2025/06/2025_AlamerRobatEtAl_L2.pdf
+- Hou &amp; Min 2025, <em>ReCALL</em> (dialogue systems) — https://www.cambridge.org/core/product/31847710516602398819C5E594038E7B
+- Zeng et al. 2024 (LLM over-correction); Koenecke et al. 2020, <em>PNAS</em> (ASR bias)</p>
+<p><strong>India context</strong>
+- Aspiring Minds spoken English study — https://www.millenniumpost.in/97-tech-graduates-cannot-speak-english-fluently-survey-101003
+- EF EPI 2025 India — https://www.ef.com/assetscdn/WIBIwq6RdJvcD9bc8RMd/cefcom-epi-site/fact-sheets/2025/ef-epi-fact-sheet-india-english.pdf
+- ASER 2023 — https://news.careers360.com/42-children-in-14-18-age-group-in-rural-india-cant-read-easy-sentences-in-english-report
+- AICTE model curriculum — https://aicte.gov.in/sites/default/files/model%20curriculum%20for%201st%20year%20ug.compressed.pdf
+- First-year engineering speaking anxiety (JELT) — https://journals.eltai.in/jelt/article/download/JELT680305/1368/4201
+- Gen Z Reels (Ipsos/Meta) — https://www.fonearena.com/blog/484311/india-reels-usage-among-gen-z-report.html
+- Hinglish on X — https://www.nature.com/articles/s41599-024-03058-6.pdf</p>
+<p><strong>Placement tests</strong>
+- Versant guide — https://www.pearson.com/content/dam/one-dot-com/one-dot-com/english/versant-test/Official-Test-Guide-Versant-Professional-English-Test-final.pdf
+- Versant Writing — https://www.pearson.com/content/dam/one-dot-com/one-dot-com/english/SupportingDocs/Versant/DataSheets/Product-Info-Sheet-Versant-Writing-Test.pdf
+- SVAR — https://service.shl.com/docs/SVAR%20-%20Spoken%20English%20(U.S.).pdf
+- Accenture CA — https://faceprep.in/article/accenture-communication-assessment-test-pattern-sample-questions-faceprep/
+- TCS NQT — https://prepinsta.com/tcs-nqt/syllabus/
+- Duolingo English Test question guide — https://englishtest-static.duolingo.com/media/resources/Questions%20Guide%202026.pdf</p>
+<p><strong>Market</strong>
+- Duolingo streak data — https://blog.duolingo.com/improving-the-streak
+- NYT Games plays — https://www.fastcompany.com/91386818/pips-new-game-nyt-the-next-wordle
+- Write &amp; Improve — https://writeandimprove.com/free
+- SpeakX — https://yourstory.com/2025/10/gen-ai-english-speaking-speakx-funding-westbridge-elevation
+- Stimuler — https://india.entrepreneur.com/news-and-trends/stimuler-raises-usd-375-mn-funding-to-scale-voice-first/490839
+- AI English app complaints — https://unstar.app/blog/is-speak-elsa-talkpal-loora-learna-ai-english-apps-legit-2026</p>
+<p><strong>Tech</strong>
+- OpenRouter STT — https://www.openrouter.ai/docs/api/api-reference/stt/create-transcription.md
+- Groq STT — https://console.groq.com/docs/speech-to-text
+- Sarvam pricing — https://docs.sarvam.ai/api/pricing
+- Svarah benchmark (Indian-accent ASR) — https://arxiv.org/pdf/2305.15760
+- Azure Pronunciation Assessment — https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment
+- Vercel function limits — https://vercel.com/docs/functions/limitations
+- DPDP Rules — https://ourtake.bakerbotts.com/post/102lund/india-notifies-final-rules-for-digital-data-protection-act</p>
+<p><strong>Caveats.</strong> Many figures come from vendor sources or press summaries, and some are marked unverified in the raw research. Check against the originals before using any number in a deck or a public claim.</p></main></div></body></html>
