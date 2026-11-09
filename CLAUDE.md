@@ -48,4 +48,6 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Adda points never mix with Brain Gym or Drive points. Skill levels (voc, gra, lis, rea, wri; 1–8) are private: never shown to other students or on the leaderboard.
 - No speaking features. English only (no Hindi/Telugu/Tamil hints). Never call anything a "test" in student copy.
 - Content: Claude writes it in bulk, scripts check it, then a separate reviewer agent checks it as a third person before it ships. Follow the Indian English policy in Research §6 (accept / formal-only / correct). Use short English names for student-facing things.
+- Level check ("Find your level"): content + scoring live server-side in `api/_lib/english-check.js` (answers never sent to the browser). Actions checkstart/checknext/checkdone in `api/english.js`. Test accounts redo it from the home link.
+- Audio: after ANY change to Yapper's lines (YAPPER_LINES block in `english.js`) or listening content, run `python scripts/english-voice.py`. Listening sentences are "secret": recorded under sha1(voice|speed|text) names and kept OUT of the public manifest, so students can't read answers.
 - Local testing without the Vercel CLI: `npm run dev:local` (scripts/dev-server.mjs serves `public/` and runs `api/*.js` with `.env.local`, the dev DB) on http://127.0.0.1:3000.

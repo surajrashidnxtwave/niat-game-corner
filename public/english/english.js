@@ -31,6 +31,17 @@ const GAMES = [
   { id: 'vault',   name: 'Word Vault',   skill: 'voc', icon: '🔐', mins: 1, built: false, always: true }
 ];
 const gameOf = id => GAMES.find(g => g.id === id);
+// Everything Yapper says out loud. After ANY change here, run: python scripts/english-voice.py
+/*YAPPER_LINES*/const YAPPER_LINES = {
+  hello: ['Yes, I talk a lot. This is English Adda: 15 minutes a day of word games, stories and quick challenges.',
+          'First, a quick warm-up so I can pick the right games for you. No marks, no pressure.'],
+  rf: ['Part one: Real or Fake. Tap Real only if you know the word. Some words are made up, so don’t guess!'],
+  c1: ['Part two: Fill the gaps. Each word has lost its ending. Type the missing letters.'],
+  c2: ['Nice! One more short passage.'],
+  catch: ['Part three: Catch it. Listen, then type exactly what you hear. You can play each one twice.'],
+  story: ['Last part! Read this quick story, then answer two questions.'],
+  done: ['Done! Here’s where you start. I’ll pick your games from this.']
+};/*END_YAPPER_LINES*/
 const skillOf = k => SKILLS.find(s => s.k === k);
 
 /* ================= small helpers ================= */
@@ -149,8 +160,7 @@ function renderNotOpen(root){
 function renderWelcome(root){
   root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 240, 'eyap bob') + '</div>'
     + '<div class="ewel-talk"><span class="etag">New · English Adda</span><h1 class="ddisplay">Hey, I’m Yapper!</h1>'
-    + '<div class="ebubble"><p>Yes, I talk a lot. This is <b>English Adda</b>: 15 minutes a day of word games, stories and quick challenges.</p>'
-    + '<p>First, a quick warm-up so I can pick the right games for you. No marks, no pressure.</p></div>'
+    + '<div class="ebubble">' + YAPPER_LINES.hello.map(t => '<p>' + esc(t) + '</p>').join('') + '<button class="ehear" data-ehear aria-label="Hear Yapper">🔊 Hear me</button></div>'
     + '<div class="ewel-row"><button class="ebtn" data-echeck>Let’s go</button><span class="enote">About 5 minutes</span></div></div></section>';
 }
 function renderHome(root, S){
@@ -166,7 +176,7 @@ function renderHome(root, S){
   const overall = lv.length ? Math.round(lv.reduce((a, b) => a + b, 0) / lv.length) : null;
   root.innerHTML =
     '<div class="etop"><div><h1 class="ddisplay">English Adda</h1><p>15 minutes a day of word games, stories and quick challenges.</p>'
-    + (tester() ? '<p class="etester">🧪 Test account: no daily limit, every game open.</p>' : '') + '</div>'
+    + (tester() ? '<p class="etester">🧪 Test account: no daily limit, every game open.' + (S.placed ? ' <button class="elink" data-echeck>Redo the level check</button>' : '') + '</p>' : '') + '</div>'
     + '<div class="echips"><span class="echip" title="Goal days in a row">🔥 ' + plural(sk, 'day') + '</span><span class="echip" title="Adda points">' + ICON.star + ' ' + (S.points || 0).toLocaleString('en-IN') + ' pt</span>'
     + '<button class="round press mute" aria-label="Turn sound off">🔊</button></div></div>'
     + '<section class="ehero' + (closed ? ' closed' : '') + '">' + ring(t, 128)
@@ -174,7 +184,7 @@ function renderHome(root, S){
     + (btn ? '<div class="ehero-row">' + btn + '</div>' : '') + '</div>'
     + yap(closed ? 'idle' : done ? 'correct' : 'idle', 140, 'eyap ehero-yap') + '</section>'
     + '<div class="egrid"><section class="epanel"><h3>Today’s games</h3><p class="esub">' + (S.placed ? 'Picked for your level. More time goes to the skills you’re building.' : 'Your games appear after the level check.') + '</p>'
-    + '<div class="esets">' + GAMES.filter(g => !g.always).map(g => setRow(g)).join('') + '</div></section>'
+    + '<div class="esets">' + (S.placed && S.circuit && S.circuit.length ? ['groups', ...S.circuit].map(gameOf).filter(Boolean) : GAMES.filter(g => !g.always)).map(g => setRow(g)).join('') + '</div></section>'
     + '<aside class="epanel eside"><div class="eyou"><h3>Your skills</h3>'
     + (overall ? '<p class="esub">You’re <b>Level ' + overall + ': ' + LEVELS[overall - 1] + '</b>. Only you can see this.</p>' : '<p class="esub">The level check sets these. Only you can see them.</p>')
     + SKILLS.map(s => skillRow(s, L[s.k])).join('') + '</div>'
@@ -197,9 +207,241 @@ function skillRow(s, lv){
   return '<div class="eskill" style="--c:' + s.c + '"><div class="eskill-h"><b>' + s.name + '</b><span>' + (lv ? 'Lv ' + lv + ' · ' + LEVELS[lv - 1] : '?') + '</span></div><div class="ebars">' + bars + '</div></div>';
 }
 
+/* ================= Yapper's voice + listening clips ================= */
+// Yapper's lines: clips recorded by scripts/english-voice.py, found by text in the manifest (off when sound is muted).
+// Listening clips (Catch It) play even when muted, because hearing them is the task; their file names come from the server.
+const Voice = (() => {
+  let man = null, au = null, onEnd = null;
+  const key = t => String(t).replace(/<[^>]*>/g, '').replace(/\s+/g, '').normalize('NFC');
+  fetch('assets/english/voice/manifest.json?v=' + Date.now().toString(36).slice(0, -4)).then(r => r.ok ? r.json() : null).then(j => { man = j; }).catch(() => {});
+  const muted = () => typeof SFX !== 'undefined' && SFX.muted;
+  function play(src, end){
+    stop();
+    if (!au) { au = new Audio(); au.preload = 'auto'; }
+    au.src = src; onEnd = end || null;
+    au.onended = () => { const f = onEnd; onEnd = null; if (f) f('end'); };
+    au.onerror = () => { const f = onEnd; onEnd = null; if (f) f('error'); };
+    const p = au.play(); if (p && p.catch) p.catch(() => { const f = onEnd; onEnd = null; if (f) f('blocked'); });
+  }
+  function stop(){ if (au) try { au.pause(); } catch (e) {} const f = onEnd; onEnd = null; if (f) f('stop'); }
+  return {
+    say(text, end){ if (muted() || !man) return false; const c = man.lines[key(text)]; if (!c) return false; play('assets/english/voice/' + c.f, end); return true; },
+    clip(file, end){ play('assets/english/voice/' + file, end); },
+    stop
+  };
+})();
+
+/* ================= "Find your level" (the level check) =================
+   Four parts: Real or Fake, Fill the gaps (2 passages), Catch it (4 sentences), Quick story (2 questions).
+   No marks and no right/wrong feedback during it. The server picks the second passage and the story, scores everything, and saves the levels once. */
+let C = null, CP = null;
+const frag = html => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const UNITS = 30 + 2 + 4 + 1;    // progress bar: 30 words, 2 passages, 4 sentences, 1 story
+function openCheck(){
+  if (!ME || CP) return;
+  sfx('tap'); Voice.stop();
+  CP = frag('<div class="eplayer" role="dialog" aria-modal="true" aria-label="Find your level">'
+    + '<div class="ep-top"><button class="round press ep-x" aria-label="Leave the warm-up">✕</button><div class="ep-prog"><i></i></div><span class="ep-part"></span></div>'
+    + '<div class="ep-body"></div></div>');
+  document.body.appendChild(CP); document.body.classList.add('eplaying');
+  qs('.ep-x', CP).onclick = askLeave;
+  C = { done: 0, rf: [], c1: [], c2: [], catch: [], story: [], t0: Date.now(), items: null, next: null, key: null };
+  Adda._play(true);
+  loading('Getting your warm-up ready…');
+  api('/api/english', { action: 'checkstart', token: ME.token }, 10000).then(r => {
+    if (!CP) return;
+    if (r.status === 409) { closeCheck(); toast('You’ve already found your level.'); pull(true); return; }
+    if (r.status !== 200 || !r.j.ok) return failed(() => { closeCheck(); openCheck(); });
+    C.items = r.j.items;
+    intro(1, 'Real or Fake', YAPPER_LINES.rf[0], 'Start', () => rfShow(0));
+  });
+}
+function body(){ return qs('.ep-body', CP); }
+function progress(part){ if (!CP) return; qs('.ep-prog i', CP).style.width = Math.round(C.done / UNITS * 100) + '%'; if (part) qs('.ep-part', CP).textContent = 'Part ' + part + ' of 4'; }
+function loading(msg){ body().innerHTML = '<div class="ep-center">' + yap('thinking', 120, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
+function failed(retry){
+  body().innerHTML = '<div class="ep-center">' + yap('oops', 120, 'eyap') + '<p class="esub">Couldn’t reach Game Corner. Check your internet.</p><button class="ebtn" id="ep-retry">Try again</button></div>';
+  qs('#ep-retry', CP).onclick = () => { sfx('tap'); retry(); };
+}
+function intro(part, title, line, btn, go){
+  progress(part); C.key = null;
+  body().innerHTML = '<div class="ep-intro">' + yap('idle', 150, 'eyap bob') + '<div class="ebubble"><span class="etag">Part ' + part + ' of 4 · ' + esc(title) + '</span><p>' + esc(line) + '</p></div>'
+    + '<button class="ebtn" id="ep-go">' + esc(btn) + '</button></div>';
+  Voice.say(line);
+  const b = qs('#ep-go', CP); b.focus(); b.onclick = () => { sfx('tap'); Voice.stop(); go(); };
+}
+function askLeave(){
+  if (qs('.ep-confirm', CP)) return;
+  sfx('tap');
+  const box = frag('<div class="ep-confirm"><div class="epanel"><h3>Leave the warm-up?</h3><p class="esub">Your answers so far won’t be saved. It takes about 5 minutes from the start.</p>'
+    + '<div class="ep-row"><button class="ebtn ghost sm" data-k="stay">Keep going</button><button class="ebtn sm" data-k="leave">Leave</button></div></div></div>');
+  CP.appendChild(box);
+  box.onclick = e => { const k = e.target.closest('[data-k]'); if (!k) return; box.remove(); if (k.dataset.k === 'leave') closeCheck(); };
+}
+function closeCheck(){
+  if (!CP) return;
+  Voice.stop(); clearTimeout(rfTimer);
+  CP.remove(); CP = null; C = null;
+  document.body.classList.remove('eplaying');
+  Adda._play(false);
+  render();
+}
+document.addEventListener('keydown', e => { if (CP && C && C.key && !qs('.ep-confirm', CP)) C.key(e); });
+
+// ---- part 1: Real or Fake (5 seconds a word; no answer counts as "don't know") ----
+let rfTimer = 0;
+function rfShow(i){
+  const words = C.items.rf;
+  if (i >= words.length) { C.key = null; return intro(2, 'Fill the gaps', YAPPER_LINES.c1[0], 'Start', () => passage('c1')); }
+  progress(1);
+  body().innerHTML = '<div class="erf"><p class="ecount">' + (i + 1) + ' / ' + words.length + '</p>'
+    + '<div class="erf-card"><b>' + esc(words[i]) + '</b></div><div class="erf-time"><i></i></div>'
+    + '<div class="erf-btns"><button class="ebtn ghost" data-a="0">✗ Fake</button><button class="ebtn purple" data-a="1">✓ Real</button></div>'
+    + '<p class="ehint">Not sure? Tap Fake. Guessing makes your level less accurate.</p></div>';
+  const card = qs('.erf-card', CP), bar = qs('.erf-time i', CP);
+  let answered = false;
+  const answer = v => {
+    if (answered || !C) return; answered = true; clearTimeout(rfTimer);
+    C.rf[i] = v; C.done++;
+    sfx(v === null ? 'tap' : 'select');
+    card.classList.add(v ? 'go-r' : 'go-l');
+    setTimeout(() => { if (C) rfShow(i + 1); }, 180);
+  };
+  qa('[data-a]', CP).forEach(b => b.onclick = () => answer(b.dataset.a === '1'));
+  C.key = e => { if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') answer(true); else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'f') answer(false); };
+  // swipe the card: right = real, left = fake
+  let x0 = null;
+  card.onpointerdown = e => { x0 = e.clientX; card.setPointerCapture(e.pointerId); };
+  card.onpointermove = e => { if (x0 != null) card.style.transform = 'translateX(' + (e.clientX - x0) + 'px) rotate(' + ((e.clientX - x0) / 20) + 'deg)'; };
+  card.onpointerup = e => { const dx = x0 == null ? 0 : e.clientX - x0; x0 = null; card.style.transform = ''; if (dx > 70) answer(true); else if (dx < -70) answer(false); };
+  requestAnimationFrame(() => { bar.style.transition = 'width 5s linear'; bar.style.width = '0%'; });
+  rfTimer = setTimeout(() => answer(null), 5000);
+}
+
+// ---- part 2: Fill the gaps (a C-test: type the missing end of each word) ----
+function passage(which){
+  const p = which === 'c1' ? C.items.c1 : C.next.c2;
+  progress(2);
+  let g = 0;
+  const text = p.parts.map(x => x.t != null ? esc(x.t)
+    : '<span class="egap">' + esc(x.stem) + '<input data-g="' + (g++) + '" maxlength="' + x.n + '" style="--n:' + x.n + '" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Missing ' + x.n + ' letters after ' + esc(x.stem) + '"></span>').join('');
+  body().innerHTML = '<div class="epass"><p class="ecount">Passage ' + (which === 'c1' ? 1 : 2) + ' of 2</p><h2 class="ddisplay">Fill the gaps</h2>'
+    + '<p class="esub">Type only the missing letters. The boxes show how many.</p><div class="epass-text">' + text + '</div>'
+    + '<button class="ebtn" id="ep-done">Done</button></div>';
+  const ins = qa('input[data-g]', CP);
+  ins.forEach((el, k) => {
+    el.oninput = () => { el.value = el.value.replace(/[^A-Za-z]/g, ''); if (el.value.length >= +el.maxLength && ins[k + 1]) ins[k + 1].focus(); };
+    el.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); (ins[k + 1] || qs('#ep-done', CP)).focus(); } if (e.key === 'Backspace' && !el.value && ins[k - 1]) { e.preventDefault(); ins[k - 1].focus(); } };
+  });
+  if (ins[0] && matchMedia('(pointer:fine)').matches) ins[0].focus();
+  qs('#ep-done', CP).onclick = () => {
+    sfx('tap');
+    C[which] = ins.map(el => el.value.trim().toLowerCase());
+    C.done++;
+    if (which === 'c2') return intro(3, 'Catch it', YAPPER_LINES.catch[0], 'Start', () => catchShow(0));
+    const go = () => {
+      loading('One moment…');
+      api('/api/english', { action: 'checknext', token: ME.token, rf: C.rf, c1: C.c1 }, 10000).then(r => {
+        if (!CP) return;
+        if (r.status !== 200 || !r.j.ok) return failed(go);
+        C.next = r.j.items;
+        progress(2);
+        body().innerHTML = '<div class="ep-intro">' + yap('correct', 130, 'eyap bob') + '<div class="ebubble"><p>' + esc(YAPPER_LINES.c2[0]) + '</p></div><button class="ebtn" id="ep-go">Next passage</button></div>';
+        Voice.say(YAPPER_LINES.c2[0]);
+        qs('#ep-go', CP).onclick = () => { sfx('tap'); Voice.stop(); passage('c2'); };
+      });
+    };
+    go();
+  };
+}
+
+// ---- part 3: Catch it (hear a sentence, type it; 2 plays each) ----
+function catchShow(i){
+  const list = C.items.catch;
+  if (i >= list.length) return intro(4, 'Quick story', YAPPER_LINES.story[0], 'Start', storyShow);
+  progress(3);
+  const it = list[i];
+  let plays = 0, playing = false;
+  body().innerHTML = '<div class="ecatch"><p class="ecount">Sentence ' + (i + 1) + ' of ' + list.length + '</p>'
+    + '<button class="eplay" aria-label="Play the sentence"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>'
+    + '<p class="esub eplays">Tap to play. You can play it twice.</p>'
+    + '<input class="field ecatch-in" maxlength="240" placeholder="Type what you hear" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Type the sentence you heard">'
+    + '<p class="ehint">About ' + it.words + ' words. Small spelling slips are okay.</p>'
+    + '<button class="ebtn" id="ep-next" disabled>Next</button></div>';
+  const btn = qs('.eplay', CP), lab = qs('.eplays', CP), inp = qs('.ecatch-in', CP), nx = qs('#ep-next', CP);
+  const play = () => {
+    if (playing || plays >= 2) return;
+    plays++; playing = true; btn.classList.add('on');
+    lab.textContent = 'Listen…';
+    Voice.clip(it.clip, why => {
+      playing = false; if (!CP) return;
+      btn.classList.remove('on');
+      if (why === 'blocked' || why === 'error') { plays--; lab.textContent = why === 'error' ? 'Couldn’t load the sound. Tap to try again.' : 'Tap to play.'; return; }
+      lab.textContent = plays >= 2 ? 'No plays left. Type what you heard.' : '1 play left.';
+      btn.disabled = plays >= 2; nx.disabled = false;
+      inp.focus();
+    });
+  };
+  btn.onclick = () => { sfx('tap'); play(); };
+  inp.oninput = () => { if (inp.value.trim()) nx.disabled = false; };
+  inp.onkeydown = e => { if (e.key === 'Enter' && !nx.disabled) nx.click(); };
+  nx.onclick = () => { sfx('tap'); Voice.stop(); C.catch[i] = inp.value.trim(); C.done++; catchShow(i + 1); };
+  setTimeout(() => { if (CP && !plays) play(); }, 350);
+}
+
+// ---- part 4: Quick story (2 questions) ----
+function storyShow(){
+  progress(4);
+  const s = C.next.story;
+  body().innerHTML = '<div class="estory"><p class="ecount">Read, then answer</p><div class="estory-text">' + esc(s.text) + '</div>'
+    + s.q.map((q, qi) => '<div class="eq"><b>' + (qi + 1) + '. ' + esc(q.q) + '</b><div class="eopts">'
+      + q.o.map((o, oi) => '<button class="eopt" data-q="' + qi + '" data-o="' + oi + '" aria-pressed="false">' + esc(o) + '</button>').join('') + '</div></div>').join('')
+    + '<button class="ebtn" id="ep-fin" disabled>Finish</button></div>';
+  C.story = s.q.map(() => null);
+  qa('.eopt', CP).forEach(b => b.onclick = () => {
+    sfx('select');
+    const qi = +b.dataset.q; C.story[qi] = +b.dataset.o;
+    qa('.eopt[data-q="' + qi + '"]', CP).forEach(x => x.setAttribute('aria-pressed', x === b));
+    qs('#ep-fin', CP).disabled = C.story.some(x => x === null);
+  });
+  qs('#ep-fin', CP).onclick = () => { sfx('tap'); C.done++; submitCheck(); };
+}
+function submitCheck(){
+  progress(4);
+  loading('Yapper is working out your level…');
+  const secs = Math.round((Date.now() - C.t0) / 1000);
+  api('/api/english', { action: 'checkdone', token: ME.token, rf: C.rf, c1: C.c1, c2: C.c2, catch: C.catch, story: C.story, secs }, 12000).then(r => {
+    if (!CP) return;
+    if (r.status !== 200 || !r.j.ok) return failed(submitCheck);
+    EA = r.j.state; pulledAt = Date.now(); cacheSave();
+    result(r.j.levels);
+  });
+}
+function result(L){
+  C.done = UNITS; progress(4);
+  const ks = SKILLS.map(s => s.k), vals = ks.map(k => L[k]);
+  const overall = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+  const hi = Math.max(...vals), lo = Math.min(...vals);
+  const best = SKILLS.filter(s => L[s.k] === hi).map(s => s.name), weak = SKILLS.filter(s => L[s.k] === lo).map(s => s.name);
+  const line = hi === lo ? 'You’re even across all five skills. We’ll mix everything.'
+    : 'Your strongest: <b>' + best.slice(0, 2).join(' and ') + '</b>. We’ll train <b>' + weak.slice(0, 2).join(' and ') + '</b> most.';
+  body().innerHTML = '<div class="eresult">' + yap('correct', 140, 'eyap bob') + '<div class="ebubble"><p>' + esc(YAPPER_LINES.done[0]) + '</p></div>'
+    + '<h2 class="ddisplay">You’re Level ' + overall + ': ' + LEVELS[overall - 1] + '</h2>'
+    + '<div class="epanel eres-skills">' + SKILLS.map(s => skillRow(s, L[s.k])).join('') + '<p class="esub" style="margin:10px 0 0">' + line + ' Only you can see this.</p></div>'
+    + '<button class="ebtn" id="ep-home">See today’s games</button></div>';
+  Voice.say(YAPPER_LINES.done[0]);
+  sfx('levelup'); try { if (!reduced()) confetti(); } catch (e) {}
+  qs('#ep-home', CP).onclick = () => { sfx('tap'); closeCheck(); };
+}
+
 /* ================= buttons ================= */
 document.addEventListener('click', e => {
-  if (e.target.closest('[data-echeck]')) { sfx('tap'); toast('The level check is being built. Coming in the next update!'); }
+  if (e.target.closest('[data-echeck]')) openCheck();
+  else if (e.target.closest('[data-ehear]')) {
+    const [a, b] = YAPPER_LINES.hello;
+    if (typeof SFX !== 'undefined' && SFX.muted) return toast('Sound is off. Turn it on to hear Yapper.');
+    Voice.say(a, why => { if (why === 'end') Voice.say(b); });
+  }
   else if (e.target.closest('[data-eplay]')) { sfx('tap'); toast('The games are being built. Coming soon!'); }
 });
 
