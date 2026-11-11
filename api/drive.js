@@ -124,6 +124,11 @@ async function finish(res, me, b) {
     const memo = cleanMemo(b.memo);
     await sql`UPDATE drive_students SET points = points + ${pts}, memo = memo || ${JSON.stringify(memo)}::jsonb, updated_at = now() WHERE student_id = ${me.id}`;
   }
+  // replay time: first finishes keep their time in drive_days; a replay's time is saved as a 'time' event so admin minutes count it
+  if (!first && !blocked && secs) {
+    await sql.query(`INSERT INTO drive_events (client_id, student_id, day, kind, data, replay, created_at) VALUES ($1, $2, $3, 'time', $4::jsonb, true, to_timestamp($5 / 1000.0)) ON CONFLICT (client_id) DO NOTHING`,
+      [me.id + ':' + b.cid + ':t', me.id, day, JSON.stringify({ secs }), at]);
+  }
   // answers are saved even on replays (marked), so the team can see what changed; blocked finishes save nothing
   const ev = blocked ? [] : cleanEvents(b.events);
   if (ev.length) {
