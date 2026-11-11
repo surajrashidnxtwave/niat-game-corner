@@ -1212,7 +1212,8 @@ function lock(msg){
   $('err').textContent = msg || ''; $('err').hidden = !msg;
 }
 $('login-form').onsubmit = e => { e.preventDefault(); KEY = $('key').value.trim(); if (KEY) load(); };
-$('refresh').onclick = () => { DV.data = null; load(); };
+/* reload the whole page, so a long-open tab also picks up a newly deployed version (key and tab are kept in this tab's sessionStorage) */
+$('refresh').onclick = () => location.reload();
 $('lock').onclick = () => lock();
 if (KEY) load();
 </script>
