@@ -252,7 +252,9 @@ async function driveReport(sql){
              (COALESCE(SUM(secs) FILTER (WHERE at > now() - interval '7 days'), 0) / 60)::int AS week,
              (COALESCE(SUM(secs) FILTER (WHERE at <= now() - interval '7 days' AND at > now() - interval '14 days'), 0) / 60)::int AS prev_week,
              (COALESCE(SUM(secs), 0) / 60)::int AS total,
-             (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) / 60.0)::numeric)::int FROM wk) AS med_week
+             (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) / 60.0)::numeric)::int FROM wk) AS med_week,
+             (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY x.secs) / 60.0)::numeric, 1)::float FROM
+                (SELECT student_id, SUM(secs) AS secs FROM tt WHERE (at AT TIME ZONE 'Asia/Kolkata')::date = ${IST} GROUP BY 1) x) AS med_today
       FROM tt`),
     // minutes per India calendar day, last 14 days
     sql.query(`WITH ${TIME}
@@ -351,7 +353,8 @@ export default async function handler(req, res) {
       // the attention metric: who trained, who hit the daily goal (15 minutes, same as DAY_GOAL in the page), median minutes of those who trained
       sql`SELECT to_char(day, 'YYYY-MM-DD') AS day, COUNT(*) FILTER (WHERE active > 0)::int AS trained,
                  COUNT(*) FILTER (WHERE active >= 900)::int AS hit_goal,
-                 ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY active) FILTER (WHERE active > 0) / 60.0)::numeric, 1)::float AS med_min
+                 ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY active) FILTER (WHERE active > 0) / 60.0)::numeric, 1)::float AS med_min,
+                 (SUM(active) / 60)::int AS minutes
           FROM daily WHERE day > current_date - 14 GROUP BY day ORDER BY day DESC`,
       // end-of-session "11-star" ratings: how many sessions got each star level
       sql`SELECT rating AS stars, COUNT(*)::int AS n FROM feedback WHERE kind = 'session' GROUP BY rating ORDER BY rating`,

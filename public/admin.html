@@ -297,6 +297,12 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         </div>
       </div>
       <div class="card">
+        <h2>Minutes trained each day</h2>
+        <p class="sub">Last 14 days (IST). Active minutes in Brain Gym games, all students together. Hover a bar for the number of students and the median per student.</p>
+        <div id="c-mins"></div>
+        <details style="margin-top:12px"><summary class="muted small" style="cursor:pointer">Show as a table</summary><div class="scroll"><table id="c-mins-t"></table></div></details>
+      </div>
+      <div class="card">
         <div class="head"><div><h2>Brain muscles, all universities</h2><p class="sub">Median score out of 100. A student's score on a muscle is their best on any game for it.</p></div><button class="btn" data-goto="unis">Compare universities →</button></div>
         <div id="c-skills"></div>
       </div>
@@ -399,6 +405,11 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           <div class="legend"><span><i style="background:var(--bad)"></i>1–4 Not there yet</span><span><i style="background:#C9CCE0"></i>5–6 Fine</span><span><i style="background:var(--brand)"></i>7–11 Would come back</span></div>
           <div id="dv-stars"></div>
         </div>
+      </div>
+      <div class="card">
+        <h2>Minutes in lessons each day</h2>
+        <p class="sub">Last 14 days (IST). Time in lessons finished that day, replays included, all students together. Each lesson counts at most 60 minutes; time in lessons left unfinished isn’t recorded. The table under “Active students each day” has the numbers.</p>
+        <div id="dv-mins"></div>
       </div>
       <div class="card">
         <h2>Active students each day</h2>
@@ -652,8 +663,9 @@ function render(){
     ['hero', 'Students logged in', fmt(joined), pctTxt(joined, roster) + ' of ' + fmt(roster) + ' on the list'],
     ['', 'Universities started', activeUnis + ' / ' + U.length, 'with at least one student logged in'],
     ['', 'Active today', fmt(a1), fmt(g0.hit_goal) + ' hit the 15-minute goal'],
+    ['', 'Minutes trained today', fmt(g0.minutes || 0), g0.trained ? 'median ' + (g0.med_min || 0) + ' min per student · ' + fmt(g0.trained) + ' trained' : 'nobody has trained yet today'],
     ['', 'Active in last 7 days', fmt(a7), pctTxt(a7, joined) + ' of students who logged in'],
-    ['', 'Minutes trained', fmt(mins), fmt(rounds) + ' rounds played'],
+    ['', 'Minutes trained, all time', fmt(mins), fmt(rounds) + ' rounds played'],
     ['', 'Median session rating', medStars + (rated ? ' / 11' : ''), rated ? back + ' rated 7+ (“I’ll be back”)' : 'no ratings yet']
   ];
   $('kpis').innerHTML = K.map(k => '<div class="kpi ' + k[0] + '"><div class="label">' + k[1] + '</div><div class="value">' + esc(k[2]) + '</div><div class="note">' + esc(k[3]) + '</div></div>').join('');
@@ -662,8 +674,13 @@ function render(){
   const byDay = new Map((d.goal || []).map(g => [g.day, g])), days = [];
   for (let i = 13; i >= 0; i--) {
     const k = new Date(Date.now() - i * 864e5).toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), g = byDay.get(k) || { trained:0, hit_goal:0, med_min:0 };
-    days.push({ day:k, hit:g.hit_goal, under:g.trained - g.hit_goal, trained:g.trained, med:g.med_min });
+    days.push({ day:k, hit:g.hit_goal, under:g.trained - g.hit_goal, trained:g.trained, med:g.med_min, minutes:g.minutes || 0 });
   }
+  bars($('c-mins'), days.some(r => r.minutes) ? days : [], [{ key:'minutes', color:'var(--brand)' }], r => dayLabel(r.day),
+    r => dayLabel(r.day) + '\n' + fmt(r.minutes) + ' minutes trained' + (r.trained ? '\n' + r.trained + ' students · median ' + (r.med || 0) + ' min each' : ''));
+  table($('c-mins-t'), [['Day', r => esc(dayLabel(r.day))], ['Minutes trained', r => fmt(r.minutes), 'n'], ['Students who trained', r => fmt(r.trained), 'n'],
+    ['Median per student', r => r.trained ? (r.med || 0) + ' min' : '–', 'n'], ['Hit the 15-minute goal', r => fmt(r.hit), 'n']], days.slice().reverse().filter(r => r.trained || r.minutes));
+  if (window.innerWidth < 640) $('c-mins').querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; });
   bars($('c-daily'), days, [{ key:'hit', color:'var(--brand)' }, { key:'under', color:'var(--brand-3)' }],
     r => dayLabel(r.day).replace(' ', ' '),
     r => dayLabel(r.day) + '\n' + r.trained + ' trained · ' + r.hit + ' hit 15 min' + (r.trained ? '\nMedian ' + (r.med || 0) + ' min' : ''));
@@ -933,7 +950,8 @@ function renderDrive(){
     ['hero', 'Students in Drive School', fmt(k.started), (joined ? pctTxt(k.started, joined) + ' of students who logged in · ' : '') + fmt(w.new_w) + ' new this week'],
     ['', 'Active this week', fmt(w.active_w), 'opened, finished or rated a lesson in the last 7 days', delta(w.active_w, w.active_pw)],
     ['', 'Lessons finished this week', fmt(w.lessons_w), 'first finishes, Day 1 onward', delta(w.lessons_w, w.lessons_pw)],
-    ['', 'Minutes in lessons this week', fmt(M.week), 'Today ' + fmt(M.today) + ' · all time ' + fmt(M.total) + (M.med_week != null ? ' · median ' + M.med_week + ' min per student this week' : ''), delta(M.week, M.prev_week)],
+    ['', 'Minutes in lessons today', fmt(M.today), M.students_today ? 'median ' + M.med_today + ' min per student · ' + fmt(M.students_today) + ' in lessons' : 'nobody has finished a lesson yet today'],
+    ['', 'Minutes in lessons this week', fmt(M.week), 'all time ' + fmt(M.total) + (M.med_week != null ? ' · median ' + M.med_week + ' min per student' : ''), delta(M.week, M.prev_week)],
     ['', 'Lesson rating', R.n ? R.med + ' / 11' : '–', R.n ? pctTxt(R.hi, R.n) + ' gave 7+ (“I’ll be back”) · ' + fmt(R.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)],
     ['', 'Went on to Day 1', pctTxt(k.lesson1, k.setup_done), fmt(k.lesson1) + ' of ' + fmt(k.setup_done) + ' who finished the Day 0 setup'],
     ['', 'Finished all ' + d.built + ' days', fmt(k.all_done), 'every lesson built so far']
@@ -966,6 +984,9 @@ function renderDrive(){
   table($('dv-daily-t'), [['Day', r => esc(dayLabel(r.day))], ['Active', r => fmt(r.active), 'n'], ['Finished a lesson', r => fmt(r.students), 'n'],
     ['Lessons finished', r => fmt(r.lessons), 'n'], ['Minutes in lessons', r => fmt(r.minutes), 'n'], ['Median time', r => r.med_min == null ? '–' : r.med_min + ' min', 'n']], days.slice().reverse().filter(r => r.active || r.minutes));
   if (window.innerWidth < 640) $('dv-daily').querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; });
+  bars($('dv-mins'), days.some(r => r.minutes) ? days : [], [{ key:'minutes', color:'var(--brand)' }], r => dayLabel(r.day),
+    r => dayLabel(r.day) + '\n' + fmt(r.minutes) + ' minutes in lessons' + (r.students ? '\n' + r.students + ' finished a lesson' : ''));
+  if (window.innerWidth < 640) $('dv-mins').querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; });
 
   /* lessons */
   table($('dv-funnel'), [
@@ -1066,7 +1087,7 @@ function renderSummary(){
   const roster = sum('on_roster'), joined = sum('joined'), a1 = sum('active1');
   const bw = D.week || {}, BR = rateStats((D.stars || []).map(r => ({ stars:r.stars, n:r.n })));
   const today = new Date().toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), g0 = (D.goal || []).find(g => g.day === today) || { trained:0, hit_goal:0 };
-  const dv = DV.data, w = dv ? dv.week || {} : {}, DS = dv ? driveStats() : null;
+  const dv = DV.data, w = dv ? dv.week || {} : {}, DS = dv ? driveStats() : null, DM = dv ? dv.mins || {} : {};
 
   $('sum-line').innerHTML = '<b>' + fmt(joined) + '</b> of ' + fmt(roster) + ' students on the list have logged in (' + pctTxt(joined, roster) + ') across ' + U.filter(u => u.joined).length + ' universities. '
     + 'In the last 7 days <b>' + fmt(bw.active_w) + '</b> trained in Brain Gym'
@@ -1074,15 +1095,19 @@ function renderSummary(){
 
   $('sum-bg').innerHTML = [
     ['Active this week', fmt(bw.active_w), pctTxt(bw.active_w, joined) + ' of students who logged in', delta(bw.active_w, bw.active_pw)],
-    ['Minutes trained this week', fmt(bw.minutes_w), bw.med_min_w != null ? 'median ' + bw.med_min_w + ' min per active student' : '', delta(bw.minutes_w, bw.minutes_pw)],
     ['Active today', fmt(a1), fmt(g0.hit_goal) + ' hit the 15-minute goal'],
-    ['Session rating', BR.n ? BR.med + ' / 11' : '–', BR.n ? pctTxt(BR.hi, BR.n) + ' gave 7+ · ' + fmt(BR.n) + ' ratings' : 'no ratings yet', pts(bw.hi_w, bw.rated_w, bw.hi_pw, bw.rated_pw)]
+    ['Minutes trained this week', fmt(bw.minutes_w), bw.med_min_w != null ? 'median ' + bw.med_min_w + ' min per active student' : '', delta(bw.minutes_w, bw.minutes_pw)],
+    ['Minutes trained today', fmt(g0.minutes || 0), g0.trained ? 'median ' + (g0.med_min || 0) + ' min per student' : 'nobody yet today'],
+    ['Session rating', BR.n ? BR.med + ' / 11' : '–', BR.n ? pctTxt(BR.hi, BR.n) + ' gave 7+ · ' + fmt(BR.n) + ' ratings' : 'no ratings yet', pts(bw.hi_w, bw.rated_w, bw.hi_pw, bw.rated_pw)],
+    ['Minutes trained, all time', fmt(sum('minutes')), fmt(sum('rounds')) + ' rounds played']
   ].map(mTile).join('');
   $('sum-dv').innerHTML = !dv ? '<p class="muted">Loading…</p>' : [
     ['Active this week', fmt(w.active_w), pctTxt(w.active_w, joined) + ' of students who logged in', delta(w.active_w, w.active_pw)],
-    ['Lessons finished this week', fmt(w.lessons_w), w.med_lessons_w != null ? 'median ' + w.med_lessons_w + ' per active student' : '', delta(w.lessons_w, w.lessons_pw)],
-    ['Minutes in lessons this week', fmt((dv.mins || {}).week || 0), 'Today ' + fmt((dv.mins || {}).today || 0) + ' · all time ' + fmt((dv.mins || {}).total || 0), delta((dv.mins || {}).week, (dv.mins || {}).prev_week)],
-    ['Lesson rating', DS.all.n ? DS.all.med + ' / 11' : '–', DS.all.n ? pctTxt(DS.all.hi, DS.all.n) + ' gave 7+ · ' + fmt(DS.all.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)]
+    ['In lessons today', fmt(DM.students_today || 0), 'students who finished a lesson today'],
+    ['Minutes in lessons this week', fmt(DM.week || 0), DM.med_week != null ? 'median ' + DM.med_week + ' min per student' : '', delta(DM.week, DM.prev_week)],
+    ['Minutes in lessons today', fmt(DM.today || 0), DM.students_today ? 'median ' + DM.med_today + ' min per student' : 'nobody yet today'],
+    ['Lesson rating', DS.all.n ? DS.all.med + ' / 11' : '–', DS.all.n ? pctTxt(DS.all.hi, DS.all.n) + ' gave 7+ · ' + fmt(DS.all.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)],
+    ['Minutes in lessons, all time', fmt(DM.total || 0), fmt(w.lessons_w) + ' lessons finished this week' + (w.med_lessons_w != null ? ' (median ' + w.med_lessons_w + ' each)' : '')]
   ].map(mTile).join('');
 
   /* what to look at: plain rules on the numbers, with a minimum group size */
