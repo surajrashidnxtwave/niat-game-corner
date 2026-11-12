@@ -100,7 +100,9 @@ const CSV = {
   progress: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, p.game_id, p.active / 60 AS minutes, p.plays AS rounds, p.best, p.best_pct, p.vol AS kg_lifted, p.updated_at
              FROM progress p JOIN students s ON s.id = p.student_id ORDER BY s.pilot, s.roll, p.game_id`,
   drive_students: `SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.started_on, ds.points,
-                     COUNT(dd.day)::int AS days_done, MAX(dd.day) AS last_day, MAX(dd.completed_at) AS last_done_at, ds.memo
+                     COUNT(dd.day)::int AS days_done, MAX(dd.day) AS last_day, MAX(dd.completed_at) AS last_done_at,
+                     (COALESCE(SUM(LEAST(dd.secs, 3600)), 0) + COALESCE((SELECT SUM(LEAST((e.data->>'secs')::int, 3600)) FROM drive_events e WHERE e.student_id = ds.student_id AND e.kind = 'time'), 0)) / 60 AS minutes,
+                     ds.memo
                    FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN drive_days dd ON dd.student_id = ds.student_id
                    GROUP BY s.id, ds.student_id ORDER BY s.pilot, days_done DESC, s.name`,
   drive_ratings: `SELECT e.created_at, s.name, s.roll AS niat_id, s.pilot AS batch, e.day, (e.data->>'stars')::int AS stars,
@@ -139,7 +141,13 @@ async function driveReport(sql){
   const REAL = `s.pilot NOT LIKE 'DEMO%'`;
   const DD = `dd AS (SELECT student_id, COUNT(*) FILTER (WHERE day > 0)::int AS lessons, BOOL_OR(day = 0) AS setup, MAX(completed_at) AS last FROM drive_days GROUP BY student_id)`;
   const RATE = `e.kind = 'rate' AND ${REAL}`, STARS = `(e.data->>'stars')::int`;
-  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students, week, rates, rateTexts, chips, lessonHist, rateHist] = await Promise.all([
+  // lesson time: first finishes (drive_days.secs) + replays ('time' events). Each lesson capped at 60 minutes,
+  // so a tab left open overnight doesn't count as hours. Time in lessons left unfinished isn't recorded.
+  const TIME = `t AS (SELECT d.student_id, d.completed_at AS at, LEAST(d.secs, 3600) AS secs FROM drive_days d WHERE d.secs IS NOT NULL
+                 UNION ALL SELECT e.student_id, e.created_at, LEAST((e.data->>'secs')::int, 3600) FROM drive_events e WHERE e.kind = 'time'),
+           tt AS (SELECT t.* FROM t JOIN students s ON s.id = t.student_id WHERE ${REAL})`;
+  const IST = `(now() AT TIME ZONE 'Asia/Kolkata')::date`;
+  const [kpi, funnel, daily, acc, scales, study, hours, stands, texts, unis, students, week, rates, rateTexts, chips, lessonHist, rateHist, mins, minsDaily] = await Promise.all([
     sql.query(`WITH ${DD}
       SELECT COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
              COUNT(*) FILTER (WHERE dd.lessons >= ${DRIVE_LAST_BUILT})::int AS all_done,
@@ -189,17 +197,21 @@ async function driveReport(sql){
       WHERE e.kind IN ('reflect', 'plan', 'stand') AND e.replay = false AND ${REAL} ORDER BY e.created_at DESC LIMIT 300`),
     sql.query(`WITH ${DD},
            rt AS (SELECT e.student_id, COUNT(*)::int AS n, COUNT(*) FILTER (WHERE ${STARS} >= 7)::int AS hi
-                  FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
-      SELECT s.pilot, COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
+                  FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id), ${TIME},
+           tm AS (SELECT student_id, SUM(secs) AS secs FROM tt GROUP BY student_id)
+      SELECT s.pilot, (COALESCE(SUM(tm.secs), 0) / 60)::int AS minutes, COUNT(*)::int AS started, COUNT(*) FILTER (WHERE dd.setup)::int AS setup_done, COUNT(*) FILTER (WHERE dd.lessons > 0)::int AS lesson1,
              COALESCE(SUM(dd.lessons), 0)::int AS lessons, COUNT(*) FILTER (WHERE dd.last > now() - interval '7 days')::int AS active7,
              COALESCE(SUM(rt.n), 0)::int AS rated, COALESCE(SUM(rt.hi), 0)::int AS rated_hi
       FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
+           LEFT JOIN tm ON tm.student_id = ds.student_id
       WHERE ${REAL} GROUP BY s.pilot`),
     sql.query(`WITH ${DD},
-           rt AS (SELECT e.student_id, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY ${STARS}))::numeric, 1)::float AS stars FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id)
+           rt AS (SELECT e.student_id, ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY ${STARS}))::numeric, 1)::float AS stars FROM drive_events e WHERE e.kind = 'rate' GROUP BY e.student_id),
+           ${TIME}, tm AS (SELECT student_id, SUM(secs) AS secs FROM tt GROUP BY student_id)
       SELECT s.name, s.roll AS niat_id, s.pilot AS batch, ds.points, to_char(ds.started_on, 'YYYY-MM-DD') AS started_on,
-             COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at, rt.stars
+             COALESCE(dd.lessons, 0) AS lessons, COALESCE(dd.setup, false) AS setup, dd.last AS last_at, rt.stars, (COALESCE(tm.secs, 0) / 60)::int AS minutes
       FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id LEFT JOIN rt ON rt.student_id = ds.student_id
+           LEFT JOIN tm ON tm.student_id = ds.student_id
       WHERE ${REAL} ORDER BY lessons DESC, ds.points DESC, s.name LIMIT 3000`),
     // this week (last 7 days) vs the 7 days before, for the trend arrows
     sql.query(`SELECT
@@ -231,12 +243,28 @@ async function driveReport(sql){
     // per batch: how many students finished 0, 1, 2... lessons, and how many ratings of each star level (for per-university medians)
     sql.query(`WITH ${DD} SELECT s.pilot, COALESCE(dd.lessons, 0) AS v, COUNT(*)::int AS n
       FROM drive_students ds JOIN students s ON s.id = ds.student_id LEFT JOIN dd ON dd.student_id = ds.student_id WHERE ${REAL} GROUP BY 1, 2`),
-    sql.query(`SELECT s.pilot, ${STARS} AS v, COUNT(*)::int AS n FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} GROUP BY 1, 2`)
+    sql.query(`SELECT s.pilot, ${STARS} AS v, COUNT(*)::int AS n FROM drive_events e JOIN students s ON s.id = e.student_id WHERE ${RATE} GROUP BY 1, 2`),
+    // minutes in lessons: today (IST), last 7 days, the 7 before, all time, and the median per student this week
+    sql.query(`WITH ${TIME},
+           wk AS (SELECT student_id, SUM(secs) AS secs FROM tt WHERE at > now() - interval '7 days' GROUP BY student_id)
+      SELECT (COALESCE(SUM(secs) FILTER (WHERE (at AT TIME ZONE 'Asia/Kolkata')::date = ${IST}), 0) / 60)::int AS today,
+             COUNT(DISTINCT student_id) FILTER (WHERE (at AT TIME ZONE 'Asia/Kolkata')::date = ${IST})::int AS students_today,
+             (COALESCE(SUM(secs) FILTER (WHERE at > now() - interval '7 days'), 0) / 60)::int AS week,
+             (COALESCE(SUM(secs) FILTER (WHERE at <= now() - interval '7 days' AND at > now() - interval '14 days'), 0) / 60)::int AS prev_week,
+             (COALESCE(SUM(secs), 0) / 60)::int AS total,
+             (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY secs) / 60.0)::numeric)::int FROM wk) AS med_week,
+             (SELECT ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY x.secs) / 60.0)::numeric, 1)::float FROM
+                (SELECT student_id, SUM(secs) AS secs FROM tt WHERE (at AT TIME ZONE 'Asia/Kolkata')::date = ${IST} GROUP BY 1) x) AS med_today
+      FROM tt`),
+    // minutes per India calendar day, last 14 days
+    sql.query(`WITH ${TIME}
+      SELECT to_char((at AT TIME ZONE 'Asia/Kolkata')::date, 'YYYY-MM-DD') AS day, (SUM(secs) / 60)::int AS minutes
+      FROM tt WHERE at > now() - interval '15 days' GROUP BY 1`)
   ]);
   const um = new Map();                                // batches -> universities
   for (const p of unis) {
     const name = uniOf(p.pilot), u = um.get(name) || { uni: name, started: 0, setup_done: 0, lesson1: 0, lessons: 0, active7: 0 };
-    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7', 'rated', 'rated_hi']) u[k] = (u[k] || 0) + p[k];
+    for (const k of ['started', 'setup_done', 'lesson1', 'lessons', 'active7', 'rated', 'rated_hi', 'minutes']) u[k] = (u[k] || 0) + p[k];
     um.set(name, u);
   }
   const medBy = rows => {                              // batches -> university histograms -> median
@@ -249,7 +277,7 @@ async function driveReport(sql){
   for (const st of students) st.uni = uniOf(st.batch);
   for (const t of texts) t.uni = uniOf(t.batch);
   for (const t of rateTexts) t.uni = uniOf(t.batch);
-  return { ok: true, built: DRIVE_LAST_BUILT, kpi: kpi[0], week: week[0], funnel, daily, acc, scales: scaleScores(scales), study, hours: hours[0], stands, texts,
+  return { ok: true, built: DRIVE_LAST_BUILT, kpi: kpi[0], week: week[0], mins: mins[0], minsDaily, funnel, daily, acc, scales: scaleScores(scales), study, hours: hours[0], stands, texts,
            rates, rateTexts, chips, unis: [...um.values()].sort((a, b) => b.started - a.started), students };
 }
 
@@ -325,7 +353,8 @@ export default async function handler(req, res) {
       // the attention metric: who trained, who hit the daily goal (15 minutes, same as DAY_GOAL in the page), median minutes of those who trained
       sql`SELECT to_char(day, 'YYYY-MM-DD') AS day, COUNT(*) FILTER (WHERE active > 0)::int AS trained,
                  COUNT(*) FILTER (WHERE active >= 900)::int AS hit_goal,
-                 ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY active) FILTER (WHERE active > 0) / 60.0)::numeric, 1)::float AS med_min
+                 ROUND((percentile_cont(0.5) WITHIN GROUP (ORDER BY active) FILTER (WHERE active > 0) / 60.0)::numeric, 1)::float AS med_min,
+                 (SUM(active) / 60)::int AS minutes
           FROM daily WHERE day > current_date - 14 GROUP BY day ORDER BY day DESC`,
       // end-of-session "11-star" ratings: how many sessions got each star level
       sql`SELECT rating AS stars, COUNT(*)::int AS n FROM feedback WHERE kind = 'session' GROUP BY rating ORDER BY rating`,

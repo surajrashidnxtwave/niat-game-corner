@@ -12,10 +12,10 @@
 //   - points per lesson are capped, so an edited page can't inflate the leaderboard
 import { db, studentFor, limited, ipOf, int, text, dbReady } from './_lib/db.js';
 
-export const DRIVE_LAST_BUILT = 7;      // highest day with content in this release
+export const DRIVE_LAST_BUILT = 14;     // highest day with content in this release
 const DAILY_MAX = 3;
 const MAX_PTS = 400;                    // generous cap per lesson; real lessons give about 100–250
-const KINDS = ['attempt', 'predict', 'recall', 'plan', 'rewrite', 'reflect', 'stand', 'game', 'scale', 'study', 'pairs', 'theory', 'sort', 'review', 'story'];
+const KINDS = ['attempt', 'predict', 'recall', 'plan', 'rewrite', 'reflect', 'stand', 'game', 'scale', 'study', 'pairs', 'theory', 'sort', 'review', 'story', 'practice'];
 const DIMS = ['strategy', 'motivation', 'voice'];
 const SPLIT_MIN = 20;
 
@@ -123,6 +123,11 @@ async function finish(res, me, b) {
   if (first) {
     const memo = cleanMemo(b.memo);
     await sql`UPDATE drive_students SET points = points + ${pts}, memo = memo || ${JSON.stringify(memo)}::jsonb, updated_at = now() WHERE student_id = ${me.id}`;
+  }
+  // replay time: first finishes keep their time in drive_days; a replay's time is saved as a 'time' event so admin minutes count it
+  if (!first && !blocked && secs) {
+    await sql.query(`INSERT INTO drive_events (client_id, student_id, day, kind, data, replay, created_at) VALUES ($1, $2, $3, 'time', $4::jsonb, true, to_timestamp($5 / 1000.0)) ON CONFLICT (client_id) DO NOTHING`,
+      [me.id + ':' + b.cid + ':t', me.id, day, JSON.stringify({ secs }), at]);
   }
   // answers are saved even on replays (marked), so the team can see what changed; blocked finishes save nothing
   const ev = blocked ? [] : cleanEvents(b.events);

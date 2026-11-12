@@ -29,7 +29,7 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - To add a day: write `dayN.js`, then raise `BUILT` in `drive.js` AND `DRIVE_LAST_BUILT` in `api/drive.js` (both must match).
 - Take a Stand is never judged or scored. Peer split only at 20+ answers. Drive points never mix with Brain Gym points.
 - Day 0 uses our own mindset and stick-with-it questions (not the published Dweck/Grit-S scales, so no permission needed). Don't compare them with published norms. Students aren't told about the Day 56 re-check.
-- Days 0 and 4–7 were written by Claude and are marked FOR TEAM REVIEW in their file headers.
+- Days 0 and 4–14 were written by Claude and are marked FOR TEAM REVIEW in their file headers. Day 12 saves two if-then plans in memo plan_d12 (an array) for Day 19 to check.
 - Day 0 is required: Drive School shows only a quiet Day 0 start screen until it's done, and Day 1 needs Day 0 (client and server). Turbo introduces himself on Day 0's first screen ("Meet Turbo"), not before.
 - Turbo talks: info screens are chat bubbles typed word by word, in step with recorded clips (Kokoro af_heart, normal pitch, 100% speed, short pauses between phrases). Clips live in `public/assets/voice/` with `manifest.json`. Lines without a clip type silently. Copy is short and casual for Gen Z students.
 - After ANY change to Turbo's lines (lesson body/guide/wrap text, or the TURBO_LINES block in `drive.js`), run `python scripts/turbo-voice.py`. It records only new or changed lines and deletes unused clips. Needs kokoro-onnx + model files in `~/.cache/kokoro` (see the script header).
@@ -60,3 +60,16 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Test accounts can jump into any game from the console: `Adda.open('express', 6)`, `Adda.open('flick', 2)`, `Adda.open('pairup', 1)`, `Adda.open('munch', 1)`, `Adda.open('post', 3)`, `Adda.open('echo', 2)`.
 - After `english.css`/`english.js` changes, raise their `?v=` numbers in `index.html`. The dev server caches `api/_lib` modules: restart it after editing them.
 - Local testing without the Vercel CLI: `npm run dev:local` (scripts/dev-server.mjs serves `public/` and runs `api/*.js` with `.env.local`, the dev DB) on http://127.0.0.1:3000.
+
+## UI v2 (branch ui-overhaul, Nov 2026)
+- Font: Plus Jakarta Sans (text) + Barlow Condensed (headlines, big numbers). Styles for home, nav, game shell, results, leaderboard and login live in the "UI v2" block at the end of the `<style>` in `public/index.html`.
+- Home: one dark hero (`#h-today` ring + title + start button, `#h-checks` plan, `#h-week`), then quests and rival, then the library with skill filter chips (`renderLib`, `LIBF`).
+- Phones and tablets get a 4-tab dark dock (Brain Gym, Drive School, Leaderboard, Profiles); laptops keep the sidebar. The dock hides while a pop-up is open.
+- Dark theme: `html[data-theme="dark"]`, chosen with the Theme button (saved in localStorage `gc_theme`, default light). Never hard-code `#fff` or `var(--ink)` as a background: use `--card`, `--chip`, `--tile`, and `--pill` / `--pill-ink` for filled dark pills. In `color-mix`, mix with `var(--card)`, not `#fff`. Drive School's dark tokens are at the end of `drive.css`.
+- After changing `drive.css` or `drive.js`, raise their `?v=` numbers in `index.html`.
+- On the intro screen, Enter starts the game.
+
+## Welcome page + home-screen app (Nov 2026)
+- `public/welcome.html` is the landing page (3D arcade, three.js r128 from CDN). It is the default page: `index.html` sends every new visit there (logged in or not) unless the URL has a `#hash`, `?src=home-screen` (the installed app), or this tab already came through (sessionStorage `gc_in`). Its Log in / Insert NIAT ID buttons go to `/#login`; logged-in visitors see "Continue" (`/#home`).
+- Don't show game counts on the welcome page: games unlock over time.
+- Home-screen install: `public/manifest.webmanifest`, icons in `public/assets/icons/`, `public/sw.js` (caches nothing, only an offline page), `public/install.js` (any `[data-install]` button: real prompt on Chrome/Edge, steps on iPhone and in-app browsers; hidden when already opened as the app).

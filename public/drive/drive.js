@@ -7,7 +7,7 @@
 
 /* ================= config ================= */
 const FLAGS = {};                  // screens with flag:'x' show only when FLAGS.x is true (Day 0 now uses our own items, no flag)
-const BUILT = 7;                   // highest day with content in this release (the server has the same number)
+const BUILT = 14;                  // highest day with content in this release (the server has the same number)
 const DAILY_MAX = 3;
 const TZ = 'Asia/Kolkata';
 
@@ -179,7 +179,8 @@ POSES.forEach(p => { const i = new Image(); i.src = 'assets/turbo/turbo-' + p + 
   'Nice work! Lesson done.', 'Replay done. Points count only the first time.', 'Nice recall!',
   'You came back and got it.', 'First try!', 'Not this time. Your call: try again or skip.',
   'Each review resets the curve and slows the next drop.', 'Let’s see what Sam was doing.',
-  'Not quite.', 'Nice work!', 'All of them. Nailed it.', 'Every blank right.', 'Perfect order.', 'Close, but not quite.', 'Yes! Bold and right.'
+  'Not quite.', 'Nice work!', 'All of them. Nailed it.', 'Every blank right.', 'Perfect order.', 'Close, but not quite.', 'Yes! Bold and right.',
+  'Stretch landed! +15.', 'Missed, but you stretched. That’s how you grow.'
 ]; /*END_TURBO_LINES*/
 
 /* Turbo's voice: clips recorded ahead of time with Kokoro (am_fenrir, +3 semitones) by scripts/turbo-voice.py.
@@ -369,7 +370,7 @@ function loadDay(d){
   if (DRIVE_LESSONS[d]) return Promise.resolve(DRIVE_LESSONS[d]);
   return new Promise((ok, bad) => {
     const s = document.createElement('script');
-    s.src = 'content/drive/day' + d + '.js?v=5';
+    s.src = 'content/drive/day' + d + '.js?v=6';
     s.onload = () => DRIVE_LESSONS[d] ? ok(DRIVE_LESSONS[d]) : bad();
     s.onerror = bad;
     document.head.appendChild(s);
@@ -419,7 +420,7 @@ function guide(text, mood, pose, quiet, say){
   guideTW = text ? typeOut(b, { speak: !quiet, say }) : null;
   setPose(pose || (mood === 'ok' ? 'correct' : mood === 'bad' ? 'oops' : basePose));
 }
-const THINK = new Set(['story', 'estimate', 'rank', 'bet', 'pick', 'template', 'counter', 'selfcheck', 'predict', 'slider', 'scenarioSlider', 'poll', 'gameTheory']);
+const THINK = new Set(['story', 'estimate', 'rank', 'bet', 'pick', 'template', 'counter', 'selfcheck', 'predict', 'slider', 'scenarioSlider', 'poll', 'gameTheory', 'calendar', 'commons', 'ifthen']);
 let typingT = null;
 document.addEventListener('input', e => {
   if (!L || !P || !P.contains(e.target) || !e.target.matches('textarea,input[type=text],input:not([type])')) return;
@@ -452,7 +453,7 @@ function askClose(){
   if (L.mustRate) { if (!L.rating) rateNow(); toast('One quick rating, then you’re done.'); return; }
   if (L.i === 0 || last || L.finished) return closeLesson();
   openModal('<h3 id="mtitle">Leave this lesson?</h3><p style="margin:0">Progress inside this lesson won’t be saved. You can start it again any time.</p>'
-    + '<button type="button" class="btn full" id="dl-stay" style="background:var(--ink);color:#fff">Keep going</button>'
+    + '<button type="button" class="btn full" id="dl-stay">Keep going</button>'
     + '<button type="button" class="mclose" id="dl-go">Leave anyway</button>');
   qs('#dl-stay').onclick = () => closeModal();
   qs('#dl-go').onclick = () => { closeModal(); closeLesson(); };
@@ -557,6 +558,16 @@ function miniCurve(box, i){
   }
   const steps = [['c1', 'c3'], ['c2', 'c4'], ['c5'], ['c6']];
   for (let k = 0; k <= Math.min(i, steps.length - 1); k++) steps[k].forEach(c => qs('.' + c, box).classList.add('on'));
+}
+/* a month calendar (Mon-first weeks, the last day is the exam); on = picked days */
+function calGrid(N, on, lock, cls){
+  return '<div class="dcal' + (cls ? ' ' + cls : '') + '">' + ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => '<span class="dcal-h" aria-hidden="true">' + d + '</span>').join('')
+    + Array.from({ length: N }, (_, i) => {
+      const d = i + 1;
+      if (d === N) return '<span class="dcal-d exam" role="img" aria-label="Day ' + d + ': exam">🎯</span>';
+      return lock ? '<span class="dcal-d' + (on.has(d) ? ' on' : '') + '" aria-label="Day ' + d + (on.has(d) ? ': study' : '') + '">' + d + '</span>'
+        : '<button type="button" class="dcal-d" data-d="' + d + '" aria-pressed="false" aria-label="Day ' + d + '">' + d + '</button>';
+    }).join('') + '</div>';
 }
 const fill = (t, d) => String(t).replace(/\{(\w+)\}/g, (m, k) => d[k] != null ? esc(String(d[k])) : m);
 
@@ -1287,6 +1298,135 @@ estimate(s, a){
   });
 },
 
+/* Day 8: place study sessions on a calendar before an exam (the last day). s.weeks, s.sessions. Saves L.data.cal for calendarCompare */
+calendar(s, a){
+  const N = (s.weeks || 4) * 7, need = s.sessions || 6, on = new Set();
+  a.card.appendChild(frag(kick(s.kicker || 'Plan it') + '<h3>' + s.title + '</h3>' + (s.text ? '<p>' + s.text + '</p>' : '')
+    + calGrid(N, on, false) + '<p class="dnote dcenter" id="dp-caln" aria-live="polite">0 of ' + need + ' placed</p>'));
+  qa('.dcal-d[data-d]', a.card).forEach(b => b.onclick = () => {
+    const d = +b.dataset.d;
+    if (on.has(d)) on.delete(d); else if (on.size < need) on.add(d); else { toast('That’s all ' + need + '. Tap a day again to move it.'); return; }
+    sfx('tap'); b.classList.toggle('on', on.has(d)); b.setAttribute('aria-pressed', on.has(d));
+    qs('#dp-caln').textContent = on.size + ' of ' + need + ' placed'; a.ready(on.size === need);
+  });
+  a.cont(s.btn || 'Lock my plan', false, () => {
+    const days = [...on].sort((x, y) => x - y), weeks = new Set(days.map(d => Math.ceil(d / 7))).size, late = days.filter(d => d > N - 4).length;
+    L.data.cal = { days, weeks, late, N };
+    log('practice', { key: 'calendar', days, weeks, last3: late, first: days[0] });
+    addPts(10);
+  });
+},
+/* your plan next to a spaced plan (s.good: the spaced days) */
+calendarCompare(s, a){
+  const c = L.data.cal || { days: [], weeks: 0, late: 0, N: 28 };
+  const msg = c.late >= Math.ceil(c.days.length / 2) ? (c.late === c.days.length ? 'All' : 'Half or more') + ' of your sessions are in the last 3 days. That’s cramming: it feels productive, but most of it fades soon after the exam.'
+    : c.weeks >= 3 ? 'Nicely spread over ' + c.weeks + ' weeks. That’s spacing, the same idea the research backs.'
+    : 'Some spacing, but your sessions bunch up in ' + plural(c.weeks, 'week') + '. Starting earlier gives every review a gap to work with.';
+  a.card.appendChild(frag(kick(s.kicker || 'Compare') + '<h3>' + s.title + '</h3>'
+    + '<div class="dcal-two"><div><p class="dcal-cap">Your plan</p>' + calGrid(c.N, new Set(c.days), true) + '</div>'
+    + '<div><p class="dcal-cap">A spaced plan</p>' + calGrid(c.N, new Set(s.good), true, 'good') + '</div></div>'
+    + '<p>' + msg + '</p>' + (s.note ? '<p class="dnote">' + s.note + '</p>' : '')));
+  a.cont();
+},
+
+/* quick-fire drill: tap the answer for each item, no explanations. Two drills (blocked, then mixed) feed drillResult */
+drill(s, a){
+  const its = s.items, n = its.length, t0 = Date.now(); let k = 0, right = 0, busy = false;
+  a.card.appendChild(frag(kick(s.kicker) + '<h3>' + s.title + '</h3>' + (s.text ? '<p>' + s.text + '</p>' : '')
+    + '<div class="dtf-card"><small id="dp-drn"></small><p class="dmono dcode" id="dp-drq"></p></div>'
+    + '<div class="dopts ddrill">' + s.opts.map(o => '<button class="dopt" data-v="' + o + '">' + o + '</button>').join('') + '</div><p class="dnote dcenter" id="dp-drf" aria-live="polite"></p>'));
+  actions('');
+  const show = () => { qs('#dp-drn').textContent = (k + 1) + ' of ' + n; qs('#dp-drq').textContent = its[k][0]; qa('.dopt', a.card).forEach(b => b.classList.remove('right', 'wrong')); busy = false; };
+  const end = () => {
+    const secs = Math.round((Date.now() - t0) / 1000);
+    L.data.drill = Object.assign({}, L.data.drill, { [s.set]: { right, n, secs } });
+    log('practice', { key: 'drill', set: s.set, right, of: n, secs });
+    addPts(right);
+    a.card.innerHTML = '';
+    a.card.appendChild(frag(kick(s.kicker) + '<h3>Round done</h3><div class="dfacts"><div class="dfact"><b>' + right + ' / ' + n + '</b><span>right</span></div><div class="dfact"><b>' + secs + 's</b><span>time taken</span></div></div>' + (s.end ? '<p>' + s.end + '</p>' : '')));
+    a.cont();
+  };
+  qa('.dopt', a.card).forEach(b => b.onclick = () => {
+    if (busy) return; busy = true;
+    const it = its[k], ok = b.dataset.v === it[1];
+    if (ok) { right++; sfx('softok'); } else sfx('softbad');
+    b.classList.add(ok ? 'right' : 'wrong');
+    qs('#dp-drf').innerHTML = ok ? '' : '<b class="dbad">' + esc(it[0]) + ' is ' + it[1] + '.</b>';
+    setTimeout(() => { qs('#dp-drf').innerHTML = ''; k++; if (k < n) show(); else end(); }, ok ? 350 : 1100);
+  });
+  show();
+},
+drillResult(s, a){
+  const d = L.data.drill || {}, row = (id, lab) => { const x = d[id] || {}; return '<div class="dfact"><b>' + (x.right ?? '–') + ' / ' + (x.n ?? '–') + '</b><span>' + lab + (x.secs != null ? ', ' + x.secs + 's' : '') + '</span></div>'; };
+  a.card.appendChild(frag(kick('Your result') + '<h3>' + s.title + '</h3><div class="dfacts">' + s.sets.map(x => row(x[0], x[1])).join('') + '</div>' + (s.body || []).map(p => '<p>' + p + '</p>').join('')));
+  a.cont();
+},
+
+/* if-then plan: two boxes. All plans from one day are kept together in memo plan_dN (a later day checks them) */
+ifthen(s, a){
+  const ex = s.examples || [];
+  a.card.appendChild(frag(kick(s.kicker || 'Your plan') + '<h3>' + s.q + '</h3>' + (s.text ? '<p>' + s.text + '</p>' : '')
+    + (ex.length ? '<p class="dnote">Stuck? Tap an example, then change it to fit your week.</p><div class="dbank">' + ex.map((e, i) => '<button class="dchipw" data-i="' + i + '">If ' + e[0] + ', then I’ll ' + e[1] + '</button>').join('') + '</div>' : '')
+    + '<div class="dfield"><label for="dp-if">If…</label><input id="dp-if" type="text" autocomplete="off" placeholder="' + esc(s.ifPh || 'a time, a place or a feeling') + '"></div>'
+    + '<div class="dfield"><label for="dp-then">then I’ll…</label><input id="dp-then" type="text" autocomplete="off" placeholder="' + esc(s.thenPh || 'one small, clear action') + '"></div>'
+    + '<div class="dmeta"><span id="dp-itm">At least 3 words in each box.</span><span></span></div>'));
+  const fi = qs('#dp-if'), ft = qs('#dp-then'); blockPaste(fi); blockPaste(ft);
+  const clean = () => [fi.value.trim().replace(/^if\s+/i, '').replace(/[,.]$/, ''), ft.value.trim().replace(/^then\s+/i, '').replace(/^i(’|')?ll\s+|^i will\s+/i, '').replace(/\.$/, '')];
+  let used = -1;
+  const upd = () => {
+    const [x, y] = clean(), copy = used >= 0 && norm(x) === norm(ex[used][0]) && norm(y) === norm(ex[used][1]);
+    qs('#dp-itm').textContent = copy ? 'Change it a little so it fits your week.' : 'At least 3 words in each box.';
+    a.ready(words(x) >= 3 && words(y) >= 3 && !copy);
+  };
+  qa('.dchipw', a.card).forEach(b => b.onclick = () => { sfx('tap'); used = +b.dataset.i; fi.value = ex[used][0]; ft.value = ex[used][1]; upd(); ft.focus(); });
+  fi.oninput = upd; ft.oninput = upd;
+  a.cont(s.btn || 'Save my plan', false, () => {
+    const [x, y] = clean(), text = 'If ' + x + ', then I’ll ' + y + '.', k = 'plan_d' + L.d;
+    L.memo[k] = (Array.isArray(L.memo[k]) ? L.memo[k] : []).concat(text);
+    log('plan', { key: s.key, text, cue: x, action: y, fromExample: used >= 0, words: words(text) });
+    addPts(10); sfx('select');
+  });
+},
+
+/* Day 13: a shared resource game. You + 4 bots share hostel Wi-Fi for s.rounds nights; each night everyone goes light or heavy.
+   Speed depends on how many go heavy; going heavy is always better for you that night, but worse for the hostel.
+   The bots: when the Wi-Fi was fast, one more of them is tempted to go heavy; when it crawled, one backs off; when you went heavy, one copies you. */
+commons(s, a){
+  const LV = ['Fast', 'OK', 'Slow', 'Crawl'], lvOf = H => H === 0 ? 0 : H <= 2 ? 1 : H === 3 ? 2 : 3;
+  const PAY = s.payoff || { l: [3, 2, 1, 0], h: [5, 4, 3, 2] }, M = (s.mates || ['Riya', 'Kabir', 'Dev', 'Asha']).length, R = s.rounds || 5;
+  const hist = []; let m = s.start || 0, mine = 0, hostel = 0;
+  const table = '<table class="dpay"><caption class="sr">Your points each night</caption><thead><tr><th></th>' + LV.map(l => '<th>' + l + '</th>').join('') + '</tr></thead><tbody>'
+    + [['l', 'Light'], ['h', 'Heavy']].map(([k, t]) => '<tr><th>' + t + '</th>' + PAY[k].map(v => '<td>' + v + '</td>').join('') + '</tr>').join('') + '</tbody></table>'
+    + '<p class="dnote">Speed: <b>Fast</b> if nobody goes heavy, <b>OK</b> with 1–2 heavy, <b>Slow</b> with 3, <b>Crawl</b> with 4–5.</p>';
+  const draw = msg => {
+    const r = hist.length;
+    a.card.innerHTML = '';
+    a.card.appendChild(frag(kick(s.kicker || 'Play it') + '<h3>' + s.title + '</h3><p>' + s.text + '</p>' + table
+      + '<div class="dscore"><span>Night <b>' + Math.min(r + 1, R) + '</b> of ' + R + '</span><span>You <b>' + mine + '</b></span><span>Hostel <b>' + hostel + '</b></span></div>'
+      + '<div class="dhist">' + hist.map((h, i) => '<span>N' + (i + 1) + ': you ' + (h.me === 'h' ? 'heavy' : 'light') + ', ' + h.m + ' of ' + M + ' mates heavy · ' + LV[h.lv] + '</span>').join('') + '</div>'
+      + (msg ? '<p class="dnote" aria-live="polite">' + msg + '</p>' : '')
+      + (r < R ? '<div class="dsides two"><button class="dsidecard" data-m="l"><b>Light</b><span>' + (s.hint ? s.hint.l : 'Chats, notes, one video in low quality.') + '</span></button><button class="dsidecard" data-m="h"><b>Heavy</b><span>' + (s.hint ? s.hint.h : 'HD streaming and big downloads all night.') + '</span></button></div>' : '')));
+    qa('[data-m]', a.card).forEach(b => b.onclick = () => {
+      sfx('tap');
+      const me = b.dataset.m, H = m + (me === 'h' ? 1 : 0), lv = lvOf(H);
+      const you = PAY[me][lv], all = you + m * PAY.h[lv] + (M - m) * PAY.l[lv];
+      hist.push({ me, m, lv, you, all }); mine += you; hostel += all;
+      const txt = 'Night ' + hist.length + ': ' + m + ' of ' + M + ' mates went heavy, and you went ' + (me === 'h' ? 'heavy' : 'light') + '. Wi-Fi: ' + LV[lv] + '. You get ' + you + '.';
+      m = Math.max(0, Math.min(M, m + (me === 'h' ? 1 : 0) + (lv === 0 ? 1 : 0) - (lv >= 2 ? 1 : 0)));
+      if (hist.length < R) { draw(txt); return; }
+      draw(txt);
+      log('theory', { game: 'commons', moves: hist.map(h => h.me).join(''), mates: hist.map(h => h.m), total: mine, hostel });
+      L.data.commons = { mine, hostel, heavy: hist.filter(h => h.me === 'h').length };
+      addPts(10);
+      a.card.appendChild(frag('<div class="dfacts"><div class="dfact"><b>' + mine + '</b><span>your points</span></div><div class="dfact"><b>' + hostel + '</b><span>the whole hostel’s points</span></div><div class="dfact"><b>' + (R * 3) + ' / ' + (R * 3 * (M + 1)) + '</b><span>you / the hostel, if all 5 stayed light every night</span></div></div>'));
+      a.cont('See what happened');
+      guide(s.doneGuide || '');
+    });
+  };
+  actions('');
+  draw('');
+},
+
 /* mindset games inside a lesson (review days) */
 gameRound(s, a){ (GAMES[s.game] || GAMES.bounceBack)(s, a); }
 };
@@ -1336,6 +1476,60 @@ const GAMES = {
       a.cont();
     };
     draw('');
+  },
+
+  /* Safe or Stretch: each round, pick an easy question (few points) or a hard one (more points, a miss still gets a little).
+     Tracks how often the student stretches, and whether they stretch again right after a miss (that's the "does" signal). */
+  safeStretch(s, a){
+    const rs = s.rounds, P = s.points || { safe: 5, stretch: 15, tried: 2 };
+    let k = 0, picks = '', safeRight = 0, stretchRight = 0, missed = false, chances = 0, retries = 0;
+    const pickRound = msg => {
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(kick(s.kicker || 'Game · Safe or Stretch') + '<h3>' + s.title + ' (' + (k + 1) + ' of ' + rs.length + ')</h3>' + (msg ? '<p class="dnote" aria-live="polite">' + msg + '</p>' : '')
+        + '<div class="dsides two"><button class="dsidecard" data-p="s"><b>🛟 Safe · ' + P.safe + '</b><span>' + (rs[k].safe.tag || 'An easy one. Very likely right.') + '</span></button>'
+        + '<button class="dsidecard" data-p="t"><b>🧗 Stretch · ' + P.stretch + '</b><span>' + (rs[k].stretch.tag || 'A hard one. A miss still gets ' + P.tried + '.') + '</span></button></div>'));
+      actions('');
+      qa('[data-p]', a.card).forEach(b => b.onclick = () => {
+        sfx('select'); const p = b.dataset.p; picks += p;
+        if (missed) { chances++; if (p === 't') retries++; }
+        ask(p);
+      });
+    };
+    const ask = p => {
+      const q = p === 't' ? rs[k].stretch : rs[k].safe;
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(kick(p === 't' ? '🧗 Stretch' : '🛟 Safe') + '<h3>' + q.q + '</h3>' + (q.code ? '<pre class="dmono dcode">' + q.code + '</pre>' : '')
+        + '<div class="drecall-in"><input id="dp-ss" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer"></div>'));
+      const inp = qs('#dp-ss'); blockPaste(inp); setTimeout(() => inp.focus({ preventScroll: true }), 30);
+      const check = () => {
+        if (!inp.value.trim()) return;
+        inp.disabled = true;
+        const ok = [].concat(q.a).map(x => norm(String(x)).replace(/\s/g, '')).includes(norm(inp.value).replace(/\s/g, ''));
+        const pts = ok ? (p === 't' ? P.stretch : P.safe) : (p === 't' ? P.tried : 0);
+        addPts(pts); missed = !ok;
+        if (ok) { if (p === 't') stretchRight++; else safeRight++; }
+        sfx(ok ? 'correct' : 'softbad');
+        guide(ok ? (p === 't' ? 'Stretch landed! +15.' : 'Yes!') : (p === 't' ? 'Missed, but you stretched. That’s how you grow.' : 'Not quite.'), ok ? 'ok' : 'bad');
+        a.card.appendChild(frag('<p class="dnote" aria-live="polite">' + (ok ? '<b class="dok">Right.</b> ' : '<b class="dbad">The answer is ' + [].concat(q.a)[0] + '.</b> ') + (q.why || '') + '</p>'));
+        k++;
+        const last = k >= rs.length;
+        actions('<button class="dbtn" id="dp-main">' + (last ? 'See my round' : 'Next round') + '</button>');
+        qs('#dp-main').onclick = () => { sfx('tap'); last ? end() : pickRound(''); };
+        qs('#dp-main').focus({ preventScroll: true });
+      };
+      inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); check(); } };
+      inp.oninput = () => a.ready(!!inp.value.trim());
+      actions('<button class="dbtn" id="dp-main" disabled>Check</button>'); qs('#dp-main').onclick = check;
+    };
+    const end = () => {
+      const st = [...picks].filter(p => p === 't').length;
+      log('game', { game: 'safeStretch', level: s.level || 1, picks, stretches: st, stretchRight, safeRight, of: rs.length, chances, retries });
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(kick(s.kicker || 'Game · Safe or Stretch') + '<h3>Round done</h3><div class="dfacts"><div class="dfact"><b>' + st + ' / ' + rs.length + '</b><span>times you picked Stretch</span></div><div class="dfact"><b>' + (safeRight + stretchRight) + ' / ' + rs.length + '</b><span>answers right</span></div>'
+        + (chances ? '<div class="dfact"><b>' + retries + ' / ' + chances + '</b><span>times you stretched right after a miss</span></div>' : '') + '</div><p>' + (s.end || '') + '</p>'));
+      a.cont();
+    };
+    pickRound('');
   }
 };
 
@@ -1525,7 +1719,7 @@ async function renderProfile(){
     const n = Math.min(doneN, 7);
     box.innerHTML = '<div class="card dprof-empty">' + turboImg('thinking', 120, 'dprof-turbo') + '<h2>Drive Profile</h2><p class="muted">Your profile builds as you go: Strategy, Motivation and Voice. Your first snapshot appears after Day 7.</p>'
       + '<div class="dprog big" role="progressbar" aria-label="Days done before your snapshot" aria-valuemin="0" aria-valuemax="7" aria-valuenow="' + n + '"><i style="width:' + (n / 7 * 100) + '%"></i></div><p><b>' + n + ' of 7 days done</b></p>'
-      + '<button class="btn" data-go="drive" style="background:var(--ink);color:#fff">Go to Drive School</button></div>';
+      + '<button class="btn" data-go="drive">Go to Drive School</button></div>';
     return;
   }
   if (!p) { box.innerHTML = '<div class="card dprof-empty"><p class="muted">Loading your Drive Profile…</p></div>'; return; }

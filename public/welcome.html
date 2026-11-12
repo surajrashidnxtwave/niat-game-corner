@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Corner · NIAT</title>
+<meta name="description" content="Game Corner: Brain Gym games and Drive School for NIAT students. A few minutes a day.">
+<meta name="theme-color" content="#05060F">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/assets/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Game Corner">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,800;1,800&family=Nunito:wght@700;800;900&family=Press+Start+2P&display=swap">
+<style>
+/* Layout: the page is a place. A 3D arcade in the corner of a dark room: neon GAME CORNER sign in the middle,
+   a few machines awake, the rest under covers, and a driving rig (Drive School) hidden behind you.
+   Scroll walks the camera. HTML adds one line per stop and three playable screens.
+   Single night look by choice (no light theme). */
+:root{
+  color-scheme:dark;
+  --bg:#05060F; --panel:rgba(6,8,20,.92); --line:rgba(255,255,255,.16); --ink:#FFFFFF; --soft:#AAB2D4;
+  --energy:#C6F432; --on-energy:#10152E; --energy-deep:#8FB312; --bad:#FF5A6E; --pink:#FF4D8D; --violet:#7B61FF; --amber:#FFB020;
+  --display:'Barlow Condensed','Arial Narrow',Impact,sans-serif; --body:'Nunito','Trebuchet MS',system-ui,sans-serif; --pixel:'Press Start 2P',ui-monospace,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.3,1.5,.5,1); --ch:min(320px,46vh);
+}
+*{box-sizing:border-box}
+html{scroll-snap-type:y proximity}
+body{margin:0;background:var(--bg);color:var(--ink);font:700 17px/1.45 var(--body);overflow-x:hidden}
+h1,h2,p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--energy);outline-offset:3px;border-radius:10px}
+.spacers section{height:100vh;height:100svh;scroll-snap-align:start}
+
+.stage{position:fixed;inset:0;overflow:hidden;--acc:var(--pink)}
+.stage[data-s="2"]{--acc:#FF7A2F} .stage[data-s="3"]{--acc:#0B9BD6} .stage[data-s="4"]{--acc:var(--violet)} .stage[data-s="5"]{--acc:var(--energy)} .stage[data-s="6"]{--acc:var(--amber)} .stage[data-s="7"]{--acc:var(--energy)}
+.stage.quake{animation:quake .4s}
+@keyframes quake{20%{transform:translate(-8px,4px)}40%{transform:translate(7px,-5px)}60%{transform:translate(-5px,-3px)}80%{transform:translate(4px,3px)}}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+.scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;opacity:.55}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(75% 75% at 50% 45%,transparent 50%,rgba(0,0,0,.85) 100%)}
+.flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:7}
+.flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.5}100%{opacity:0}}
+.nogl .stage{background:radial-gradient(60% 50% at 50% 40%,#3a1a6b,var(--bg))}
+.flat{display:none;position:absolute;left:0;right:0;top:22%;text-align:center;font:800 clamp(56px,14vw,150px)/.86 var(--display);font-style:italic;text-transform:uppercase;text-shadow:0 0 30px var(--pink),0 0 80px var(--violet)}
+.nogl .flat{display:block}
+
+.px{font:400 10px/1.6 var(--pixel);letter-spacing:.08em;text-transform:uppercase}
+.bar{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;z-index:5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.left{display:flex;align-items:center;gap:10px;min-width:0}
+.niat{flex:none;display:grid;place-items:center;width:40px;height:46px;border-radius:10px;background:#fff;box-shadow:0 0 18px rgba(255,255,255,.25)}
+.niat img{height:34px;width:auto;display:block}
+.slash{color:var(--soft);font:800 20px/1 var(--display);opacity:.7}
+@media (max-width:520px){ .slash{display:none} .hud{font-size:8px} }
+.hud{color:var(--energy);text-shadow:0 0 10px rgba(198,244,50,.6);min-width:0;white-space:nowrap;overflow:hidden}
+.hud::before{content:"● ";animation:blink 1s steps(2) infinite}
+.mini{font:800 22px/1 var(--display);font-style:italic;text-transform:uppercase;letter-spacing:.04em;opacity:0;transform:translateY(-10px);transition:opacity .5s, transform .5s var(--ease);text-shadow:0 0 16px var(--pink)}
+.stage[data-s="2"] .mini,.stage[data-s="3"] .mini,.stage[data-s="4"] .mini,.stage[data-s="5"] .mini,.stage[data-s="6"] .mini{opacity:1;transform:none}
+.login{justify-self:end;position:relative;display:inline-flex;flex-direction:column;justify-content:center;align-items:flex-start;min-height:48px;padding:5px 20px 6px 18px;border-radius:16px;background:var(--energy);color:var(--on-energy);text-decoration:none;font-weight:900;font-size:17px;line-height:1.05;box-shadow:0 4px 0 var(--energy-deep),0 0 26px rgba(198,244,50,.55);transition:transform .15s var(--ease)}
+.login small{font-size:11px;font-weight:800;opacity:.75;letter-spacing:.02em}
+.login::after{content:"";position:absolute;inset:-4px;border-radius:20px;border:2px solid var(--energy);opacity:0;animation:ring 2.4s ease-out infinite;pointer-events:none}
+@keyframes ring{0%{opacity:.8;transform:scale(.96)}100%{opacity:0;transform:scale(1.18)}}
+.login:hover{transform:translateY(-1px) scale(1.03)}
+.login:active{transform:translateY(3px)}
+@media (max-width:420px){ .login{padding:4px 14px;font-size:16px} .login small{font-size:10px} .mini{display:none} }
+.inst{display:inline-flex;align-items:center;gap:8px;margin-top:16px;min-height:44px;padding:0 18px;border-radius:99px;border:1.5px solid var(--line);background:rgba(5,6,15,.6);color:var(--ink);font-weight:800;font-size:15px;cursor:pointer}
+.inst:hover{border-color:var(--ink)}
+.inst[hidden]{display:none}
+@keyframes blink{50%{opacity:0}}
+
+/* captions */
+.tx{position:absolute;left:0;right:0;z-index:4;text-align:center;opacity:0;transform:translateY(18px);pointer-events:none;transition:opacity .45s var(--ease), transform .7s var(--ease);padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.tx.on{opacity:1;transform:none;transition-delay:.45s}
+.tx.on a,.tx.on button{pointer-events:auto}
+.booting .tx{opacity:0}
+.cap{bottom:clamp(64px,12vh,120px)}
+.above{bottom:calc(50% + var(--ch) / 2 + 20px)}
+.below{top:calc(50% + var(--ch) / 2 + 18px)}
+.big{font:800 clamp(30px,6vmin,66px)/.96 var(--display);font-style:italic;text-transform:uppercase;text-wrap:balance;text-shadow:0 2px 12px var(--bg),0 0 34px var(--bg),0 0 70px var(--bg)}
+.big em{font-style:inherit;color:var(--energy)}
+.sub{color:var(--soft);font-size:clamp(15px,2.2vmin,19px);margin-top:8px;text-wrap:balance;text-shadow:0 0 16px var(--bg),0 0 30px var(--bg)}
+.sub b{color:var(--ink)}
+.tag{color:var(--acc);margin-bottom:10px;transition:color .6s;text-shadow:0 0 12px var(--bg)}
+.blinker{animation:blink 1.1s steps(2) infinite;color:var(--energy);margin-top:14px}
+
+/* the three playable screens */
+.crt{position:absolute;left:50%;top:50%;width:min(580px,90vw);height:var(--ch);margin:calc(var(--ch) / -2) 0 0 max(-290px,-45vw);z-index:4;border-radius:30px / 26px;background:var(--panel);border:2px solid var(--acc);
+  box-shadow:0 0 0 8px #000,0 0 0 10px rgba(255,255,255,.08),0 0 70px var(--acc),inset 0 0 70px rgba(255,255,255,.06);overflow:hidden;display:grid;padding:18px;gap:10px;
+  opacity:0;transform:scale(.5);pointer-events:none;transition:opacity .35s var(--ease), transform .6s var(--spring), border-color .5s, box-shadow .5s}
+.crt.on{opacity:1;transform:none;pointer-events:auto;transition-delay:.55s;animation:hum 4s steps(40) infinite}
+@keyframes hum{50%{filter:brightness(1.07)}}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),radial-gradient(120% 90% at 50% 50%,transparent 60%,rgba(0,0,0,.5))}
+.d1{grid-template-rows:1fr auto;text-align:center}
+.word{font:800 clamp(64px,15vh,128px)/1 var(--display);letter-spacing:.03em;align-self:center;text-shadow:0 0 30px currentColor}
+.time{font:800 clamp(64px,15vh,128px)/1 var(--display);font-style:italic;color:var(--energy);font-variant-numeric:tabular-nums;align-self:center;text-shadow:0 0 30px rgba(198,244,50,.6)}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.keys button{min-height:52px;border:0;border-radius:14px;cursor:pointer;font-weight:900;font-size:15px;color:#10152E;box-shadow:0 5px 0 rgba(0,0,0,.45);transition:transform .08s}
+.keys button:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.d2{grid-template-rows:auto 1fr auto}
+.code{font:700 clamp(18px,3.4vh,26px)/1.2 ui-monospace,Menlo,Consolas,monospace;background:#000;border-radius:12px;padding:14px 16px;overflow-x:auto;white-space:nowrap;color:var(--energy)}
+.says{align-self:center;justify-self:start;background:var(--ink);color:#10152E;border-radius:18px 18px 18px 6px;padding:12px 16px;font-weight:800;font-size:clamp(15px,2.8vh,19px)}
+.stamp{position:absolute;right:18px;top:42%;font:800 clamp(40px,9vh,64px)/1 var(--display);font-style:italic;text-transform:uppercase;color:var(--bad);border:5px solid var(--bad);border-radius:14px;padding:2px 14px;opacity:0;transform:rotate(-10deg) scale(2.6);z-index:1}
+.stamp.hit{opacity:1;transform:rotate(-10deg) scale(1);transition:transform .35s var(--spring), opacity .15s}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.two button{min-height:52px;border-radius:14px;border:2px solid var(--line);background:transparent;cursor:pointer;font-weight:900;transition:background .2s, border-color .2s, transform .1s}
+.two button:hover{border-color:var(--ink)}
+.two button:disabled{opacity:.4;cursor:default}
+.two button.pick{background:var(--ink);color:#10152E;opacity:1}
+.d3{grid-template-rows:1fr auto;text-align:center}
+.crt.d3.on{transition-delay:1.9s}
+.tx.below[data-for="6"].on{transition-delay:2.1s}
+.ask{align-self:center;font:800 clamp(24px,5.4vh,40px)/1.02 var(--display);text-transform:uppercase;text-wrap:balance}
+.ask em{font-style:normal;color:var(--amber)}
+.again{background:none;border:0;color:var(--soft);font-weight:800;text-decoration:underline;cursor:pointer;margin-top:6px}
+
+.go{display:inline-flex;align-items:center;gap:12px;min-height:66px;padding:0 36px;border-radius:18px;background:var(--energy);color:var(--on-energy);font:400 clamp(12px,2.2vmin,16px)/1 var(--pixel);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;box-shadow:0 7px 0 var(--energy-deep),0 0 50px rgba(198,244,50,.45);animation:throb 1.6s ease-in-out infinite;transition:transform .15s var(--ease)}
+.go:hover{transform:translateY(-2px) scale(1.04)}
+.go:active{transform:translateY(5px)}
+@keyframes throb{50%{box-shadow:0 7px 0 var(--energy-deep),0 0 90px rgba(198,244,50,.8)}}
+
+.toast{position:absolute;z-index:8;left:0;top:0;transform:translate(-50%,-140%);background:var(--ink);color:#10152E;font-weight:800;font-size:14px;padding:8px 12px;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
+.toast.on{opacity:1}
+.dots{position:absolute;right:max(14px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);display:grid;gap:4px;z-index:6}
+.dots button{width:28px;height:28px;border:0;background:none;cursor:pointer;display:grid;place-items:center;padding:0}
+.dots i{width:8px;height:8px;border-radius:99px;background:var(--line);transition:height .4s var(--ease), background .4s}
+.dots button.on i{height:24px;background:var(--energy);box-shadow:0 0 12px var(--energy)}
+.cue{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);transform:translateX(-50%);z-index:6;display:grid;justify-items:center;gap:2px;background:none;border:0;cursor:pointer;color:var(--soft);transition:opacity .4s}
+.cue svg{animation:nudge 1.5s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(6px)}}
+.stage[data-s="7"] .cue,.stage[data-s="0"] .cue{opacity:0;pointer-events:none}
+.snd{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:6;background:rgba(5,6,15,.55);border:1.5px solid var(--line);border-radius:99px;min-height:38px;padding:0 14px;cursor:pointer;color:var(--soft)}
+@media (max-height:560px){ .tag{display:none} }
+@media (prefers-reduced-motion: reduce){ html{scroll-snap-type:none} *{animation:none!important} }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage" data-s="0">
+  <canvas id="gl" aria-label="A dark arcade in the corner of a room with a neon Game Corner sign, a few game machines switched on and others under covers"></canvas>
+  <div class="flat" aria-hidden="true">Game<br>Corner</div>
+  <div class="scan"></div><div class="vig"></div><div class="flash" id="flash"></div>
+
+  <header class="bar"><div class="left"><span class="niat"><img src="data:image/png;base64,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" alt="NIAT" width="89" height="112"></span><span class="slash" aria-hidden="true">/</span><span class="px hud" id="hud">Power off</span></div><span class="mini">Game Corner</span><a class="login" id="login" href="/#login"><small>Played before?</small>Log in</a></header>
+
+  <div class="tx cap on" data-for="0"><h1 class="big">AI can write your code.<br><em>Can it think for you?</em></h1><p class="px blinker">Scroll to power on</p></div>
+  <div class="tx cap" data-for="1"><h2 class="big">A few machines are awake. <em>The rest are waiting.</em></h2><p class="sub">Go on. Touch one.</p></div>
+
+  <div class="tx above" data-for="2"><p class="px tag">Machine 01</p><h2 class="big">Tap the colour of the <em>ink.</em></h2></div>
+  <div class="crt d1" data-for="2">
+    <div class="word" id="word" style="color:#5AA2FF">RED</div>
+    <div class="keys" id="keys"><button id="k0" style="background:#FF5A6E">Red</button><button id="k1" style="background:#3DDC84">Green</button><button id="k2" style="background:#5AA2FF">Blue</button><button id="k3" style="background:#FFD23F">Yellow</button></div>
+  </div>
+  <div class="tx below" data-for="2"><p class="sub" id="f1">Not the word. The ink. The clock is running.</p><button class="again" id="again1" hidden>Try again</button></div>
+
+  <div class="tx above" data-for="3"><p class="px tag">Machine 02</p><h2 class="big">An AI just told you <em>this.</em></h2></div>
+  <div class="crt d2" data-for="3">
+    <div class="code">print(7 // 2 * 2)</div>
+    <div class="says">That prints 7. I’m 100% sure.</div>
+    <div class="stamp" id="stamp">Wrong</div>
+    <div class="two"><button id="trust">Trust it</button><button id="check">Check it</button></div>
+  </div>
+  <div class="tx below" data-for="3"><p class="sub" id="f2">Trust it, or check it?</p></div>
+
+  <div class="tx cap" data-for="4"><h2 class="big">What’s under the covers? <em>Not yet.</em></h2><p class="sub">New machines switch on over time. Nobody knows which one is next.</p></div>
+  <div class="tx cap" data-for="5"><h2 class="big" id="cap5">Your batch has a board. <em>You’re not on it. Yet.</em></h2></div>
+
+  <div class="tx above" data-for="6"><p class="px tag">Behind you · Drive School</p><h2 class="big">This one isn’t a <em>game.</em></h2></div>
+  <div class="crt d3" data-for="6">
+    <p class="ask">Online exam. The camera fails for the whole hour. Nobody could ever find out. <em>Do you cheat?</em></p>
+    <div class="two"><button id="st-yes">I would</button><button id="st-no">I wouldn’t</button></div>
+  </div>
+  <div class="tx below" data-for="6"><p class="sub" id="f3">Drive School. 10 minutes a day on how you learn, what drives you and what you really think.</p></div>
+
+  <div class="tx cap" data-for="7"><a class="go" id="enter" href="/#login">Insert NIAT ID <span aria-hidden="true">▶</span></a><p class="sub"><b>Brain Gym. Drive School. One login.</b> Player 1, ready?</p><button type="button" class="inst" data-install><span aria-hidden="true">📲</span> Add to home screen</button></div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <button class="px snd" id="snd" aria-pressed="false">Sound off</button>
+  <nav class="dots" id="dots" aria-label="Stops"></nav>
+  <button class="cue px" id="cue">Scroll<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+</div>
+
+<div class="spacers" aria-hidden="true"><section></section><section></section><section></section><section></section><section></section><section></section><section></section><section></section></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+const $ = id => document.getElementById(id), stage = $('stage'), N = 8;
+try { if (localStorage.getItem('bg_auth')) { $('login').innerHTML = '<small>Welcome back</small>Continue'; $('login').href = '/#home'; $('enter').href = '/#home'; } } catch (e) {}
+const CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HUD = ['Power off','Power on','Machine 01','Machine 02','? ? ?','High scores','Drive School','Player 1 ready'];
+document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 2300);
+
+/* ---------- sound (off until asked) ---------- */
+let actx = null, sound = false, humNode = null;
+function beep(f, d, type, vol){ if (!sound) return; try { const o = actx.createOscillator(), g = actx.createGain(); o.type = type || 'square'; o.frequency.value = f; g.gain.setValueAtTime(vol || .06, actx.currentTime); g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + d); o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + d); } catch (e) {} }
+$('snd').addEventListener('click', () => {
+  sound = !sound; $('snd').textContent = sound ? 'Sound on' : 'Sound off'; $('snd').setAttribute('aria-pressed', sound);
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (sound && !humNode) { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sawtooth'; o.frequency.value = 55; g.gain.value = .012; o.connect(g).connect(actx.destination); o.start(); humNode = g; }
+    if (humNode) humNode.gain.value = sound ? .012 : 0; } catch (e) {}
+  beep(660, .12);
+});
+
+/* ---------- small effects ---------- */
+let kick = 0;                                      // extra glow in the 3D scene, decays every frame
+function flash(col){ const f = $('flash'); f.style.background = col; f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
+function quake(){ stage.classList.remove('quake'); void stage.offsetWidth; stage.classList.add('quake'); }
+let toastT = 0;
+function toast(msg, x, y){ const t = $('toast'); t.textContent = msg; t.style.left = Math.max(90, Math.min(innerWidth - 90, x)) + 'px'; t.style.top = Math.max(70, y) + 'px'; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 1900); }
+
+/* ---------- stops ---------- */
+$('dots').innerHTML = ['Outside','Lights on','Machine 1','Machine 2','Under the covers','High scores','Drive School','Enter'].map((t, i) => '<button id="dot'+i+'" aria-label="'+t+'"><i></i></button>').join('');
+const goTo = i => scrollTo({ top: i * innerHeight, behavior: CALM ? 'auto' : 'smooth' });
+$('dots').addEventListener('click', e => { const b = e.target.closest('button'); if (b) goTo(+b.id.slice(3)); });
+$('cue').addEventListener('click', () => goTo(Math.min(N - 1, cur + 1)));
+let cur = -1, t0 = 0, d1done = false, powerAt = 0, myTime = 0, d3At = 0;
+const parts = [...document.querySelectorAll('[data-for]')];
+function setScene(s){
+  if (s === cur) return; const was = cur; cur = s; stage.dataset.s = s; $('hud').textContent = HUD[s];
+  parts.forEach(p => p.classList.toggle('on', p.dataset.for === String(s)));
+  for (let i = 0; i < N; i++) $('dot' + i).classList.toggle('on', i === s);
+  if (s === 2 && !d1done) t0 = performance.now() + 900;
+  if (s >= 1 && was < 1) { powerAt = performance.now(); kick = 1.4; beep(70, .7, 'sawtooth', .1); for (let i = 0; i < 5; i++) setTimeout(() => beep(220 + i * 90, .08), 200 + i * 160); }
+  if (s === 0) powerAt = 0;
+  if (s === 5) $('cap5').innerHTML = myTime ? 'You just hit <em>' + myTime.toFixed(2) + 's.</em> It isn’t saved. Yet.' : 'Your batch has a board. <em>You’re not on it. Yet.</em>';
+  if (s === 6) { d3At = performance.now(); kick = .8; beep(180, .5, 'sawtooth', .07); }
+  if (s === 7) kick = 1;
+}
+const fpos = () => Math.max(0, Math.min(N - 1, scrollY / innerHeight));
+function onScroll(){ setScene(Math.round(fpos())); }
+addEventListener('scroll', onScroll, { passive:true }); addEventListener('resize', onScroll); onScroll();
+
+/* ---------- machine 1: one timed tap ---------- */
+$('keys').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || d1done) return;
+  if (b.id !== 'k2') { const w = $('word'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake'); $('f1').textContent = 'That’s the word. Look at the ink.'; flash('#FF5A6E'); beep(140, .2, 'sawtooth'); return; }
+  d1done = true; flash('#C6F432'); kick = 1.2; beep(880, .1); setTimeout(() => beep(1320, .16), 90);
+  myTime = Math.max(.2, (performance.now() - t0) / 1000); const w = $('word');
+  w.className = 'time'; w.style.color = ''; w.textContent = myTime.toFixed(2) + 's'; $('keys').style.visibility = 'hidden';
+  $('f1').innerHTML = 'Now keep that up for 20 seconds. <b>That’s Level 1.</b>'; $('again1').hidden = false;
+});
+$('again1').addEventListener('click', () => {
+  d1done = false; const w = $('word'); w.className = 'word'; w.textContent = ['GREEN','YELLOW','RED'][Math.floor(Math.random() * 3)]; w.style.color = '#5AA2FF';
+  $('keys').style.visibility = ''; $('f1').textContent = 'Not the word. The ink. The clock is running.'; $('again1').hidden = true; t0 = performance.now();
+});
+/* ---------- machine 2: trust or check ---------- */
+function verdict(trusted){
+  $('trust').disabled = $('check').disabled = true; $(trusted ? 'trust' : 'check').classList.add('pick'); $('stamp').classList.add('hit');
+  setTimeout(() => { quake(); flash(trusted ? '#FF5A6E' : '#C6F432'); kick = 1.2; }, 200);
+  beep(trusted ? 120 : 740, .3, trusted ? 'sawtooth' : 'square');
+  $('f2').innerHTML = (trusted ? 'It prints 6. You got played.' : 'Good instinct. It prints 6.') + ' <b>The AI inside is wrong on purpose. Sometimes.</b>';
+}
+$('trust').addEventListener('click', () => verdict(true));
+$('check').addEventListener('click', () => verdict(false));
+/* ---------- Drive School: take a stand ---------- */
+function stand(yes){
+  $('st-yes').disabled = $('st-no').disabled = true; $(yes ? 'st-yes' : 'st-no').classList.add('pick'); flash('#FFB020'); kick = 1; beep(520, .25);
+  $('f3').innerHTML = 'No right answer. Nobody marks this one. <b>Inside, you have to say why.</b>';
+}
+$('st-yes').addEventListener('click', () => stand(true));
+$('st-no').addEventListener('click', () => stand(false));
+$('enter').addEventListener('click', () => beep(990, .2));
+$('enter').addEventListener('pointerenter', () => { kick = .9; });
+
+/* ---------- the 3D arcade ---------- */
+function arcade(){
+  const T = THREE, V = (x, y, z) => new T.Vector3(x, y, z);
+  const LOW = innerWidth < 720 || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  const gl = $('gl'), renderer = new T.WebGLRenderer({ canvas: gl, antialias: !LOW, powerPreference: 'high-performance' });
+  const PR = Math.min(LOW ? 1.25 : 1.75, devicePixelRatio || 1); renderer.setPixelRatio(PR);
+  const scene = new T.Scene(); scene.background = new T.Color(0x04050D); scene.fog = new T.FogExp2(0x04050D, .042);
+  const cam = new T.PerspectiveCamera(55, 1, .1, 120);
+  const room = new T.Group(); scene.add(room);
+  const S = Math.SQRT1_2, C = V(0, 0, -6), DS = T.DoubleSide, ADD = T.AdditiveBlending;
+  const WALL = [{ d: V(-S, 0, S), n: V(S, 0, S), col: 0xFF4D8D }, { d: V(S, 0, S), n: V(-S, 0, S), col: 0x5B4BFF }];
+  const SKC = [0xFF7A2F, 0x0B9BD6, 0x7B61FF, 0xF0457A, 0x20A35A, 0x0F9F8F, 0x2F7BF0, 0xD08F00];
+  const FD = '"Barlow Condensed", "Arial Narrow", Impact, sans-serif', FP = '"Press Start 2P", monospace';
+  const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  const cv = (w, h, fn) => { const c = canvas(w, h); fn(c.getContext('2d'), w, h); const t = new T.CanvasTexture(c); t.anisotropy = 4; return t; };
+
+  /* floor: neon grid, see-through so the room mirrors in it */
+  const grid = cv(256, 256, (x, w) => { x.fillStyle = '#05071A'; x.fillRect(0, 0, w, w); x.strokeStyle = 'rgba(155,59,245,.95)'; x.lineWidth = 3; x.strokeRect(0, 0, w, w); });
+  grid.wrapS = grid.wrapT = T.RepeatWrapping; grid.repeat.set(46, 46);
+  const floor = new T.Mesh(new T.PlaneGeometry(92, 92), new T.MeshBasicMaterial({ map: grid, transparent: true, opacity: LOW ? 1 : .72, color: 0x9090B0 }));
+  floor.rotation.x = -Math.PI / 2; scene.add(floor);
+  const ringMat = new T.MeshBasicMaterial({ color: 0xC6F432, transparent: true, opacity: 0, blending: ADD, depthWrite: false, side: DS });
+  const ring = new T.Mesh(new T.RingGeometry(.92, 1, 64), ringMat); ring.rotation.x = -Math.PI / 2; ring.position.set(0, .03, -4.5); scene.add(ring);
+
+  /* walls: panels with faint code scribbles, neon strips, neon hints */
+  const wallTex = cv(512, 512, (x, w) => {
+    x.fillStyle = '#12173A'; x.fillRect(0, 0, w, w);
+    for (let i = 0; i < 2600; i++) { x.fillStyle = 'rgba(255,255,255,' + (Math.random() * .035) + ')'; x.fillRect(Math.random() * w, Math.random() * w, 2, 2); }
+    x.strokeStyle = 'rgba(0,0,0,.45)'; x.lineWidth = 4; for (let i = 0; i <= 4; i++) { x.beginPath(); x.moveTo(i * 128, 0); x.lineTo(i * 128, w); x.stroke(); }
+    x.font = '800 54px ' + FD; x.fillStyle = 'rgba(155,120,255,.13)'; ['==', '{ }', '?', '//', '[ ]', '!=', '#', '**'].forEach((g, i) => x.fillText(g, 20 + (i % 4) * 128, 150 + Math.floor(i / 4) * 230 + (i % 2) * 50));
+  });
+  wallTex.wrapS = wallTex.wrapT = T.RepeatWrapping; wallTex.repeat.set(5, 2);
+  const wallMat = new T.MeshLambertMaterial({ map: wallTex, side: DS });
+  const neonText = (txt, col, W) => cv(W || 512, 200, (x, w, h) => { x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = 'italic 800 150px ' + FD; x.lineJoin = 'round';
+    for (let i = 0; i < 3; i++) { x.shadowColor = col; x.shadowBlur = 20 + i * 20; x.strokeStyle = col; x.lineWidth = 7; x.strokeText(txt, w / 2, h / 2); } x.shadowBlur = 4; x.strokeStyle = '#fff'; x.lineWidth = 2.500; x.strokeText(txt, w / 2, h / 2); });
+  const neonMat = (txt, col, W) => new T.MeshBasicMaterial({ map: neonText(txt, col, W), transparent: true, blending: ADD, depthWrite: false, side: DS, opacity: 0 });
+  const hints = [];
+  WALL.forEach((w, k) => {
+    const rot = Math.atan2(w.n.x, w.n.z);
+    const m = new T.Mesh(new T.PlaneGeometry(20, 7.4), wallMat); m.position.copy(C).addScaledVector(w.d, 10); m.position.y = 3.7; m.rotation.y = rot; room.add(m);
+    [5.9, 6.25].forEach((y, j) => { const s = new T.Mesh(new T.BoxGeometry(19.6, .06, .06), new T.MeshBasicMaterial({ color: j ? 0xC6F432 : w.col }));
+      s.position.copy(C).addScaledVector(w.d, 10).addScaledVector(w.n, .06); s.position.y = y; s.rotation.y = rot; room.add(s); });
+    const hm = neonMat(k ? 'LV 5' : '15:00', k ? '#7B9BFF' : '#FF7FB0');
+    const hp = new T.Mesh(new T.PlaneGeometry(2.7, 1.05), hm); hp.position.copy(C).addScaledVector(w.d, 7.2).addScaledVector(w.n, .09); hp.position.y = 4.35; hp.rotation.y = rot; room.add(hp); hints.push(hm);
+  });
+  const ceil = new T.Mesh(new T.PlaneGeometry(60, 60), new T.MeshLambertMaterial({ color: 0x0A0D22 })); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, 7.4, 6); scene.add(ceil);
+
+  /* glow sprites */
+  const glowTex = cv(128, 128, (x, w) => { const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.35, 'rgba(255,255,255,.3)'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; x.fillRect(0, 0, w, w); });
+  const glow = (col, sx, sy, p, op) => { const s = new T.Sprite(new T.SpriteMaterial({ map: glowTex, color: col, blending: ADD, depthWrite: false, transparent: true, opacity: op })); s.scale.set(sx, sy, 1); s.position.copy(p); room.add(s); return s; };
+
+  /* neon sign: lights up one letter at a time */
+  const SIGN = V(0, 4.75, -3.1), TXT = 'GAME CORNER', signC = canvas(1400, 520), sx = signC.getContext('2d');
+  sx.font = 'italic 800 236px ' + FD; const cw = [...TXT].map(ch => sx.measureText(ch).width), tw = cw.reduce((a, b) => a + b, 0);
+  const signTex = new T.CanvasTexture(signC); signTex.anisotropy = 4;
+  function drawSign(lit, dead){
+    const x = sx, W = 1400, H = 520; x.clearRect(0, 0, W, H); x.font = 'italic 800 236px ' + FD; x.textAlign = 'left'; x.textBaseline = 'middle'; x.lineJoin = 'round';
+    let px = (W - tw) / 2;
+    [...TXT].forEach((ch, i) => {
+      if (i < lit && i !== dead) {
+        for (let k = 0; k < 3; k++) { x.shadowColor = k < 2 ? '#FF4D8D' : '#9B3BF5'; x.shadowBlur = 26 + k * 28; x.strokeStyle = '#FF7FB0'; x.lineWidth = 9; x.strokeText(ch, px, H / 2 - 20); }
+        x.shadowBlur = 6; x.shadowColor = '#fff'; x.strokeStyle = '#fff'; x.lineWidth = 3.500; x.strokeText(ch, px, H / 2 - 20);
+      } else { x.shadowBlur = 0; x.strokeStyle = 'rgba(255,255,255,.1)'; x.lineWidth = 5; x.strokeText(ch, px, H / 2 - 20); }
+      px += cw[i];
+    });
+    if (lit > TXT.length) { x.shadowColor = '#C6F432'; x.shadowBlur = 24; x.strokeStyle = '#C6F432'; x.lineWidth = 7; x.beginPath(); x.moveTo(190, H - 70); x.lineTo(W - 190, H - 70); x.stroke(); x.stroke(); }
+    signTex.needsUpdate = true;
+  }
+  drawSign(CALM ? 12 : 0, -1);
+  const sign = new T.Mesh(new T.PlaneGeometry(6.2, 2.3), new T.MeshBasicMaterial({ map: signTex, transparent: true, blending: ADD, depthWrite: false, side: DS })); sign.position.copy(SIGN); room.add(sign);
+  const signGlow = glow(0xFF4D8D, 11, 5.5, V(0, 4.75, -3.5), 0);
+
+  /* machines: 4 per wall. Three are on. The rest sit under covers, so nobody can count what is coming. */
+  const prof = new T.Shape(); [[-.4, 0], [.38, 0], [.38, .78], [.56, .86], [.56, .94], [.3, 1.02], [.22, 1.62], [.44, 1.68], [.44, 1.93], [-.4, 1.93]].forEach((p, i) => i ? prof.lineTo(p[0], p[1]) : prof.moveTo(p[0], p[1]));
+  const cabGeo = new T.ExtrudeGeometry(prof, { depth: .98, bevelEnabled: false }); cabGeo.rotateY(-Math.PI / 2); cabGeo.translate(.49, 0, 0);
+  const edgeGeo = new T.EdgesGeometry(cabGeo, 30), scrGeo = new T.PlaneGeometry(.8, .54), mqGeo = new T.PlaneGeometry(.92, .2);
+  const stickGeo = new T.CylinderGeometry(.012, .012, .1, 6), ballGeo = new T.SphereGeometry(.034, 10, 8), btnGeo = new T.CylinderGeometry(.03, .03, .02, 10);
+  const bodyMat = new T.MeshLambertMaterial({ color: 0x1C2252, side: DS }), stickMat = new T.MeshLambertMaterial({ color: 0x9AA0C0 });
+  const clothTex = cv(256, 256, (x, w) => { x.fillStyle = '#2A2440'; x.fillRect(0, 0, w, w); for (let i = 0; i < 26; i++) { const g = x.createLinearGradient(i * 10, 0, i * 10 + 10, 0); g.addColorStop(0, 'rgba(0,0,0,.35)'); g.addColorStop(.5, 'rgba(255,255,255,.07)'); g.addColorStop(1, 'rgba(0,0,0,.3)'); x.fillStyle = g; x.fillRect(i * 10, 0, 10, w); } });
+  clothTex.wrapS = clothTex.wrapT = T.RepeatWrapping;
+  const clothMat = new T.MeshLambertMaterial({ map: clothTex, side: DS });
+  const qTex = cv(128, 128, (x, w) => { x.textAlign = 'center'; x.textBaseline = 'middle'; x.font = '800 110px ' + FD; x.shadowColor = '#fff'; x.shadowBlur = 16; x.fillStyle = '#fff'; x.fillText('?', w / 2, w / 2 + 6); });
+  const qGeo = new T.PlaneGeometry(.5, .5);
+  const mqPlay = cv(256, 56, (x, w, h) => { x.fillStyle = '#000'; x.fillRect(0, 0, w, h); x.fillStyle = '#fff'; x.font = '22px ' + FP; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('PLAY', w / 2, h / 2 + 2); });
+  const FRAMES = {
+    '0-0': [['RED', '#5AA2FF'], ['BLUE', '#FFD23F'], ['GREEN', '#FF5A6E'], ['YELLOW', '#3DDC84']],
+    '1-0': [['7//2*2', '#C6F432'], ['= ?', '#C6F432'], ['AI: 7', '#FF5A6E'], ['SURE?', '#FFD23F']],
+    '1-1': [['==', '#FF7FB0'], ['!=', '#FF7FB0'], ['<=', '#FF7FB0'], ['+=', '#5AA2FF']]
+  };
+  const machines = [], bodies = [];
+  function paint(m, fr){
+    const x = m.ctx, W = 256, H = 176, f = m.frames[fr % m.frames.length]; x.shadowBlur = 0; x.fillStyle = '#02030A'; x.fillRect(0, 0, W, H); x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = f[1]; x.shadowColor = f[1]; x.shadowBlur = 18; x.font = '800 ' + (f[0].length > 4 ? 58 : 92) + 'px ' + FD; x.fillText(f[0], W / 2, H / 2 + 4); m.tex.needsUpdate = true;
+  }
+  WALL.forEach((w, side) => { for (let i = 0; i < 4; i++) {
+    const g = new T.Group(), frames = FRAMES[side + '-' + i], col = new T.Color(SKC[(i * 2 + side) % 8]);
+    g.position.copy(C).addScaledVector(w.d, 2.7 + 2.15 * i).addScaledVector(w.n, .5); g.rotation.y = Math.atan2(w.n.x, w.n.z);
+    const sp = g.position.clone().addScaledVector(w.n, .272); sp.y = 1.32;
+    const m = { i, side, frames, open: !!frames, col, pw: 0, hv: 0, screen: sp, n: w.n, seed: Math.random() * 9, fr: -1, g, shake: 0, peek: 0 };
+    let body;
+    if (frames) {
+      body = new T.Mesh(cabGeo, bodyMat); g.add(body);
+      m.lm = new T.LineBasicMaterial({ color: 0x000000 }); g.add(new T.LineSegments(edgeGeo, m.lm));
+      const c = canvas(256, 176); m.ctx = c.getContext('2d'); m.tex = new T.CanvasTexture(c);
+      m.sm = new T.MeshBasicMaterial({ map: m.tex, color: 0x000000, side: DS }); const scr = new T.Mesh(scrGeo, m.sm); scr.position.set(0, 1.32, .272); scr.rotation.x = -.133; g.add(scr);
+      m.mm = new T.MeshBasicMaterial({ map: mqPlay, color: 0x000000, side: DS }); const mq = new T.Mesh(mqGeo, m.mm); mq.position.set(0, 1.805, .446); g.add(mq);
+      const st = new T.Mesh(stickGeo, stickMat); st.position.set(-.2, 1.04, .42); g.add(st);
+      m.bm = new T.MeshBasicMaterial({ color: 0x000000 }); const ball = new T.Mesh(ballGeo, m.bm); ball.position.set(-.2, 1.1, .42); g.add(ball);
+      [.1, .25].forEach(xx => { const b = new T.Mesh(btnGeo, m.bm); b.position.set(xx, .995, .42); b.rotation.x = .3; g.add(b); });
+    } else {                                                   /* under a cover: only a shape and a question mark */
+      body = new T.Mesh(cabGeo, clothMat); body.scale.set(1.1, 1.05, 1.16); g.add(body);
+      m.lm = new T.LineBasicMaterial({ color: 0x000000 }); const ed = new T.LineSegments(edgeGeo, m.lm); ed.scale.copy(body.scale); g.add(ed);
+      m.qm = new T.MeshBasicMaterial({ map: qTex, color: 0x000000, transparent: true, blending: ADD, depthWrite: false, side: DS });
+      const q = new T.Mesh(qGeo, m.qm); q.position.set(0, 1.38, .36); q.rotation.x = -.133; g.add(q);
+    }
+    room.add(g); body.userData.idx = machines.length; bodies.push(body); machines.push(m);
+  } });
+  machines.forEach(m => { if (m.open) paint(m, 0); });
+  const covered = machines.filter(m => !m.open);
+
+  /* high-score board in the corner */
+  const boardC = canvas(512, 340), bx = boardC.getContext('2d'), boardTex = new T.CanvasTexture(boardC), AZ = 'ABCDEFGHIJKLMNOPRSTUVY';
+  function drawBoard(t){
+    const x = bx; x.shadowBlur = 0; x.fillStyle = '#02030A'; x.fillRect(0, 0, 512, 340); x.textBaseline = 'middle'; x.shadowBlur = 12;
+    x.font = '26px ' + FP; x.textAlign = 'center'; x.fillStyle = '#FF4D8D'; x.shadowColor = '#FF4D8D'; x.fillText('HIGH SCORES', 256, 44);
+    x.font = '19px ' + FP; x.textAlign = 'left';
+    ['1ST', '2ND', '3RD', '4TH'].forEach((r, i) => { let nm = ''; for (let k = 0; k < 6; k++) nm += AZ[Math.floor(Math.random() * AZ.length)];
+      x.fillStyle = '#AAB2D4'; x.shadowColor = '#7B61FF'; x.fillText(r + '  ' + nm + '  ?????', 40, 98 + i * 44); });
+    if (Math.floor(t * 2.5) % 2) { x.fillStyle = '#C6F432'; x.shadowColor = '#C6F432'; x.fillText(myTime ? 'YOU  ' + myTime.toFixed(2) + 'S  UNSAVED' : 'YOU  ------  -----', 40, 98 + 4 * 44 + 10); }
+    boardTex.needsUpdate = true;
+  }
+  const BOARD = V(0, 3.05, -4.72), boardMat = new T.MeshBasicMaterial({ map: boardTex, color: 0x000000, side: DS });
+  const board = new T.Mesh(new T.PlaneGeometry(2.3, 1.53), boardMat); board.position.copy(BOARD); room.add(board);
+  const frame = new T.Mesh(new T.PlaneGeometry(2.5, 1.73), new T.MeshBasicMaterial({ color: 0x2A1252, side: DS })); frame.position.copy(BOARD); frame.position.z -= .02; room.add(frame);
+  drawBoard(0);
+
+  /* Drive School: a driving rig at the far end of the room, behind the visitor the whole time */
+  const RZ = 19, roadC = canvas(512, 288), rx = roadC.getContext('2d'), roadTex = new T.CanvasTexture(roadC);
+  function drawRoad(t){
+    const x = rx, W = 512, H = 288, hy = 150; x.shadowBlur = 0;
+    const sky = x.createLinearGradient(0, 0, 0, hy); sky.addColorStop(0, '#0B0720'); sky.addColorStop(1, '#5A1E6E'); x.fillStyle = sky; x.fillRect(0, 0, W, hy);
+    x.fillStyle = '#FFB020'; x.shadowColor = '#FF7A2F'; x.shadowBlur = 30; x.beginPath(); x.arc(W / 2, hy, 46, Math.PI, 0); x.fill(); x.shadowBlur = 0;
+    x.fillStyle = '#0A0818'; x.fillRect(0, hy, W, H - hy);
+    x.fillStyle = '#17142E'; x.beginPath(); x.moveTo(W / 2 - 10, hy); x.lineTo(W / 2 + 10, hy); x.lineTo(W / 2 + 250, H); x.lineTo(W / 2 - 250, H); x.fill();
+    x.strokeStyle = '#C6F432'; x.lineWidth = 3; x.beginPath(); x.moveTo(W / 2 - 10, hy); x.lineTo(W / 2 - 250, H); x.moveTo(W / 2 + 10, hy); x.lineTo(W / 2 + 250, H); x.stroke();
+    x.fillStyle = '#fff'; for (let k = 0; k < 7; k++) { const z = (k / 7 + t * .55) % 1, zz = z * z, y = hy + (H - hy) * zz; x.fillRect(W / 2 - (1 + 7 * zz), y, 2 + 14 * zz, 3 + 30 * zz); }
+    x.font = '17px ' + FP; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#FFB020'; x.shadowColor = '#FFB020'; x.shadowBlur = 10; x.fillText('DAY 01', W / 2, 30);
+    x.font = '11px ' + FP; x.fillStyle = '#fff'; x.fillText("LEARNER'S PERMIT", W / 2, 58); roadTex.needsUpdate = true;
+  }
+  drawRoad(0);
+  const bw = new T.Mesh(new T.PlaneGeometry(26, 7.4), wallMat); bw.position.set(0, 3.7, RZ + 1.2); bw.rotation.y = Math.PI; room.add(bw);
+  const dsMat = neonMat('DRIVE SCHOOL', '#FFB020', 1024), ds = new T.Mesh(new T.PlaneGeometry(5.6, 1.1), dsMat); ds.position.set(0, 3.6, RZ + 1.1); ds.rotation.y = Math.PI; room.add(ds);
+  const rigMat = new T.MeshLambertMaterial({ color: 0x221A3E, side: DS }), roadMat = new T.MeshBasicMaterial({ map: roadTex, color: 0x000000, side: DS }), amberLine = new T.LineBasicMaterial({ color: 0x000000 });
+  const SCREEN3 = V(0, 1.95, RZ - .1);
+  const boxAt = (w, h, d, x, y, z, mat) => { const g = new T.BoxGeometry(w, h, d), m = new T.Mesh(g, mat); m.position.set(x, y, z); room.add(m); const e = new T.LineSegments(new T.EdgesGeometry(g), amberLine); e.position.copy(m.position); room.add(e); return m; };
+  boxAt(2.3, 1.15, .8, 0, .575, RZ + .1, rigMat); boxAt(2.2, 1.3, .14, 0, 1.95, RZ, rigMat);
+  const rscr = new T.Mesh(new T.PlaneGeometry(2.0, 1.125), roadMat); rscr.position.copy(SCREEN3); rscr.rotation.y = Math.PI; room.add(rscr);
+  const wheel = new T.Mesh(new T.TorusGeometry(.27, .04, 8, 28), stickMat); wheel.position.set(0, 1.28, RZ - .55); wheel.rotation.x = .35; room.add(wheel);
+  const col3 = new T.Mesh(new T.CylinderGeometry(.03, .03, .5, 8), stickMat); col3.position.set(0, 1.2, RZ - .33); col3.rotation.x = 1.2; room.add(col3);
+  boxAt(.85, .14, .85, 0, .55, RZ - 1.55, rigMat); boxAt(.85, 1.0, .14, 0, 1.05, RZ - 2.0, rigMat);
+  const la = new T.PointLight(0xFFB020, 0, 12); la.position.set(0, 3.2, RZ - 1.5); scene.add(la);
+
+  /* mirror the room under the floor (skipped on weak devices) */
+  if (!LOW) { const mirror = room.clone(true); mirror.scale.y = -1; scene.add(mirror); }
+
+  /* dust */
+  const dn = LOW ? 120 : 320, dp = new Float32Array(dn * 3); for (let i = 0; i < dn; i++) { dp[i * 3] = (Math.random() - .5) * 26; dp[i * 3 + 1] = Math.random() * 7; dp[i * 3 + 2] = -6 + Math.random() * 26; }
+  const dg = new T.BufferGeometry(); dg.setAttribute('position', new T.BufferAttribute(dp, 3));
+  const dust = new T.Points(dg, new T.PointsMaterial({ color: 0xB9A6FF, size: .045, transparent: true, opacity: .7, depthWrite: false })); scene.add(dust);
+
+  /* lights */
+  const amb = new T.AmbientLight(0x5560A8, 0), lp = new T.PointLight(0xFF4D8D, 0, 22), lb = new T.PointLight(0x5B4BFF, 0, 22), ls = new T.PointLight(0xFF7FB0, 0, 15);
+  lp.position.set(-4, 4.5, 0); lb.position.set(4, 4.5, 0); ls.position.copy(SIGN).add(V(0, -.4, 1.2)); scene.add(amb, lp, lb, ls);
+
+  /* bloom: makes the neon actually glow */
+  let composer = null, bloom = null;
+  try { if (T.EffectComposer && T.UnrealBloomPass) { composer = new T.EffectComposer(renderer); composer.addPass(new T.RenderPass(scene, cam));
+    bloom = new T.UnrealBloomPass(new T.Vector2(innerWidth, innerHeight), .6, .4, .22); composer.addPass(bloom); } } catch (e) { composer = null; }
+
+  /* camera stops: [position, look-at]. The camera turns between them, so stop 6 really is behind you. */
+  const mL = machines[0], mR = machines[4], mC = machines[2], at = (m, dist) => { const p = m.screen.clone().addScaledVector(m.n, dist); p.y += .04; return p; };
+  const cPos = at(mC, 2.5); cPos.y = 1.25;
+  const STOPS = [
+    [V(0, 3.6, 6.4), V(0, 4.0, -3.1)],
+    [V(0, 2.5, 8.2), V(0, 2.9, -3.4)],
+    [at(mL, 1.02), mL.screen.clone()],
+    [at(mR, 1.02), mR.screen.clone()],
+    [cPos, mC.screen.clone()],
+    [V(0, 3.0, -1.6), BOARD.clone()],
+    [V(.5, 2.1, RZ - 3.7), V(0, 2.45, RZ)],
+    [V(0, 2.1, 7.4), V(0, 3.7, -3.1)]
+  ];
+  const UP = V(0, 1, 0), mt = new T.Matrix4(), QS = STOPS.map(s => new T.Quaternion().setFromRotationMatrix(mt.lookAt(s[0], s[1], UP)));
+  const pos = STOPS[0][0].clone().add(V(0, 0, 3.5)), tp = V(0, 0, 0), tq = new T.Quaternion(), q = QS[0].clone();
+  let mx = 0, my = 0, px = -1, py = -1, hovered = null, downAt = [0, 0];
+  const ray = new T.Raycaster(), nd = new T.Vector2();
+  function pick(){ if (px < 0 || cur === 0 || cur === 2 || cur === 3 || cur === 6) return null; nd.set(px / innerWidth * 2 - 1, -(py / innerHeight) * 2 + 1); ray.setFromCamera(nd, cam); const h = ray.intersectObjects(bodies, false)[0]; return h ? machines[h.object.userData.idx] : null; }
+  addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; px = e.clientX; py = e.clientY; }, { passive:true });
+  gl.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
+  gl.addEventListener('pointerup', e => {
+    if (Math.abs(e.clientX - downAt[0]) + Math.abs(e.clientY - downAt[1]) > 8) return;
+    px = e.clientX; py = e.clientY; const m = pick(); if (!m || cur < 1) return;
+    if (m.open) { m.hv = 2.2; kick = .7; beep(880, .12); toast('This one is on. Log in to play.', px, py); }
+    else { m.shake = 1; m.peek = 1; beep(120, .25, 'sawtooth'); toast('Not yet.', px, py); }
+  });
+  function size(){ const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); if (composer) { composer.setPixelRatio(PR); composer.setSize(w, h); } cam.aspect = w / h; cam.updateProjectionMatrix(); }
+  size(); addEventListener('resize', size);
+
+  const clock = new T.Clock(); let L = 0, lastBoard = 0, bp = 0, litN = CALM ? 12 : 0, dead = -1, deadTill = 0, frameN = 0, fov = 55, signOn = 0, D = 0;
+  function tick(){
+    const t = clock.getElapsedTime(), f = fpos(), i = Math.min(N - 2, Math.floor(f)), k = f - i, e = k * k * (3 - 2 * k); frameN++;
+    tp.lerpVectors(STOPS[i][0], STOPS[i + 1][0], e); tq.copy(QS[i]).slerp(QS[i + 1], e);
+    const close = cur === 2 || cur === 3 || cur === 6 ? .15 : 1;
+    tp.x += mx * .9 * close; tp.y -= my * .5 * close;
+    const gap = pos.distanceTo(tp);
+    pos.lerp(tp, CALM ? 1 : .065); q.slerp(tq, CALM ? 1 : .065);
+    cam.position.copy(pos); cam.position.y += Math.sin(t * .8) * .03; cam.position.x += Math.sin(t * .5) * .05; cam.quaternion.copy(q);
+    const base = innerWidth < innerHeight ? 78 : 55; fov += (base + Math.min(16, gap * 2.600) - fov) * .1;
+    if (Math.abs(fov - cam.fov) > .05) { cam.fov = fov; cam.updateProjectionMatrix(); }
+
+    /* sign: buzz on letter by letter, then the odd dead tube */
+    const want = Math.max(0, Math.min(12, Math.floor((t - .5) / .13)));
+    if (want > litN) { litN = want; drawSign(litN, -1); beep(300 + litN * 40, .05, 'square', .03); }
+    if (litN >= 12) {
+      if (dead < 0 && cur <= 1 && Math.random() < .004) { dead = Math.floor(Math.random() * 11); if (TXT[dead] === ' ') dead = 6; deadTill = t + .09 + Math.random() * .12; drawSign(12, dead); }
+      else if (dead >= 0 && t > deadTill) { dead = -1; drawSign(12, -1); }
+    }
+    signOn += ((litN / 12) - signOn) * .1;
+
+    const on = cur >= 1, since = powerAt ? (performance.now() - powerAt) / 1000 : 0;
+    L += ((on ? 1 : 0) - L) * .05; kick *= .94; D += ((cur >= 6 ? 1 : 0) - D) * .05;
+    amb.intensity = .14 + L * .5 + kick * .25; lp.intensity = L * 1.3 + kick; lb.intensity = L * 1.3 + kick; ls.intensity = signOn * (1.5 + L * .2); la.intensity = D * 1.6;
+    signGlow.material.opacity = .42 * signOn; hints[0].opacity = L * (Math.sin(t * 23) > .97 ? .4 : 1); hints[1].opacity = L;
+    dsMat.opacity = D * (Math.sin(t * 17) > .96 ? .5 : 1); roadMat.color.setScalar(D * (cur === 6 && performance.now() - d3At > 1900 ? .35 : 1)); amberLine.color.setRGB(1 * D, .69 * D, .12 * D);
+    if (D > .05 && frameN % 2 === 0) drawRoad(t);
+    if (bloom) bloom.strength = .6 + kick * .8;
+    if (since > 0 && since < 2.2) { const r = since / 2.2; ring.scale.setScalar(1 + r * 30); ringMat.opacity = (1 - r) * .9; } else ringMat.opacity = 0;
+
+    if (frameN % 4 === 0) hovered = pick();
+    gl.style.cursor = hovered && cur >= 1 ? 'pointer' : 'crosshair';
+    if (on && Math.random() < .006) covered[Math.floor(Math.random() * covered.length)].peek = 1;     // something stirs under a cover
+    const fr = Math.floor(t * 1.4);
+    for (const m of machines) {
+      const tgt = on && since > m.i * .25 + m.side * .1 ? 1 : 0;
+      m.pw += (tgt - m.pw) * .14; m.hv += ((m === hovered ? 1 : 0) - m.hv) * .15; m.peek *= .93;
+      const fin = cur === 7 ? .25 * Math.max(0, Math.sin(t * 5 - m.i * .9)) : 0;
+      if (m.open) {
+        const jit = 1 + Math.sin(t * 9 + m.seed) * .05;
+        m.sm.color.setScalar(Math.min(1.6, m.pw * jit + m.hv * .5 + fin)); m.mm.color.copy(m.col).multiplyScalar(m.pw * 1.1 + m.hv * .5 + fin);
+        m.lm.color.copy(m.col).multiplyScalar(m.pw * .9 + m.hv * .8 + fin); m.bm.color.copy(m.col).multiplyScalar(m.pw);
+        if (m.pw > .3 && fr + m.i !== m.fr) { m.fr = fr + m.i; paint(m, m.fr); }
+      } else {
+        const breathe = .16 + Math.sin(t * 1.3 + m.seed) * .1 + (cur === 4 ? .25 : 0);
+        m.qm.color.setScalar(m.pw * breathe + m.hv * .7 + m.peek * 1.2);
+        m.lm.color.copy(m.col).multiplyScalar(m.peek * 1.4 + m.hv * .5);
+      }
+      if (m.shake) { m.shake *= .86; m.g.rotation.z = Math.sin(t * 60) * .05 * m.shake; if (m.shake < .02) { m.shake = 0; m.g.rotation.z = 0; } }
+      const lift = m.open ? m.hv * .06 : 0; if (Math.abs(m.g.position.y - lift) > .001) m.g.position.y = lift;
+    }
+    bp += ((on ? (cur === 2 || cur === 3 ? .15 : 1) : 0) - bp) * .08; boardMat.color.setScalar(bp);
+    if (cur === 5 && t - lastBoard > .09) { lastBoard = t; drawBoard(t); }
+    dust.rotation.y = t * .012;
+    if (composer) composer.render(); else renderer.render(scene, cam);
+    if (!document.hidden) requestAnimationFrame(tick);
+  }
+  tick(); document.addEventListener('visibilitychange', () => { if (!document.hidden) requestAnimationFrame(tick); });
+}
+function boot(){ try { if (!window.THREE) throw 0; arcade(); } catch (e) { console.error(e); document.documentElement.classList.add('nogl'); } }
+const fontsIn = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('italic 800 100px "Barlow Condensed"'), document.fonts.load('20px "Press Start 2P"')]) : Promise.resolve();
+Promise.race([fontsIn, new Promise(r => setTimeout(r, 1800))]).then(boot, boot);
+</script>
+<script src="/install.js"></script>
+</body>
+</html>
