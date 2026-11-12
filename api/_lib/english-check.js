@@ -28,10 +28,11 @@ export const RF = [
 // ---------- Part 2: Fill the gaps (C-test) ----------
 // stem{missing|alt} marks a gap: the student sees the stem and types the missing letters (boxes = length of the first answer).
 // Any ending after | is also accepted. Gaps were reviewed so each has only one sensible answer of that length.
+// C-test rule: the first and the last sentence of each passage stay whole (no gaps), so readers get context at both ends.
 export const CTEST = {
-  mid: { lv: 4, text: 'Last month, our college held its first coding contest. More th{an} two hundred stu{dents} signed up, but on{ly} forty finished all the probl{ems}. The win{ner} was a fresher fr{om} Nellore who had never used a lap{top} before joining college. She sa{id|ys} she practised for an hour every night on her bro{ther}’s old phone.' },
-  easy: { lv: 2, text: 'Ravi lives in a small town near Guntur. Every mor{ning} he wa{lks} to the b{us} stop wi{th} his sis{ter}. They ta{ke} the bus to the{ir} college. The ri{de} is long, so they li{sten} to music or ta{lk} about their day.' },
-  hard: { lv: 7, text: 'Many students assume that being busy is the same as being productive. In rea{lity}, research on learn{ing|ers} suggests that the num{ber} of hours we spend mat{ters} far less than how we spe{nd|nt} them. Rereading notes fe{els} reassuring, yet it rar{ely} leads to lasting memory. Testing yourself, by con{trast}, is uncomfortable but rema{rkably} effective. The les{son} is simple: deliberate effort beats mere activity.' }
+  mid: { lv: 4, text: 'Last month, our college held its first coding contest. More th{an} two hundred stu{dents} signed up, but on{ly} forty finished all the probl{ems}. The win{ner} was a fresher fr{om} Nellore who had never used a lap{top} before joining college. She sa{id|ys} she practised for an hour every night on her bro{ther}’s old phone. Next month, she wants to start a coding club for first-years.' },
+  easy: { lv: 2, text: 'Ravi lives in a small town near Guntur. Every mor{ning} he wa{lks} to the b{us} stop wi{th} his sis{ter}. They ta{ke} the bus to the{ir} college. The ri{de} is long, so they li{sten} to music or ta{lk} about their day. On Fridays, they often stop for tea on the way home.' },
+  hard: { lv: 7, text: 'Many students assume that being busy is the same as being productive. In rea{lity}, research on learn{ing|ers} suggests that the num{ber} of hours we spend mat{ters} far less than how we spe{nd|nt} them. Rereading notes fe{els} reassuring, yet it rar{ely} leads to lasting memory. Testing yourself, by con{trast}, is uncomfortable but rema{rkably} effective. The les{son} is simple: deliberate effort beats mere activity. Twenty focused minutes can teach you more than an hour of passive reading.' }
 };
 // split into text pieces and gaps: [{ t }, { stem, n, ans: [..] }]
 export function parseCtest(text){
