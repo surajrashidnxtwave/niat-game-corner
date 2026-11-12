@@ -1,4 +1,4 @@
-/* English Adda: a daily 15-minute English workout made of short games, inside Game Corner. Host: Yapper.
+/* English Adda: a daily 15-minute English workout made of short games, inside Game Corner. Host: Mithu the parakeet (art: scripts/mithu-art.py).
    Uses the page's helpers from index.html: ME, api, SFX, syncMute, toast, confetti, anim, reduced, W3, esc, view, openModal, closeModal.
    Server copy: /api/english (timer, streak, points, levels; only batches in ENGLISH_BATCHES can open it).
    This file keeps a local cache so the page opens instantly, and counts active seconds only while a game is running. */
@@ -19,34 +19,40 @@ const SKILLS = [
 const LEVELS = ['First Sip', 'Regular', 'Chatter', 'Storyteller', 'Debater', 'Anchor', 'Headliner', 'Adda Legend'];
 // v1 games (built: false = not playable in this release yet). Keep built: true in step with BUILT in api/_lib/english-games.js
 const GAMES = [
-  { id: 'groups',  name: 'Word Groups',  skill: 'voc', icon: '🧩', mins: 2, built: true, daily: true },
-  { id: 'realfake',name: 'Real or Fake', skill: 'voc', icon: '🕵️', mins: 2, built: true },
+  { id: 'pairup',  name: 'Dive',         skill: 'voc', icon: '🐟', mins: 2, built: true },
+  { id: 'realfake',name: 'Real or Fake', skill: 'voc', icon: '🥚', mins: 3, built: true },
+  { id: 'echo',    name: 'Echo',         skill: 'lis', icon: '🦇', mins: 3, built: true },
   { id: 'catch',   name: 'Catch It',     skill: 'lis', icon: '🎧', mins: 2, built: false },
   { id: 'rewind',  name: 'Story Rewind', skill: 'lis', icon: '📻', mins: 3, built: false },
-  { id: 'jumble',  name: 'Jumble',       skill: 'gra', icon: '🔀', mins: 2, built: true },
-  { id: 'spotfix', name: 'Spot & Fix',   skill: 'gra', icon: '🔍', mins: 2, built: true },
+  { id: 'flick',   name: 'Hop',          skill: 'gra', icon: '🐿️', mins: 2, built: true },
+  { id: 'express', name: 'Express',      skill: 'gra', icon: '🚂', mins: 2, built: true },
+  { id: 'post',    name: 'Pigeon Post',  skill: 'rea', icon: '🕊️', mins: 3, built: true },
   { id: 'reels',   name: 'Reel Reader',  skill: 'rea', icon: '📱', mins: 3, built: false },
   { id: 'vanish',  name: 'Vanish',       skill: 'rea', icon: '💨', mins: 3, built: false },
+  { id: 'munch',   name: 'Munch',        skill: 'wri', icon: '🐐', mins: 2, built: true },
   { id: 'email',   name: 'Fix My Email', skill: 'wri', icon: '✉️', mins: 3, built: false },
   { id: 'vault',   name: 'Word Vault',   skill: 'voc', icon: '🔐', mins: 1, built: true, always: true }
 ];
 const gameOf = id => GAMES.find(g => g.id === id);
-// Everything Yapper says out loud. After ANY change here, run: python scripts/english-voice.py
-/*YAPPER_LINES*/const YAPPER_LINES = {
-  hello: ['Yes, I talk a lot. This is English Adda: 15 minutes a day of word games, stories and quick challenges.',
-          'First, a quick warm-up so I can pick the right games for you. No marks, no pressure.'],
+// Everything Mithu says out loud. After ANY change here, run: python scripts/english-voice.py
+/*MITHU_LINES*/const MITHU_LINES = {
+  hello: ['I’m Mithu. I hear everything on this campus. And no, I don’t repeat. I remix.',
+          'This is English Adda: 15 minutes a day of quick word games. First, a short warm-up so I can pick your games. No marks, no pressure.'],
   rf: ['Part one: Real or Fake. Tap Real only if you know the word. Some words are made up, so don’t guess!'],
   c1: ['Part two: Fill the gaps. Each word has lost its ending. Type the missing letters.'],
   c2: ['Nice! One more short passage.'],
   catch: ['Part three: Catch it. Listen, then type exactly what you hear. Each sentence plays only once, so stay sharp!'],
   story: ['Last part! Read this quick story, then answer two questions.'],
   done: ['Done! Here’s where you start. I’ll pick your games from this.'],
-  groups: ['Word Groups! Sixteen words, four groups of four. Tap four words that go together, then Submit. You get four mistakes. Go!'],
-  realfake: ['Real or Fake! Some words are real. Some are spelt wrong, or made up. Five seconds each, so look closely!'],
-  jumble: ['Jumble! Tap the pieces in the right order to build the sentence.', 'Careful: one piece doesn’t belong. Leave it out.'],
-  spotfix: ['Spot and Fix! Tap the part with the mistake, then pick the fix. Some sentences are already perfect, so don’t over-fix.'],
+  realfake: ['A koel hid fake eggs in the crow’s nest. Help the crow! Every egg has a word on it.', 'A real word is a real egg. A wrong spelling or a made-up word is a fake egg.'],
+  pairup: ['Dive! The kingfisher is hungry. Read the sign next to him. Then tap the leaf with the right word. A fish hides under it.'],
+  flick: ['The squirrel wants to cross the river. He needs your help. The stones make a sentence.', 'If the sentence is right, tap Hop. If one stone is wrong, tap Wait. Then tap the wrong stone.'],
+  express: ['Express! Some coaches are already on the train. Tap the missing ones in order, and the train leaves.', 'Careful: one coach doesn’t belong. Leave it in the yard.'],
+  munch: ['Munch! This goat is hungry, but he eats only extra words. One word in each sentence is extra.', 'Tap that word and he eats it. Then the sentence is right.'],
+  post: ['Pigeon Post! The pigeon brings a note. Read it, then tap the house with the right answer.'],
+  echo: ['Echo! It’s dark in the cave, and the bat finds his way by sound. Earphones in?', 'You hear each sentence only once. Tap the missing words, and each right word lights a lamp.'],
   vault: ['Word Vault time! Let’s see which of your saved words stuck.']
-};/*END_YAPPER_LINES*/
+};/*END_MITHU_LINES*/
 const skillOf = k => SKILLS.find(s => s.k === k);
 
 /* ================= small helpers ================= */
@@ -57,14 +63,14 @@ const istDay = t => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'nume
 const sfx = name => { try { SFX.play(name); } catch (e) {} };
 const mins = s => Math.floor(s / 60);
 const tester = () => !!(typeof ME !== 'undefined' && ME && ME.pilot === 'DEMO');
-const yap = (pose, size, cls, tip) => '<img class="' + (cls || 'eyap') + '" src="assets/yapper/yapper-' + pose + '.svg" width="' + size + '" height="' + size + '" alt="" decoding="async"' + (tip ? ' data-tip="' + tip + '" tabindex="0" role="button" aria-label="Yapper says hi"' : '') + '>';
-// what Yapper says when you hover over (or tap) him. Text only, no sound.
+const yap = (pose, size, cls, tip) => '<img class="' + (cls || 'eyap') + '" src="assets/mithu/mithu-' + pose + '.svg" width="' + size + '" height="' + size + '" alt="" decoding="async"' + (tip ? ' data-tip="' + tip + '" tabindex="0" role="button" aria-label="Mithu says hi"' : '') + '>';
+// what Mithu says when you hover over (or tap) him. Text only, no sound.
 const TIPS = {
-  hi: ['Hi, I’m Yapper. Ready to play?', 'Yes, I talk a lot. Let’s play!', 'Words are my snacks. Got any?'],
-  home: ['Hi, I’m Yapper. Ready to play?', '15 minutes. That’s all I ask!', 'Today’s games are picked just for you.', 'Psst… keep that streak alive 🔥'],
-  done: ['Goal done! You’re on fire 🔥', 'Nice work today. Bonus round?'],
-  closed: ['Adda’s closed. See you tomorrow!', 'Rest those brain cells. Back tomorrow?'],
-  wait: ['Not open for you yet. Soon, promise!']
+  hi: ['I’m Mithu. Ready when you are.', 'I don’t repeat. I remix.', 'I heard that. I hear everything.'],
+  home: ['I’m Mithu. Ready when you are.', '15 minutes. Shorter than the mess queue.', 'Today’s games are picked for you.', 'Nice streak. Keep it going 🔥'],
+  done: ['Goal done. I’m impressed, and I’m hard to impress.', 'Done for today. Bonus round?'],
+  closed: ['Adda’s closed. See you tomorrow.', 'Go rest. I’ll be here.'],
+  wait: ['Not open for you yet. Soon.']
 };
 const ICON = {
   star: '<svg viewBox="0 0 24 24" fill="#F5B82E" aria-hidden="true"><path d="M12 2l2.6 6.6L21 9.3l-5 4.4 1.5 6.8L12 17l-5.5 3.5L8 13.7 3 9.3l6.4-.7z"/></svg>',
@@ -160,20 +166,20 @@ function render(){
   const S = st();
   pull();
   if (OPEN === false) return renderNotOpen(root);
-  if (!S) { root.innerHTML = '<div class="eload">' + yap('thinking', 120, 'eyap bob') + '<p>Opening the adda…</p></div>'; return; }
+  if (!S) { root.innerHTML = '<div class="eload">' + yap('thinking', 150, 'eyap bob') + '<p>Opening the adda…</p></div>'; return; }
   if (!S.placed && !tester()) return renderWelcome(root);
   renderHome(root, S);
 }
 function renderNotOpen(root){
   root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 200, 'eyap bob', 'wait') + '</div><div class="ewel-talk">'
-    + '<h1 class="ddisplay">English Adda</h1><p class="ewel-sub">Not open for your batch yet. Yapper is still warming up. Check back soon!</p>'
+    + '<h1 class="ddisplay">English Adda</h1><p class="ewel-sub">Not open for your batch yet. Mithu is still warming up. Check back soon!</p>'
     + '<button class="ebtn ghost" data-go="home">Back to Brain Gym</button></div></section>';
 }
-/* the level check is required: until it's done, English Adda shows only this start screen. Yapper introduces himself here. */
+/* the level check is required: until it's done, English Adda shows only this start screen. Mithu introduces himself here. */
 function renderWelcome(root){
   root.innerHTML = '<section class="ewelcome"><div class="ewel-yap">' + yap('idle', 240, 'eyap bob', 'hi') + '</div>'
-    + '<div class="ewel-talk"><span class="etag">New · English Adda</span><h1 class="ddisplay">Hey, I’m Yapper!</h1>'
-    + '<div class="ebubble">' + YAPPER_LINES.hello.map(t => '<p>' + esc(t) + '</p>').join('') + '<button class="ehear" data-ehear aria-label="Hear Yapper">🔊 Hear me</button></div>'
+    + '<div class="ewel-talk"><span class="etag">New · English Adda</span><h1 class="ddisplay">Hey, I’m Mithu.</h1>'
+    + '<div class="ebubble">' + MITHU_LINES.hello.map(t => '<p>' + esc(t) + '</p>').join('') + '<button class="ehear" data-ehear aria-label="Hear Mithu">🔊 Hear me</button></div>'
     + '<div class="ewel-row"><button class="ebtn" data-echeck>Let’s go</button><span class="enote">About 5 minutes</span></div></div></section>';
 }
 function renderHome(root, S){
@@ -195,7 +201,7 @@ function renderHome(root, S){
     + '<section class="ehero' + (closed ? ' closed' : '') + '">' + ring(t, 128)
     + '<div class="ehero-text"><span class="etag">' + tag + '</span><h2 class="ddisplay">' + esc(h) + '</h2><p>' + esc(p) + '</p>'
     + (btn ? '<div class="ehero-row">' + btn + '</div>' : '') + '</div>'
-    + yap(closed ? 'idle' : done ? 'correct' : 'idle', 140, 'eyap ehero-yap', closed ? 'closed' : done ? 'done' : 'home') + '</section>'
+    + yap(closed ? 'idle' : done ? 'correct' : 'idle', 180, 'eyap ehero-yap', closed ? 'closed' : done ? 'done' : 'home') + '</section>'
     + '<div class="egrid"><section class="epanel"><h3>Today’s games</h3><p class="esub">' + (S.placed ? 'Picked for your level. More time goes to the skills you’re building.' : 'Your games appear after the level check.') + '</p>'
     + '<div class="esets">' + (S.placed && S.circuit && S.circuit.length ? todaySets(S).map(x => setRow(gameOf(x.id), x.done)) : GAMES.filter(g => !g.always).map(g => setRow(g))).join('') + '</div>'
     + (S.placed || tester() ? '<h3 class="evh">Always open</h3><div class="esets">' + setRow(gameOf('vault'), false, vaultLine(S)) + '</div>' : '') + '</section>'
@@ -222,8 +228,8 @@ function skillRow(s, lv){
   return '<div class="eskill" style="--c:' + s.c + '"><div class="eskill-h"><b>' + s.name + '</b><span>' + (lv ? 'Lv ' + lv + ' · ' + LEVELS[lv - 1] : '?') + '</span></div><div class="ebars">' + bars + '</div></div>';
 }
 
-/* ================= Yapper's voice + listening clips ================= */
-// Yapper's lines: clips recorded by scripts/english-voice.py, found by text in the manifest (off when sound is muted).
+/* ================= Mithu's voice + listening clips ================= */
+// Mithu's lines: clips recorded by scripts/english-voice.py, found by text in the manifest (off when sound is muted).
 // Listening clips (Catch It) play even when muted, because hearing them is the task; their file names come from the server.
 const Voice = (() => {
   let man = null, au = null, onEnd = null;
@@ -268,14 +274,14 @@ function openCheck(){
     if (r.status === 409) { closeCheck(); toast('You’ve already found your level.'); pull(true); return; }
     if (r.status !== 200 || !r.j.ok) return failed(() => { closeCheck(); openCheck(); });
     C.items = r.j.items;
-    intro(1, 'Real or Fake', YAPPER_LINES.rf[0], 'Start', () => rfShow(0));
+    intro(1, 'Real or Fake', MITHU_LINES.rf[0], 'Start', () => rfShow(0));
   });
 }
 function body(){ return qs('.ep-body', CP); }
 function progress(part){ if (!CP) return; qs('.ep-prog i', CP).style.width = Math.round(C.done / UNITS * 100) + '%'; if (part) qs('.ep-part', CP).textContent = 'Part ' + part + ' of 4'; }
-function loading(msg){ body().innerHTML = '<div class="ep-center">' + yap('thinking', 120, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
+function loading(msg){ body().innerHTML = '<div class="ep-center">' + yap('thinking', 150, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
 function failed(retry){
-  body().innerHTML = '<div class="ep-center">' + yap('oops', 120, 'eyap') + '<p class="esub">Couldn’t reach Game Corner. Check your internet.</p><button class="ebtn" id="ep-retry">Try again</button></div>';
+  body().innerHTML = '<div class="ep-center">' + yap('oops', 150, 'eyap') + '<p class="esub">Couldn’t reach Game Corner. Check your internet.</p><button class="ebtn" id="ep-retry">Try again</button></div>';
   qs('#ep-retry', CP).onclick = () => { sfx('tap'); retry(); };
 }
 function intro(part, title, line, btn, go){
@@ -307,7 +313,7 @@ document.addEventListener('keydown', e => { if (CP && C && C.key && !qs('.ep-con
 let rfTimer = 0;
 function rfShow(i){
   const words = C.items.rf;
-  if (i >= words.length) { C.key = null; return intro(2, 'Fill the gaps', YAPPER_LINES.c1[0], 'Start', () => passage('c1')); }
+  if (i >= words.length) { C.key = null; return intro(2, 'Fill the gaps', MITHU_LINES.c1[0], 'Start', () => passage('c1')); }
   progress(1);
   body().innerHTML = '<div class="erf"><p class="ecount">' + (i + 1) + ' / ' + words.length + '</p>'
     + '<div class="erf-card"><b>' + esc(words[i]) + '</b></div><div class="erf-time"><i></i></div>'
@@ -353,7 +359,7 @@ function passage(which){
     sfx('tap');
     C[which] = ins.map(el => el.value.trim().toLowerCase());
     C.done++;
-    if (which === 'c2') return intro(3, 'Catch it', YAPPER_LINES.catch[0], 'Start', () => catchShow(0));
+    if (which === 'c2') return intro(3, 'Catch it', MITHU_LINES.catch[0], 'Start', () => catchShow(0));
     const go = () => {
       loading('One moment…');
       api('/api/english', { action: 'checknext', token: ME.token, rf: C.rf, c1: C.c1 }, 10000).then(r => {
@@ -361,8 +367,8 @@ function passage(which){
         if (r.status !== 200 || !r.j.ok) return failed(go);
         C.next = r.j.items;
         progress(2);
-        body().innerHTML = '<div class="ep-intro">' + yap('correct', 130, 'eyap bob') + '<div class="ebubble"><p>' + esc(YAPPER_LINES.c2[0]) + '</p></div><button class="ebtn" id="ep-go">Next passage</button></div>';
-        Voice.say(YAPPER_LINES.c2[0]);
+        body().innerHTML = '<div class="ep-intro">' + yap('correct', 170, 'eyap bob') + '<div class="ebubble"><p>' + esc(MITHU_LINES.c2[0]) + '</p></div><button class="ebtn" id="ep-go">Next passage</button></div>';
+        Voice.say(MITHU_LINES.c2[0]);
         qs('#ep-go', CP).onclick = () => { sfx('tap'); Voice.stop(); passage('c2'); };
       });
     };
@@ -373,7 +379,7 @@ function passage(which){
 // ---- part 3: Catch it (hear a sentence once, type it) ----
 function catchShow(i){
   const list = C.items.catch;
-  if (i >= list.length) return intro(4, 'Quick story', YAPPER_LINES.story[0], 'Start', storyShow);
+  if (i >= list.length) return intro(4, 'Quick story', MITHU_LINES.story[0], 'Start', storyShow);
   progress(3);
   const it = list[i];
   let plays = 0, playing = false;
@@ -423,7 +429,7 @@ function storyShow(){
 }
 function submitCheck(){
   progress(4);
-  loading('Yapper is working out your level…');
+  loading('Mithu is working out your level…');
   const secs = Math.round((Date.now() - C.t0) / 1000);
   api('/api/english', { action: 'checkdone', token: ME.token, rf: C.rf, c1: C.c1, c2: C.c2, catch: C.catch, story: C.story, secs }, 12000).then(r => {
     if (!CP) return;
@@ -440,16 +446,16 @@ function result(L){
   const best = SKILLS.filter(s => L[s.k] === hi).map(s => s.name), weak = SKILLS.filter(s => L[s.k] === lo).map(s => s.name);
   const line = hi === lo ? 'You’re even across all five skills. We’ll mix everything.'
     : 'Your strongest: <b>' + best.slice(0, 2).join(' and ') + '</b>. We’ll train <b>' + weak.slice(0, 2).join(' and ') + '</b> most.';
-  body().innerHTML = '<div class="eresult">' + yap('correct', 140, 'eyap bob') + '<div class="ebubble"><p>' + esc(YAPPER_LINES.done[0]) + '</p></div>'
+  body().innerHTML = '<div class="eresult">' + yap('correct', 180, 'eyap bob') + '<div class="ebubble"><p>' + esc(MITHU_LINES.done[0]) + '</p></div>'
     + '<h2 class="ddisplay">You’re Level ' + overall + ': ' + LEVELS[overall - 1] + '</h2>'
     + '<div class="epanel eres-skills">' + SKILLS.map(s => skillRow(s, L[s.k])).join('') + '<p class="esub" style="margin:10px 0 0">' + line + ' Only you can see this.</p></div>'
     + '<button class="ebtn" id="ep-home">See today’s games</button></div>';
-  Voice.say(YAPPER_LINES.done[0]);
+  Voice.say(MITHU_LINES.done[0]);
   sfx('levelup'); try { if (!reduced()) confetti(); } catch (e) {}
   qs('#ep-home', CP).onclick = () => { sfx('tap'); closeCheck(); };
 }
 
-/* ================= the games: Word Groups, Real or Fake, Jumble, Spot & Fix, Word Vault =================
+/* ================= the games: Word Groups, Real or Fake, Flick, Express, Word Vault =================
    One player shell for all of them. The server picks each round at the student's level and sends the answers along,
    so feedback is instant; points and levels come from the server, which re-scores the FIRST attempt at each item. */
 let G = null, GP = null;
@@ -463,7 +469,7 @@ const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
 // today's sets in order, each marked done by counting today's finished rounds per game
 function todaySets(S){
   const left = Object.assign({}, (S && S.played) || {});
-  return ['groups', ...((S && S.circuit) || [])].map(id => { const done = left[id] > 0; if (done) left[id]--; return { id, done }; });
+  return ((S && S.circuit) || []).map(id => { const done = left[id] > 0; if (done) left[id]--; return { id, done }; });
 }
 function nextGame(){
   const S = st(); if (!S) return null;
@@ -484,18 +490,18 @@ function startNext(){
 
 const pb = () => qs('.ep-body', GP);
 function gprog(f){ if (GP) qs('.ep-prog i', GP).style.width = Math.round(Math.max(0, Math.min(1, f)) * 100) + '%'; }
-function gload(msg){ pb().innerHTML = '<div class="ep-center">' + yap('thinking', 120, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
+function gload(msg){ pb().innerHTML = '<div class="ep-center">' + yap('thinking', 150, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
 function gfail(msg, retry){
-  pb().innerHTML = '<div class="ep-center">' + yap('oops', 120, 'eyap') + '<p class="esub">' + esc(msg || 'Couldn’t reach Game Corner. Check your internet.') + '</p>'
+  pb().innerHTML = '<div class="ep-center">' + yap('oops', 150, 'eyap') + '<p class="esub">' + esc(msg || 'Couldn’t reach Game Corner. Check your internet.') + '</p>'
     + '<div class="ep-row">' + (retry ? '<button class="ebtn" id="eg-retry">Try again</button>' : '') + '<button class="ebtn ghost" id="eg-close">Close</button></div></div>';
   if (retry) qs('#eg-retry', GP).onclick = () => { sfx('tap'); retry(); };
   qs('#eg-close', GP).onclick = () => { sfx('tap'); closeGame(); };
 }
-// Yapper's corner bubble: hints, the "why", praise. Spoken only if a clip exists (fixed lines); the rest is text.
+// Mithu's corner bubble: hints, the "why", praise. Spoken only if a clip exists (fixed lines); the rest is text.
 function say(html, pose){
   if (!GP) return;
   const box = qs('.ep-yapper', GP); box.hidden = false;
-  qs('.ep-yapper img', GP).src = 'assets/yapper/yapper-' + (pose || 'idle') + '.svg';
+  qs('.ep-yapper img', GP).src = 'assets/mithu/mithu-' + (pose || 'idle') + '.svg';
   const s = qs('.ep-say', GP); s.innerHTML = html; box.classList.remove('epopin'); void box.offsetWidth; box.classList.add('epopin');
 }
 function hush(){ if (GP) qs('.ep-yapper', GP).hidden = true; }
@@ -510,10 +516,12 @@ function openGame(game, opt){
   GP = frag('<div class="eplayer eg" role="dialog" aria-modal="true" aria-label="' + esc(g.name) + '">'
     + '<div class="ep-top"><button class="round press ep-x" aria-label="Leave this round">✕</button><div class="ep-prog"><i></i></div><span class="ep-time"></span></div>'
     + '<div class="ep-body"></div>'
-    + '<div class="ep-yapper" hidden aria-live="polite">' + yap('idle', 64, 'eyap') + '<div class="ep-say"></div></div></div>');
+    + '<div class="ep-yapper" hidden aria-live="polite">' + yap('idle', 84, 'eyap') + '<div class="ep-say"></div></div></div>');
   document.body.appendChild(GP); document.body.classList.add('eplaying');
   qs('.ep-x', GP).onclick = askLeaveGame;
-  G = { game, opt, cid: newCid(), t0: Date.now(), ids: [], ans: [], tries: [], ms: [], combo: 0, missed: [], timer: 0 };
+  const S0 = st();
+  G = { game, opt, cid: newCid(), t0: Date.now(), ids: [], ans: [], tries: [], ms: [], combo: 0, missed: [], timer: 0,
+        mode: opt.mode === 'rush' ? 'rush' : 'chill', score: 0, streak: 0, bestStreak: 0, missIdx: [], replay: null, rushWas: !!(S0 && S0.rush && S0.rush[game]) };
   Adda._play(true, timeLabel); timeLabel(todaySecs());
   gload('Getting your round ready…');
   const req = game === 'vault' ? { action: 'vault', op: 'get', token: ME.token } : { action: 'roundstart', game, token: ME.token, lv: opt.lv, n: opt.n };
@@ -524,19 +532,27 @@ function openGame(game, opt){
     if (r.j.closed) return gfail('Adda’s closed for today. Great work! Your Word Vault is still open.');
     if (r.j.already) return gfail('You’ve done today’s Word Groups. A new puzzle comes tomorrow!');
     G.round = r.j.round || { quiz: r.j.quiz };
-    gintro(game);
+    // "Play again" on a run game starts at once, with no intro
+    if (opt.auto && RUN_GAMES[game]) { sfx('go'); G.t0 = Date.now(); RUN_GAMES[game](); } else gintro(game);
   });
   go();
 }
 function gintro(game){
-  const g = gameOf(game), lines = YAPPER_LINES[game] || [];
-  const extra = game === 'jumble' && G.round.lv >= 4 ? lines[1] : '';
+  const g = gameOf(game), lines = MITHU_LINES[game] || [];
+  const extra = (game === 'express' && G.round.lv >= 4) || ['flick', 'realfake', 'munch', 'echo'].includes(game) ? lines[1] : '';
+  const run = !!RUN_GAMES[game], S = st(), canRush = tester() || !!(S && S.rush && S.rush[game]), best = (S && S.best && S.best[game]) || {};
   const sub = game === 'groups' && G.round.items ? 'Puzzle #' + G.round.items[0].n : game === 'vault' ? plural(G.round.quiz.length, 'word') + ' to review' : 'Level ' + G.round.lv + ' · ' + LEVELS[G.round.lv - 1];
-  pb().innerHTML = '<div class="ep-intro">' + yap('idle', 140, 'eyap bob') + '<div class="ebubble"><span class="etag">' + g.icon + ' ' + esc(g.name) + ' · ' + esc(sub) + '</span>'
-    + '<p>' + esc(lines[0] || '') + '</p>' + (extra ? '<p>' + esc(extra) + '</p>' : '') + '</div><button class="ebtn" id="eg-go">Start</button></div>';
+  pb().innerHTML = '<div class="ep-intro">' + yap('idle', 180, 'eyap bob') + '<div class="ebubble"><span class="etag">' + g.icon + ' ' + esc(g.name) + ' · ' + esc(sub) + '</span>'
+    + '<p>' + esc(lines[0] || '') + '</p>' + (extra ? '<p>' + esc(extra) + '</p>' : '') + '</div>'
+    + (run ? '<div class="erun-modes"><button class="ebtn" id="eg-go" data-m="chill">Chill<small>no clock</small></button>'
+        + '<button class="ebtn purple" id="eg-rush" data-m="rush"' + (canRush ? '' : ' disabled') + '>⚡ Rush<small>' + (canRush ? 'beat the clock' : 'get 80% in Chill to open') + '</small></button></div>'
+        + (best.chill || best.rush ? '<p class="esub">Your best: ' + [best.chill ? 'Chill ' + fmt(best.chill) : '', best.rush ? 'Rush ' + fmt(best.rush) : ''].filter(Boolean).join(' · ') + '</p>' : '')
+      : '<button class="ebtn" id="eg-go">Start</button>') + '</div>';
   Voice.say(lines[0], why => { if (why === 'end' && extra) Voice.say(extra); });
   const b = qs('#eg-go', GP); b.focus();
-  b.onclick = () => { sfx('go'); Voice.stop(); G.t0 = Date.now(); ({ realfake: rfGame, jumble: jbGame, spotfix: sfGame, groups: grGame, vault: vaultGame })[game](); };
+  const start = m => { sfx('go'); Voice.stop(); G.t0 = Date.now(); if (m) G.mode = m; ({ realfake: rfGame, flick: flGame, express: exGame, pairup: puGame, munch: muGame, post: poGame, echo: ecGame, groups: grGame, vault: vaultGame })[game](); };
+  b.onclick = () => start(run ? 'chill' : '');
+  const rb = qs('#eg-rush', GP); if (rb) rb.onclick = () => start('rush');
 }
 function askLeaveGame(){
   if (!GP || qs('.ep-confirm', GP)) return;
@@ -561,161 +577,745 @@ document.addEventListener('keydown', e => {
 });
 const nextBtn = (label, fn) => { const b = qs('#eg-next', GP); b.textContent = label || 'Next'; b.hidden = false; b.disabled = false; b.focus({ preventScroll: true }); b.onclick = () => { sfx('tap'); fn(); }; };
 
-/* ---- Real or Fake: 20 words, 5 seconds each. After each answer: the meaning (or the right spelling), then "Next word in 3, 2, 1" ---- */
 // the example sentence with the word in bold
 const exBold = (ex, w) => esc(ex).replace(new RegExp('\\b(' + w + ')\\b'), '<b>$1</b>');
-function rfGame(){
+
+/* ================= run games (Hop, Express, Dive, Real or Fake, Munch, Pigeon Post, Echo): one action, a live score, Chill or Rush =================
+   Score = 100 per right answer x the streak multiplier, plus a speed bonus in Rush (the same sum as runScore on the server;
+   the saved number is the server's). There is no Next button: the game moves on by itself, and a miss shows its fix on the
+   item for a moment. Misses are kept for Miss Replay on the end card. */
+const RUN_GAMES = { flick: flGame, express: exGame, pairup: puGame, realfake: rfGame, munch: muGame, post: poGame, echo: ecGame };
+const streakMult = n => Math.min(5, 1 + Math.floor((n - 1) / 3));
+const fmt = n => Number(n || 0).toLocaleString('en-IN');
+// the items of this run and where its answers go. In Miss Replay: only the missed items, nothing recorded.
+function runCtx(){
+  if (G.replay) return { items: G.replay, rec(){} };
   const items = G.round.items; G.ids = items.map(x => x.id);
+  return { items, rec(i, a, tries, ms){ G.ans[i] = a; G.tries[i] = tries; G.ms[i] = ms; } };
+}
+function runHud(){
+  if (G.replay) return '<div class="erun-hud"><span class="erun-mode">Miss Replay · no score</span></div>';
+  return '<div class="erun-hud"><span class="erun-mode' + (G.mode === 'rush' ? ' rush' : '') + '">' + (G.mode === 'rush' ? '⚡ Rush' : 'Chill') + '</span>'
+    + '<span class="erun-mult" hidden></span><span class="erun-score"><b>0</b><small>score</small></span></div>';
+}
+function runPaint(gain){
+  const sc = qs('.erun-score', GP), mu = qs('.erun-mult', GP); if (!sc) return;
+  qs('b', sc).textContent = fmt(G.score);
+  const next = streakMult(G.streak + 1);   // what the next right answer is worth
+  mu.hidden = G.streak < 2; mu.textContent = '🔥 ' + G.streak + (next > 1 ? ' · x' + next : '');
+  if (gain) {
+    const f = document.createElement('i'); f.className = 'erun-gain'; f.textContent = '+' + gain; sc.appendChild(f); setTimeout(() => f.remove(), 800);
+    sc.classList.remove('bump'); void sc.offsetWidth; sc.classList.add('bump');
+  }
+}
+function runHit(ms, lim){
+  if (G.replay) return sfx('correct');
+  G.streak++; G.bestStreak = Math.max(G.bestStreak, G.streak);
+  const mult = streakMult(G.streak);
+  const gain = 100 * mult + (G.mode === 'rush' && lim ? Math.round(50 * Math.max(0, 1 - ms / lim)) : 0);
+  G.score += gain;
+  sfx(mult > 1 && (G.streak - 1) % 3 === 0 ? 'combo' : 'correct');
+  runPaint(gain);
+}
+function runMiss(i, sound, consolation){
+  sfx(sound || 'wrong');
+  if (G.replay) return;
+  G.streak = 0; G.score += consolation || 0;
+  if (!G.missIdx.includes(i)) G.missIdx.push(i);
+  runPaint(consolation);
+}
+// after a miss: move on after `ms`, or at once on a tap, Enter or Space. In Miss Replay it waits for the tap.
+function holdThen(ms, fn){
+  let done = false; const body = pb();
+  const go = () => { if (done || !G) return; done = true; clearTimeout(G.timer); body.removeEventListener('click', go); G.key = null; fn(); };
+  setTimeout(() => { if (!done) body.addEventListener('click', go); }, 250);   // not the same tap that answered
+  G.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+  if (!G.replay) G.timer = setTimeout(go, ms);
+}
+const endRun = () => G.replay ? showRun(G.lastJ) : finish();
+const TAP = '<i class="erun-tap">Tap to go on</i>';
+// each run game IS its scene: Hop = stepping stones and a squirrel, Express = a train, Dive = a kingfisher and a pond,
+// Real or Fake = a crow's nest with real and fake eggs, Munch = a goat at a hedge, Pigeon Post = a pigeon and a street,
+// Echo = a bat in a dark cave
+const SKY = '<div class="esky" aria-hidden="true"><i></i><i></i><i></i></div>';
+
+/* ---- Hop (game id: flick): a squirrel wants to cross the river and needs the student's help. The sentence is a path
+        of stepping stones, one stone per phrase. Sentence right -> Hop (swipe right): he bounces across and banks a nut.
+        One stone wrong -> Wait (swipe left), then TAP THE WRONG STONE: it sinks, the right one rises, and he crosses.
+        Hop onto a wrong sentence and he falls in at exactly the wrong stone, so the mistake shows itself. 20 sentences. ---- */
+const SQUIRREL = '<svg viewBox="0 0 48 40" aria-hidden="true"><path d="M13 31Q-3 27 3 12Q8 0 20 7Q11 12 15 23Z" fill="#B5651D"/><path d="M9 26Q2 20 7 11" fill="none" stroke="#E9B983" stroke-width="3" stroke-linecap="round"/>'
+  + '<ellipse cx="26" cy="27" rx="12" ry="10" fill="#C98A4B"/><ellipse cx="29" cy="30" rx="6" ry="5" fill="#F6E3C6"/>'
+  + '<path d="M17 21Q26 15 35 21" fill="none" stroke="#5A3A1E" stroke-width="2.4" stroke-linecap="round"/><path d="M17 24.5Q26 18.5 35 24.5" fill="none" stroke="#F6E3C6" stroke-width="1.8" stroke-linecap="round"/>'
+  + '<circle cx="34" cy="8.5" r="3.4" fill="#B5651D"/><circle cx="37" cy="17" r="8" fill="#C98A4B"/><circle cx="40" cy="15.5" r="1.8" fill="#1E1B2E"/><circle cx="45" cy="18.5" r="1.4" fill="#5A3A1E"/>'
+  + '<path d="M22 37h6M31 37h6" stroke="#8A5A2B" stroke-width="3" stroke-linecap="round"/></svg>';
+function flGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay, HOP = reduced() ? 0 : 135;
+  let nuts = 0;
+  pb().innerHTML = '<div class="ehp">' + runHud()
+    + '<div class="ehp-river"><div class="ehp-water" aria-hidden="true"></div><p class="ehp-ctx" hidden>📧 In a formal email or interview</p><div class="ehp-path"></div>'
+    + '<div class="ehp-sq"><div class="ehp-sqi">' + SQUIRREL + '</div></div></div>'
+    + '<div class="efl-fuse"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<p class="efl-why" aria-live="polite"></p>'
+    + '<div class="efl-btns"><button class="efl-b off" data-a="0"><b>✋ Wait</b>a stone is wrong</button><button class="efl-b ok" data-a="1"><b>Hop ➜</b>all stones are right</button></div>'
+    + '<p class="ehint efl-help">Help the squirrel cross. Swipe right to hop, left to wait.</p></div>';
+  const river = qs('.ehp-river', GP), path = qs('.ehp-path', GP), sq = qs('.ehp-sq', GP), sqi = qs('.ehp-sqi', GP), ctx = qs('.ehp-ctx', GP);
+  const fuse = qs('.efl-fuse i', GP), why = qs('.efl-why', GP), btns = qa('.efl-b', GP);
+  const wait = ms => new Promise(res => setTimeout(res, reduced() ? 0 : ms));
+  // where the squirrel sits on a stone (or a bank), measured inside the river
+  const put = (el, jump) => {
+    const r = el.getBoundingClientRect(), q = river.getBoundingClientRect();
+    sq.style.transition = jump ? '' : 'none';
+    sq.style.transform = 'translate(' + (r.left - q.left + r.width / 2 - 22) + 'px,' + (r.top - q.top - 27) + 'px)';
+    if (jump) { sqi.classList.remove('j'); void sqi.offsetWidth; sqi.classList.add('j'); }
+  };
   const step = i => {
-    hush(); clearInterval(G.tick);
-    if (i >= items.length) return finish();
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
     gprog(i / items.length);
-    const it = items[i];
-    pb().innerHTML = '<div class="erf"><p class="ecount">' + (i + 1) + ' / ' + items.length + (G.combo >= 3 ? ' · 🔥 ' + G.combo : '') + '</p>'
-      + '<div class="erf-card"><b>' + esc(it.w) + '</b></div><div class="erf-time"><i></i></div>'
-      + '<div class="erf-fb" aria-live="polite"></div>'
-      + '<div class="erf-btns"><button class="ebtn ghost" data-a="0">✗ Fake</button><button class="ebtn purple" data-a="1">✓ Real</button></div></div>';
-    const card = qs('.erf-card', GP), bar = qs('.erf-time i', GP), fb = qs('.erf-fb', GP);
-    const t0 = Date.now(); let done = false;
+    const it = items[i], t0 = Date.now(); let done = false, x0 = null;
+    const live = () => !!GP && !!G && path.dataset.i === String(i);
+    why.textContent = ''; why.className = 'efl-why'; ctx.hidden = it.ctx !== 'formal';
+    path.dataset.i = i;
+    path.innerHTML = '<span class="ehp-bank a"></span>'
+      + it.parts.map((p, k) => '<span class="ehp-stone" style="--d:' + (k * 45) + 'ms">' + esc(p) + '</span>').join('')
+      + '<span class="ehp-bank b"><b>🌰 ' + nuts + '</b></span>';
+    const stones = qa('.ehp-stone', path), A = qs('.ehp-bank.a', path), B = qs('.ehp-bank.b', path), bad = it.good ? null : stones[it.err];
+    sq.classList.remove('splash'); put(A);
+    btns.forEach(b => { b.disabled = false; });
+    const hopTo = async el => { if (!live()) return; put(el, true); sfx('tap'); await wait(HOP); };
+    const cross = async () => { for (const s of stones) await hopTo(s); await hopTo(B); if (live()) { nuts++; qs('b', B).textContent = '🌰 ' + nuts; B.classList.add('got'); } };
+    // the wrong stone sinks and the right one comes up in its place
+    const fix = async () => { bad.classList.add('sink'); await wait(230); if (!live()) return; bad.className = 'ehp-stone fixed'; bad.textContent = it.fixPart; await wait(200); };
+    const tell = right => {
+      why.className = 'efl-why show ' + (right ? 'ok' : 'bad');
+      why.innerHTML = '<b>' + (it.good ? (right ? '✓ Yes, the sentence is right.' : 'Every stone was fine. This sentence is right.') : (right ? '✓ Yes, that stone was wrong.' : pick != null ? 'Not that stone.' : 'One stone was wrong.') + ' Say “' + esc(it.fix) + '”.') + '</b> ' + esc(it.why) + TAP;
+      holdThen(3600, () => step(i + 1));
+    };
+    // Wait: now the student must tap the stone that is wrong
+    let picking = false;
+    const ask = () => {
+      if (done || picking || !G) return; picking = true;
+      btns.forEach(b => { b.disabled = true; }); path.classList.add('choosing'); sfx('select');
+      why.className = 'efl-why show ask'; why.innerHTML = '<b>Which stone is wrong?</b> Tap it.';
+      stones.forEach((s, k) => { s.onclick = () => answer({ p: k }); });
+      G.key = e => { const k = +e.key - 1; if (k >= 0 && k < stones.length) answer({ p: k }); };
+    };
+    const answer = async v => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      const ms = Date.now() - t0, pick = v && typeof v === 'object' ? v.p : null;
+      const right = it.good ? v === true : pick === it.err;
+      R.rec(i, v, 1, ms);
+      btns.forEach(b => { b.disabled = true; }); path.classList.remove('choosing'); stones.forEach(s => { s.onclick = null; });
+      why.textContent = ''; why.className = 'efl-why';
+      if (rush) { const w = getComputedStyle(fuse).width; fuse.style.transition = 'none'; fuse.style.width = w; }
+      if (right) {
+        runHit(ms, it.lim);
+        if (bad) await fix();
+        await cross();
+        if (!live()) return;
+        if (G.replay) return tell(true);
+        path.classList.add('out');
+        G.timer = setTimeout(() => { path.classList.remove('out'); step(i + 1); }, reduced() ? 40 : 170);
+        return;
+      }
+      runMiss(i, v === null ? 'softbad' : 'wrong');
+      if (v === true) {
+        // hopped onto a wrong sentence: he gets as far as the wrong stone, and it gives way
+        for (const s of stones.slice(0, it.err)) await hopTo(s);
+        await hopTo(bad); if (!live()) return;
+        bad.classList.add('sink'); sq.classList.add('splash'); sfx('bump'); await wait(380); if (!live()) return;
+        bad.className = 'ehp-stone fixed'; bad.textContent = it.fixPart; put(A); sq.classList.remove('splash');
+      } else {
+        if (pick != null && stones[pick] !== bad) { stones[pick].classList.add('no'); await wait(420); if (!live()) return; }   // tapped a stone that was fine
+        if (bad) await fix();                                    // the real wrong stone sinks and the right one comes up
+        else stones.forEach(s => s.classList.add('solid'));      // the sentence was right: every stone was fine
+      }
+      if (live()) tell(false);
+    };
+    btns.forEach(b => { b.onclick = () => b.dataset.a === '1' ? answer(true) : ask(); });
+    G.key = e => { if (e.key === 'ArrowRight') answer(true); else if (e.key === 'ArrowLeft') ask(); };
+    river.onpointerdown = e => { if (!done && !picking) x0 = e.clientX; };
+    river.onpointerup = e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null; if (dx > 60) answer(true); else if (dx < -60) ask(); };
+    river.onpointercancel = () => { x0 = null; };
+    if (rush) {
+      fuse.style.transition = 'none'; fuse.style.width = '100%'; void fuse.offsetWidth;
+      fuse.style.transition = 'width ' + it.lim + 'ms linear'; fuse.style.width = '0%';
+      G.timer = setTimeout(() => answer(null), it.lim);
+    }
+  };
+  step(0);
+}
+
+/* ---- Express: sentence pieces are coaches in the yard. Tap them in order; a wrong coach bounces back; a full train leaves (8 trains) ---- */
+function exGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  pb().innerHTML = '<div class="eex">' + runHud()
+    + '<div class="eex-scene">' + SKY + '<span class="eex-signal" aria-hidden="true"></span><div class="eex-train"></div></div>'
+    + '<div class="eex-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<p class="eex-note" aria-live="polite"></p><div class="eex-yard" aria-label="Coaches in the yard"></div>'
+    + '<p class="ehint eex-help">Some coaches are already on the train. Tap the rest in order, left to right.</p></div>';
+  const train = qs('.eex-train', GP), yard = qs('.eex-yard', GP), note = qs('.eex-note', GP), clock = qs('.eex-clock i', GP), sig = qs('.eex-signal', GP);
+  const step = i => {
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now(); let placed = [], wrong = 0, over = false; const taps = [];
+    // places 0..n-1 on the train: some coaches are already there (it.fixed); the empty places fill from left to right
+    const gaps = Array.from({ length: it.n }, (_, p) => p).filter(p => !it.fixed.includes(p)), main = it.orders[0];
+    note.className = 'eex-note'; note.textContent = G.replay ? 'Hint: ' + it.hint : it.x ? 'One coach doesn’t belong. Leave it in the yard.' : '';
+    sig.className = 'eex-signal';
+    const draw = () => {
+      train.innerHTML = '<span class="eex-eng" aria-hidden="true"><i class="eex-puff"></i><i class="eex-puff b"></i>🚂</span>'
+        + Array.from({ length: it.n }, (_, p) => {
+            const g = gaps.indexOf(p), txt = c => esc(p === 0 ? capFirst(c) : c);
+            const coach = g < 0 ? '<span class="eex-coach fixed">' + txt(main[p]) + '</span>'
+              : g < placed.length ? '<span class="eex-coach' + (g === placed.length - 1 && !over ? ' new' : '') + '">' + txt(placed[g]) + '</span>'
+              : '<span class="eex-coach slot' + (g === placed.length && !over ? ' next' : '') + '"></span>';
+            // the full stop or question mark stays with the last coach when the train wraps
+            return p === it.n - 1 ? '<span class="eex-last">' + coach + '<span class="eex-end">' + esc(it.end) + '</span></span>' : coach;
+          }).join('');
+    };
+    yard.innerHTML = it.chunks.map((c, k) => '<button class="eex-coach yard" data-k="' + k + '">' + esc(c) + '</button>').join('');
+    train.className = 'eex-train arrive'; draw();
+    const leave = () => { sfx('whoosh'); train.classList.remove('arrive'); train.classList.add('go'); G.timer = setTimeout(() => step(i + 1), reduced() ? 60 : 480); };
+    const end = completed => {
+      over = true; clearTimeout(G.timer);
+      const ms = Date.now() - t0, clean = completed && !wrong;
+      R.rec(i, taps, 1 + wrong, ms);
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
+      qa('button', yard).forEach(b => { b.disabled = true; });
+      if (!completed) { placed = gaps.map(p => main[p]); qa('button', yard).forEach(b => b.classList.toggle('used', placed.includes(it.chunks[+b.dataset.k]))); }
+      draw();
+      train.classList.remove('arrive'); train.classList.add(clean ? 'ok' : completed ? 'meh' : 'late');
+      sig.classList.add(clean ? 'green' : 'red');
+      if (clean) runHit(ms, it.lim); else runMiss(i, completed ? 'softok' : 'softbad', completed ? 40 : 0);
+      if (clean && !G.replay) { note.className = 'eex-note ok'; note.textContent = praise(); G.timer = setTimeout(leave, 520); return; }
+      note.className = 'eex-note show ' + (clean ? 'ok' : 'bad');
+      note.innerHTML = '<b>' + (clean ? '✓ ' : completed ? 'Built it. ' : '⏱ Time’s up. Here’s the sentence. ') + '</b>' + esc(it.why) + TAP;
+      holdThen(3600, leave);
+    };
+    yard.onclick = e => {
+      const b = e.target.closest('[data-k]'); if (!b || over || b.classList.contains('used')) return;
+      const text = it.chunks[+b.dataset.k], next = [...placed, text];
+      taps.push(text);
+      if (it.orders.some(o => next.every((c, j) => o[gaps[j]] === c))) {
+        placed.push(text); b.classList.add('used'); sfx('select'); draw();
+        if (placed.length === gaps.length) end(true);
+      } else {
+        // wrong coach: it bounces back. A hint after the second wrong tap.
+        wrong++; sfx('wrong'); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope');
+        if (wrong === 2 && !G.replay) { note.className = 'eex-note'; note.textContent = 'Hint: ' + it.hint; }
+        if (taps.length >= 38) end(false);
+      }
+    };
+    if (rush) {
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => end(false), it.lim);
+    }
+  };
+  step(0);
+}
+
+/* ---- Dive (game id: pairup): a hungry kingfisher sits on a branch above a pond. The sign next to him shows a word and
+        what to look for (opposite of, same as, goes with, or a picture). Four fish swim below, each carrying a word.
+        Tap the right fish and he dives and catches it; tap a wrong one and it darts away. 20 dives. ---- */
+const DIVE_ASK = { pic: 'What is this?', opp: 'Opposite of', mean: 'Same as', go: 'Goes with' };
+const KINGFISHER = '<svg viewBox="0 0 60 46" aria-hidden="true"><path d="M9 30 0 39l13-3z" fill="#1565C0"/><ellipse cx="22" cy="27" rx="15" ry="12" fill="#FF8A3D"/>'
+  + '<path d="M7 25Q9 10 26 12Q37 14 37 27Q24 20 7 25Z" fill="#1E88E5"/><circle cx="36" cy="15" r="10" fill="#1E88E5"/><path d="M29 20q7 6 13 0v5q-6 4-13 0z" fill="#fff"/>'
+  + '<circle cx="39" cy="13" r="2.6" fill="#fff"/><circle cx="39.7" cy="13" r="1.4" fill="#1E1B2E"/><path d="M44 12.5 60 16l-16 4z" fill="#37474F"/>'
+  + '<path d="M18 38v6M26 38v6" stroke="#E64A19" stroke-width="2.4" stroke-linecap="round"/></svg>';
+// the words sit on lily pads; a small fish hides under each pad, so the kingfisher is the biggest animal in the scene
+const MINI_FISH = '<svg class="edv-mini" viewBox="0 0 34 18" aria-hidden="true"><path d="M8 9 0 2v14z" fill="#F76707"/><ellipse cx="19" cy="9" rx="13" ry="7.5" fill="#FF922B"/><circle cx="26" cy="7" r="1.8" fill="#1E1B2E"/></svg>';
+function puGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  let caught = 0;
+  pb().innerHTML = '<div class="edv">' + runHud()
+    + '<div class="edv-pond"><div class="edv-sky"><span class="edv-branch" aria-hidden="true"></span><span class="edv-bird" aria-hidden="true">' + KINGFISHER + '</span>'
+    + '<div class="edv-sign"><small></small><b></b></div><span class="edv-basket" aria-hidden="true">🐟 <b>0</b></span></div>'
+    + '<div class="edv-water"><div class="edv-rip" aria-hidden="true"></div><div class="edv-school"></div></div></div>'
+    + '<div class="erun-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<p class="edv-note" aria-live="polite"></p>'
+    + '<p class="ehint edv-help">The kingfisher is hungry. Read the sign and tap the right leaf. A fish hides under it.</p></div>';
+  const pond = qs('.edv-pond', GP), bird = qs('.edv-bird', GP), sign = qs('.edv-sign', GP), school = qs('.edv-school', GP);
+  const note = qs('.edv-note', GP), clock = qs('.erun-clock i', GP), basket = qs('.edv-basket', GP);
+  const wait = ms => new Promise(res => setTimeout(res, reduced() ? 0 : ms));
+  // the bird flies down to a fish and back to his branch
+  const dive = async fish => {
+    if (reduced() || !bird.animate) return;
+    const f = fish.getBoundingClientRect(), b = bird.getBoundingClientRect();
+    const dx = f.left + f.width / 2 - b.left - b.width / 2, dy = f.top - b.top - 6;
+    await bird.animate([{ transform: 'translate(0,0) rotate(0)' }, { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(48deg)' }], { duration: 300, easing: 'ease-in', fill: 'forwards' }).finished;
+    const sp = document.createElement('i'); sp.className = 'edv-splash'; const p = pond.getBoundingClientRect();
+    sp.style.left = (f.left + f.width / 2 - p.left) + 'px'; sp.style.top = (f.top - p.top) + 'px'; pond.appendChild(sp); setTimeout(() => sp.remove(), 600);
+    sfx('whoosh');
+  };
+  const back = () => { if (!reduced() && bird.animate) bird.animate([{ transform: getComputedStyle(bird).transform }, { transform: 'translate(0,0) rotate(0)' }], { duration: 340, easing: 'ease-out', fill: 'forwards' }); };
+  const step = i => {
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now(); let done = false;
+    const live = () => !!GP && !!G && school.dataset.i === String(i);
+    note.textContent = ''; note.className = 'edv-note';
+    qs('small', sign).textContent = DIVE_ASK[it.k];
+    qs('b', sign).innerHTML = it.k === 'pic' ? '<span class="edv-emo">' + esc(it.a) + '</span>' : esc(it.a);
+    sign.classList.remove('flip'); void sign.offsetWidth; sign.classList.add('flip');
+    school.dataset.i = i;
+    school.innerHTML = it.opts.map((o, k) => '<button class="edv-fish f' + k + '" data-o="' + k + '" style="--d:' + (k * 60) + 'ms"><span class="edv-body">' + esc(o) + '</span>' + MINI_FISH + '</button>').join('');
+    const fishes = qa('.edv-fish', school), good = fishes[it.opts.indexOf(it.b)];
+    const answer = async (v, fish) => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      const ms = Date.now() - t0, right = v === it.b;
+      R.rec(i, v, 1, ms);
+      fishes.forEach(f => { f.disabled = true; });
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
+      if (fish) await dive(fish);
+      if (!live()) return;
+      if (right) {
+        runHit(ms, it.lim); fish.classList.add('caught'); caught++; qs('b', basket).textContent = caught;
+        basket.classList.remove('ebump'); void basket.offsetWidth; basket.classList.add('ebump');
+        back(); await wait(360); if (!live()) return;
+        if (!G.replay) return step(i + 1);
+      } else {
+        runMiss(i, v === null ? 'softbad' : 'wrong');
+        if (fish) { fish.classList.add('dart'); back(); }       // the wrong fish gets away
+        good.classList.add('glow');
+      }
+      note.className = 'edv-note show ' + (right ? 'ok' : 'bad');
+      note.innerHTML = '<b>' + (v === null ? '⏱ Too slow. ' : right ? '✓ ' : '') + (it.k === 'pic' ? esc(it.a) + ' = ' : esc(DIVE_ASK[it.k]) + ' <i>' + esc(it.a) + '</i>: ') + esc(it.b) + '</b>' + TAP;
+      holdThen(2600, () => step(i + 1));
+    };
+    fishes.forEach(f => { f.onclick = () => answer(it.opts[+f.dataset.o], f); });
+    G.key = e => { const k = '1234'.indexOf(e.key); if (k >= 0 && fishes[k]) fishes[k].click(); };
+    if (rush) {
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => answer(null, null), it.lim);
+    }
+  };
+  step(0);
+}
+
+/* ---- Real or Fake: a koel hides its eggs in a crow's nest (koels really do this). Each word is an egg.
+        A real word is the crow's own egg: keep it and a chick hatches. A wrong spelling or a made-up word is a koel's
+        egg: push it out. Keep a fake egg and a noisy koel chick hatches. After every egg the meaning (or the right
+        spelling) stays on screen for a few seconds, because students need time to read it. 20 eggs. ---- */
+const CROW = '<svg viewBox="0 0 76 60" aria-hidden="true"><path d="M10 36 0 46l14-2z" fill="#22252B"/><ellipse cx="30" cy="36" rx="20" ry="15" fill="#2B2F36"/><path d="M34 26q14-4 16 8q-6 12-18 10z" fill="#8A9099"/>'
+  + '<circle cx="50" cy="20" r="12" fill="#2B2F36"/><circle cx="54" cy="17" r="3" fill="#fff"/><circle cx="55" cy="17" r="1.6" fill="#111"/><path d="M60 17 76 22l-15 5z" fill="#15171B"/>'
+  + '<path d="M26 50v8M36 50v8" stroke="#15171B" stroke-width="3" stroke-linecap="round"/></svg>';
+const CHICK = '<svg viewBox="0 0 40 36" aria-hidden="true"><circle cx="20" cy="20" r="14" fill="#9AA1AB"/><circle cx="15" cy="16" r="2.4" fill="#111"/><circle cx="25" cy="16" r="2.4" fill="#111"/><path d="M16 21h8l-4 6z" fill="#F0A43A"/><path d="M14 6q6-6 12 0" fill="none" stroke="#9AA1AB" stroke-width="3" stroke-linecap="round"/></svg>';
+const KOEL = '<svg viewBox="0 0 40 36" aria-hidden="true"><circle cx="20" cy="20" r="14" fill="#1B2440"/><circle cx="15" cy="16" r="3" fill="#E5484D"/><circle cx="25" cy="16" r="3" fill="#E5484D"/><circle cx="15" cy="16" r="1.2" fill="#111"/><circle cx="25" cy="16" r="1.2" fill="#111"/><path d="M14 21h12l-6 9z" fill="#C9D36A"/></svg>';
+function rfGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  let chicks = 0;
+  pb().innerHTML = '<div class="enst">' + runHud()
+    + '<div class="enst-tree"><span class="enst-leaf a" aria-hidden="true"></span><span class="enst-leaf b" aria-hidden="true"></span><span class="enst-crow" aria-hidden="true">' + CROW + '</span>'
+    + '<span class="enst-count" aria-hidden="true">🐥 <b>0</b></span><div class="enst-nest"><div class="enst-slot"></div><span class="enst-bowl" aria-hidden="true"></span></div></div>'
+    + '<div class="erun-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<div class="enst-info" aria-live="polite"></div>'
+    + '<div class="efl-btns"><button class="efl-b off" data-a="0"><b>✗ Fake egg</b>wrong spelling or not a word</button><button class="efl-b ok" data-a="1"><b>✓ Real egg</b>a real word</button></div>'
+    + '<p class="ehint efl-help">Help the crow. Keys: ← fake, → real.</p></div>';
+  const slot = qs('.enst-slot', GP), info = qs('.enst-info', GP), clock = qs('.erun-clock i', GP), btns = qa('.efl-b', GP), crow = qs('.enst-crow', GP), count = qs('.enst-count', GP);
+  const step = i => {
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now(); let done = false;
+    info.className = 'enst-info'; info.innerHTML = '';
+    slot.innerHTML = '<div class="enst-egg in"><b>' + esc(it.w) + '</b></div>';
+    const egg = qs('.enst-egg', slot);
+    btns.forEach(b => { b.disabled = false; });
     const answer = v => {
       if (done || !G) return; done = true; clearTimeout(G.timer);
-      G.ans[i] = v; G.tries[i] = 1; G.ms[i] = Date.now() - t0;
-      const right = v === it.real;
-      G.combo = right ? G.combo + 1 : 0;
-      if (it.real && !right) G.missed.push(it.w);
-      card.classList.add(right ? 'ok' : 'bad');
-      qs('.erf-time', GP).hidden = true;
-      sfx(right ? (G.combo >= 3 ? 'combo' : 'correct') : v === null ? 'softbad' : 'wrong');
-      const head = v === null ? '⏱ Time’s up!' : right ? '✓ ' + praise() : '✗ Not quite.';
+      const ms = Date.now() - t0, right = v === it.real;
+      R.rec(i, v, 1, ms);
+      btns.forEach(b => { b.disabled = true; });
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
+      if (right) runHit(ms, it.lim); else { runMiss(i, v === null ? 'softbad' : 'wrong'); if (it.real && !G.replay) G.missed.push(it.w); }
+      // what happens to the egg
+      egg.classList.remove('in');
+      if (v === true) {            // kept: it hatches. A real egg gives a crow chick, a fake one a koel chick
+        egg.classList.add('hatch');
+        slot.insertAdjacentHTML('beforeend', '<span class="enst-baby' + (it.real ? '' : ' koel') + '">' + (it.real ? CHICK : KOEL) + '</span>');
+        if (it.real) { chicks++; qs('b', count).textContent = chicks; count.classList.remove('ebump'); void count.offsetWidth; count.classList.add('ebump'); }
+      } else if (v === false) {    // pushed out of the nest
+        egg.classList.add(it.real ? 'back' : 'roll'); crow.classList.remove('peck'); void crow.offsetWidth; crow.classList.add('peck');
+      } else egg.classList.add(it.real ? 'realglow' : 'fakeglow');
+      const head = v === null ? '⏱ Too slow.' : right ? '✓ ' + praise() : v === true ? 'Koo! That egg was fake.' : 'Oh no. That egg was real.';
       let body;
       if (it.real) body = '<p><b>' + esc(it.w) + '</b> is a real word. It means: ' + esc(it.m) + '.</p>' + (it.ex ? '<p class="erf-ex">“' + exBold(it.ex, it.w) + '”</p>' : '');
       else if (it.k === 'spell') body = '<p><b>' + esc(it.w) + '</b> is a wrong spelling.</p><p class="erf-fix">Right spelling: <b>' + esc(it.r) + '</b></p>';
       else body = '<p><b>' + esc(it.w) + '</b> is not a word.</p><p class="erf-fix">Say: <b>' + esc(it.r) + '</b></p>';
-      fb.className = 'erf-fb show ' + (right ? 'ok' : 'bad');
-      fb.innerHTML = '<p class="erf-head">' + head + '</p>' + body;
-      // countdown to the next word: 3 s when right, 5 s when wrong (more to read). Tap Next to skip.
-      let left = right ? 3 : 5;
-      qs('.erf-btns', GP).innerHTML = '<p class="erf-next">Next word in <b>' + left + '</b></p><button class="ebtn" id="eg-next">' + (i + 1 < items.length ? 'Next →' : 'Finish') + '</button>';
-      const num = qs('.erf-next b', GP), go = () => { clearInterval(G.tick); clearTimeout(G.timer); step(i + 1); };
-      qs('#eg-next', GP).onclick = () => { sfx('tap'); go(); };
-      G.tick = setInterval(() => { left--; if (left > 0) num.textContent = left; else go(); }, 1000);
-      G.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+      info.className = 'enst-info show ' + (right ? 'ok' : 'bad');
+      info.innerHTML = '<p class="erf-head">' + head + '</p>' + body + TAP;
+      // time to read: 5 s after a right answer, 7 s after a miss; a tap moves on sooner
+      holdThen(right ? 5000 : 7000, () => step(i + 1));
     };
-    qa('[data-a]', GP).forEach(b => b.onclick = () => answer(b.dataset.a === '1'));
-    G.key = e => { if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') answer(true); else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'f') answer(false); };
-    let x0 = null;
-    card.onpointerdown = e => { if (done) return; x0 = e.clientX; card.setPointerCapture(e.pointerId); };
-    card.onpointermove = e => { if (x0 != null) card.style.transform = 'translateX(' + (e.clientX - x0) + 'px) rotate(' + ((e.clientX - x0) / 20) + 'deg)'; };
-    card.onpointerup = e => { const dx = x0 == null ? 0 : e.clientX - x0; x0 = null; card.style.transform = ''; if (dx > 70) answer(true); else if (dx < -70) answer(false); };
-    requestAnimationFrame(() => { bar.style.transition = 'width 5s linear'; bar.style.width = '0%'; });
-    G.timer = setTimeout(() => answer(null), 5000);
+    btns.forEach(b => { b.onclick = () => answer(b.dataset.a === '1'); });
+    G.key = e => { if (e.key === 'ArrowRight') answer(true); else if (e.key === 'ArrowLeft') answer(false); };
+    if (rush) {
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => answer(null), it.lim);
+    }
   };
   step(0);
 }
 
-/* ---- Jumble: tap the pieces into order (8 sentences); a hint after the first miss, the answer after the second ---- */
-function jbGame(){
-  const items = G.round.items; G.ids = items.map(x => x.id);
-  const step = i => {
-    hush(); G.key = null;
-    if (i >= items.length) return finish();
-    gprog(i / items.length);
-    const it = items[i], t0 = Date.now();
-    let placed = [], tries = 0, over = false;
-    pb().innerHTML = '<div class="ejb"><p class="ecount">Sentence ' + (i + 1) + ' of ' + items.length + (G.combo >= 2 ? ' · 🔥 ' + G.combo + ' in a row' : '') + '</p>'
-      + '<div class="ejb-line" aria-label="Your sentence"></div><div class="ejb-bank" aria-label="Pieces"></div>'
-      + (it.x ? '<p class="ehint">One piece doesn’t belong. Leave it out.</p>' : '<p class="ehint">Tap the pieces in order. Tap a placed piece to send it back.</p>')
-      + '<div class="ep-row"><button class="ebtn" id="eg-check" disabled>Check</button><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
-    const line = qs('.ejb-line', GP), bank = qs('.ejb-bank', GP), chk = qs('#eg-check', GP);
-    const draw = () => {
-      line.innerHTML = placed.map((k, p) => '<button class="echunk in" data-p="' + p + '">' + esc(p === 0 ? capFirst(it.chunks[k]) : it.chunks[k]) + '</button>').join('')
-        + (placed.length < it.n ? '<span class="eslot"></span>'.repeat(Math.min(3, it.n - placed.length)) : '<span class="ejb-end">' + esc(it.end) + '</span>');
-      bank.innerHTML = it.chunks.map((c, k) => placed.includes(k) ? '<span class="echunk ghost">' + esc(c) + '</span>' : '<button class="echunk" data-k="' + k + '">' + esc(c) + '</button>').join('');
-      chk.disabled = over || placed.length !== it.n;
-    };
-    line.onclick = e => { const b = e.target.closest('[data-p]'); if (!b || over) return; sfx('tap'); placed.splice(+b.dataset.p, 1); line.classList.remove('bad'); draw(); };
-    bank.onclick = e => { const b = e.target.closest('[data-k]'); if (!b || over || placed.length >= it.n) return; sfx('select'); placed.push(+b.dataset.k); line.classList.remove('bad'); draw(); };
-    const show = (o, cls) => { line.innerHTML = '<span class="ejb-done ' + cls + '">' + esc(capFirst(o.join(' ')) + it.end) + '</span>'; bank.innerHTML = ''; };
-    chk.onclick = () => {
-      const got = placed.map(k => it.chunks[k]);
-      tries++; if (tries === 1) G.ans[i] = got; G.tries[i] = tries; G.ms[i] = Date.now() - t0;
-      const ok = it.orders.some(o => o.join(' | ') === got.join(' | '));
-      if (ok) {
-        over = true; G.combo = tries === 1 ? G.combo + 1 : 0;
-        sfx(G.combo >= 3 ? 'combo' : 'correct'); show(got, 'ok');
-        say('<b>' + (tries === 1 ? praise() : 'Got it!') + (G.combo >= 3 ? ' 🔥 ' + G.combo + ' in a row.' : '') + '</b> ' + esc(it.why), 'correct');
-      } else if (tries === 1) {
-        sfx('wrong'); line.classList.add('bad'); draw();
-        say('<b>Hint:</b> ' + esc(it.hint), 'thinking');
-        return;
-      } else {
-        over = true; G.combo = 0; sfx('softbad'); show(it.orders[0], 'shown');
-        say(esc(it.why), 'oops');
-      }
-      chk.hidden = true; nextBtn(i + 1 < items.length ? 'Next' : 'Finish', () => step(i + 1));
-    };
-    G.key = e => { if (e.key === 'Enter' && !chk.disabled && !chk.hidden) chk.click(); };
-    draw();
+/* ---- Munch (writing): a hungry goat stands under a hedge. The sentence grows on the hedge, one word per leaf, and one
+        word is extra. He eats only extra words. Tap the extra leaf: he trots under it, jumps and eats it, and the sentence
+        closes up. Tap a needed word: he takes a bite, pulls a face and spits it out, then eats the real extra word, so the
+        fixed sentence is always shown. 12 sentences. ---- */
+const GOAT = '<svg viewBox="0 0 74 62" aria-hidden="true"><path d="M13 30Q5 22 9 15q3 7 8 11z" fill="#E6DCCB"/>'
+  + '<path d="M18 42v15M26 43v14M41 43v14M49 42v15" stroke="#6B5B4E" stroke-width="5" stroke-linecap="round"/>'
+  + '<ellipse cx="33" cy="35" rx="23" ry="13.5" fill="#F7F1E6"/><ellipse cx="26" cy="31" rx="9" ry="7" fill="#CC9A68"/><ellipse cx="38" cy="43" rx="14" ry="4" fill="#E6DCCB"/>'
+  + '<path d="M47 31q3-11 9-16l7 7q-5 6-7 13z" fill="#F7F1E6"/>'
+  + '<path d="M53 11q-4-9 3-11q-3 4 0 11z" fill="#8C7B6B"/><path d="M58 10q-1-9 6-10q-4 4-2 10z" fill="#9C8B7B"/>'
+  + '<ellipse cx="60" cy="18" rx="10.5" ry="8.5" fill="#F7F1E6"/><ellipse cx="68" cy="21.5" rx="5.6" ry="5" fill="#EBDCC8"/>'
+  + '<path d="M54 15q-10 0-13 7q8 1 13-3z" fill="#CC9A68"/>'
+  + '<circle cx="61.5" cy="15.5" r="2.4" fill="#1E1B2E"/><circle cx="62.3" cy="14.7" r=".8" fill="#fff"/><circle cx="70.6" cy="20" r="1.1" fill="#5A3A1E"/>'
+  + '<path class="emu-mouth" d="M66 25q2.5 1.8 5 0" fill="none" stroke="#5A3A1E" stroke-width="1.3" stroke-linecap="round"/>'
+  + '<path d="M62 25l1.6 8 3.4-6.4z" fill="#E6DCCB"/></svg>';
+function muGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  let ate = 0, gx = 0;
+  pb().innerHTML = '<div class="emu">' + runHud()
+    + '<div class="emu-field"><span class="emu-sun" aria-hidden="true"></span><p class="ehp-ctx emu-ctx" hidden>📧 In a formal email or interview</p>'
+    + '<span class="emu-count" aria-hidden="true">🌿 <b>0</b></span>'
+    + '<div class="emu-hedge"></div><div class="emu-grass" aria-hidden="true"></div>'
+    + '<span class="emu-goat" aria-hidden="true"><span class="emu-goati">' + GOAT + '</span><i class="emu-say"></i></span></div>'
+    + '<div class="erun-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<p class="edv-note emu-note" aria-live="polite"></p>'
+    + '<p class="ehint emu-help">One word is extra. Tap it, and the goat eats it.</p></div>';
+  const field = qs('.emu-field', GP), hedge = qs('.emu-hedge', GP), goat = qs('.emu-goat', GP), gi = qs('.emu-goati', GP), bub = qs('.emu-say', GP);
+  const note = qs('.emu-note', GP), clock = qs('.erun-clock i', GP), count = qs('.emu-count', GP), ctx = qs('.emu-ctx', GP);
+  const wait = ms => new Promise(res => setTimeout(res, reduced() ? 0 : ms));
+  const pose = c => { gi.classList.remove('bite', 'bleh', 'yum'); void gi.offsetWidth; if (c) gi.classList.add(c); };
+  const speak = t => { bub.textContent = t; bub.classList.remove('on'); void bub.offsetWidth; bub.classList.add('on'); };
+  // the goat trots along the grass until his mouth is under the leaf
+  const walkTo = async leaf => {
+    const r = leaf.getBoundingClientRect(), f = field.getBoundingClientRect(), w = goat.offsetWidth;
+    const x = Math.max(4, Math.min(f.width - w - 4, r.left - f.left + r.width / 2 - w * 0.9)), d = Math.abs(x - gx);
+    gx = x;
+    if (reduced()) { goat.style.transition = 'none'; goat.style.transform = 'translateX(' + x + 'px)'; return; }
+    goat.style.transition = 'transform ' + Math.round(Math.min(460, 140 + d * 1.1)) + 'ms ease-in-out';
+    goat.style.transform = 'translateX(' + x + 'px)';
+    gi.classList.add('trot');
+    await wait(Math.min(460, 140 + d * 1.1));
+    gi.classList.remove('trot');
   };
-  step(0);
-}
-
-/* ---- Spot & Fix: tap the wrong part (or "No error"), then choose the fix ---- */
-function sfGame(){
-  const items = G.round.items; G.ids = items.map(x => x.id);
+  // jump up and bite: the leaf flies into his mouth
+  const bite = async leaf => {
+    await walkTo(leaf); if (!G) return;
+    pose('bite'); sfx('tap');
+    const r = leaf.getBoundingClientRect(), g = goat.getBoundingClientRect();
+    if (!reduced() && leaf.animate) await leaf.animate([{ transform: 'none', opacity: 1 }, { transform: 'translate(' + (g.right - 10 - r.left - r.width / 2) + 'px,' + (g.top + 18 - r.top - r.height / 2) + 'px) scale(.2) rotate(40deg)', opacity: 0 }], { duration: 260, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {});
+  };
+  // the eaten leaf shrinks to nothing, so the words close up into the fixed sentence
+  const swallow = leaf => { leaf.style.width = leaf.offsetWidth + 'px'; void leaf.offsetWidth; leaf.classList.add('gone'); };
   const step = i => {
-    hush(); G.key = null;
-    if (i >= items.length) return finish();
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
     gprog(i / items.length);
-    const it = items[i], t0 = Date.now();
-    let tries = 0, stage = 'find';
-    G.ans[i] = { p: null, f: null };
-    pb().innerHTML = '<div class="esf"><p class="ecount">Sentence ' + (i + 1) + ' of ' + items.length + '</p>'
-      + (it.ctx === 'formal' ? '<span class="esf-ctx">📧 In a formal email or interview</span>' : '')
-      + '<div class="esf-s">' + it.parts.map((p, k) => '<button class="esf-part" data-p="' + k + '">' + esc(p) + '</button>').join(' ') + '</div>'
-      + '<button class="ebtn ghost sm esf-none" data-p="-1">✓ No error</button>'
-      + '<div class="esf-fixes" hidden></div>'
-      + '<p class="ehint esf-tell">Tap the part with the mistake. Or tap “No error”.</p>'
-      + '<div class="ep-row"><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
-    const fixesEl = qs('.esf-fixes', GP), tell = qs('.esf-tell', GP);
-    const partEl = k => qs('.esf-part[data-p="' + k + '"]', GP);
-    const lock = () => qa('.esf-part,.esf-none', GP).forEach(b => b.disabled = true);
-    const fixed = f => { const el = partEl(it.err); el.innerHTML = esc(it.parts[it.err].replace(it.bad, it.fixes[f])); };
-    const done = () => { lock(); tell.hidden = true; G.ms[i] = Date.now() - t0; nextBtn(i + 1 < items.length ? 'Next' : 'Finish', () => step(i + 1)); };
-    const reveal = () => {
-      sfx('softbad');
-      if (it.err == null) { qs('.esf-none', GP).classList.add('right'); say('This one had <b>no error</b>. ' + esc(it.why), 'oops'); }
-      else { partEl(it.err).classList.add('right'); fixed(it.ans); say('Fix: <b>' + esc(it.fixes[it.ans]) + '</b>. ' + esc(it.why), 'oops'); }
-      done();
-    };
-    qa('.esf-part,.esf-none', GP).forEach(b => b.onclick = () => {
-      if (stage !== 'find') return;
-      const p = +b.dataset.p; tries++; G.tries[i] = tries;
-      if (G.ans[i].p === null) G.ans[i].p = p;
-      const right = it.err == null ? p === -1 : p === it.err;
-      if (right && it.err == null) { sfx('correct'); b.classList.add('right'); say((tries === 1 ? praise() + ' ' : '') + 'No error here. ' + esc(it.why), 'correct'); return done(); }
+    const it = items[i], t0 = Date.now(); let done = false;
+    const live = () => !!GP && !!G && hedge.dataset.i === String(i);
+    note.textContent = ''; note.className = 'edv-note emu-note'; ctx.hidden = it.ctx !== 'formal';
+    hedge.dataset.i = i; pose('');
+    hedge.innerHTML = it.words.map((w, k) => '<button class="emu-leaf" data-k="' + k + '" style="--d:' + (k * 35) + 'ms;--r:' + ((k * 37 % 9) - 4) + 'deg">' + esc(w) + '</button>').join('');
+    const leaves = qa('.emu-leaf', hedge), extra = leaves[it.x];
+    const answer = async k => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      const ms = Date.now() - t0, right = k === it.x;
+      R.rec(i, k, 1, ms);
+      leaves.forEach(l => { l.disabled = true; });
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
       if (right) {
-        sfx('select'); b.classList.add('found'); stage = 'fix'; lock();
-        tell.textContent = 'Found it! Now pick the fix.'; hush();
-        fixesEl.hidden = false;
-        fixesEl.innerHTML = it.fixes.map((f, k) => '<button class="eopt" data-f="' + k + '">' + esc(f) + '</button>').join('');
-        qa('[data-f]', fixesEl).forEach(fb => fb.onclick = () => {
-          if (stage !== 'fix') return; stage = 'done';
-          const f = +fb.dataset.f; G.ans[i].f = f;
-          qa('[data-f]', fixesEl).forEach(x => { x.disabled = true; if (+x.dataset.f === it.ans) x.classList.add('right'); });
-          fixed(it.ans); partEl(it.err).classList.add('right');
-          if (f === it.ans) { sfx('correct'); say((tries === 1 ? praise() + ' ' : '') + esc(it.why), 'correct'); }
-          else { fb.classList.add('bad'); sfx('wrong'); say('Better: <b>' + esc(it.fixes[it.ans]) + '</b>. ' + esc(it.why), 'oops'); }
-          done();
-        });
-        return;
+        runHit(ms, it.lim);
+        await bite(extra); if (!live()) return;
+        swallow(extra); pose('yum'); speak(['Yum!', 'Crunchy.', 'Tasty!', 'More!'][i % 4]);
+        ate++; qs('b', count).textContent = ate; count.classList.remove('ebump'); void count.offsetWidth; count.classList.add('ebump');
+        await wait(560); if (!live()) return;
+        if (!G.replay) return step(i + 1);
+      } else {
+        runMiss(i, k == null ? 'softbad' : 'wrong');
+        if (k != null) {
+          // a needed word: he bites, pulls a face and spits it back onto the hedge
+          const leaf = leaves[k];
+          await bite(leaf); if (!live()) return;
+          if (leaf.getAnimations) leaf.getAnimations().forEach(a => a.cancel());
+          leaf.classList.add('spat'); pose('bleh'); speak('Bleh! I need that one.'); sfx('bump');
+          await wait(700); if (!live()) return;
+        }
+        extra.classList.add('glow'); await wait(380); if (!live()) return;
+        await bite(extra); if (!live()) return;
+        swallow(extra); pose('yum');
       }
-      b.classList.add('miss'); setTimeout(() => b.classList.remove('miss'), 500);
-      if (tries === 1) { sfx('wrong'); say('<b>Hint:</b> ' + esc(it.hint), 'thinking'); }
-      else { stage = 'done'; reveal(); }
+      note.className = 'edv-note show ' + (right ? 'ok' : 'bad');
+      note.innerHTML = '<b>' + (k == null ? '⏱ Too slow. ' : right ? '✓ ' : 'Not “' + esc(it.words[k].replace(/[.,?!]$/, '')) + '”. ') + 'The extra word is “' + esc(it.words[it.x].replace(/[.,?!]$/, '')) + '”.</b> ' + esc(it.why) + TAP;
+      holdThen(right ? 2600 : 4600, () => step(i + 1));
+    };
+    leaves.forEach(l => { l.onclick = () => answer(+l.dataset.k); });
+    G.key = e => { const k = +e.key - 1; if (e.key >= '1' && e.key <= '9' && leaves[k]) answer(k); };
+    if (rush) {
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => answer(null), it.lim);
+    }
+  };
+  step(0);
+}
+
+/* ---- Pigeon Post (reading): a pigeon flies in with a note (a chat, notice, email or poster). The tag on his leg asks
+        one question. Three houses stand below, each with an answer on its sign. Tap the right house: he flies there, the
+        letter drops through the door and the window lights up. Wrong house: the door stays shut and he flies back.
+        8 notes. ---- */
+const PIGEON = '<svg viewBox="0 0 64 48" aria-hidden="true"><path d="M14 28 0 34l2-9 13-1z" fill="#5C6675"/>'
+  + '<ellipse cx="28" cy="28" rx="18" ry="12" fill="#A7B1BF"/><path d="M14 24q12-14 30-4q-10 12-30 4z" fill="#8792A3"/><path d="M22 23q8 3 16-1M20 27q9 3 18-1" stroke="#4E5868" stroke-width="2" fill="none" stroke-linecap="round"/>'
+  + '<path d="M38 22q4-10 10-11l4 9q-5 4-10 9z" fill="#5FA88B"/><path d="M40 27q4-5 10-6l2 4q-6 3-10 7z" fill="#8A6FB8"/>'
+  + '<circle cx="49" cy="13" r="8" fill="#8E99A8"/><circle cx="51.5" cy="11.5" r="2.6" fill="#F28C28"/><circle cx="51.9" cy="11.3" r="1.3" fill="#1E1B2E"/>'
+  + '<path d="M56 13l7 2.5-7 2z" fill="#3B4250"/><ellipse cx="56.2" cy="12.6" rx="1.8" ry="1.1" fill="#EDEFF3"/>'
+  + '<path d="M25 39v6M32 39v6" stroke="#E07A8C" stroke-width="2.4" stroke-linecap="round"/>'
+  + '<g class="epo-env"><rect x="54" y="15" width="11" height="8" rx="1.2" fill="#fff" stroke="#C9B48A" stroke-width="1"/><path d="M54.5 15.5l5 4 5-4" fill="none" stroke="#C9B48A" stroke-width="1"/></g></svg>';
+const KIND = { chat: '💬 Chat', note: '📝 Note', notice: '📌 Notice', email: '✉️ Email', poster: '📣 Poster' };
+function poGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  let sent = 0;
+  pb().innerHTML = '<div class="epo">' + runHud()
+    + '<div class="epo-sky">' + SKY + '<span class="epo-count" aria-hidden="true">📬 <b>0</b></span>'
+    + '<div class="epo-mail"><span class="epo-bird" aria-hidden="true">' + PIGEON + '</span>'
+    + '<div class="epo-note"><div class="epo-head"><span class="epo-kind"></span><span class="epo-from"></span></div><p class="epo-text"></p></div></div>'
+    + '<p class="epo-q"><span>🏷️</span><b></b></p>'
+    + '<div class="epo-street"></div><div class="epo-road" aria-hidden="true"></div></div>'
+    + '<div class="erun-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<p class="edv-note epo-why" aria-live="polite"></p>'
+    + '<p class="ehint epo-help">Read the note. Then tap the house with the right answer.</p></div>';
+  const bird = qs('.epo-bird', GP), noteEl = qs('.epo-note', GP), street = qs('.epo-street', GP), q = qs('.epo-q b', GP);
+  const why = qs('.epo-why', GP), clock = qs('.erun-clock i', GP), count = qs('.epo-count', GP);
+  const wait = ms => new Promise(res => setTimeout(res, reduced() ? 0 : ms));
+  // he flies to a house and back to the note
+  const fly = async house => {
+    if (reduced() || !bird.animate) return;
+    const h = house.getBoundingClientRect(), b = bird.getBoundingClientRect();
+    const dx = h.left + h.width / 2 - b.left - b.width / 2, dy = h.top - b.top - b.height * 0.55;
+    await bird.animate([{ transform: 'none' }, { transform: 'translate(' + dx * 0.5 + 'px,' + (dy * 0.5 - 30) + 'px) rotate(8deg)' }, { transform: 'translate(' + dx + 'px,' + dy + 'px)' }], { duration: 520, easing: 'ease-in-out', fill: 'forwards' }).finished.catch(() => {});
+  };
+  const home = () => { if (!reduced() && bird.animate) bird.animate([{ transform: getComputedStyle(bird).transform }, { transform: 'none' }], { duration: 420, easing: 'ease-out', fill: 'forwards' }); };
+  const step = i => {
+    clearTimeout(G.timer); G.key = null;
+    if (i >= items.length) return endRun();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now(); let done = false;
+    const live = () => !!GP && !!G && street.dataset.i === String(i);
+    why.textContent = ''; why.className = 'edv-note epo-why';
+    qs('.epo-kind', noteEl).textContent = KIND[it.kind] || KIND.note;
+    qs('.epo-from', noteEl).textContent = 'From: ' + it.from;
+    qs('.epo-text', noteEl).textContent = it.text;
+    noteEl.classList.remove('in'); void noteEl.offsetWidth; noteEl.classList.add('in');
+    bird.classList.remove('arrive'); void bird.offsetWidth; bird.classList.add('arrive'); bird.classList.remove('noenv');
+    q.textContent = it.q;
+    street.dataset.i = i;
+    street.innerHTML = it.opts.map((o, k) => '<button class="epo-house h' + k + '" data-o="' + k + '" style="--d:' + (k * 70) + 'ms"><span class="epo-roof"></span><span class="epo-wall"><span class="epo-win"></span>'
+      + '<b class="epo-sign">' + esc(o) + '</b><span class="epo-door"></span></span></button>').join('');
+    const houses = qa('.epo-house', street), good = houses[it.opts.indexOf(it.a)];
+    const answer = async (v, house) => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      const ms = Date.now() - t0, right = v === it.a;
+      R.rec(i, v, 1, ms);
+      houses.forEach(h => { h.disabled = true; });
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
+      if (house) { sfx('whoosh'); await fly(house); }
+      if (!live()) return;
+      if (right) {
+        runHit(ms, it.lim); house.classList.add('lit'); bird.classList.add('noenv');
+        sent++; qs('b', count).textContent = sent; count.classList.remove('ebump'); void count.offsetWidth; count.classList.add('ebump');
+        home(); await wait(650); if (!live()) return;
+        if (!G.replay) return step(i + 1);
+      } else {
+        runMiss(i, v == null ? 'softbad' : 'wrong');
+        if (house) house.classList.add('shut');
+        home(); good.classList.add('glow');
+      }
+      why.className = 'edv-note show ' + (right ? 'ok' : 'bad');
+      why.innerHTML = '<b>' + (v == null ? '⏱ Too slow. ' : right ? '✓ ' : 'Wrong house. ') + 'The answer is “' + esc(it.a) + '”.</b> ' + esc(it.why) + TAP;
+      holdThen(right ? 3000 : 6000, () => step(i + 1));
+    };
+    houses.forEach(h => { h.onclick = () => answer(it.opts[+h.dataset.o], h); });
+    G.key = e => { const k = '123'.indexOf(e.key); if (k >= 0 && houses[k]) houses[k].click(); };
+    if (rush) {
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => answer(null, null), it.lim);
+    }
+  };
+  step(0);
+}
+
+/* ---- Echo (listening): it is dark in the cave, and the bat finds his way by sound. A sentence plays ONCE (owner's rule;
+        Miss Replay may play it again). It is written on the cave wall with 1-3 dark gaps. For each gap, tap one of three
+        words: a right word lights a lamp, a wrong one shows the right word in red. All lamps lit: the bat flies out.
+        10 sentences. In Rush the clock starts when the sound ends. ---- */
+const BAT = '<svg viewBox="0 0 80 48" aria-hidden="true"><path d="M40 24Q26 4 4 10q8 4 6 10q8-2 10 6q8-4 12 2z" fill="#6E4FA8"/><path d="M40 24Q54 4 76 10q-8 4-6 10q-8-2-10 6q-8-4-12 2z" fill="#6E4FA8"/>'
+  + '<path d="M30 14l-3-11 9 7zM50 14l3-11-9 7z" fill="#4E3580"/><ellipse cx="40" cy="25" rx="12" ry="13" fill="#5B3F8C"/>'
+  + '<circle cx="35" cy="21" r="4.6" fill="#fff"/><circle cx="45" cy="21" r="4.6" fill="#fff"/><circle cx="35.8" cy="21.6" r="2.3" fill="#1E1B2E"/><circle cx="44.2" cy="21.6" r="2.3" fill="#1E1B2E"/>'
+  + '<path d="M36 30q4 3 8 0" fill="none" stroke="#2A1C4A" stroke-width="1.4" stroke-linecap="round"/><path d="M37 30.6l1 2.4 1-2.2M41 30.8l1 2.2 1-2.4" fill="#fff"/>'
+  + '<ellipse cx="40" cy="31" rx="6" ry="3" fill="#7E62B8" opacity=".5"/></svg>';
+function ecGame(){
+  const R = runCtx(), items = R.items, rush = G.mode === 'rush' && !G.replay;
+  let lit = 0;
+  pb().innerHTML = '<div class="eec">' + runHud()
+    + '<div class="eec-cave"><span class="eec-drip a" aria-hidden="true"></span><span class="eec-drip b" aria-hidden="true"></span><span class="eec-drip c" aria-hidden="true"></span>'
+    + '<span class="eec-count" aria-hidden="true">💡 <b>0</b></span>'
+    + '<div class="eec-batbox" aria-hidden="true"><span class="eec-wave"><i></i><i></i><i></i></span><span class="eec-bat">' + BAT + '</span></div>'
+    + '<p class="eec-state" aria-live="polite"></p><div class="eec-wall"></div>'
+    + '<button class="ebtn sm eec-play" hidden>🔊 Tap to hear it</button></div>'
+    + '<div class="erun-clock"' + (rush ? '' : ' hidden') + '><i></i></div>'
+    + '<div class="eec-tiles"></div>'
+    + '<p class="edv-note eec-why" aria-live="polite"></p>'
+    + '<p class="ehint eec-help">Listen once. Tap the missing words in order.</p></div>';
+  const cave = qs('.eec-cave', GP), bat = qs('.eec-batbox', GP), wall = qs('.eec-wall', GP), tiles = qs('.eec-tiles', GP), state = qs('.eec-state', GP);
+  const play = qs('.eec-play', GP), why = qs('.eec-why', GP), clock = qs('.erun-clock i', GP), count = qs('.eec-count', GP);
+  const wait = ms => new Promise(res => setTimeout(res, reduced() ? 0 : ms));
+  const step = i => {
+    clearTimeout(G.timer); G.key = null; Voice.stop();
+    if (i >= items.length) return endRun();
+    gprog(i / items.length);
+    const it = items[i], picks = [];
+    let tEnd = 0, played = 0, done = false, g = 0;
+    const live = () => !!GP && !!G && wall.dataset.i === String(i);
+    why.textContent = ''; why.className = 'edv-note eec-why'; play.hidden = true;
+    bat.classList.remove('out'); cave.classList.remove('win');
+    wall.dataset.i = i;
+    wall.innerHTML = it.parts.map(p => p.t != null ? '<span class="eec-t">' + esc(p.t) + '</span>' : '<span class="eec-gap" data-g="' + p.g + '"><i class="eec-lamp"></i><b>' + '&nbsp;'.repeat(6) + '</b></span>').join('');
+    const gapEl = k => qs('.eec-gap[data-g="' + k + '"]', wall);
+    const startClock = () => {
+      if (!rush || done) return;
+      clock.style.transition = 'none'; clock.style.width = '100%'; void clock.offsetWidth;
+      clock.style.transition = 'width ' + it.lim + 'ms linear'; clock.style.width = '0%';
+      G.timer = setTimeout(() => finish(true), it.lim);
+    };
+    // the sound: once in a scored run; Miss Replay can play it again
+    const listen = () => {
+      if (!live() || done && !G.replay) return;
+      played++; play.hidden = true; cave.classList.add('on'); state.textContent = 'Listen…';
+      qa('.eec-tile', tiles).forEach(b => { b.disabled = false; });
+      Voice.clip(it.clip, why => {
+        if (!live()) return;
+        cave.classList.remove('on');
+        if (why === 'blocked' || why === 'error') { played--; if (!picks.length) qa('.eec-tile', tiles).forEach(b => { b.disabled = true; }); state.textContent = why === 'error' ? 'Couldn’t load the sound.' : ''; play.hidden = false; play.textContent = why === 'error' ? '🔊 Try again' : '🔊 Tap to hear it'; return; }
+        if (why !== 'end') return;
+        tEnd = Date.now(); state.textContent = done ? '' : 'Now tap the missing words.';
+        if (G.replay) { play.hidden = false; play.textContent = '🔊 Hear it again'; }
+        startClock();
+      });
+      if (!tEnd) tEnd = Date.now();   // in case the answer comes before the sound ends
+    };
+    play.onclick = () => { sfx('tap'); listen(); };
+    // the tiles for the gap that is open now
+    const showGap = () => {
+      qa('.eec-gap', wall).forEach(x => x.classList.toggle('now', +x.dataset.g === g));
+      const o = it.gaps[g].o;
+      // the words can be tapped once the sound has started
+      tiles.innerHTML = o.map((w, k) => '<button class="eec-tile" data-k="' + k + '" style="--d:' + (k * 50) + 'ms"' + (played ? '' : ' disabled') + '>' + esc(w) + '</button>').join('');
+      qa('.eec-tile', tiles).forEach(b => { b.onclick = () => pick(o[+b.dataset.k], b); });
+    };
+    const pick = (w, btn) => {
+      if (done || !G) return;
+      const gap = it.gaps[g], el = gapEl(g), ok = w === gap.a;
+      picks.push(w);
+      qs('b', el).textContent = gap.a;
+      el.classList.remove('now'); el.classList.add(ok ? 'on' : 'off');
+      if (ok) { sfx('select'); lit++; qs('b', count).textContent = lit; count.classList.remove('ebump'); void count.offsetWidth; count.classList.add('ebump'); }
+      else { sfx('wrong'); if (btn) { btn.classList.add('nope'); } }
+      g++;
+      if (g >= it.gaps.length) return finish(false);
+      setTimeout(() => { if (live() && !done) showGap(); }, ok ? 120 : 380);
+    };
+    const finish = async late => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      if (late) { for (let k = g; k < it.gaps.length; k++) { picks.push(''); const el = gapEl(k); qs('b', el).textContent = it.gaps[k].a; el.classList.add('off'); } }
+      if (rush) { const w = getComputedStyle(clock).width; clock.style.transition = 'none'; clock.style.width = w; }
+      const ms = tEnd ? Math.max(0, Date.now() - tEnd) : 0, right = picks.every((w, k) => w === it.gaps[k].a);
+      R.rec(i, picks, 1, ms);
+      qa('.eec-tile', tiles).forEach(b => { b.disabled = true; });
+      state.textContent = '';
+      await wait(late ? 0 : 260); if (!live()) return;
+      tiles.innerHTML = '';
+      if (right) {
+        runHit(ms, it.lim); cave.classList.add('win'); bat.classList.add('out'); sfx('whoosh');
+        await wait(700); if (!live()) return;
+        if (!G.replay) return step(i + 1);
+      } else runMiss(i, late ? 'softbad' : 'softok');
+      why.className = 'edv-note show ' + (right ? 'ok' : 'bad');
+      why.innerHTML = '<b>' + (late ? '⏱ Time’s up. ' : right ? '✓ ' : '') + '“' + it.parts.map(p => p.t != null ? esc(p.t) : '<u>' + esc(it.gaps[p.g].a) + '</u>').join('') + '”</b> ' + esc(it.why) + TAP;
+      holdThen(right ? 3000 : 5600, () => step(i + 1));
+    };
+    G.key = e => { const k = '123'.indexOf(e.key); const b = qa('.eec-tile', tiles)[k]; if (k >= 0 && b && !b.disabled) b.click(); };
+    showGap();
+    state.textContent = 'Get ready…';
+    // a short pause so the student is ready; then the sound plays by itself
+    G.timer = setTimeout(() => { if (live() && !played) listen(); }, i === 0 ? 500 : 900);
+  };
+  step(0);
+}
+
+/* ---- end card for run games: score, your best, your last runs as a line, Play again first ---- */
+function spark(last){
+  if (!last || last.length < 2) return '<p class="esub erun-first">Play again to start your score line.</p>';
+  const W = 240, H = 64, lo = Math.min(...last), hi = Math.max(...last), span = hi - lo || 1;
+  const pts = last.map((v, i) => [14 + i * (W - 28) / (last.length - 1), H - 12 - (v - lo) / span * (H - 26)]);
+  return '<figure class="erun-spark"><svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Your last ' + last.length + ' scores: ' + last.join(', ') + '">'
+    + '<polyline points="' + pts.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ') + '" fill="none" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'
+    + pts.map((p, i) => '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="' + (i === pts.length - 1 ? 6 : 4) + '" fill="' + (i === pts.length - 1 ? '#F0457A' : '#8B5CF6') + '"/>').join('')
+    + '</svg><figcaption>Your last ' + last.length + ' runs</figcaption></figure>';
+}
+function showRun(j){
+  j = j || {}; G.lastJ = j; G.replay = null; G.key = null; clearTimeout(G.timer); hush(); gprog(1);
+  const game = G.game, g = gameOf(game), S = st();
+  const run = j.run || { score: G.score, best: 0, last: [G.score], mode: G.mode, streak: G.bestStreak };
+  const items = j.items || G.ids.length, acc = items ? Math.round((j.correct || 0) / items * 100) : 0;
+  const isBest = run.score > 0 && run.score > run.best, first = run.last.length < 2;
+  const lu = j.levelUp, sk = lu && skillOf(lu.skill);
+  const canRush = tester() || !!(S && S.rush && S.rush[game]), opened = canRush && !G.rushWas && !tester();
+  const misses = G.missIdx.length, nxt = nextGame(), closedNow = isClosed(), missed = [...new Set(G.missed || [])];
+  pb().innerHTML = '<div class="eresult erun-end">' + yap(isBest || lu ? 'correct' : 'idle', 130, 'eyap bob')
+    + (lu ? '<div class="elvup" style="--c:' + sk.c + '">⬆️ ' + esc(sk.name) + ' is now <b>Level ' + lu.lv + ': ' + LEVELS[lu.lv - 1] + '</b>!</div>' : '')
+    + '<p class="erun-tag">' + g.icon + ' ' + esc(g.name) + ' · ' + (run.mode === 'rush' ? '⚡ Rush' : 'Chill') + '</p>'
+    + '<div class="erun-big"><b id="erun-n">0</b>' + (isBest ? '<span class="erun-nb">' + (first ? 'First score!' : 'New best!') + '</span>' : '<span class="erun-pb">Your best: ' + fmt(run.best) + '</span>') + '</div>'
+    + spark(run.last)
+    + '<div class="egstats"><div><b>' + acc + '%</b><span>right first time</span></div><div><b>🔥 ' + (run.streak || 0) + '</b><span>best streak</span></div><div><b>+' + (j.points || 0) + '</b><span>Adda points</span></div></div>'
+    + (opened ? '<p class="erun-unlock">⚡ Rush is open! Same game, now with a clock.</p>' : '')
+    + (missed.length ? '<div class="epanel evoffer"><h3>Save words to your Word Vault?</h3><p class="esub">They’ll come back for quick reviews, so they stick.</p>'
+      + missed.map(w => '<label class="evchk"><input type="checkbox" value="' + esc(w) + '" checked> ' + esc(w) + '</label>').join('') + '<button class="ebtn purple sm" id="eg-save">Save words</button></div>' : '')
+    + (j.points === 0 && !tester() ? '<p class="esub">No points this time: today’s 25 minutes are used up.</p>' : '')
+    + '<div class="erun-btns"><button class="ebtn erun-again" id="eg-again">Play again</button><div class="ep-row">'
+    + (canRush ? '<button class="ebtn purple sm" id="eg-switch">' + (run.mode === 'rush' ? 'Play Chill' : 'Try ⚡ Rush') + '</button>' : '')
+    + (misses ? '<button class="ebtn ghost sm" id="eg-miss">Replay ' + (misses === 1 ? '1 miss' : misses + ' misses') + '</button>' : '')
+    + '</div><div class="ep-row">' + (closedNow || !nxt || nxt === game ? '' : '<button class="ebtn ghost sm" id="eg-more">Next: ' + esc(gameOf(nxt).name) + '</button>')
+    + '<button class="ebtn ghost sm" id="eg-home">Back to Adda</button></div></div></div>';
+  // the score counts up
+  const n = qs('#erun-n', GP), t0 = performance.now(), dur = reduced() ? 0 : 700;
+  const tickUp = t => { if (!GP || !n.isConnected) return; const f = dur ? Math.min(1, (t - t0) / dur) : 1; n.textContent = fmt(Math.round(run.score * (1 - Math.pow(1 - f, 3)))); if (f < 1) requestAnimationFrame(tickUp); };
+  requestAnimationFrame(tickUp);
+  if (!G.shown) { G.shown = true; if (lu) { sfx('levelup'); try { if (!reduced()) confetti(); } catch (e) {} } else if (isBest && !first) { sfx('fanfare'); try { if (!reduced()) confetti(); } catch (e) {} } else sfx('star'); }
+  const again = mode => { closeGame(); openGame(game, { mode, auto: true }); };
+  qs('#eg-again', GP).onclick = () => again(run.mode);
+  const sw = qs('#eg-switch', GP); if (sw) sw.onclick = () => again(run.mode === 'rush' ? 'chill' : 'rush');
+  const ms = qs('#eg-miss', GP); if (ms) ms.onclick = () => { sfx('tap'); G.replay = G.missIdx.map(i => G.round.items[i]); RUN_GAMES[game](); };
+  const more = qs('#eg-more', GP); if (more) more.onclick = () => { closeGame(); openGame(nxt); };
+  qs('#eg-home', GP).onclick = () => { sfx('tap'); closeGame(); };
+  const save = qs('#eg-save', GP);
+  if (save) save.onclick = () => {
+    const words = qa('.evchk input:checked', GP).map(x => x.value);
+    if (!words.length) { qs('.evoffer', GP).remove(); return; }
+    save.disabled = true; save.textContent = 'Saving…';
+    api('/api/english', { action: 'vault', op: 'add', token: ME.token, words, source: 'realfake' }, 10000).then(r => {
+      const box = qs('.evoffer', GP); if (!box) return;
+      if (r.status === 200 && r.j.ok) { sfx('select'); G.missed = []; box.innerHTML = '<p class="esub" style="margin:0">🔐 ' + plural(words.length, 'word') + ' saved. First review tomorrow.</p>'; pull(true); }
+      else { save.disabled = false; save.textContent = 'Try again'; }
     });
   };
-  step(0);
+  qs('#eg-again', GP).focus({ preventScroll: true });
 }
 
 /* ---- Word Groups: 16 words, 4 groups of 4, 4 mistakes allowed ---- */
@@ -791,7 +1391,7 @@ function grGame(){
 function vaultGame(){
   const quiz = G.round.quiz || [];
   if (!quiz.length) {
-    pb().innerHTML = '<div class="ep-center">' + yap('idle', 120, 'eyap bob') + '<h2 class="ddisplay">Your vault is clear</h2><p class="esub">No words due right now. Words you miss in Real or Fake can be saved here, and they come back on a smart schedule.</p><button class="ebtn" id="eg-close">Back to Adda</button></div>';
+    pb().innerHTML = '<div class="ep-center">' + yap('idle', 150, 'eyap bob') + '<h2 class="ddisplay">Your vault is clear</h2><p class="esub">No words due right now. Words you miss in Real or Fake can be saved here, and they come back on a smart schedule.</p><button class="ebtn" id="eg-close">Back to Adda</button></div>';
     qs('#eg-close', GP).onclick = () => { sfx('tap'); closeGame(); };
     return;
   }
@@ -837,7 +1437,7 @@ function finish(){
   gprog(1); hush(); G.key = null; gload('Saving…');
   const secs = Math.round((Date.now() - G.t0) / 1000);
   const P = G.game === 'groups' ? G.round.items[0] : null;
-  const send = () => api('/api/english', { action: 'round', token: ME.token, cid: G.cid, game: G.game, ids: G.ids, answers: G.ans, tries: G.tries, ms: G.ms, secs, n: P ? P.n : undefined }, 12000).then(r => {
+  const send = () => api('/api/english', { action: 'round', token: ME.token, cid: G.cid, game: G.game, ids: G.ids, answers: G.ans, tries: G.tries, ms: G.ms, secs, n: P ? P.n : undefined, mode: RUN_GAMES[G.game] ? G.mode : undefined }, 12000).then(r => {
     if (!GP) return;
     if (r.status !== 200 || !r.j.ok) return gfail('Couldn’t save this round. Check your internet.', send);
     if (r.j.state) { EA = r.j.state; pulledAt = Date.now(); cacheSave(); }
@@ -846,12 +1446,13 @@ function finish(){
   send();
 }
 function showResult(j){
+  if (RUN_GAMES[G.game]) return showRun(j);
   const game = G.game, items = j.items || G.ids.length, acc = items ? Math.round((j.correct || 0) / items * 100) : 0;
   const lu = j.levelUp, sk = lu && skillOf(lu.skill);
   const nxt = nextGame(), closedNow = isClosed();
   let head = game === 'groups' ? ((j.correct ? 'Puzzle solved!' : 'Puzzle done')) : acc >= 80 ? 'Great round!' : acc >= 50 ? 'Good round!' : 'Round done!';
   const missed = [...new Set(G.missed || [])];
-  pb().innerHTML = '<div class="eresult egres">' + yap(lu || acc >= 80 ? 'correct' : 'idle', 120, 'eyap bob')
+  pb().innerHTML = '<div class="eresult egres">' + yap(lu || acc >= 80 ? 'correct' : 'idle', 150, 'eyap bob')
     + (lu ? '<div class="elvup" style="--c:' + sk.c + '">⬆️ ' + esc(sk.name) + ' is now <b>Level ' + lu.lv + ': ' + LEVELS[lu.lv - 1] + '</b>!</div>' : '')
     + '<h2 class="ddisplay">' + esc(head) + '</h2>'
     + '<div class="egstats">' + (game === 'groups' ? '' : '<div><b>' + acc + '%</b><span>first-try right</span></div>') + '<div><b>+' + (j.points || 0) + '</b><span>Adda points</span></div>'
@@ -887,8 +1488,8 @@ function showResult(j){
 document.addEventListener('click', e => {
   if (e.target.closest('[data-echeck]')) openCheck();
   else if (e.target.closest('[data-ehear]')) {
-    const [a, b] = YAPPER_LINES.hello;
-    if (typeof SFX !== 'undefined' && SFX.muted) return toast('Sound is off. Turn it on to hear Yapper.');
+    const [a, b] = MITHU_LINES.hello;
+    if (typeof SFX !== 'undefined' && SFX.muted) return toast('Sound is off. Turn it on to hear Mithu.');
     Voice.say(a, why => { if (why === 'end') Voice.say(b); });
   }
   else if (e.target.closest('[data-eplay]')) startNext();
@@ -896,8 +1497,8 @@ document.addEventListener('click', e => {
   else if (e.target.closest('[data-tip]')) showTip(e.target.closest('[data-tip]'), true);
 });
 
-/* ================= Yapper's hover bubble ================= */
-// hover (mouse) or tap/focus (phone, keyboard) on Yapper: a speech bubble pops up above him
+/* ================= Mithu's hover bubble ================= */
+// hover (mouse) or tap/focus (phone, keyboard) on Mithu: a speech bubble pops up above him
 let tipEl = null, tipFor = null, tipTimer = 0, tipLast = '';
 function showTip(img, tapped){
   const list = TIPS[img.dataset.tip] || TIPS.hi;
@@ -942,7 +1543,7 @@ function leave(){ playing = false; flush(); }
 function reset(){ flush(true); playing = false; pend = 0; EA = null; OPEN = null; pulledAt = 0; syncAt = 0; const r = qs('#english-root'); if (r) r.innerHTML = ''; const t = qs('#tab-english'); if (t) t.hidden = true; }
 window.Adda = {
   render, leave, reset, sync,
-  // test accounts only: jump straight into a game, e.g. Adda.open('jumble', 6) or Adda.open('groups', 0, 12) for puzzle #12
+  // test accounts only: jump straight into a game, e.g. Adda.open('express', 6) or Adda.open('groups', 0, 12) for puzzle #12
   open(game, lv, n){ if (!tester()) return 'Test accounts only'; openGame(game, { lv, n }); return 'Opening ' + game; },
   _state: st, _todaySecs: todaySecs,
   _play(on, hook){ playing = !!on; secondHook = on ? hook || null : null; lastAct = Date.now(); if (!on) flush(); }

@@ -5,7 +5,7 @@
 //   { action: "checknext",  token, rf, c1 } -> { ok, items }    (second passage + story, picked from parts 1-2)
 //   { action: "checkdone",  token, rf, c1, c2, catch, story, secs } -> { ok, levels, state }   (scored here, saved once; DEMO can redo)
 //   { action: "roundstart", token, game, lv?, n? } -> { ok, round }   (items picked at the student's level; lv/n only for test accounts)
-//   { action: "round", token, cid, game, ids, answers, tries, ms, secs } -> { ok, points, correct, levelUp, state }   (re-scored here)
+//   { action: "round", token, cid, game, ids, answers, tries, ms, secs, mode? } -> { ok, points, correct, levelUp, run?, state }   (re-scored here; mode = chill|rush for Flick and Express)
 //   { action: "vault", token, op: "get" | "add" | "review", ... }   (Word Vault: spaced review, 1 point per right answer, 20 a day)
 // Who can open it: batches listed in ENGLISH_BATCHES (comma separated, default "DEMO"; "ALL" opens it to everyone).
 // Rules the server enforces (the page shows the same rules, but this is the copy that counts):
@@ -15,7 +15,7 @@
 import { createHash } from 'node:crypto';
 import { db, studentFor, limited, ipOf, int, text, dbReady } from './_lib/db.js';
 import { startItems, nextItems, score as scoreCheck } from './_lib/english-check.js';
-import { BUILT, SKILL, ROUND_N, BOX_DAYS, buildRound, scoreItem, roundPoints, vaultQuiz, wordInfo, tierOf } from './_lib/english-games.js';
+import { BUILT, SKILL, ROUND_N, RUN, BOX_DAYS, buildRound, scoreItem, roundPoints, runScore, vaultQuiz, wordInfo, tierOf } from './_lib/english-games.js';
 
 export const GOAL = 900;          // 15 minutes
 export const CAP = 1500;          // 25 minutes of fresh content a day
@@ -62,13 +62,19 @@ async function ensure(sql, me) {
 async function state(me) {
   const sql = db();
   await ensure(sql, me);
-  const [st, days, today, played, vlt] = await Promise.all([
+  const [st, days, today, played, vlt, runs] = await Promise.all([
     sql`SELECT to_char(started_on, 'YYYY-MM-DD') AS started_on, points, levels, placed_at FROM english_students WHERE student_id = ${me.id}`,
     sql.query(`SELECT to_char(day, 'YYYY-MM-DD') AS d, active FROM english_daily WHERE student_id = $1 AND day > ${IST_TODAY} - 400 ORDER BY day DESC`, [me.id]),
     sql.query(`SELECT to_char(${IST_TODAY}, 'YYYY-MM-DD') AS d`),
     sql.query(`SELECT game, count(*)::int AS n FROM english_rounds WHERE student_id = $1 AND ist_date = ${IST_TODAY} GROUP BY game`, [me.id]),
-    sql.query(`SELECT count(*)::int AS total, count(*) FILTER (WHERE due <= ${IST_TODAY})::int AS due, count(*) FILTER (WHERE box = 5)::int AS mastered FROM english_vault WHERE student_id = $1`, [me.id])
+    sql.query(`SELECT count(*)::int AS total, count(*) FILTER (WHERE due <= ${IST_TODAY})::int AS due, count(*) FILTER (WHERE box = 5)::int AS mastered FROM english_vault WHERE student_id = $1`, [me.id]),
+    // run games: best score per mode, and whether Rush is open (one round with 80%+ right)
+    sql.query(`SELECT game, COALESCE(meta->>'mode', 'chill') AS mode, max((meta->>'score')::int) AS best, bool_or(items > 0 AND correct * 5 >= items * 4) AS good
+               FROM english_rounds WHERE student_id = $1 AND game = ANY($2) GROUP BY 1, 2`, [me.id, RUN])
   ]);
+  const best = {}, rush = {};
+  for (const r of runs) { (best[r.game] = best[r.game] || {})[r.mode] = r.best || 0; if (r.good) rush[r.game] = true; }
+  if (tester(me)) RUN.forEach(g => { rush[g] = true; });
   const t = today[0].d, s = st[0];
   const todaySecs = (days.find(x => x.d === t) || {}).active || 0;
   const goalDates = days.filter(x => x.active >= GOAL).map(x => x.d);
@@ -78,7 +84,7 @@ async function state(me) {
     levels, placed: !!s.placed_at, circuit: s.placed_at ? circuit(levels, me.id + ':' + t) : [],
     todaySecs, goal: GOAL, cap: CAP, closed: !tester(me) && todaySecs >= CAP,
     streak: streak(goalDates, t), goalDays: goalDates.length,
-    played: Object.fromEntries(played.map(r => [r.game, r.n])), vault: vlt[0], built: BUILT
+    played: Object.fromEntries(played.map(r => [r.game, r.n])), vault: vlt[0], built: BUILT, best, rush
   };
 }
 const cleanLevels = l => { const o = {}; for (const k of SKILLS) o[k] = int(l && l[k], 1, 8) ? l[k] : null; return o; };
@@ -157,7 +163,7 @@ async function checkDone(res, me, b) {
 // ---------- today's games ----------
 // 5 sets a day, fixed for the day (seeded by student + date). 60% of sets train the 1-2 weakest skills.
 // Word Groups (the daily puzzle) always comes first and Word Vault review is separate, so neither is in this list.
-const SKILL_GAMES = { voc: ['realfake'], gra: ['jumble', 'spotfix'], lis: ['catch', 'rewind'], rea: ['reels', 'vanish'], wri: ['email'] };
+const SKILL_GAMES = { voc: ['pairup', 'realfake'], gra: ['flick', 'express'], lis: ['echo', 'catch', 'rewind'], rea: ['post', 'reels', 'vanish'], wri: ['munch', 'email'] };
 // a skill whose games aren't built yet borrows any built game, so every slot is playable
 const SETS = BUILT.filter(g => g !== 'groups');
 const gamesFor = sk => { const g = SKILL_GAMES[sk].filter(x => BUILT.includes(x)); return g.length ? g : SETS; };
@@ -183,6 +189,11 @@ export function circuit(levels, seed) {
   for (let i = 0; i < out.length && new Set(out).size < 4; i++) {
     if (out.indexOf(out[i]) !== i) { const u = pool.find(x => !out.includes(x)); if (u) out[i] = u; }
   }
+  // no game more than twice a day: swap the extra one for the game used least
+  for (let i = out.length - 1; i >= 0; i--) {
+    const uses = x => out.filter(y => y === x).length;
+    if (uses(out[i]) > 2) { const alt = SETS.filter(x => uses(x) < 2).sort((a, b) => uses(a) - uses(b))[0]; if (alt) out[i] = alt; }
+  }
   // order: shuffle until no game comes twice in a row
   for (let t = 0; t < 30; t++) {
     for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
@@ -191,7 +202,7 @@ export function circuit(levels, seed) {
   return out;
 }
 
-// ---------- objective games (Real or Fake, Jumble, Spot & Fix, Word Groups) ----------
+// ---------- objective games (Real or Fake, Flick, Express, Word Groups) ----------
 const lvOf = (levels, game) => int(levels && levels[SKILL[game]], 1, 8) ? levels[SKILL[game]] : 1;
 const okCid = v => text(v, 64) && v.length >= 8;
 async function student(sql, me) {
@@ -247,7 +258,9 @@ async function saveRound(res, me, b) {
     if (game === 'groups' && (await groupsToday(sql, me)).length) points = 0;
   }
   const correct = scored.filter(x => x.ok).length;
-  const meta = game === 'groups' ? { solved: scored[0].solved, miss: scored[0].miss, n: int(b.n, 1, 9999) ? b.n : null } : null;
+  const mode = b.mode === 'rush' ? 'rush' : 'chill';
+  const run = RUN.includes(game) ? { mode, ...runScore(scored, mode) } : null;
+  const meta = game === 'groups' ? { solved: scored[0].solved, miss: scored[0].miss, n: int(b.n, 1, 9999) ? b.n : null } : run;
   const ins = await sql.query(
     `INSERT INTO english_rounds (client_id, student_id, game, level, items, correct, points, secs, ist_date, played_at, meta)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, ${IST_TODAY}, now(), $9::jsonb) ON CONFLICT (client_id) DO NOTHING RETURNING id`,
@@ -266,7 +279,14 @@ async function saveRound(res, me, b) {
                ON CONFLICT (student_id, day) DO UPDATE SET fresh_rounds = english_daily.fresh_rounds + 1`, [me.id])
   ]);
   const levelUp = game === 'groups' ? null : await levelCheck(sql, me, skill, L, T);
-  return res.status(200).json({ ok: true, points, correct, items: scored.length, levelUp, state: await state(me) });
+  if (run) {
+    // for the end card: the last five scores in this mode (oldest first, this run last) and the best before this run
+    const past = await sql.query(`SELECT client_id, (meta->>'score')::int AS s FROM english_rounds
+      WHERE student_id = $1 AND game = $2 AND COALESCE(meta->>'mode', 'chill') = $3 AND meta->>'score' IS NOT NULL ORDER BY played_at DESC, id DESC LIMIT 60`, [me.id, game, mode]);
+    run.last = past.slice(0, 5).map(r => r.s).reverse();
+    run.best = Math.max(0, ...past.filter(r => r.client_id !== b.cid).map(r => r.s));
+  }
+  return res.status(200).json({ ok: true, points, correct, items: scored.length, levelUp, run, state: await state(me) });
 }
 
 // Up a level: 80%+ right over the last 20 answers at the current level, spread over 2+ days (test accounts: 1 day is enough).

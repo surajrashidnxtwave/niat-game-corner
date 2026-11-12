@@ -1,13 +1,13 @@
-"""Record English Adda's audio with Kokoro (offline, free, open source). Same voice and engine as Turbo (af_heart).
+"""Record English Adda's audio with Kokoro (offline, free, open source). Same engine as Turbo; Mithu speaks in a male voice (am_puck).
 
-Lines come from scripts/english-lines.mjs: Yapper's lines (in public/english/english.js, YAPPER_LINES block) and
+Lines come from scripts/english-lines.mjs: Mithu's lines (in public/english/english.js, MITHU_LINES block) and
 listening sentences from the game content (secret: the student has to type them, so they never appear in the manifest).
 Output: public/assets/english/voice/<hash>.mp3 + manifest.json (public lines only: text -> file, duration, word timings).
 File name = sha1("voice|speed|text")[:12].mp3, the same formula as clipName() in api/_lib/english-check.js.
 Only new or changed lines are recorded; clips no longer used are deleted.
 
 Setup: the same as scripts/turbo-voice.py (kokoro-onnx + model files in ~/.cache/kokoro).
-Run after any change to Yapper's lines or listening content:  python scripts/english-voice.py
+Run after any change to Mithu's lines or listening content:  python scripts/english-voice.py
 """
 import hashlib, importlib.util, json, os, subprocess, sys
 import numpy as np, soundfile as sf
@@ -34,7 +34,10 @@ def main():
     lines = json.loads(subprocess.run(['node', os.path.join(ROOT, 'scripts', 'english-lines.mjs')], capture_output=True, text=True, encoding='utf-8', check=True).stdout)
     os.makedirs(OUT, exist_ok=True)
     mpath = os.path.join(OUT, 'manifest.json')
-    man = {'voice': 'af_heart', 'lines': {}}
+    # Mithu's lines use the voice named in english-lines.mjs (a male Kokoro voice); tv.record() speaks in tv.VOICE
+    pub = next((L['v'] for L in lines if not L.get('secret')), tv.VOICE)
+    tv.VOICE = pub
+    man = {'voice': pub, 'lines': {}}
     keep, made = set(), 0
     for L in lines:
         text, voice, speed, secret = L['t'], L['v'], float(L['s']), L.get('secret', False)
@@ -61,7 +64,7 @@ def main():
                     info = {'f': f, 'd': round(len(audio) / tv.SR, 2), 't': times, 'c': offs}
             man['lines'][tv.key(text)] = info
         else:
-            raise SystemExit(f'Public lines use af_heart at speed 1.0 only: {text[:40]}')
+            raise SystemExit(f'Public lines use one voice at speed 1.0 only: {text[:40]}')
     gone = [x for x in os.listdir(OUT) if x.endswith('.mp3') and x not in keep]
     for x in gone: os.remove(os.path.join(OUT, x))
     json.dump(man, open(mpath, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))

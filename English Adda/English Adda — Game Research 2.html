@@ -1,0 +1,483 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Adda Game Research 2</title><style>
+:root{--bg:#fbf8f3;--card:#fff;--ink:#1f1b16;--mute:#6b6257;--line:#e8e0d4;--acc:#c27a12;--accbg:#fdf1de;--code:#f4efe7}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17140f;--card:#201c16;--ink:#efe8dd;--mute:#a89d8f;--line:#3a332a;--acc:#f0b04f;--accbg:#2e2416;--code:#2a241c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,Segoe UI,Roboto,Inter,sans-serif}
+.wrap{display:grid;grid-template-columns:270px minmax(0,1fr);gap:40px;max-width:1220px;margin:0 auto;padding:32px 24px}
+nav{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);overflow:auto;font-size:14px}
+nav .toc>ul{padding-left:0}
+nav ul{list-style:none;padding-left:14px;margin:4px 0}
+nav a{color:var(--mute);text-decoration:none;display:block;padding:3px 0}
+nav a:hover{color:var(--acc)}
+nav b{display:block;margin-bottom:10px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;font-size:12px}
+main{min-width:0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:40px 48px}
+h1{font-size:2.1em;line-height:1.2;margin:0 0 .2em}
+h2{margin-top:2.2em;padding-top:.6em;border-top:1px solid var(--line);font-size:1.5em}
+h3{margin-top:1.6em;font-size:1.15em;color:var(--acc)}
+h1+p em,h1+p{color:var(--mute)}
+a{color:var(--acc)}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14.5px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--accbg)}
+code{background:var(--code);padding:1px 5px;border-radius:5px;font-size:.88em}
+pre{background:var(--code);padding:14px 16px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.5}
+pre code{background:none;padding:0}
+blockquote{margin:1em 0;padding:.4em 1em;border-left:4px solid var(--acc);background:var(--accbg);border-radius:0 8px 8px 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+li{margin:.25em 0}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;padding:16px}nav{position:static;max-height:none;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--card)}main{padding:24px 18px}}
+main img{max-width:200px;height:auto;display:block}</style></head><body><div class="wrap">
+<nav><b>Contents</b><div class="toc">
+<ul><li><a href="#1-the-short-version">1. The short version</a><li><a href="#2-what-is-wrong-with-the-games-we-have">2. What is wrong with the games we have</a><li><a href="#3-what-the-academic-literature-says">3. What the academic literature says</a><ul><li><a href="#31-game-based-language-learning">3.1 Game-based language learning</a></li><li><a href="#32-vocabulary">3.2 Vocabulary</a></li><li><a href="#33-grammar">3.3 Grammar</a></li><li><a href="#34-listening-and-reading-speed">3.4 Listening and reading speed</a></li><li><a href="#35-short-writing-and-ai-feedback">3.5 Short writing and AI feedback</a></li><li><a href="#36-motivation-and-difficulty">3.6 Motivation and difficulty</a></li><li><a href="#37-lessons-from-brain-training">3.7 Lessons from brain training</a></li><li><a href="#38-indian-learners">3.8 Indian learners</a></li></ul></li><li><a href="#4-what-the-market-does">4. What the market does</a><ul><li><a href="#41-what-each-product-teaches-us">4.1 What each product teaches us</a></li><li><a href="#42-eleven-rules-that-separate-a-game-from-a-quiz">4.2 Eleven rules that separate a game from a quiz</a></li><li><a href="#43-gaps-nobody-has-filled">4.3 Gaps nobody has filled</a></li></ul></li><li><a href="#5-who-we-are-building-for">5. Who we are building for</a><ul><li><a href="#51-findings">5.1 Findings</a></li><li><a href="#52-rules-for-this-audience">5.2 Rules for this audience</a></li></ul></li><li><a href="#6-the-new-games">6. The new games</a><ul><li><a href="#wave-1-prove-the-feel-4-games">Wave 1: prove the feel (4 games)</a></li><li><a href="#wave-2-widen-4-games">Wave 2: widen (4 games)</a></li><li><a href="#wave-3-keep-it-fresh-around-week-4-2-games-events">Wave 3: keep it fresh around week 4 (2 games + events)</a></li><li><a href="#what-happens-to-the-step-3-games">What happens to the step 3 games</a></li></ul></li><li><a href="#7-session-scores-and-progress">7. Session, scores and progress</a><li><a href="#8-mithu">8. Mithu</a><li><a href="#9-what-we-should-not-claim">9. What we should not claim</a><li><a href="#10-build-plan">10. Build plan</a><li><a href="#11-decisions-needed-from-the-owner">11. Decisions needed from the owner</a><li><a href="#12-sources-checked-in-this-round">12. Sources checked in this round</a></ul>
+</div></nav>
+<main>
+<h1 id="english-adda-game-research-2-from-worksheets-to-games">English Adda — Game Research 2: from worksheets to games</h1>
+<p><em>12 Nov 2026. Written after the product owner played step 3 and said the games are boring. This doc adds to the first Research doc; it does not replace it. Nothing here is built yet.</em></p>
+<p><strong>How to read the trust tags.</strong> Three research passes were run (academic literature, market teardown, audience). Each claim is tagged:</p>
+<ul>
+<li><strong>[V]</strong> checked against a source in this round (abstract, article or product page).</li>
+<li><strong>[M]</strong> from memory of the paper or product, not re-checked. Check before quoting a number to anyone.</li>
+<li><strong>[J]</strong> our judgement, no data.</li>
+<li><strong>[no data]</strong> we looked and found nothing usable.</li>
+</ul>
+<hr />
+<h2 id="1-the-short-version">1. The short version</h2>
+<ol>
+<li><strong>Why the current games feel boring.</strong> Every game has the same shape: <em>item 3 of 10 → answer → read a paragraph → press Next</em>. That is the shape of a worksheet. Lumosity, Elevate and the Brain Gym games students like (Color Clash, Symbol Sprint, Bug Tracker) have a different shape: one action, repeated 40–80 times in two minutes, with something always moving, and a score you try to beat.</li>
+<li><strong>The research agrees with the owner.</strong> The best-supported formats (recall, judging a word in a sentence, building sentences, timed easy reading) are also the ones that make good fast games. The weakest-supported formats (spotting errors on its own, C-tests as practice, typing a full sentence after audio) are three of the things we built.</li>
+<li><strong>What we should build.</strong> Ten original games on one shared &quot;run&quot; engine, built in three waves. Each has one action, a physical picture that explains the rule, a calm mode first and a fast mode after, and an end card with your best score and a curve. Details in §6.</li>
+<li><strong>Mithu.</strong> He comes back as the host. He must look nothing like Duolingo's owl, and he must be a sharp commentator, not a bird that repeats. A first sketch and a character brief are in §8.</li>
+<li><strong>Decisions needed from the owner</strong> are listed in §11. Building starts after those.</li>
+</ol>
+<hr />
+<h2 id="2-what-is-wrong-with-the-games-we-have">2. What is wrong with the games we have</h2>
+<p>I read the game code (<code>public/english/english.js</code>) and compared it with the Brain Gym games.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Adda games now</th>
+<th>Brain Gym games students like</th>
+<th>Lumosity / Elevate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decisions in 2 minutes</td>
+<td>8–20</td>
+<td>40–100</td>
+<td>40–80</td>
+</tr>
+<tr>
+<td>Screen between items</td>
+<td>Explanation text + Next button (Real or Fake waits 3–5 s)</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Counter on screen</td>
+<td>&quot;Sentence 3 of 8&quot;</td>
+<td>Clock and score</td>
+<td>Clock and score</td>
+</tr>
+<tr>
+<td>Motion</td>
+<td>Card shakes or turns green</td>
+<td>Things move all the time</td>
+<td>Things move all the time</td>
+</tr>
+<tr>
+<td>What you touch</td>
+<td>Buttons under the question</td>
+<td>The thing itself</td>
+<td>The sentence or word itself</td>
+</tr>
+<tr>
+<td>End of round</td>
+<td>&quot;You got 7 of 10&quot;</td>
+<td>Score vs your best</td>
+<td>Score, best, last five, level bar</td>
+</tr>
+<tr>
+<td>Reason to replay</td>
+<td>None</td>
+<td>Beat your score</td>
+<td>Beat your score</td>
+</tr>
+</tbody>
+</table>
+<p>Other problems:</p>
+<ul>
+<li><strong>All five games look the same.</strong> White card, purple button, text. Each Lumosity or Elevate game has its own small world.</li>
+<li><strong>The teaching interrupts the play.</strong> We stop after every item to explain. Good for learning one item, bad for flow. The fix (from Brilliant and from the feedback research) is a 300 ms correction on the item itself, then a short review of only the misses at the end.</li>
+<li><strong>No fast, easy play.</strong> Everything is &quot;learn something new&quot;. Nothing lets a student feel quick and good with what they already know. Language teaching calls this the fluency strand, and it is a quarter of a balanced course (Nation 2007 [M]).</li>
+</ul>
+<hr />
+<h2 id="3-what-the-academic-literature-says">3. What the academic literature says</h2>
+<p>Full notes are in the session log; the points that change our design are below. The first Research doc (§4) already covers spaced recall, gamification effect sizes, leaderboard risks and feedback basics.</p>
+<h3 id="31-game-based-language-learning">3.1 Game-based language learning</h3>
+<ul>
+<li>Games help language learning by about half a standard deviation (Dixon, Dixon &amp; Jordan 2022, <em>Language Learning &amp; Technology</em> [V]). Games made for fun did a little better than games made for teaching.</li>
+<li>How the game is designed matters about as much as having a game at all: games vs no game 0.33; better-designed version vs plain version of the same game 0.34 (Clark, Tanner-Smith &amp; Killingsworth 2016 [V]).</li>
+<li><strong>Warning.</strong> In deHaan, Reed &amp; Kuwada 2010 [V], students who <em>played</em> a music game remembered fewer words than students who only <em>watched</em>. The game actions had nothing to do with the language, so they stole attention.</li>
+<li><strong>So:</strong> the tap or drag must itself be the language work. No shooting, jumping or steering laid on top.</li>
+</ul>
+<h3 id="32-vocabulary">3.2 Vocabulary</h3>
+<ul>
+<li>What matters most is making the learner <strong>judge or use the word in a context</strong>. Looking a word up added nothing (Yanagisawa &amp; Webb 2021, 42 studies [V]).</li>
+<li>Seeing a word many times is a weak lever on its own (r = .34; Uchihara, Webb &amp; Yanagisawa 2019 [V]). Activity type matters hugely: 18–77% of words learned depending on the activity (Webb, Yanagisawa &amp; Uchihara 2020 [V]).</li>
+<li>Recall beats recognition. Order of difficulty: recognise meaning → recognise form → recall meaning → recall form (Laufer &amp; Goldstein 2004 [M]).</li>
+<li>About 10 meetings with a word are needed (Webb 2007 [M]). Total spacing matters more than the exact schedule (Nakata 2015 [V]).</li>
+<li><strong>So:</strong> a word should be met 8–12 times across <em>different</em> games and days, moving from &quot;see it&quot; to &quot;judge it in a sentence&quot; to &quot;type it from a clue&quot;.</li>
+</ul>
+<h3 id="33-grammar">3.3 Grammar</h3>
+<ul>
+<li>Telling the rule plainly works better than hoping learners pick it up (Spada &amp; Tomita 2010 [V]). Feedback on errors has a medium, lasting effect (Li 2010 [V]).</li>
+<li>Highlighting text (bold, colour) hardly teaches anything (Lee &amp; Huang 2008 [M]).</li>
+<li>For grammar, practising a pattern many times in one sitting is fine, unlike vocabulary (Suzuki &amp; DeKeyser 2017 [V]).</li>
+<li>Sentence combining improved writing (0.50); teaching grammar on its own did not (−0.32) (Graham &amp; Perin 2007 [V]; school pupils writing in their first language, so treat as a pointer).</li>
+<li>Fast right/wrong judgement draws on the kind of knowledge used in live speech and timed tests (Ellis 2005 [M]). There is little direct proof that practising it improves writing, so we pair it with building games.</li>
+<li><strong>So:</strong> build and combine sentences more, hunt errors less. After a miss: one-line rule, then two or three fresh items on the same pattern straight away. Time a pattern only after the student gets it right untimed.</li>
+</ul>
+<h3 id="34-listening-and-reading-speed">3.4 Listening and reading speed</h3>
+<ul>
+<li>Timed repeated reading raised speed by about 45 words a minute and also helped on new texts (Chang &amp; Millett 2013 [V], only 13 students). Speed-reading gains carried over to other reading (Tran &amp; Nation 2014 [V citation]).</li>
+<li>Partial dictation (sentence shown with a few gaps) beats no dictation in small studies [V]. No large review exists.</li>
+<li>C-tests are a good <em>measure</em>. We found no evidence that doing them <em>teaches</em> [M]. Keep them in the level check only.</li>
+<li><strong>So:</strong> add a reading-speed game with a personal words-per-minute graph, and change Catch It from &quot;type the whole sentence&quot; to &quot;fill the gaps you could not hear&quot;.</li>
+</ul>
+<h3 id="35-short-writing-and-ai-feedback">3.5 Short writing and AI feedback</h3>
+<ul>
+<li>AI feedback improved revision only a little (d = 0.19) but raised motivation (0.36) (Meyer et al. 2024 [V]).</li>
+<li>Students with plain ChatGPT did better in practice and <strong>17% worse</strong> once it was taken away; a hint-only tutor removed most of the harm (Bastani et al. 2025, <em>PNAS</em> [V]; maths, one school).</li>
+<li>A third of feedback studies found feedback made performance worse, mostly when it was about the person and not the task (Kluger &amp; DeNisi 1996 [M]).</li>
+<li><strong>So:</strong> the judge gives hints, never the rewritten answer. Feedback talks about the sentence, never the student.</li>
+</ul>
+<h3 id="36-motivation-and-difficulty">3.6 Motivation and difficulty</h3>
+<ul>
+<li>In 20,000+ sessions of a learning game, even medium difficulty lowered play time. Novelty, choice and suspense did the job people expect difficulty to do (Lomas et al. 2013, 2017 [V]).</li>
+<li>The &quot;85% right&quot; rule comes from a maths model of machine learners, not from language students (Wilson et al. 2019 [V]). Use it as a first guess.</li>
+<li>Points, levels and leaderboards increase how much people do, not how much they want to (Mekler et al. 2017 [V]).</li>
+<li>Gamification's effect dropped after about week 4, then partly came back (Rodrigues et al. 2022, 14 weeks [V]).</li>
+<li>Streak effects: still only company data.</li>
+<li><strong>So:</strong> aim for 80–90% right on the first try, lean easy for weak students, and get excitement from near-misses, reveals and new mechanics. Plan something new around week 4.</li>
+</ul>
+<h3 id="37-lessons-from-brain-training">3.7 Lessons from brain training</h3>
+<ul>
+<li>Lumosity paid $2 million to the US FTC in 2016 for claims it could not support [V]. Reviews find people get better at the games they practise and tasks very close to them, with little effect on daily life (Simons et al. 2016 [V]; Sala &amp; Gobet 2019 [V]).</li>
+<li>Independent evidence for Duolingo is thin (Loewen et al. 2019, nine learners [V]).</li>
+<li><strong>So:</strong> our games must be the placement task in game form (close transfer). We claim only what our own check measures, and the Boss Round uses a different format from the daily games so we measure English, not game skill.</li>
+</ul>
+<h3 id="38-indian-learners">3.8 Indian learners</h3>
+<ul>
+<li>Fluent English goes with about 34% higher hourly wages for men, after controls (Azam, Chin &amp; Prakash 2013 [V]).</li>
+<li>Hindi, Telugu and Tamil have no articles, put the verb last and have no &quot;do&quot; in questions. Expected errors: articles, prepositions, question word order, &quot;-ing&quot; with verbs like <em>know</em> and <em>have</em> [M]. Small studies of Tamil-medium engineering students agree, adding tense choice and missing &quot;-s&quot; [V].</li>
+<li>We found no solid study of Telugu-speaking undergraduates, and none comparing English-medium with regional-medium engineering students. Our own game logs can fill this.</li>
+<li><strong>So:</strong> weight grammar content to articles, prepositions, tense and question order. Log misses by pattern.</li>
+</ul>
+<hr />
+<h2 id="4-what-the-market-does">4. What the market does</h2>
+<p>The first doc has the product table. This round looked at mechanics and feel. Elevate's and Lumosity's help pages blocked us, so some details are from memory. <strong>Someone on the team should play Elevate, Lumosity's word games and Knudge.me for 20 minutes each before we lock designs.</strong></p>
+<h3 id="41-what-each-product-teaches-us">4.1 What each product teaches us</h3>
+<ul>
+<li><strong>Lumosity</strong> [V for game list]. Its word games: recall words from a starting stem; pick all synonyms fast; drag words into order by strength; find the words that do not fit a story. A daily workout is a short set of 1–3 minute games shown as cards you tick off [M]. Scores feed a personal index. It compares you with yourself.</li>
+<li><strong>Elevate</strong> (closest to what we want) [V for most]. Tap the word that can be cut from a wordy sentence. Tap Valid or Error on a sentence. Swipe a word to &quot;positive&quot; or &quot;negative&quot;. Read text at rising speed. Each game is 60–120 s with its own art. <strong>Complaints to avoid</strong> [V]: every game is timed, so the clock matters more than learning; no time to think after a wrong answer; content repeats after months.</li>
+<li><strong>Brilliant</strong> [V for basics]. No videos. One idea per screen. You move something, guess, then get the reason. Wrong answers are explained, not punished. For language this means: drag a comma and see the meaning change; slide a message from &quot;chat&quot; to &quot;formal&quot; and watch the words change.</li>
+<li><strong>Duolingo.</strong> Fast modes (pair matching against a shrinking clock [V]) are its most game-like part. Mascot with attitude is the brand [V]. Users hate blocked practice, guilt reminders and AI-made content [V].</li>
+<li><strong>Word-game hits</strong> [M]. Daily shared puzzle with a share grid; a rank ladder that turns an open task into a goal; letter-swipe as a pleasure in itself; typing games where restart takes one key press.</li>
+<li><strong>Classroom games</strong> (Kahoot, Blooket, Gimkit) [M]. The quiz is fuel; the fun is the game on top. Useful later for class events.</li>
+<li><strong>India.</strong> Knudge.me has English mini-games with generic arcade skins [V]. Hello English has challenges but is reported buggy [V]. Placement sites (IndiaBix, PrepInsta) are plain question lists [M]. Speaking apps are not game-like.</li>
+</ul>
+<h3 id="42-eleven-rules-that-separate-a-game-from-a-quiz">4.2 Eleven rules that separate a game from a quiz</h3>
+<ol>
+<li><strong>One action per game.</strong> Tap, swipe, drag or type. Nothing else.</li>
+<li><strong>The text is the playfield.</strong> Touch the sentence itself, not option buttons under it.</li>
+<li><strong>Decisions take 1–3 seconds.</strong> Two minutes = 40–80 decisions.</li>
+<li><strong>Something always moves.</strong> No Next button. No &quot;question 3 of 10&quot;.</li>
+<li><strong>A clock or moving object sets the pace, and hits in a row build a multiplier.</strong> A calm mode exists too (see §5 rule 5).</li>
+<li><strong>One physical picture per game</strong> that explains the rule without words: a train, a pair of scissors, a dial.</li>
+<li><strong>A run restarts in one tap.</strong></li>
+<li><strong>Feedback happens inside the motion</strong> (sound, colour, a quick fix shown on the item). Misses are reviewed on the end card.</li>
+<li><strong>The result is a curve:</strong> score, personal best, last five runs. Never &quot;7 out of 10&quot;.</li>
+<li><strong>The session is a playlist</strong> of 3–5 different games picked for you.</li>
+<li><strong>Difficulty changes quietly during the run.</strong> The student notices only the level-up.</li>
+</ol>
+<h3 id="43-gaps-nobody-has-filled">4.3 Gaps nobody has filled</h3>
+<ul>
+<li>Grammar with motion (everything except Elevate is multiple choice).</li>
+<li>Listening as a fast game (everyone does &quot;play, type, submit&quot;).</li>
+<li>Chat-to-formal tone as a toy.</li>
+<li>Indian English errors as the content.</li>
+<li>Campus settings instead of space ships and pandas.</li>
+<li>Short writing judged in seconds.</li>
+</ul>
+<hr />
+<h2 id="5-who-we-are-building-for">5. Who we are building for</h2>
+<h3 id="51-findings">5.1 Findings</h3>
+<ul>
+<li><strong>Phone first.</strong> Under 10% of Indian homes have a computer; 85% have a smartphone (CMS-T 2025 [V]). B.Tech students often have laptops, but plan for a phone in one hand.</li>
+<li><strong>They read English and listen in their own language.</strong> English is preferred for reading (42%); local languages for video (56%) and audio (57%) (Google–Kantar 2025, 4,000+ Gen Z [V]). This explains weak listening.</li>
+<li><strong>Data is cheap</strong> (about 31 GB a month per user [V]), but hostel networks drop [anecdotes only].</li>
+<li><strong>Women are 45% of Indian gamers</strong> (Lumikai 2025 [V]). Women lean to puzzle and casual games, men to shooters and competition (older data [V]).</li>
+<li><strong>Ranks and seasons are familiar</strong> from BGMI [J]. <strong>Chess.com has 1M+ daily users in India</strong> [V, company figure], which shows a &quot;smart&quot; game with a rating can be cool.</li>
+<li><strong>Real-money gaming was banned in August 2025</strong> [V]. Never copy betting or cash.</li>
+<li><strong>Accent and English shame are real.</strong> 62% of Indian test takers think their accent hurts their score (Pearson [V]). A study of first-year engineers links English stigma to self-image [V].</li>
+<li><strong>Placement English is a speed task.</strong> TCS, Infosys and Wipro verbal sections give under a minute per question (prep sites, which disagree on details [V]). Accenture and Cognizant use listening, sentence building and story retelling.</li>
+<li><strong>Tone.</strong> Short, witty, about a shared moment works (Zomato, Swiggy [V]). Over-familiar or guilt-based messages backfire (Zepto backlash [V]; Duolingo reminder complaints [V]). Institutions using Gen Z slang get called cringe [V].</li>
+<li><strong>Streaks.</strong> People can start caring about the streak more than the activity, and many quit when it breaks [V, secondary].</li>
+<li><strong>[no data]:</strong> peak hours for college students, earphone ownership, comfort typing English on a phone, attitudes to ranking. Our own logs and the launch survey must answer these.</li>
+</ul>
+<h3 id="52-rules-for-this-audience">5.2 Rules for this audience</h3>
+<ol>
+<li>Design for a 360 px wide phone, one hand. Laptop is the second layout.</li>
+<li>Load a whole round (text and audio) before it starts. Save answers on the phone and send later if the network drops.</li>
+<li>Sound is never required. Listening games ask &quot;Earphones in?&quot; first and offer another game if not.</li>
+<li>Tap, swipe and drag first. Typing only in short bursts, and forgive thumb slips where spelling is not the skill.</li>
+<li><strong>Calm first, fast after.</strong> Each game opens in an untimed &quot;Chill&quot; mode. The timed &quot;Rush&quot; mode opens once the student is right about 80% of the time. The student can always choose Chill. This handles both the placement clock and the anxiety findings.</li>
+<li>Half the games are puzzles, half are speed games.</li>
+<li>No guilt. A missed day gets a normal hello.</li>
+<li>Plain English. At most one internet word per screen. No Hinglish in instructions.</li>
+<li>Jokes are about the situation (mess food, Tatkal, the HOD), never about the student's English, accent, town or school.</li>
+<li>Use words they already own (game, creator and tech words) as a bridge to formal words.</li>
+<li>Settings come from all of India, not only the north: trains, cricket, hostel, fests, food delivery, group chats.</li>
+<li>Placement stays in the background. Every screen leads with today's win.</li>
+</ol>
+<hr />
+<h2 id="6-the-new-games">6. The new games</h2>
+<p>All ten are original designs. They use mechanics that are common across many products, not any one product's name, art, content or levels.</p>
+<p>Every game shares one <strong>run engine</strong>: a start card with Mithu and a one-line rule, a 60–120 s run, a clock and score at the top, a combo meter, pause, an end card (score, best, last five runs as a small curve, &quot;Play again&quot; as the biggest button), then <strong>Miss Replay</strong>: only the items you missed, slowed down, with the one-line reason and a fresh item on the same pattern.</p>
+<h3 id="wave-1-prove-the-feel-4-games">Wave 1: prove the feel (4 games)</h3>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>Action</th>
+<th>What happens</th>
+<th>Skill → placement task</th>
+<th>Why (evidence)</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flick</strong></td>
+<td>Swipe</td>
+<td>A sentence card slides in. Swipe right if it sounds right, left if something is off. 1–3 s each. Hits in a row light a streak flame and raise the multiplier. A wrong swipe flashes the faulty words for a moment and moves on.</td>
+<td>Grammar → error identification (TCS, Infosys, AMCAT)</td>
+<td>Fast judgement taps the knowledge used under a clock; one-line rule and fresh retry in Miss Replay (§3.3)</td>
+<td>Reuses all 192 Spot &amp; Fix items; each gives a wrong and a right card</td>
+</tr>
+<tr>
+<td><strong>Express</strong></td>
+<td>Tap</td>
+<td>A train waits at the platform. Sentence pieces are coaches in the yard. Tap them in order to couple them. A wrong coach bounces back at once. When the last coach clicks on, the train leaves and the next one rolls in. In Rush, the signal counts down.</td>
+<td>Grammar → sentence building (Versant, Cognizant jumbled sentences)</td>
+<td>Building beats error hunting (§3.3); no Check button, feedback inside the motion (§4.2)</td>
+<td>Reuses all 192 Jumble items</td>
+</tr>
+<tr>
+<td><strong>Pair Up</strong></td>
+<td>Tap</td>
+<td>A board of 8 tiles: words on one side, partners on the other (meaning, or the word it goes with: <em>make + a decision</em>, <em>take + a break</em>). Tap a pair and both tiles are replaced at once, so the board never empties. Each stage is a little faster.</td>
+<td>Vocabulary → synonyms, word choice</td>
+<td>Pairs like <em>make/do</em> force a judgement in context (§3.2); refilling board gives constant motion</td>
+<td>Reuses 320 words; needs about 150 new word-partner pairs</td>
+</tr>
+<tr>
+<td><strong>Catch It</strong> (rebuilt)</td>
+<td>Tap, later type</td>
+<td>&quot;Earphones in?&quot; A sentence plays once. It appears with 2–4 gaps on the words that are hard to hear (<em>a/the</em>, <em>-ed</em>, <em>-s</em>, small joining words). Tap the right word tiles into the gaps before the sound wave fades. Higher levels: type the gap words.</td>
+<td>Listening → dictation, sentence repeat (Versant, Accenture, Cognizant)</td>
+<td>Partial dictation, less typing, same ear training (§3.4); keeps the owner's one-play rule</td>
+<td>New: about 150 sentences with gap marks; audio through the existing voice script</td>
+</tr>
+</tbody>
+</table>
+<p>Wave 1 covers one puzzle-leaning game (Pair Up), two speed games (Flick, Express) and listening. <strong>Word Groups stays</strong> as the one shared daily puzzle. It already has the right shape (a puzzle with an &quot;aha&quot; and a share grid) and the owner has tuned it.</p>
+<h3 id="wave-2-widen-4-games">Wave 2: widen (4 games)</h3>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>Action</th>
+<th>What happens</th>
+<th>Skill → placement task</th>
+<th>Why</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Trim</strong></td>
+<td>Tap</td>
+<td>A wordy sentence with a pair of scissors. Tap the words that add nothing (<em>return <strong>back</strong></em>, <em>discuss <strong>about</strong></em>, <em>repeat <strong>again</strong></em>, <em>free <strong>gift</strong></em>). They snip away and the sentence closes up.</td>
+<td>Writing → concise, formal writing (email tasks)</td>
+<td>Editing real text; uses the Indian English &quot;formal only&quot; list from the first doc</td>
+<td>New: about 150 sentences</td>
+</tr>
+<tr>
+<td><strong>Fast Read</strong></td>
+<td>Read, tap</td>
+<td>A short, easy story (100–120 words, almost all known words) appears a line at a time. Read it at your own speed, then answer one quick detail question so nobody can skip. Your words-per-minute goes on a graph. The same story comes back on two later days so you beat your own time.</td>
+<td>Reading → comprehension under time</td>
+<td>Timed repeated reading (§3.4); the missing &quot;fast and easy&quot; strand (§2)</td>
+<td>New: about 60 stories, level-tagged with the existing word-frequency check</td>
+</tr>
+<tr>
+<td><strong>Vault Run</strong> (replaces Word Vault)</td>
+<td>Type</td>
+<td>Words you have met drift down the screen as a meaning plus the first letters (<em>&quot;say sorry&quot; → apo _ _ _ _ _ _</em>). Type the rest before it lands. Only your own saved and missed words appear, on a spaced schedule.</td>
+<td>Vocabulary → recall and spelling</td>
+<td>Recall of form is the strongest step (§3.2); 8–12 spaced meetings</td>
+<td>No new content; uses the vault</td>
+</tr>
+<tr>
+<td><strong>Tone Dial</strong></td>
+<td>Drag</td>
+<td>A phone shows a message. A dial runs from &quot;Group chat&quot; to &quot;Mail to HR&quot;. As you turn it, the message rewrites itself through four versions. Stop the dial where it fits the person shown (friend, senior, HOD, recruiter). Later levels: one version has a slip; spot which.</td>
+<td>Writing → register (email tasks, interviews)</td>
+<td>Brilliant-style &quot;move it and see&quot; (§4.1); the register gap is their real weakness (§5.1)</td>
+<td>New: about 80 message sets of four</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wave-3-keep-it-fresh-around-week-4-2-games-events">Wave 3: keep it fresh around week 4 (2 games + events)</h3>
+<table>
+<thead>
+<tr>
+<th>Game</th>
+<th>Action</th>
+<th>What happens</th>
+<th>Skill</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Scale</strong></td>
+<td>Drag</td>
+<td>Four or five words on a thermometer. Drag them into order from weak to strong (<em>okay → good → great → brilliant</em>).</td>
+<td>Vocabulary shades of meaning</td>
+</tr>
+<tr>
+<td><strong>Type Dash</strong></td>
+<td>Type</td>
+<td>Type a short sentence at your level against your own ghost from last time. Shows speed and accuracy. Laptop-friendly; on phones it is optional.</td>
+<td>Writing fluency (Versant typing section)</td>
+</tr>
+</tbody>
+</table>
+<p>Also in wave 3: Boss Round in a different format from the daily games (§3.7), and a class event mode if the pilot asks for it.</p>
+<h3 id="what-happens-to-the-step-3-games">What happens to the step 3 games</h3>
+<table>
+<thead>
+<tr>
+<th>Step 3 game</th>
+<th>Decision</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Word Groups</td>
+<td>Keep as the daily shared puzzle</td>
+<td>Right shape already</td>
+</tr>
+<tr>
+<td>Real or Fake</td>
+<td>Keep in the level check only; its words feed Pair Up and Vault Run</td>
+<td>As a daily game it is recognise-only</td>
+</tr>
+<tr>
+<td>Jumble</td>
+<td>Becomes Express</td>
+<td>Same content, new feel</td>
+</tr>
+<tr>
+<td>Spot &amp; Fix</td>
+<td>Becomes Flick</td>
+<td>Weakest evidence as a stand-alone; content reused</td>
+</tr>
+<tr>
+<td>Word Vault</td>
+<td>Becomes Vault Run</td>
+<td>Same spacing engine, now a game</td>
+</tr>
+<tr>
+<td>Catch It</td>
+<td>Rebuilt as partial dictation</td>
+<td>Less typing, better evidence</td>
+</tr>
+<tr>
+<td>Story Rewind, Vanish, Fix My Email (not built)</td>
+<td>Hold</td>
+<td>Need the AI judge; revisit after wave 2 with hint-only feedback</td>
+</tr>
+</tbody>
+</table>
+<p>Nothing is thrown away: 320 words, 192 jumbles, 192 spot-and-fix items and 30 group puzzles all carry over. The server side (round picking, first-attempt scoring, level-up rule) stays.</p>
+<hr />
+<h2 id="7-session-scores-and-progress">7. Session, scores and progress</h2>
+<ul>
+<li><strong>Today's Adda</strong> becomes a playlist of 4 cards: the daily Word Groups puzzle plus 3 games picked from the student's weakest and least-played skills, each a different action. Tick them off. After that, any game is free play until the 25-minute close.</li>
+<li><strong>Score per game:</strong> points for each hit × multiplier. The end card shows this run, your best, and your last five runs as a small line. No &quot;7 of 10&quot;.</li>
+<li><strong>Skill meters (private).</strong> The five skills keep their 1–8 levels. Each game's results feed its skill. A level-up is the big moment and says what you can now do (&quot;You now handle <em>since</em> and <em>for</em>&quot;), because rewards that tell you about your skill work better than points alone (§3.6).</li>
+<li><strong>Seasons.</strong> Four weeks each. The class leaderboard counts effort only (goal days and games finished) and resets each season. Each new season brings one new game or mode, which is also our answer to the week-4 drop.</li>
+<li><strong>Streak</strong> stays as designed: goal days, one miss forgiven per 7 days, no guilt copy.</li>
+<li><strong>Adda points</strong> stay separate from Brain Gym and Drive points.</li>
+</ul>
+<hr />
+<h2 id="8-mithu">8. Mithu</h2>
+<p>The owner has asked for Mithu back as host. He replaces Yapper in English Adda. Turbo stays in Drive School.</p>
+<p><strong>Risks we must design around</strong> [J, no data exists on this]:</p>
+<ol>
+<li><strong>Looking like Duolingo's owl.</strong> This is why he was dropped before. Mithu must be a slim Indian rose-ringed parakeet: long tail, red hooked beak, dark neck ring. Not round, not an owl, not lime green.</li>
+<li><strong>&quot;Rattu tota&quot;.</strong> A parrot stands for learning by rote. Mithu must never repeat. He is the campus commentator who has overheard every hostel conversation. His own line on it: <em>&quot;I don't repeat. I remix.&quot;</em></li>
+<li><strong>Looking childish.</strong> No baby talk, no &quot;Good job, champ!&quot;. Dry, quick, kind.</li>
+<li><strong>The name is north Indian.</strong> Neutral at worst for Telugu, Tamil and Kannada students [J]. Earlier the owner disliked Indian &quot;-u&quot; names for new mascots; the owner has now chosen this one, so we go with it.</li>
+</ol>
+<p><strong>First sketch</strong> (one pose, for a yes/no on direction, not final art):</p>
+<p><img src="mithu-draft.svg" alt="Mithu first sketch" /></p>
+<p>Deep green body, yellow-green front, blue tail, red beak, rose-and-black neck ring, half-closed eyes, purple commentator headphones with a small mic (purple ties him to the Adda colours).</p>
+<p><strong>Voice in text.</strong> One short line at a time. Examples:</p>
+<ul>
+<li>Start of Flick: &quot;Sounds right? Swipe right. Sounds off? You know what to do.&quot;</li>
+<li>Combo of 10: &quot;Ten in a row. I felt that.&quot;</li>
+<li>A miss: &quot;<em>Discuss about</em>? Drop the <em>about</em>. Next.&quot;</li>
+<li>Coming back after a gap: &quot;You're back. The mess food hasn't improved. Shall we?&quot;</li>
+<li>End card, new best: &quot;New best. I'm telling everyone. (I'm not. Levels are private.)&quot;</li>
+</ul>
+<p><strong>Spoken voice.</strong> Options: keep the current Kokoro Heart voice, or switch to the free second (male) Kokoro voice that was already allowed for dialogues. Owner's choice (§11).</p>
+<p><strong>Work when approved:</strong> four poses (idle, correct, thinking, oops), a web search for look-alikes as we did before, swap the art and the YAPPER_LINES block, re-record with <code>python scripts/english-voice.py</code>, update CLAUDE.md.</p>
+<hr />
+<h2 id="9-what-we-should-not-claim">9. What we should not claim</h2>
+<ul>
+<li>Not &quot;makes you fluent&quot; or &quot;improves communication&quot;. We can say &quot;practises the same task types as placement tests&quot;.</li>
+<li>Numbers only from our own check: level check at the start and again at about week 8, compared by how much each student played.</li>
+<li>Vendor employability numbers disagree by 14 points between reports (56% vs 42.6% [V]). Do not quote either as fact.</li>
+</ul>
+<hr />
+<h2 id="10-build-plan">10. Build plan</h2>
+<ol>
+<li><strong>Run engine + end card + Miss Replay</strong> (shared by every game), and Mithu art if approved.</li>
+<li><strong>Flick and Express</strong> first. They reuse existing content, so the owner can feel the difference within one build step.</li>
+<li>Owner plays. If the feel is right, <strong>Pair Up and Catch It</strong>.</li>
+<li>Playlist home screen, seasons, score curves.</li>
+<li>Wave 2, then wave 3 at about week 4 of the pilot.</li>
+</ol>
+<p>Each content batch still goes through <code>node scripts/english-content-check.mjs</code> and a separate reviewer agent.</p>
+<hr />
+<h2 id="11-decisions-needed-from-the-owner">11. Decisions needed from the owner</h2>
+<ol>
+<li><strong>The lineup in §6.</strong> Any game to drop, add or rename?</li>
+<li><strong>Mithu's look</strong> (the sketch) and <strong>his voice</strong> (current Heart voice, or the male voice).</li>
+<li><strong>Chill first, Rush after</strong> (§5.2 rule 5): agree, or should games open timed?</li>
+<li><strong>Step 3 games:</strong> fine to turn Jumble, Spot &amp; Fix and Word Vault into Express, Flick and Vault Run, and keep Real or Fake only in the level check?</li>
+</ol>
+<hr />
+<h2 id="12-sources-checked-in-this-round">12. Sources checked in this round</h2>
+<p><strong>Literature:</strong> Dixon, Dixon &amp; Jordan 2022 (LL&amp;T 26(1)); Tsai &amp; Tsai 2018 (Computers &amp; Education 125); Clark, Tanner-Smith &amp; Killingsworth 2016 (RER 86(1)); deHaan, Reed &amp; Kuwada 2010 (LL&amp;T 14(2)); Yanagisawa &amp; Webb 2021 (Language Learning 71(2)); Uchihara, Webb &amp; Yanagisawa 2019 (Language Learning 69(3)); Webb, Yanagisawa &amp; Uchihara 2020 (MLJ 104(4)); Nakata 2015 (SSLA 37(4)); Spada &amp; Tomita 2010 and Li 2010 (Language Learning 60(2)); Suzuki &amp; DeKeyser 2017 (LTR); Graham &amp; Perin 2007 (JEP 99); Chang &amp; Millett 2013 (RFL 25(2)); Tran &amp; Nation 2014 (e-FLT 11(1)); Meyer et al. 2024 (Computers and Education: AI 6); Bastani et al. 2025 (PNAS 122(26)); Wilson et al. 2019 (Nature Communications 10:4646); Lomas et al. 2013, 2017 (CHI); Mekler et al. 2017 (CHB 71); Rodrigues et al. 2022 (IJETHE 19:13); FTC v. Lumos Labs 2016; Simons et al. 2016 (PSPI 17(3)); Sala &amp; Gobet 2019 (TiCS 23(1)); Loewen et al. 2019 (ReCALL 31(3)); Azam, Chin &amp; Prakash 2013 (EDCC 61(2)).</p>
+<p><strong>From memory, to verify before quoting:</strong> Wouters et al. 2013; Webb 2007; Laufer &amp; Goldstein 2004; Nation 2007; Norris &amp; Ortega 2000; Lee &amp; Huang 2008; Ellis 2005; Kluger &amp; DeNisi 1996; Deci, Koestner &amp; Ryan 1999; Nakanishi 2015.</p>
+<p><strong>Market:</strong> lumosity.com (language games blog, word games page, LPI help page); Elevate help pages (search snippets only) and the Common Sense Media review; brilliant.org &quot;How Brilliant teaches&quot;; Duolingo timed-challenge write-ups; Google Semantris; Quizlet help and engineering blog; Knudge.me Play Store listing; FluentU review of Hello English; Peak App Store listing.</p>
+<p><strong>Audience:</strong> Data For India (CMS-T 2025); EY via Bloomberg (2025); Google–Kantar Gen Z study (Aug 2025); Lumikai (Nov 2025); Nokia MBiT and Ericsson data reports; Chess.com India figures via YourStory; coverage of the Online Gaming Act (Aug 2025); Pearson PTE survey and Skills Outlook 2023; JELT study of first-year engineers; India Skills Report 2026; Mercer | Mettl Graduate Skill Index 2025; Deloitte Gen Z survey 2025; Naukri Gen Z report (Jan 2026); afaqs and Social Samosa on Zepto, Zomato, Swiggy and Duolingo India; The Decision Lab on streaks; FACE Prep, PrepInsta and placementpreparation.io for test patterns.</p>
+</main></div></body></html>

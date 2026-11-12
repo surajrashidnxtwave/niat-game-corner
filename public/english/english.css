@@ -1,5 +1,5 @@
 /* English Adda styles. Uses Game Corner's tokens (--ink, --soft, --line, --card, --chip, --shadow, --display, --font);
-   English-only colours are the --e-* tokens below (Yapper purple + chai amber). Light only, like the rest of Game Corner. */
+   English-only colours are the --e-* tokens below (Mithu purple + chai amber). Light only, like the rest of Game Corner. */
 :root{
   --e-purple:#8B5CF6; --e-purple-d:#6D3FD9; --e-purple-soft:#F3EEFF;
   --e-amber:#F0A43A; --e-amber-d:#C9781E; --e-amber-soft:#FFF4E2;
@@ -10,9 +10,9 @@
 @media (min-width:960px){#view-english{max-width:1120px}}
 
 /* ---------- sidebar tab ---------- */
-.tab-yap{width:34px;height:34px;margin-left:auto;flex:none;animation:ebob 3s ease-in-out infinite}
+.tab-yap{width:42px;height:42px;margin-left:auto;flex:none;animation:ebob 3s ease-in-out infinite}
 #tab-english[hidden]{display:none}
-@media (max-width:959px){#tab-english svg{display:none}.tab-yap{width:26px;height:26px;margin-left:0;order:-1}.tab-full{display:none}}
+@media (max-width:959px){#tab-english svg{display:none}.tab-yap{width:32px;height:32px;margin-left:0;order:-1}.tab-full{display:none}}
 /* phones: with four tabs (Brain Gym, Drive School, English, Leaderboard) the bottom bar stacks icon over label so it fits 360 px */
 @media (max-width:959px){
   .tabbar .inner > .tab{flex-direction:column;gap:2px;padding:6px 2px;font-size:11.5px;min-width:0;line-height:1.15}
@@ -20,10 +20,10 @@
   .tabbar .inner > #tab-drive > svg,.tabbar .inner > #tab-english > svg{display:none!important}   /* the mascot is the icon */
   .tabbar .inner > .tab .tab-lab{overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .tabbar .inner{gap:2px}
-  .tabbar .tab-turbo,.tabbar .tab-yap{width:24px;height:24px;margin:-2px 0 0}
+  .tabbar .tab-turbo{width:24px;height:24px;margin:-2px 0 0}.tabbar .tab-yap{width:30px;height:30px;margin:-6px 0 -2px}
 }
 @media (max-width:380px){.tabbar .inner > .tab{font-size:10.5px;letter-spacing:-.1px}}
-@media (min-width:960px){#tab-english .tab-lab{white-space:nowrap}.tab-yap{width:36px;height:36px;margin:-8px -4px -8px auto}}
+@media (min-width:960px){#tab-english .tab-lab{white-space:nowrap}.tab-yap{width:44px;height:44px;margin:-12px -4px -12px auto}}
 
 /* ---------- shared bits ---------- */
 @keyframes ebob{50%{transform:translateY(-5px)}}
@@ -77,7 +77,7 @@
 .ehero h2{font-size:34px;margin:10px 0 6px}
 .ehero p{margin:0;opacity:.9;font-weight:600;max-width:52ch}
 .ehero-row{margin-top:16px}
-.ehero-yap{width:120px;height:120px;flex:none;align-self:flex-end;margin-bottom:-6px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.3))}
+.ehero-yap{width:160px;height:160px;flex:none;align-self:flex-end;margin-bottom:-6px;filter:drop-shadow(0 10px 18px rgba(0,0,0,.3))}
 html.w3d-ready .ehero{background:radial-gradient(circle at 100% 0,rgba(240,164,58,.4),transparent 55%),linear-gradient(160deg,rgba(42,28,99,.86),rgba(91,50,201,.88) 70%);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3)}
 
 .ering{width:var(--sz);height:var(--sz);position:relative;flex:none}
@@ -91,7 +91,7 @@ html.w3d-ready .ehero{background:radial-gradient(circle at 100% 0,rgba(240,164,5
   .ehero{flex-wrap:wrap;padding:18px}
   .ehero h2{font-size:28px}
   .ehero .ering{--sz:96px!important}
-  .ehero-yap{position:absolute;right:10px;top:10px;width:84px;height:84px;margin:0}
+  .ehero-yap{position:absolute;right:6px;top:6px;width:112px;height:112px;margin:0}
   .ehero-text{flex-basis:100%}
 }
 
@@ -172,7 +172,6 @@ html.w3d .eplayer{background:linear-gradient(160deg,#F6F1FF,#FFF4E6)}
 .eplay:active{transform:translateY(4px)}
 .eplay.on{animation:epulse 1s ease-in-out infinite}
 .eplay[disabled]{opacity:.4;cursor:not-allowed;animation:none}
-@keyframes epulse{50%{box-shadow:0 8px 0 #4B2AA8,0 0 0 14px rgba(139,92,246,.18)}}
 .ecatch-in{width:min(520px,100%);font-size:19px!important;padding:14px 16px!important;text-align:center}
 
 /* Quick story */
@@ -190,7 +189,7 @@ html.w3d .eplayer{background:linear-gradient(160deg,#F6F1FF,#FFF4E6)}
 @media (max-width:640px){.erf-card b{font-size:38px}.epass-text{font-size:17.5px;padding:16px}.erf-btns .ebtn{min-width:120px}}
 .elink{border:0;background:none;padding:0;font:inherit;font-weight:800;color:inherit;text-decoration:underline;cursor:pointer}
 
-/* Yapper's hover bubble (english.js showTip) */
+/* Mithu's hover bubble (english.js showTip) */
 [data-tip]{cursor:pointer;outline:none}
 [data-tip]:focus-visible{outline:3px solid var(--e-voc,#8B5CF6);outline-offset:4px;border-radius:50%}
 .eyap-tip{position:fixed;z-index:9000;max-width:240px;background:var(--card,#fff);color:var(--ink,#1d1b26);font-weight:700;font-size:15px;line-height:1.35;padding:10px 14px;border-radius:16px;box-shadow:0 10px 28px rgba(40,20,90,.22);pointer-events:none;opacity:0;transform:translateY(6px) scale(.96);transition:opacity .16s ease,transform .18s ease}
@@ -218,7 +217,7 @@ button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
 .eg .ep-body{padding-bottom:150px}
 .ep-yapper{position:fixed;left:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:4;display:flex;align-items:flex-end;gap:6px;max-width:min(560px,calc(100% - 24px));pointer-events:none}
 .ep-yapper[hidden]{display:none}
-.ep-yapper img{width:64px;height:64px;flex:none;filter:drop-shadow(0 6px 10px rgba(75,42,168,.25))}
+.ep-yapper img{width:84px;height:84px;flex:none;filter:drop-shadow(0 6px 10px rgba(75,42,168,.25))}
 .ep-say{background:var(--card);border-radius:18px 18px 18px 4px;padding:10px 14px;box-shadow:0 10px 26px rgba(40,20,90,.18);font-weight:650;font-size:15.5px;line-height:1.45;pointer-events:auto}
 .ep-say i{color:var(--soft)}
 .ep-yapper.epopin .ep-say{animation:epop .25s ease-out}
@@ -243,33 +242,14 @@ button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
 .erf-btns:has(.erf-next) .ebtn{min-width:120px}
 
 /* Jumble */
-.ejb{display:flex;flex-direction:column;gap:14px;margin:auto 0;padding:10px 0}
-.ejb-line{min-height:96px;background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-content:flex-start;border:3px solid transparent;transition:border-color .15s}
-.ejb-line.bad{border-color:var(--e-bad);animation:eshake .4s}
-.ejb-bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:52px}
 .echunk{border:2px solid var(--e-line);background:var(--card);border-radius:14px;padding:10px 14px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 4px 0 var(--e-line);color:var(--ink)}
 .echunk.in{background:var(--e-purple-soft);border-color:color-mix(in srgb,var(--e-purple) 45%,transparent);box-shadow:0 3px 0 color-mix(in srgb,var(--e-purple) 35%,transparent)}
 .echunk.ghost{opacity:.25;box-shadow:none;cursor:default;border-style:dashed}
 .echunk:active{transform:translateY(2px)}
 .eslot{width:64px;height:42px;border-radius:12px;border:2px dashed var(--e-line)}
-.ejb-end{font-weight:900;font-size:20px}
-.ejb-done{font-size:20px;font-weight:800;line-height:1.5;padding:4px}
-.ejb-done.ok{color:#14733E}
 @keyframes eshake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
 
 /* Spot & Fix */
-.esf{display:flex;flex-direction:column;gap:14px;align-items:center;margin:auto 0;padding:10px 0}
-.esf-ctx{background:#E9F1FF;color:#2C4FA8;font-weight:800;font-size:13.5px;border-radius:999px;padding:5px 12px}
-.esf-s{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--shadow);font-size:20px;line-height:2.2;text-align:center;width:100%}
-.esf-part{border:0;border-bottom:3px solid color-mix(in srgb,var(--e-purple) 30%,transparent);background:transparent;font:inherit;font-weight:700;padding:2px 6px;border-radius:8px;cursor:pointer;color:var(--ink)}
-.esf-part:hover:not([disabled]){background:var(--e-purple-soft)}
-.esf-part[disabled]{cursor:default}
-.esf-part.miss{background:#FDECEC;animation:eshake .4s}
-.esf-part.found{background:#FFF1D6;border-bottom-color:var(--e-amber)}
-.esf-part.right{background:#E7F8EE;border-bottom-color:var(--e-ok);color:#14733E}
-.esf-none.right{background:#E7F8EE;box-shadow:0 0 0 3px var(--e-ok)}
-.esf-fixes{display:grid;gap:8px;width:min(460px,100%)}
-.esf-fixes[hidden]{display:none}
 .eopt.right{border-color:var(--e-ok);background:#E7F8EE;box-shadow:0 4px 0 color-mix(in srgb,var(--e-ok) 40%,transparent)}
 .eopt.bad{border-color:var(--e-bad);background:#FDECEC;box-shadow:0 4px 0 color-mix(in srgb,var(--e-bad) 35%,transparent)}
 .eopt[disabled]{cursor:default}
@@ -308,14 +288,14 @@ button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
 .evoffer{width:min(460px,100%);text-align:left}
 .evchk{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:6px 12px;margin:0 6px 8px 0;font-weight:800;cursor:pointer}
 .evoffer .ebtn{display:flex;margin-top:6px}
-@media (max-width:640px){.esf-s{font-size:18px}.echunk{font-size:16px;padding:9px 12px}.ep-yapper img{width:52px;height:52px}}
-@media (prefers-reduced-motion:reduce){.ejb-line.bad,.esf-part.miss,.egr-grid.shake,.ep-yapper.epopin .ep-say{animation:none}}
+@media (max-width:640px){.echunk{font-size:16px;padding:9px 12px}.ep-yapper img{width:68px;height:68px}}
+@media (prefers-reduced-motion:reduce){.egr-grid.shake,.ep-yapper.epopin .ep-say{animation:none}}
 
 /* short laptop screens and small phones: keep each game on one screen */
 @media (max-height:640px){
   .erf{gap:10px}.erf-card{aspect-ratio:2.4}.erf-card b{font-size:38px}
   .egr-tile{aspect-ratio:2.6}.egr{gap:8px}
-  .ep-intro .eyap,.eresult .eyap{width:96px;height:96px}
+  .ep-intro .eyap,.eresult .eyap{width:128px;height:128px}
   .egstats div{padding:8px 14px}.egstats b{font-size:26px}
 }
 @media (min-width:700px){.egr-grid,.egr-solved{width:min(620px,100%);margin:0 auto}.egr-tile{aspect-ratio:2.2}}
@@ -325,3 +305,365 @@ button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
 .egr-cl-t{font-weight:800;color:var(--soft);font-size:14px}
 .egr-cl{background:var(--chip);border-radius:999px;padding:5px 12px;font-weight:800;font-size:14px}
 .egr-cl.done{background:var(--g);color:#1d1b26;text-decoration:line-through;text-decoration-thickness:2px;opacity:.8}
+
+/* ---------- run games (Flick, Express): score bar, mode buttons, end card ---------- */
+.erun-hud{display:flex;align-items:center;gap:10px;min-height:46px}
+.erun-mode{font-weight:900;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--soft);background:var(--card);border-radius:999px;padding:6px 12px;box-shadow:var(--shadow)}
+.erun-mode.rush{color:#fff;background:linear-gradient(135deg,#FF7A2F,#F0457A)}
+.erun-mult{font-weight:900;font-size:15px;color:#C2410C;background:#FFE8D6;border-radius:999px;padding:6px 12px;white-space:nowrap}
+.erun-score{margin-left:auto;position:relative;display:flex;flex-direction:column;align-items:flex-end;line-height:1}
+.erun-score b{font-family:var(--display);font-weight:900;font-size:32px;line-height:1;font-variant-numeric:tabular-nums;color:var(--ink)}
+.erun-score small{font-size:11px;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:.06em}
+.erun-score.bump b{animation:erbump .25s}
+.erun-gain{position:absolute;right:0;top:-8px;font-style:normal;font-weight:900;font-size:16px;color:var(--e-ok);animation:ergain .8s forwards;pointer-events:none}
+@keyframes erbump{50%{transform:scale(1.2)}}
+@keyframes ergain{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-28px)}}
+.erun-tap{display:block;font-style:normal;font-size:12px;font-weight:800;color:var(--soft);margin-top:6px;text-transform:uppercase;letter-spacing:.05em}
+.erun-modes{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.erun-modes .ebtn{flex-direction:column;gap:2px;min-width:156px;padding:12px 22px}
+.erun-modes .ebtn small{font-size:12px;font-weight:700;opacity:.9}
+.erun-end{gap:12px}
+.erun-tag{margin:0;font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+.erun-big{display:flex;flex-direction:column;align-items:center;gap:6px}
+.erun-big b{font-family:var(--display);font-weight:900;font-size:68px;line-height:1;font-variant-numeric:tabular-nums;background:linear-gradient(90deg,var(--e-purple-d),#F0457A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.erun-nb{font-weight:900;color:#fff;background:linear-gradient(135deg,#FF7A2F,#F0457A);border-radius:999px;padding:5px 14px;animation:epop .4s .7s both}
+.erun-pb{font-weight:800;color:var(--soft)}
+.erun-spark{margin:0;width:240px;max-width:100%}
+.erun-spark svg{display:block;width:100%;height:auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
+.erun-spark figcaption{font-size:12px;font-weight:800;color:var(--soft);margin-top:4px}
+.erun-first{margin:0}
+.erun-unlock{margin:0;font-weight:900;color:#C2410C;background:#FFE8D6;border-radius:14px;padding:8px 14px}
+.erun-btns{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;margin-top:4px}
+.erun-again{font-size:20px;padding:18px 44px;min-width:240px}
+
+/* ---------- Hop (game id: flick): stepping stones across a river ---------- */
+.ehp{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:600px;align-self:center}
+.ehp-river{position:relative;border-radius:26px;overflow:hidden;min-height:230px;padding:54px 14px 34px;background:linear-gradient(#8ADCF2,#49AEE6);box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;display:flex;align-items:center}
+.ehp-water{position:absolute;inset:0;background-image:radial-gradient(ellipse 26px 4px at 30px 12px,rgba(255,255,255,.5) 60%,transparent 62%),radial-gradient(ellipse 18px 3px at 96px 34px,rgba(255,255,255,.35) 60%,transparent 62%);background-size:132px 50px;animation:ehpflow 7s linear infinite}
+@keyframes ehpflow{to{background-position:132px 0}}
+.ehp-ctx{position:absolute;left:12px;top:10px;margin:0;z-index:2;font-size:12.5px;font-weight:800;color:var(--e-amber-d);background:var(--e-amber-soft);border-radius:999px;padding:4px 10px}
+.ehp-path{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:38px 10px;align-items:center;width:100%}
+.ehp-stone{background:#F4EFE6;color:var(--ink);border-radius:20px 24px 22px 26px;padding:10px 14px;font-weight:800;font-size:17.5px;line-height:1.2;white-space:nowrap;box-shadow:0 5px 0 #B8AD9A,0 10px 6px rgba(0,50,100,.25);animation:ehprise .32s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:var(--d,0ms)}
+.ehp-stone.fixed{background:#DFF5E8;color:#14733E;box-shadow:0 5px 0 #6BBF8E,0 10px 6px rgba(0,50,100,.25);animation:ehprise .3s cubic-bezier(.2,.9,.3,1.3) both}
+/* choosing the wrong stone: a white ring, no new animation (changing the animation would replay the stones' entrance) */
+.ehp-path.choosing .ehp-stone{cursor:pointer;box-shadow:0 5px 0 #B8AD9A,0 0 0 4px #fff,0 10px 6px rgba(0,50,100,.25)}
+.ehp-path.choosing .ehp-stone:active{background:#FFF4E2}
+.ehp-stone.no{background:#FDE7E8;animation:eshake .4s}
+.efl-why.ask{border-left:5px solid var(--e-amber);font-size:17px}
+.ehp-stone.solid{background:#DFF5E8;box-shadow:0 5px 0 #6BBF8E,0 10px 6px rgba(0,50,100,.25)}
+.ehp-stone.sink,.ehp-path.out .ehp-stone{animation:ehpsink .24s ease-in forwards}
+@keyframes ehprise{from{transform:translateY(22px) scale(.8);opacity:0}}
+@keyframes ehpsink{to{transform:translateY(20px) scale(.75);opacity:0}}
+.ehp-bank{flex:none;width:50px;height:40px;border-radius:50% 50% 44% 44%;background:#74C651;box-shadow:0 5px 0 #4C9A31,0 10px 6px rgba(0,50,100,.22);display:grid;place-items:center}
+.ehp-bank.b{width:auto;min-width:64px;padding:0 10px}
+.ehp-bank.b b{font-size:15px;font-weight:900;color:#1F4D12;white-space:nowrap}
+.ehp-bank.b.got{animation:erbump .3s}
+.ehp-sq{position:absolute;left:0;top:0;z-index:3;width:44px;height:37px;transition:transform 135ms linear;pointer-events:none}
+.ehp-sqi{width:100%;height:100%}
+.ehp-sqi svg{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 2px rgba(0,40,80,.3))}
+.ehp-sqi.j{animation:ehpj 135ms ease-out}
+@keyframes ehpj{50%{transform:translateY(-16px) rotate(-8deg)}}
+.ehp-sq.splash .ehp-sqi{animation:ehpsplash .38s ease-in forwards}
+@keyframes ehpsplash{40%{transform:translateY(-10px) rotate(20deg)}100%{transform:translateY(30px) scale(.4) rotate(70deg);opacity:0}}
+@media (max-width:640px){.ehp-stone{font-size:15.5px;padding:9px 11px}.ehp-path{gap:36px 8px}.ehp-river{padding:52px 10px 30px}.ehp-bank{width:42px;height:36px}}
+
+/* ---------- shared by Hop: clock bar, the reason after a miss, the two big buttons ---------- */
+.efl{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:560px;align-self:center}
+/* drifting clouds (Flick and Express) */
+.esky{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.esky i{position:absolute;left:-90px;width:64px;height:20px;border-radius:999px;background:#fff;opacity:.8;animation:ecloud 46s linear infinite}
+.esky i::before{content:'';position:absolute;left:14px;top:-12px;width:30px;height:26px;border-radius:50%;background:#fff}
+.esky i:nth-child(1){top:14%;animation-delay:-8s}
+.esky i:nth-child(2){top:44%;scale:.7;animation-duration:60s;animation-delay:-34s;opacity:.6}
+.esky i:nth-child(3){top:70%;scale:.85;animation-duration:52s;animation-delay:-20s;opacity:.55}
+@keyframes ecloud{to{transform:translateX(820px)}}
+.efl-fuse,.eex-clock,.erun-clock{height:8px;border-radius:999px;background:rgba(109,63,217,.14);overflow:hidden}
+.efl-fuse i,.eex-clock i,.erun-clock i{display:block;height:100%;width:100%;border-radius:999px;background:linear-gradient(90deg,#F0457A,#FF7A2F)}
+.efl-why{margin:0;min-height:92px;font-size:15.5px;line-height:1.45;color:var(--ink);border-radius:16px;padding:10px 14px;visibility:hidden}
+.efl-why.show,.eex-note.show{visibility:visible;background:var(--card);box-shadow:var(--shadow);animation:epop .25s;text-align:left;color:var(--ink)}
+.efl-why.bad,.eex-note.show.bad{border-left:5px solid var(--e-bad)}
+.efl-why.ok,.eex-note.show.ok{border-left:5px solid var(--e-ok)}
+.efl-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.efl-b{border:0;border-radius:20px;padding:14px 8px;font:inherit;font-weight:900;font-size:15.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;transition:transform .08s}
+.efl-b b{font-size:20px;line-height:1.1}
+.efl-b.off{background:var(--e-bad);box-shadow:0 5px 0 #A92F35}
+.efl-b.ok{background:var(--e-ok);box-shadow:0 5px 0 #14733E}
+.efl-b:active{transform:translateY(3px);box-shadow:none}
+.efl-b[disabled]{opacity:.4;cursor:default}
+.efl-b:focus-visible{outline:3px solid var(--e-purple);outline-offset:3px}
+.efl-help,.eex-help{text-align:center}
+
+/* ---------- Dive (game id: pairup): a kingfisher, a sign, a pond of fish ---------- */
+.edv{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:560px;align-self:center}
+.edv-pond{position:relative;border-radius:26px;overflow:hidden;box-shadow:var(--shadow)}
+.edv-sky{position:relative;height:118px;background:linear-gradient(#CDEBFF,#EAF7FF);display:flex;align-items:center;justify-content:center;padding:0 14px 0 96px}
+.edv-branch{position:absolute;left:-12px;top:80px;width:112px;height:11px;border-radius:6px;background:#8D5A2B;box-shadow:0 3px 0 #6B4220}
+.edv-branch::after{content:'';position:absolute;right:8px;top:-12px;width:18px;height:11px;border-radius:0 80% 0 80%;background:#6CC24A}
+.edv-bird{position:absolute;left:26px;top:38px;width:58px;height:44px;z-index:5;pointer-events:none}
+.edv-bird svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px rgba(0,40,80,.25))}
+.edv-sign{position:relative;background:#fff;border:3px solid #8D5A2B;border-radius:16px;padding:8px 18px 10px;text-align:center;min-width:150px;max-width:100%;box-shadow:0 5px 0 rgba(107,66,32,.35)}
+.edv-sign small{display:block;font-size:12.5px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;color:#8D5A2B}
+.edv-sign b{display:block;font-size:27px;line-height:1.15;color:var(--ink)}
+.edv-sign.flip{animation:epop .28s}
+.edv-emo{font-size:40px;line-height:1}
+.edv-basket{position:absolute;right:10px;top:8px;font-size:15px;font-weight:900;background:rgba(255,255,255,.85);border-radius:999px;padding:4px 10px;box-shadow:var(--shadow)}
+.edv-basket.ebump{animation:erbump .3s}
+.edv-water{position:relative;background:linear-gradient(#63C5EC,#2F8FD0);padding:22px 14px 26px}
+.edv-rip{position:absolute;inset:0;background-image:radial-gradient(ellipse 26px 4px at 30px 10px,rgba(255,255,255,.45) 60%,transparent 62%),radial-gradient(ellipse 18px 3px at 96px 34px,rgba(255,255,255,.3) 60%,transparent 62%);background-size:132px 52px;animation:ehpflow 9s linear infinite}
+.edv-school{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:18px 26px}
+/* a fish is a pill with a tail; the word is written on its side */
+.edv-fish{position:relative;border:0;background:none;padding:0 0 0 20px;font:inherit;cursor:pointer;animation:edvin .35s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:var(--d,0ms)}
+.edv-fish::before{content:'';position:absolute;left:0;top:50%;translate:0 -50%;border:17px solid transparent;border-left:22px solid var(--c);border-right:0}
+.edv-body{position:relative;display:flex;align-items:center;justify-content:center;min-height:58px;padding:8px 26px 8px 12px;border-radius:30px 60% 60% 30px/30px 50% 50% 30px;background:var(--c);color:#fff;font-weight:900;font-size:18px;line-height:1.15;text-align:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.14),0 6px 8px rgba(0,40,90,.3);animation:edvsway 3.2s ease-in-out infinite alternate;animation-delay:calc(var(--d,0ms) * -9)}
+.edv-body::after{content:'';position:absolute;right:11px;top:13px;width:7px;height:7px;border-radius:50%;background:#1E1B2E;box-shadow:0 0 0 2.5px #fff}
+.edv-fish.f0{--c:#F76707}.edv-fish.f1{--c:#D6336C}.edv-fish.f2{--c:#7048E8}.edv-fish.f3{--c:#0C8599}
+.edv-fish:focus-visible .edv-body{outline:3px solid #fff;outline-offset:3px}
+.edv-fish:active .edv-body{filter:brightness(1.1)}
+.edv-fish.caught{animation:edvcaught .3s ease-in forwards}
+.edv-fish.dart{animation:edvdart .45s ease-in forwards}
+.edv-fish.glow .edv-body{box-shadow:0 0 0 4px #fff,0 0 0 9px rgba(255,255,255,.45)}
+@keyframes edvin{from{transform:translateY(26px) scale(.8);opacity:0}}
+@keyframes edvsway{from{transform:translate(-5px,2px)}to{transform:translate(6px,-3px)}}
+@keyframes edvcaught{to{transform:translateY(-30px) scale(.2);opacity:0}}
+@keyframes edvdart{to{transform:translateX(150px) scale(.8);opacity:0}}
+.edv-splash{position:absolute;z-index:4;width:14px;height:14px;margin:-7px;border-radius:50%;border:3px solid #fff;pointer-events:none;animation:edvsplash .55s ease-out forwards}
+@keyframes edvsplash{to{transform:scale(6);opacity:0}}
+.edv-note{margin:0;min-height:58px;font-size:16px;line-height:1.4;border-radius:16px;padding:10px 14px;visibility:hidden}
+.edv-note.show{visibility:visible;background:var(--card);box-shadow:var(--shadow);animation:epop .25s}
+.edv-note.bad{border-left:5px solid var(--e-bad)}.edv-note.ok{border-left:5px solid var(--e-ok)}
+.edv-note i{font-style:normal;color:var(--soft)}
+.edv-help{text-align:center}
+@media (max-width:640px){.edv-body{font-size:16px;min-height:54px;padding:8px 22px 8px 8px}.edv-school{gap:16px 16px}.edv-sign b{font-size:23px}.edv-sky{padding-left:88px}.edv-water{padding:20px 10px 24px}}
+
+/* ---------- Express ---------- */
+.eex{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:640px;align-self:center}
+.eex-scene{position:relative;background:linear-gradient(#D9E9FF,#F3F8FF 75%);border-radius:24px;padding:40px 12px 16px;box-shadow:var(--shadow);overflow:hidden;min-height:140px}
+.eex-signal{position:absolute;top:12px;right:16px;width:16px;height:16px;border-radius:50%;background:#F0A43A;box-shadow:0 0 0 4px #2A1C63}
+.eex-signal.green{background:#2BD46B}
+.eex-signal.red{background:#E0464C}
+/* a long sentence wraps onto a second track: every coach carries its own piece of rail, so each row sits on a full track */
+.eex-train{display:flex;flex-wrap:wrap;align-items:flex-end;gap:22px 6px;position:relative;z-index:1;padding-bottom:8px}
+.eex-eng,.eex-train .eex-coach,.eex-end{position:relative;white-space:nowrap}
+.eex-eng::before,.eex-train .eex-coach::before,.eex-end::before{content:'';position:absolute;left:-4px;right:-4px;bottom:-14px;height:4px;border-radius:2px;background:#B7ACD0}
+.eex-last{display:inline-flex;align-items:flex-end;gap:6px}
+.eex-eng::before{bottom:-12px;left:-12px}.eex-end::before{bottom:-6px;right:-12px}
+.eex-train.arrive{animation:eexin .45s cubic-bezier(.2,.8,.3,1)}
+.eex-train.go{animation:eexout .46s ease-in forwards}
+@keyframes eexin{from{transform:translateX(110%)}}
+@keyframes eexout{to{transform:translateX(-125%)}}
+.eex-eng{font-size:38px;line-height:1;margin-bottom:2px}
+.eex-puff{position:absolute;left:4px;top:-6px;width:12px;height:12px;border-radius:50%;background:#fff;opacity:0;animation:eexpuff .9s ease-out}
+.eex-puff.b{left:10px;animation-delay:.18s}
+@keyframes eexpuff{0%{opacity:.9;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(22px,-30px) scale(1.8)}}
+.eex-coach{position:relative;border:2px solid #5B32C9;background:#fff;color:var(--ink);border-radius:12px 12px 8px 8px;padding:9px 12px;font:inherit;font-weight:800;font-size:17px;margin-bottom:8px;min-width:46px;text-align:center}
+.eex-coach::after{content:'';position:absolute;left:10px;right:10px;bottom:-9px;height:8px;background:radial-gradient(circle at 4px 4px,#2A1C63 3.6px,transparent 4.2px) left/8px 8px no-repeat,radial-gradient(circle at 4px 4px,#2A1C63 3.6px,transparent 4.2px) right/8px 8px no-repeat}
+.eex-coach.new{animation:eexclick .22s}
+@keyframes eexclick{from{transform:translateX(26px);opacity:.3}}
+.eex-coach.slot{border-style:dashed;border-color:#B9A8E6;background:transparent;min-width:52px;height:42px;padding:0}
+.eex-coach.slot::after{opacity:.3}
+.eex-coach.slot.next{border-color:var(--e-purple);border-style:solid;background:var(--e-purple-soft);animation:eexnext 1s ease-in-out infinite}
+@keyframes eexnext{50%{box-shadow:0 0 0 5px rgba(139,92,246,.22)}}
+.eex-coach.fixed{background:#E9E2FB;border-color:#8E7BC9;color:#3B2A7A}
+.eex-end{font-size:26px;font-weight:900;color:#5B32C9;margin-bottom:8px;line-height:1}
+.eex-train.ok .eex-coach{border-color:var(--e-ok);background:#EAF9F0}
+.eex-train.meh .eex-coach{border-color:var(--e-amber-d);background:var(--e-amber-soft)}
+.eex-train.late .eex-coach{border-color:#9A93A8;background:#F1EFF5;color:#5E5870}
+.eex-train.ok .eex-coach.fixed,.eex-train.meh .eex-coach.fixed,.eex-train.late .eex-coach.fixed{opacity:.8}
+.eex-yard{display:flex;flex-wrap:wrap;gap:16px 10px;justify-content:center;min-height:64px;padding:4px 0 8px}
+.eex-coach.yard{cursor:pointer;background:var(--card);box-shadow:0 4px 0 #D9CEF5;margin:0 0 8px;transition:transform .08s}
+.eex-coach.yard:active{transform:translateY(2px)}
+.eex-coach.yard:focus-visible{outline:3px solid var(--e-purple);outline-offset:3px}
+.eex-coach.yard.used{visibility:hidden}
+.eex-coach.yard.nope{animation:eshake .35s;border-color:var(--e-bad);background:#FDE7E8}
+.eex-coach.yard[disabled]{opacity:.45;cursor:default}
+.eex-note{margin:0;min-height:50px;font-size:15.5px;line-height:1.45;color:var(--soft);text-align:center;border-radius:16px;padding:8px 14px}
+.eex-note.ok{color:#14733E;font-weight:900}
+@media (max-width:640px){
+  .eex-coach{font-size:15px;padding:7px 9px;min-width:40px}.eex-eng{font-size:28px}.eex-scene{padding:34px 10px 16px}.eex-train{gap:22px 5px}.eex-coach.slot{min-width:44px;height:38px}.eex-end{font-size:22px}
+  .erun-big b{font-size:56px}.erun-score b{font-size:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  .esky i,.eex-puff,.ehp-water,.ehp-stone,.ehp-sqi.j,.edv-rip,.edv-fish,.edv-fish .edv-body,.edv-sign.flip,.eex-train.arrive,.eex-train.go,.eex-coach.new,.eex-coach.slot.next,.eex-coach.yard.nope,.erun-score.bump b,.erun-nb{animation:none}
+  .erun-gain{animation-duration:.01s}
+}
+
+/* Dive: words sit on lily pads, a small fish hides under each, and the kingfisher is the biggest animal (owner: the fish were larger than the bird) */
+.edv-sky{height:132px;padding-left:112px}
+.edv-bird{left:12px;top:20px;width:92px;height:70px}
+.edv-branch{top:86px;width:126px}
+.edv-fish{padding:0 0 16px}
+.edv-fish::before{display:none}
+.edv-fish .edv-body{background:#3FA34D;border-radius:50%;min-height:62px;padding:8px 16px;color:#fff;box-shadow:inset 0 -6px 0 rgba(0,0,0,.16),0 6px 8px rgba(0,40,90,.3)}
+.edv-fish .edv-body::after{display:none}
+.edv-mini{position:absolute;right:16px;bottom:0;width:32px;height:17px;animation:edvwig 1.2s ease-in-out infinite alternate}
+.edv-fish.caught,.edv-fish.dart{animation:none}
+.edv-fish.caught .edv-mini{animation:edvcaught .3s ease-in forwards}
+.edv-fish.dart .edv-mini{animation:edvdart .45s ease-in forwards}
+.edv-fish.caught .edv-body{box-shadow:0 0 0 4px #fff,0 6px 8px rgba(0,40,90,.3)}
+@keyframes edvwig{from{transform:translateX(-4px)}to{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.edv-mini{animation:none}}
+
+/* ---------- Real or Fake: a crow's nest; each word is an egg ---------- */
+.enst{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:560px;align-self:center}
+.enst-tree{position:relative;height:236px;border-radius:26px;overflow:hidden;background:linear-gradient(#CDEBFF,#E6F6E0);box-shadow:var(--shadow)}
+.enst-tree::before{content:'';position:absolute;left:-10px;right:-10px;bottom:16px;height:16px;border-radius:8px;background:#8D5A2B;box-shadow:0 4px 0 #6B4220}
+.enst-leaf{position:absolute;width:120px;height:70px;border-radius:50%;background:#6CC24A;opacity:.85}
+.enst-leaf.a{left:-40px;top:-30px}
+.enst-leaf.b{right:-30px;top:-36px;background:#58B03A;width:150px}
+.enst-crow{position:absolute;left:4px;bottom:26px;width:88px;height:70px;z-index:4;pointer-events:none}
+.enst-crow svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px rgba(0,30,60,.25))}
+.enst-crow.peck{animation:enstpeck .4s ease-in-out}
+@keyframes enstpeck{50%{transform:translate(26px,6px) rotate(18deg)}}
+.enst-count{position:absolute;right:10px;top:8px;z-index:4;font-size:15px;font-weight:900;background:rgba(255,255,255,.88);border-radius:999px;padding:4px 10px;box-shadow:var(--shadow)}
+.enst-count.ebump{animation:erbump .3s}
+.enst-nest{position:absolute;right:10px;bottom:22px;width:min(66%,270px);height:170px}
+.enst-slot{position:absolute;left:0;right:0;bottom:34px;display:flex;justify-content:center;align-items:flex-end;z-index:2}
+.enst-egg{width:92%;min-height:108px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#FFFEF8,#F1E5CC);box-shadow:inset 0 -8px 0 rgba(120,90,40,.15),0 6px 10px rgba(60,40,10,.2);display:grid;place-items:center;padding:6px 18px 22px;border:3px solid transparent}
+.enst-egg b{font-family:var(--display);font-weight:900;font-size:30px;line-height:1.05;color:var(--ink);text-align:center;overflow-wrap:anywhere}
+.enst-bowl{position:absolute;left:-4px;right:-4px;bottom:0;height:62px;z-index:3;border-radius:14px 14px 50% 50%/10px 10px 100% 100%;background:repeating-linear-gradient(115deg,#8D5A2B 0 6px,#A9743C 6px 12px);box-shadow:0 5px 0 #6B4220}
+.enst-egg.in{animation:enstin .45s cubic-bezier(.3,1.4,.5,1)}
+.enst-egg.hatch{animation:ensthatch .55s ease-in forwards}
+.enst-egg.roll{animation:enstroll .6s ease-in forwards}
+.enst-egg.back{animation:eshake .4s;border-color:var(--e-ok)}
+.enst-egg.realglow{border-color:var(--e-ok)}
+.enst-egg.fakeglow{border-color:var(--e-bad)}
+@keyframes enstin{from{transform:translateY(-120px) rotate(-12deg);opacity:0}70%{transform:translateY(0) rotate(4deg)}}
+@keyframes ensthatch{0%,60%{transform:rotate(0)}15%{transform:rotate(-7deg)}30%{transform:rotate(7deg)}45%{transform:rotate(-5deg)}100%{transform:scale(.5);opacity:0}}
+@keyframes enstroll{to{transform:translate(-190px,40px) rotate(-260deg) scale(.6);opacity:0}}
+.enst-baby{position:absolute;left:50%;bottom:16px;width:74px;height:66px;margin-left:-37px;animation:enstpop .4s .45s cubic-bezier(.3,1.5,.5,1) both}
+.enst-baby svg{display:block;width:100%;height:100%}
+@keyframes enstpop{from{transform:translateY(30px) scale(.4);opacity:0}}
+.enst-info{min-height:132px;border-radius:16px;padding:10px 14px;font-size:16px;line-height:1.4;visibility:hidden}
+.enst-info.show{visibility:visible;background:var(--card);box-shadow:var(--shadow);animation:epop .25s}
+.enst-info.bad{border-left:5px solid var(--e-bad)}.enst-info.ok{border-left:5px solid var(--e-ok)}
+.enst-info p{margin:0 0 4px}
+@media (max-width:640px){.enst-egg b{font-size:25px}.enst-tree{height:220px}.enst-crow{width:76px;height:60px}.enst-nest{width:66%}}
+@media (prefers-reduced-motion:reduce){.enst-egg.in,.enst-egg.hatch,.enst-egg.roll,.enst-egg.back,.enst-baby,.enst-crow.peck{animation:none}.enst-egg.hatch,.enst-egg.roll{opacity:.25}}
+
+/* ---------- Munch (writing): a hungry goat under a hedge; each word is a leaf; he eats only the extra word ---------- */
+.emu{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:620px;align-self:center}
+.emu-field{position:relative;border-radius:26px;overflow:hidden;min-height:250px;padding:50px 14px 96px;background:linear-gradient(#BFE6FF,#E3F5FF 55%,#DFF3D0);box-shadow:var(--shadow);display:flex;align-items:flex-start}
+.emu-sun{position:absolute;right:18px;top:40px;width:34px;height:34px;border-radius:50%;background:#FFD45C;box-shadow:0 0 0 8px rgba(255,212,92,.25)}
+.emu-ctx{top:12px}
+.emu-count{position:absolute;right:10px;top:8px;z-index:4;font-size:15px;font-weight:900;background:rgba(255,255,255,.88);border-radius:999px;padding:4px 10px;box-shadow:var(--shadow)}
+.emu-count.ebump{animation:erbump .3s}
+/* the hedge: a dark green bush the words grow on */
+.emu-hedge{position:relative;z-index:2;width:100%;display:flex;flex-wrap:wrap;gap:12px 8px;align-items:center;justify-content:center;padding:18px 12px;border-radius:40px 52px 44px 56px;background:radial-gradient(circle at 12% 30%,#5DB447 0 22px,transparent 23px),radial-gradient(circle at 88% 24%,#5DB447 0 26px,transparent 27px),#4CA23A;box-shadow:inset 0 -8px 0 rgba(0,0,0,.12),0 8px 0 #3A7F2B}
+.emu-leaf{position:relative;border:0;font:inherit;font-weight:800;font-size:17.5px;line-height:1.15;color:#16351A;background:#C8F0A8;padding:9px 14px;border-radius:4px 22px 4px 22px;box-shadow:0 4px 0 #8CCB6A;cursor:pointer;white-space:nowrap;overflow:hidden;rotate:var(--r,0deg);animation:emugrow .32s cubic-bezier(.2,.9,.3,1.3) both;animation-delay:var(--d,0ms);transition:transform .08s}
+.emu-leaf:active{transform:translateY(2px)}
+.emu-leaf:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.emu-leaf[disabled]{cursor:default}
+.emu-leaf.glow{background:#FFE7A3;box-shadow:0 4px 0 #E2B44A,0 0 0 4px #fff}
+.emu-leaf.spat{background:#FDE7E8;box-shadow:0 4px 0 #E9A3A6;animation:eshake .4s}
+.emu-leaf.gone{width:0!important;padding-left:0;padding-right:0;margin-left:-8px;opacity:0;transition:width .26s ease,padding .26s ease,margin .26s ease,opacity .2s}
+@keyframes emugrow{from{transform:scale(.4);opacity:0}}
+.emu-grass{position:absolute;left:0;right:0;bottom:0;height:62px;background:radial-gradient(ellipse 30px 12px at 20px 2px,#7ED36A 60%,transparent 62%) 0 0/60px 16px repeat-x,linear-gradient(#7ED36A,#5DB447)}
+.emu-goat{position:absolute;left:0;bottom:14px;z-index:3;width:108px;height:90px;transform:translateX(4px);pointer-events:none}
+.emu-goati{display:block;width:100%;height:100%;transform-origin:30% 100%}
+.emu-goati svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px rgba(0,50,20,.25))}
+.emu-goati.trot{animation:emutrot .16s ease-in-out infinite alternate}
+.emu-goati.bite{animation:emubite .3s ease-out}
+.emu-goati.yum{animation:emuyum .45s ease-out}
+.emu-goati.bleh{animation:emubleh .5s ease-in-out}
+@keyframes emutrot{to{transform:translateY(-4px) rotate(-2deg)}}
+@keyframes emubite{50%{transform:translateY(-26px) rotate(-14deg)}}
+@keyframes emuyum{30%{transform:translateY(-10px)}60%{transform:translateY(0) scaleY(.94)}}
+@keyframes emubleh{20%{transform:rotate(6deg)}40%{transform:rotate(-6deg)}60%{transform:rotate(5deg)}80%{transform:rotate(-3deg)}}
+.emu-say{position:absolute;left:58px;top:-30px;font-style:normal;font-weight:900;font-size:14px;color:var(--ink);background:#fff;border-radius:12px;padding:4px 10px;white-space:nowrap;box-shadow:var(--shadow);opacity:0}
+.emu-say.on{animation:emusay 1.3s ease-out}
+@keyframes emusay{0%{opacity:0;transform:translateY(6px)}15%,75%{opacity:1;transform:none}100%{opacity:0}}
+.emu-help{text-align:center}
+@media (max-width:640px){.emu-leaf{font-size:15.5px;padding:8px 11px}.emu-hedge{gap:10px 6px;padding:14px 8px}.emu-field{padding:48px 8px 90px}.emu-goat{width:96px;height:80px}}
+@media (prefers-reduced-motion:reduce){.emu-leaf,.emu-leaf.spat,.emu-goati.trot,.emu-goati.bite,.emu-goati.yum,.emu-goati.bleh{animation:none}.emu-say.on{animation-duration:.01s}.emu-leaf.gone{transition:none}}
+
+/* ---------- Pigeon Post (reading): a pigeon brings a note; three houses carry the answers ---------- */
+.epo{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:600px;align-self:center}
+.epo-sky{position:relative;border-radius:26px;overflow:hidden;padding:14px 12px 0;background:linear-gradient(#FFE3C2,#FFF1DE 40%,#DDF0FF);box-shadow:var(--shadow)}
+.epo-count{position:absolute;right:10px;top:8px;z-index:4;font-size:15px;font-weight:900;background:rgba(255,255,255,.88);border-radius:999px;padding:4px 10px;box-shadow:var(--shadow)}
+.epo-count.ebump{animation:erbump .3s}
+.epo-mail{position:relative;z-index:2;display:flex;align-items:flex-start;gap:6px;padding-top:22px}
+.epo-bird{flex:none;width:76px;height:57px;margin-top:-14px;z-index:5;pointer-events:none}
+.epo-bird svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 3px 2px rgba(60,40,10,.25))}
+.epo-bird.arrive svg{animation:epoarrive .55s cubic-bezier(.2,.8,.3,1)}
+@keyframes epoarrive{from{transform:translate(-120px,-40px) rotate(-10deg);opacity:0}}
+.epo-env{transition:opacity .2s}
+.epo-bird.noenv .epo-env{opacity:0}
+.epo-note{flex:1;min-width:0;background:#FFFDF6;border-radius:6px 18px 18px 18px;padding:10px 14px 12px;box-shadow:0 2px 0 #EADFC6,0 8px 14px rgba(90,60,20,.12)}
+.epo-note.in{animation:epounfold .35s .15s cubic-bezier(.2,.9,.3,1.2) both;transform-origin:0 0}
+@keyframes epounfold{from{transform:scale(.6) rotate(-4deg);opacity:0}}
+.epo-head{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-bottom:6px}
+.epo-kind{font-size:12px;font-weight:900;color:#8D5A2B;background:#F6E7CC;border-radius:999px;padding:2px 9px}
+.epo-from{font-size:13px;font-weight:800;color:var(--soft)}
+.epo-text{margin:0;font-size:16.5px;line-height:1.5;color:var(--ink);white-space:pre-line}
+.epo-q{position:relative;z-index:2;display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:8px 14px;border-radius:14px;background:#2A1C63;color:#fff;font-size:16.5px;line-height:1.3}
+.epo-q span{font-size:18px}
+.epo-street{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end;padding:22px 2px 0}
+.epo-road{height:16px;margin:0 -12px;background:#9AA1AB;border-top:4px solid #C7CCD3}
+.epo-house{position:relative;border:0;background:none;padding:0;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;animation:eporise .35s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:var(--d,0ms)}
+@keyframes eporise{from{transform:translateY(30px);opacity:0}}
+.epo-roof{width:92%;height:30px;clip-path:polygon(50% 0,100% 100%,0 100%);background:var(--rf)}
+.epo-wall{position:relative;width:84%;min-height:104px;background:var(--wl);border-radius:0 0 4px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 6px 0;box-shadow:inset 0 -4px 0 rgba(0,0,0,.08)}
+.epo-win{width:22px;height:18px;border-radius:4px;background:#6E7F99;box-shadow:inset 0 0 0 2px #fff;transition:background .3s,box-shadow .3s}
+.epo-sign{display:block;width:100%;background:#fff;border-radius:8px;padding:5px 4px;font-size:14.5px;font-weight:900;line-height:1.15;color:var(--ink);text-align:center;overflow-wrap:anywhere;box-shadow:0 2px 0 rgba(0,0,0,.12)}
+.epo-door{width:24px;height:30px;margin-top:auto;border-radius:12px 12px 0 0;background:#7A4E2A;transition:transform .3s}
+.epo-house.h0{--rf:#E8594F;--wl:#FFE3B8}.epo-house.h1{--rf:#4C6EF5;--wl:#E3ECFF}.epo-house.h2{--rf:#2BA36B;--wl:#E2F6E8}
+.epo-house:focus-visible .epo-wall{outline:3px solid var(--e-purple);outline-offset:3px}
+.epo-house:active .epo-wall{transform:translateY(2px)}
+.epo-house[disabled]{cursor:default}
+.epo-house.lit .epo-win{background:#FFD45C;box-shadow:inset 0 0 0 2px #fff,0 0 14px 4px rgba(255,212,92,.8)}
+.epo-house.lit .epo-door{transform:perspective(60px) rotateY(-50deg);transform-origin:left}
+.epo-house.lit .epo-sign{background:#DFF5E8;color:#14733E}
+.epo-house.shut .epo-wall{animation:eshake .4s}
+.epo-house.shut .epo-sign{background:#FDE7E8;color:#A92F35}
+.epo-house.glow .epo-sign{box-shadow:0 0 0 3px var(--e-ok)}
+.epo-help{text-align:center}
+@media (max-width:640px){.epo-text{font-size:15.5px}.epo-bird{width:58px;height:44px}.epo-sign{font-size:13.5px}.epo-street{gap:6px}.epo-q{font-size:15.5px}}
+@media (prefers-reduced-motion:reduce){.epo-bird.arrive svg,.epo-note.in,.epo-house,.epo-house.shut .epo-wall{animation:none}}
+
+/* ---------- Echo (listening): a dark cave; the sentence is on the wall with dark gaps; right words light lamps ---------- */
+.eec{display:flex;flex-direction:column;gap:12px;margin:auto 0;padding:6px 0;width:100%;max-width:620px;align-self:center}
+.eec-cave{position:relative;border-radius:26px;overflow:hidden;min-height:250px;padding:20px 14px 22px;background:radial-gradient(ellipse at 50% 120%,#3A2D63,#1B1530 70%);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;gap:8px}
+.eec-cave::before{content:"";position:absolute;left:0;right:0;top:0;height:22px;background:radial-gradient(14px 22px at 20px 0,#120E22 98%,transparent) 0 0/48px 22px repeat-x}
+.eec-cave.win{background:radial-gradient(ellipse at 50% 120%,#7A62C9,#2A2150 75%)}
+.eec-drip{position:absolute;top:18px;width:4px;height:8px;border-radius:2px;background:#5D7FB8;opacity:0;animation:eecdrip 3.6s linear infinite}
+.eec-drip.a{left:18%}.eec-drip.b{left:58%;animation-delay:-1.4s}.eec-drip.c{left:84%;animation-delay:-2.6s}
+@keyframes eecdrip{0%{opacity:0;transform:none}10%{opacity:.8}60%{opacity:.6;transform:translateY(200px)}61%,100%{opacity:0;transform:translateY(200px)}}
+.eec-count{position:absolute;right:10px;top:10px;z-index:4;font-size:15px;font-weight:900;background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:4px 10px}
+.eec-count.ebump{animation:erbump .3s}
+.eec-batbox{position:relative;width:96px;height:58px;margin-top:6px;z-index:3}
+.eec-bat{display:block;width:100%;height:100%;animation:eecflap 1.6s ease-in-out infinite alternate}
+.eec-bat svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 10px rgba(160,130,255,.35))}
+@keyframes eecflap{to{transform:translateY(-6px) scaleX(.94)}}
+.eec-batbox.out .eec-bat{animation:eecout .7s ease-in forwards}
+@keyframes eecout{40%{transform:translate(30px,-10px) scale(1.05)}100%{transform:translate(360px,-90px) scale(.5);opacity:0}}
+/* sound rings from the bat while the sentence plays */
+.eec-wave{position:absolute;left:50%;top:50%;width:0;height:0}
+.eec-wave i{position:absolute;left:-30px;top:-30px;width:60px;height:60px;border-radius:50%;border:3px solid rgba(180,160,255,.8);opacity:0}
+.eec-cave.on .eec-wave i{animation:eecring 1.2s ease-out infinite}
+.eec-cave.on .eec-wave i:nth-child(2){animation-delay:.4s}.eec-cave.on .eec-wave i:nth-child(3){animation-delay:.8s}
+@keyframes eecring{from{transform:scale(.6);opacity:.9}to{transform:scale(2.4);opacity:0}}
+.eec-state{margin:0;min-height:20px;font-size:14px;font-weight:800;color:#C9BEF0;letter-spacing:.02em}
+.eec-wall{position:relative;z-index:2;font-size:19px;font-weight:800;line-height:2.1;color:#D8D1EE;text-align:center;max-width:100%;padding:0 4px}
+.eec-t{white-space:pre-wrap}
+.eec-gap{display:inline-flex;align-items:center;gap:4px;margin:0 2px;padding:0 10px 0 6px;border-radius:12px;background:#0E0B1A;box-shadow:inset 0 0 0 2px #3B3160;vertical-align:middle;line-height:1.6;white-space:nowrap;transition:background .25s,box-shadow .25s,color .25s}
+.eec-gap b{min-width:3.4em;color:transparent}
+.eec-lamp{width:12px;height:12px;border-radius:50%;background:#3B3160;transition:background .25s,box-shadow .25s}
+.eec-gap.now{box-shadow:inset 0 0 0 2px #B9A8FF;animation:eecnow 1s ease-in-out infinite}
+@keyframes eecnow{50%{box-shadow:inset 0 0 0 2px #B9A8FF,0 0 0 5px rgba(185,168,255,.25)}}
+.eec-gap.on{background:#FFF3C4;box-shadow:0 0 18px 2px rgba(255,212,92,.55)}
+.eec-gap.on b{color:#5A3A00}
+.eec-gap.on .eec-lamp{background:#FFC93C;box-shadow:0 0 10px 3px rgba(255,201,60,.9)}
+.eec-gap.off{background:#FDE7E8;box-shadow:inset 0 0 0 2px #E0464C}
+.eec-gap.off b{color:#A92F35}
+.eec-gap.off .eec-lamp{background:#E0464C}
+.eec-play{position:relative;z-index:3}
+.eec-tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;min-height:58px}
+.eec-tile{border:0;font:inherit;font-weight:900;font-size:19px;color:var(--ink);background:var(--card);border-radius:16px;padding:12px 20px;min-width:96px;box-shadow:0 5px 0 #D9CEF5;cursor:pointer;animation:edvin .3s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:var(--d,0ms);transition:transform .08s,opacity .2s}
+.eec-tile:active{transform:translateY(3px);box-shadow:0 2px 0 #D9CEF5}
+.eec-tile:focus-visible{outline:3px solid var(--e-purple);outline-offset:3px}
+.eec-tile[disabled]{opacity:.45;cursor:default}
+.eec-tile.nope{background:#FDE7E8;box-shadow:0 5px 0 #E9A3A6;animation:eshake .35s}
+.eec-help{text-align:center}
+.eec-why u{text-decoration:none;background:#FFF3C4;border-radius:4px;padding:0 3px}
+@media (max-width:640px){.eec-wall{font-size:17px}.eec-tile{font-size:17px;padding:11px 16px;min-width:84px}.eec-cave{padding:18px 8px 20px}}
+@media (prefers-reduced-motion:reduce){.eec-drip,.eec-bat,.eec-gap.now,.eec-tile,.eec-tile.nope,.eec-cave.on .eec-wave i{animation:none}.eec-batbox.out .eec-bat{animation:none;opacity:0}}

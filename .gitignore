@@ -9,3 +9,6 @@ game-corner.zip
 # student data files (never commit)
 *.csv
 *.xlsx
+
+# student feedback export: has staff names and emails, never commit
+Eval Sets - Issue Resolution.xlsx
