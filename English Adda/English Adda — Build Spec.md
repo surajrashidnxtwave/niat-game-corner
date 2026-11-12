@@ -157,7 +157,7 @@ Rounds are about 2–2.5 minutes.
 - **Placement link:** vocabulary recognition (Duolingo English Test, AMCAT).
 
 ### 5.3 Catch It · `lis`
-- **Play:** hear a sentence and type it. There is 1 free replay, then a second replay costs a few bonus points. 6 sentences per round.
+- **Play:** hear a sentence and type it. Each sentence plays **only once**, with no replay (owner decision 2026-11-12, same as the level check). Students are warned before the round starts: the intro says so, and the Play button reads “Ready? It plays once.” 6 sentences per round.
 - **Scoring** (word-level alignment):
   - case and punctuation are ignored
   - contractions are accepted both ways ("don't" = "do not")
