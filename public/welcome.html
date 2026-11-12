@@ -195,7 +195,7 @@ button{font:inherit;color:inherit}
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script>
 const $ = id => document.getElementById(id), stage = $('stage'), N = 8;
-try { if (localStorage.getItem('bg_auth')) { $('login').innerHTML = '<small>Welcome back</small>Continue'; $('login').href = '/'; $('enter').href = '/'; } } catch (e) {}
+try { if (localStorage.getItem('bg_auth')) { $('login').innerHTML = '<small>Welcome back</small>Continue'; $('login').href = '/#home'; $('enter').href = '/#home'; } } catch (e) {}
 const CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HUD = ['Power off','Power on','Machine 01','Machine 02','? ? ?','High scores','Drive School','Player 1 ready'];
 document.documentElement.classList.add('booting'); setTimeout(() => document.documentElement.classList.remove('booting'), 2300);

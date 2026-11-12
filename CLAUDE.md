@@ -48,6 +48,6 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - On the intro screen, Enter starts the game.
 
 ## Welcome page + home-screen app (Nov 2026)
-- `public/welcome.html` is the landing page (3D arcade, three.js r128 from CDN). `index.html` sends visitors there only when they are not logged in on this device (`bg_auth` empty) AND the URL has no `#hash`. Its Log in / Insert NIAT ID buttons go to `/#login`; logged-in visitors see "Continue" instead.
+- `public/welcome.html` is the landing page (3D arcade, three.js r128 from CDN). It is the default page: `index.html` sends every new visit there (logged in or not) unless the URL has a `#hash`, `?src=home-screen` (the installed app), or this tab already came through (sessionStorage `gc_in`). Its Log in / Insert NIAT ID buttons go to `/#login`; logged-in visitors see "Continue" (`/#home`).
 - Don't show game counts on the welcome page: games unlock over time.
 - Home-screen install: `public/manifest.webmanifest`, icons in `public/assets/icons/`, `public/sw.js` (caches nothing, only an offline page), `public/install.js` (any `[data-install]` button: real prompt on Chrome/Edge, steps on iPhone and in-app browsers; hidden when already opened as the app).

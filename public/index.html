@@ -14,8 +14,9 @@
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('gc_theme')==='dark'?'dark':'light'}catch(e){}</script>
-<script>/* not logged in on this device and no link to a screen: show the welcome page first (its Log in button comes back to #login) */
-try{if(!location.hash&&!localStorage.getItem('bg_auth'))location.replace('/welcome.html')}catch(e){}</script>
+<script>/* every visit starts on the welcome page. Its buttons come back with a #hash (#login / #home); after that, refreshes in this tab stay in the app.
+   The home-screen app (?src=home-screen) and links to a screen (#drive etc.) skip it. */
+try{if(location.hash||/src=home-screen/.test(location.search)||sessionStorage.getItem('gc_in'))sessionStorage.setItem('gc_in','1');else location.replace('/welcome.html')}catch(e){}</script>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="Game Corner">
