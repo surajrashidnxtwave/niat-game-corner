@@ -1,7 +1,8 @@
 // English Adda · automatic checks on the game content in api/_lib/english/ (Build Spec §9.4 step 2).
 // Run: node scripts/english-content-check.mjs     Exit code 1 if anything is wrong.
-// Word frequency bands and fake-word checks need Python wordfreq and run separately (see the header of words.js).
-import { WORDS, FAKES } from '../api/_lib/english/words.js';
+// Word frequency bands and fake-word frequency checks need Python wordfreq and run separately (see the headers of words.js and fakes.js).
+import { WORDS } from '../api/_lib/english/words.js';
+import { TRAPS } from '../api/_lib/english/fakes.js';
 import { JUMBLE } from '../api/_lib/english/jumble.js';
 import { SPOTFIX } from '../api/_lib/english/spotfix.js';
 import { GROUPS } from '../api/_lib/english/groups.js';
@@ -16,14 +17,14 @@ const lvOk = x => Number.isInteger(x.lv) && x.lv >= 1 && x.lv <= 8;
 const STRAIGHT = /['"]/;   // student-facing text uses curly quotes
 
 // ---- words ----
-dupes(WORDS, x => x.w, 'WORDS'); dupes(FAKES.map(w => ({ w })), x => x.w, 'FAKES');
+dupes(WORDS, x => x.w, 'WORDS'); dupes(TRAPS, x => x.f, 'TRAPS');
 const checkWords = new Set(RF.map(x => x.w));
 for (const x of WORDS) {
   const id = 'word ' + x.w;
   if (!lvOk(x)) err(id, 'bad lv');
   if (!/^[a-z]+$/.test(x.w)) err(id, 'word must be lowercase letters');
   if (checkWords.has(x.w)) err(id, 'also in the level check');
-  if (FAKES.includes(x.w)) err(id, 'also a fake');
+  if (TRAPS.some(t => t.f === x.w)) err(id, 'also a fake');
   if (!x.m || x.m.split(/\s+/).length > 12) err(id, 'meaning missing or over 12 words');
   if (x.m && new RegExp('\\b' + x.w.slice(0, Math.max(4, x.w.length - 2)), 'i').test(x.m)) err(id, 'meaning uses the word');
   const hits = (x.ex || '').match(new RegExp('\\b' + x.w + '\\b', 'g')) || [];
@@ -32,7 +33,17 @@ for (const x of WORDS) {
   if (BANNED.test(x.ex)) err(id, 'banned word in example');
   for (const a of x.avoid || []) if (!WORDS.some(y => y.w === a)) err(id, 'avoid names a word that is not in WORDS: ' + a);
 }
-for (const w of FAKES) if (!/^[a-z]{4,12}$/.test(w)) err('fake ' + w, 'bad shape');
+const fakePer = {};
+for (const t of TRAPS) {
+  const id = 'fake ' + t.f;
+  if (!/^[a-z]{4,14}$/.test(t.f)) err(id, 'bad shape');
+  if (!lvOk(t)) err(id, 'bad lv');
+  if (!['spell', 'form'].includes(t.k)) err(id, 'k must be spell or form');
+  if (!t.r || STRAIGHT.test(t.r) || t.r === t.f) err(id, 'r missing, straight quote or same as f');
+  if (checkWords.has(t.f)) err(id, 'is a word in the level check');
+  fakePer[t.lv] = (fakePer[t.lv] || 0) + 1;
+}
+for (let L = 1; L <= 8; L++) if ((fakePer[L] || 0) < 8) err('TRAPS lv ' + L, 'only ' + (fakePer[L] || 0) + ' fakes (need 8+)');
 const per = {}; WORDS.forEach(x => per[x.lv] = (per[x.lv] || 0) + 1);
 
 // ---- jumble ----
@@ -99,6 +110,7 @@ for (const p of GROUPS) {
   if (new Set(w).size !== 16) err(id, 'words are not 16 unique');
   if (w.some(x => !/^[a-z]+$/.test(x))) err(id, 'words must be single lowercase words');
   if (p.groups.some(g => !g.name || !g.why)) err(id, 'group missing name or why');
+  if (p.groups.some(g => STRAIGHT.test(g.name + g.why))) err(id, 'straight quote');
   const all = p.groups.map(g => g.words);
   if (!scoreItem('groups', id, all, 1).ok) err(id, 'solving all four groups does not score as solved');
 }
@@ -110,7 +122,7 @@ for (let L = 1; L <= 8; L++) for (const g of ['realfake', 'jumble', 'spotfix']) 
   if (r.items.length !== { realfake: 20, jumble: 8, spotfix: 8 }[g]) err('picker', g + ' at level ' + L + ' gave ' + r.items.length + ' items');
 }
 
-console.log('Words per level:', per, '| fakes:', FAKES.length);
+console.log('Words per level:', per, '| fakes per level:', fakePer);
 console.log('Jumble:', JUMBLE.length, '| Spot & Fix:', SPOTFIX.length, sfPer, '| Word Groups per tier:', tiers);
 if (bad.length) { console.log('\n' + bad.length + ' problem(s):\n' + bad.join('\n')); process.exit(1); }
 console.log('All content checks passed.');

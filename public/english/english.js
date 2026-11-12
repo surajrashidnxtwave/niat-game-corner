@@ -41,8 +41,8 @@ const gameOf = id => GAMES.find(g => g.id === id);
   catch: ['Part three: Catch it. Listen, then type exactly what you hear. Each sentence plays only once, so stay sharp!'],
   story: ['Last part! Read this quick story, then answer two questions.'],
   done: ['Done! Here’s where you start. I’ll pick your games from this.'],
-  groups: ['Word Groups! Sixteen words, four hidden groups of four. You get four mistakes. Go!'],
-  realfake: ['Real or Fake! Tap Real if it’s a real English word, Fake if it’s made up. Five seconds each, so be quick!'],
+  groups: ['Word Groups! Sixteen words, four groups of four. Tap four words that go together, then Submit. You get four mistakes. Go!'],
+  realfake: ['Real or Fake! Some words are real. Some are spelt wrong, or made up. Five seconds each, so look closely!'],
   jumble: ['Jumble! Tap the pieces in the right order to build the sentence.', 'Careful: one piece doesn’t belong. Leave it out.'],
   spotfix: ['Spot and Fix! Tap the part with the mistake, then pick the fix. Some sentences are already perfect, so don’t over-fix.'],
   vault: ['Word Vault time! Let’s see which of your saved words stuck.']
@@ -496,7 +496,7 @@ function say(html, pose){
   if (!GP) return;
   const box = qs('.ep-yapper', GP); box.hidden = false;
   qs('.ep-yapper img', GP).src = 'assets/yapper/yapper-' + (pose || 'idle') + '.svg';
-  const s = qs('.ep-say', GP); s.innerHTML = html; box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+  const s = qs('.ep-say', GP); s.innerHTML = html; box.classList.remove('epopin'); void box.offsetWidth; box.classList.add('epopin');
 }
 function hush(){ if (GP) qs('.ep-yapper', GP).hidden = true; }
 function addPts(){ /* shown at the end; the server decides the real number */ }
@@ -548,7 +548,7 @@ function askLeaveGame(){
 }
 function closeGame(){
   if (!GP) return;
-  Voice.stop(); if (G) clearTimeout(G.timer);
+  Voice.stop(); if (G) { clearTimeout(G.timer); clearInterval(G.tick); }
   GP.remove(); GP = null; G = null;
   document.body.classList.remove('eplaying');
   Adda._play(false);
@@ -561,17 +561,19 @@ document.addEventListener('keydown', e => {
 });
 const nextBtn = (label, fn) => { const b = qs('#eg-next', GP); b.textContent = label || 'Next'; b.hidden = false; b.disabled = false; b.focus({ preventScroll: true }); b.onclick = () => { sfx('tap'); fn(); }; };
 
-/* ---- Real or Fake: 20 words, 5 seconds each ---- */
+/* ---- Real or Fake: 20 words, 5 seconds each. After each answer: the meaning (or the right spelling), then "Next word in 3, 2, 1" ---- */
+// the example sentence with the word in bold
+const exBold = (ex, w) => esc(ex).replace(new RegExp('\\b(' + w + ')\\b'), '<b>$1</b>');
 function rfGame(){
   const items = G.round.items; G.ids = items.map(x => x.id);
   const step = i => {
-    hush();
+    hush(); clearInterval(G.tick);
     if (i >= items.length) return finish();
     gprog(i / items.length);
     const it = items[i];
     pb().innerHTML = '<div class="erf"><p class="ecount">' + (i + 1) + ' / ' + items.length + (G.combo >= 3 ? ' · 🔥 ' + G.combo : '') + '</p>'
       + '<div class="erf-card"><b>' + esc(it.w) + '</b></div><div class="erf-time"><i></i></div>'
-      + '<p class="erf-fb" aria-live="polite"></p>'
+      + '<div class="erf-fb" aria-live="polite"></div>'
       + '<div class="erf-btns"><button class="ebtn ghost" data-a="0">✗ Fake</button><button class="ebtn purple" data-a="1">✓ Real</button></div></div>';
     const card = qs('.erf-card', GP), bar = qs('.erf-time i', GP), fb = qs('.erf-fb', GP);
     const t0 = Date.now(); let done = false;
@@ -582,13 +584,22 @@ function rfGame(){
       G.combo = right ? G.combo + 1 : 0;
       if (it.real && !right) G.missed.push(it.w);
       card.classList.add(right ? 'ok' : 'bad');
-      qa('.erf-btns .ebtn', GP).forEach(b => b.disabled = true);
-      bar.style.transition = 'none';
+      qs('.erf-time', GP).hidden = true;
       sfx(right ? (G.combo >= 3 ? 'combo' : 'correct') : v === null ? 'softbad' : 'wrong');
-      fb.innerHTML = (v === null ? '⏱ Time’s up. ' : right ? '✓ ' : '✗ ') + (it.real ? '<b>' + esc(it.w) + '</b> is real' + (it.m ? ': ' + esc(it.m) : '.') : '<b>' + esc(it.w) + '</b> is made up.');
-      fb.className = 'erf-fb ' + (right ? 'ok' : 'bad');
-      G.timer = setTimeout(() => step(i + 1), right ? 1100 : 2600);
-      card.onclick = () => { clearTimeout(G.timer); step(i + 1); };
+      const head = v === null ? '⏱ Time’s up!' : right ? '✓ ' + praise() : '✗ Not quite.';
+      let body;
+      if (it.real) body = '<p><b>' + esc(it.w) + '</b> is a real word. It means: ' + esc(it.m) + '.</p>' + (it.ex ? '<p class="erf-ex">“' + exBold(it.ex, it.w) + '”</p>' : '');
+      else if (it.k === 'spell') body = '<p><b>' + esc(it.w) + '</b> is a wrong spelling.</p><p class="erf-fix">Right spelling: <b>' + esc(it.r) + '</b></p>';
+      else body = '<p><b>' + esc(it.w) + '</b> is not a word.</p><p class="erf-fix">Say: <b>' + esc(it.r) + '</b></p>';
+      fb.className = 'erf-fb show ' + (right ? 'ok' : 'bad');
+      fb.innerHTML = '<p class="erf-head">' + head + '</p>' + body;
+      // countdown to the next word: 3 s when right, 5 s when wrong (more to read). Tap Next to skip.
+      let left = right ? 3 : 5;
+      qs('.erf-btns', GP).innerHTML = '<p class="erf-next">Next word in <b>' + left + '</b></p><button class="ebtn" id="eg-next">' + (i + 1 < items.length ? 'Next →' : 'Finish') + '</button>';
+      const num = qs('.erf-next b', GP), go = () => { clearInterval(G.tick); clearTimeout(G.timer); step(i + 1); };
+      qs('#eg-next', GP).onclick = () => { sfx('tap'); go(); };
+      G.tick = setInterval(() => { left--; if (left > 0) num.textContent = left; else go(); }, 1000);
+      G.key = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
     };
     qa('[data-a]', GP).forEach(b => b.onclick = () => answer(b.dataset.a === '1'));
     G.key = e => { if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') answer(true); else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'f') answer(false); };
@@ -632,7 +643,7 @@ function jbGame(){
       if (ok) {
         over = true; G.combo = tries === 1 ? G.combo + 1 : 0;
         sfx(G.combo >= 3 ? 'combo' : 'correct'); show(got, 'ok');
-        say((tries === 1 ? praise() : 'Got it!') + (G.combo >= 3 ? ' 🔥 ' + G.combo + ' in a row.' : ''), 'correct');
+        say('<b>' + (tries === 1 ? praise() : 'Got it!') + (G.combo >= 3 ? ' 🔥 ' + G.combo + ' in a row.' : '') + '</b> ' + esc(it.why), 'correct');
       } else if (tries === 1) {
         sfx('wrong'); line.classList.add('bad'); draw();
         say('<b>Hint:</b> ' + esc(it.hint), 'thinking');
@@ -712,14 +723,19 @@ function grGame(){
   const P = G.round.items[0]; G.ids = [P.id]; G.ans = [[]]; G.tries = [0];
   let left = P.words.slice(), sel = new Set(), solved = [], miss = 0, out = false;
   const t0 = Date.now(), tried = new Set();
+  // the group names as clues: all shown at tiers 1-2; at tier 3 the hint button shows them one at a time
+  const shown = new Set(P.names ? [0, 1, 2, 3] : []);
   gprog(0);
-  pb().innerHTML = '<div class="egr"><p class="ecount">Puzzle #' + P.n + ' · find 4 groups of 4</p><div class="egr-solved"></div><div class="egr-grid"></div>'
+  pb().innerHTML = '<div class="egr"><p class="ecount">Puzzle #' + P.n + ' · find 4 groups of 4</p><div class="egr-clues"></div><div class="egr-solved"></div><div class="egr-grid"></div>'
     + '<div class="egr-miss" aria-label="Mistakes left"></div>'
-    + '<div class="ep-row egr-ctl"><button class="ebtn ghost sm" id="egr-mix">Shuffle</button><button class="ebtn ghost sm" id="egr-clear">Deselect</button><button class="ebtn sm" id="egr-go" disabled>Submit</button></div>'
+    + '<div class="ep-row egr-ctl"><button class="ebtn ghost sm" id="egr-mix">Shuffle</button><button class="ebtn ghost sm" id="egr-clear">Deselect</button>' + (P.names ? '' : '<button class="ebtn ghost sm" id="egr-hint">💡 Hint</button>') + '<button class="ebtn sm" id="egr-go" disabled>Submit</button></div>'
     + '<div class="ep-row"><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
   const grid = qs('.egr-grid', GP), sol = qs('.egr-solved', GP), go = qs('#egr-go', GP);
   const groupOf = w => P.groups.findIndex(g => g.words.includes(w));
+  const clues = qs('.egr-clues', GP);
   const draw = () => {
+    clues.innerHTML = shown.size ? '<span class="egr-cl-t">' + (P.names ? 'The 4 groups:' : 'Clues:') + '</span>' + P.groups.map((g, k) => shown.has(k) ? '<span class="egr-cl' + (solved.includes(k) ? ' done' : '') + '"' + (solved.includes(k) ? ' style="--g:' + GROUP_C[k] + '"' : '') + '>' + esc(g.name) + '</span>' : '').join('') : '';
+    const hb = qs('#egr-hint', GP); if (hb) hb.hidden = out || P.groups.every((g, k) => shown.has(k) || solved.includes(k));
     sol.innerHTML = solved.map(gi => { const g = P.groups[gi]; return '<div class="egr-row" style="--g:' + GROUP_C[gi] + '"><b>' + esc(g.name) + '</b><span>' + g.words.map(esc).join(', ') + '</span></div>'; }).join('');
     grid.innerHTML = left.map(w => '<button class="egr-tile' + (sel.has(w) ? ' on' : '') + '" data-w="' + esc(w) + '" aria-pressed="' + sel.has(w) + '">' + esc(w) + '</button>').join('');
     qs('.egr-miss', GP).innerHTML = 'Mistakes left: ' + '<i></i>'.repeat(Math.max(0, 4 - miss)) + '<i class="off"></i>'.repeat(Math.min(4, miss));
@@ -734,6 +750,8 @@ function grGame(){
   };
   qs('#egr-mix', GP).onclick = () => { sfx('whoosh'); for (let i = left.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [left[i], left[j]] = [left[j], left[i]]; } draw(); };
   qs('#egr-clear', GP).onclick = () => { sfx('tap'); sel.clear(); draw(); };
+  const hint = qs('#egr-hint', GP);
+  if (hint) hint.onclick = () => { const k = P.groups.findIndex((g, j) => !shown.has(j) && !solved.includes(j)); if (k < 0) return; sfx('reveal'); shown.add(k); draw(); say('Clue: one group is <b>' + esc(P.groups[k].name) + '</b>.', 'thinking'); };
   const end = win => {
     out = true; qs('.egr-ctl', GP).hidden = true; grid.innerHTML = '';
     G.tries[0] = G.ans[0].length; G.ms[0] = Date.now() - t0; G.share = 'English Adda #' + P.n + '\n' + G.ans[0].map(gs => gs.map(w => GROUP_E[groupOf(w)]).join('')).join('\n');
@@ -744,7 +762,7 @@ function grGame(){
   const revealNext = () => {
     const gi = P.groups.findIndex((g, k) => !solved.includes(k));
     if (gi < 0) return end(false);
-    solved.push(gi); left = left.filter(w => !P.groups[gi].words.includes(w)); sel.clear();
+    solved.push(gi); shown.add(gi); left = left.filter(w => !P.groups[gi].words.includes(w)); sel.clear();
     sfx('reveal'); draw(); say('<b>' + esc(P.groups[gi].name) + ':</b> ' + esc(P.groups[gi].why), 'thinking');
     if (solved.length < 4) nextBtn('Show next group', revealNext); else nextBtn('See result', () => end(false));
   };
@@ -754,7 +772,7 @@ function grGame(){
     tried.add(key); G.ans[0].push(guess);
     const gi = P.groups.findIndex((g, k) => !solved.includes(k) && guess.every(w => g.words.includes(w)));
     if (gi >= 0) {
-      solved.push(gi); left = left.filter(w => !guess.includes(w)); sel.clear();
+      solved.push(gi); shown.add(gi); left = left.filter(w => !guess.includes(w)); sel.clear();
       sfx('correct'); draw(); say('<b>' + esc(P.groups[gi].name) + '.</b> ' + esc(P.groups[gi].why), 'correct');
       if (solved.length === 4) end(true);
       return;

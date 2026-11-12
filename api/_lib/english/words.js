@@ -329,20 +329,3 @@ export const WORDS = [
   { w: 'workstation', lv: 8, m: 'a desk with a computer set up for one person’s job', ex: 'At her internship, Meera got her own workstation with two monitors.' },
   { w: 'wrangle', lv: 8, m: 'to argue for a long time about something', ex: 'The two clubs continued to wrangle over who would get the auditorium.' },
 ];
-export const FAKES = [
-  'smourk', 'draist', 'swoust', 'plirn', 'skouf', 'ploorn', 'gloost', 'skoust', 'stoonk', 'lounk',
-  'preant', 'skeant', 'gloork', 'thoonk', 'scoond', 'smeank', 'swairk', 'sleark', 'flurn', 'cloosh',
-  'strealt', 'bremp', 'frealt', 'swesk', 'ploord', 'straish', 'prounk', 'streard', 'praird', 'flaind',
-  'wremp', 'skeag', 'thoont', 'prouck', 'swurk', 'sweack', 'smoum', 'swoub', 'stroolt',
-  'crebow', 'croumper', 'slailton', 'clailow', 'thoontle', 'gaifon', 'stospen', 'glirnon', 'plouren', 'breanon',
-  'snoshet', 'vaintet', 'snoustle', 'feshle', 'spushet', 'fraskon', 'thairdon', 'trounen', 'pourken', 'smaishy',
-  'spougen', 'clupet', 'flainder', 'scistow', 'pleantle', 'plaimpen', 'skumpen', 'stroumpy', 'swougen', 'snurdet',
-  'ploorker', 'snindet', 'strirkle', 'fraindon', 'clealten', 'broorden', 'groorner', 'frerken', 'stourken', 'thaindow',
-  'droonty', 'graispet', 'clerdow', 'strousple', 'trestow', 'hoshet', 'flurow', 'gaifet', 'drefon', 'fraimy',
-  'snifon',
-  'smigorous', 'girudive', 'wasurory', 'cutolible', 'lirpent', 'nestubish', 'baitotment', 'snorotary', 'dreagutable', 'nolident',
-  'nondabish', 'clobuvent', 'hairtunent', 'blaimrulous', 'flisirive', 'keanucent', 'brunident', 'torinent', 'veandilous', 'forulal',
-  'handacance', 'spadipify', 'feslous', 'brobutance', 'vustobive', 'salurable', 'flaginish', 'cartamance', 'panapible', 'bopacable',
-  'hodutic', 'closival', 'braticory', 'nartatal', 'wrogatous', 'slisodary', 'heturory', 'glipirine', 'vostavent', 'skarimic',
-  'greanimance', 'fraibitude', 'plepadate', 'loubanic', 'mutolify', 'clotarish', 'crosimic', 'tebicment', 'crebamude', 'fairtabure',
-];

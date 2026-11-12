@@ -2,7 +2,8 @@
 // Content (with answers) lives in api/_lib/english/*.js and stays on the server; a round's items are sent with
 // their answers so the page can give instant feedback, but points and levels come only from the scoring here.
 import { createHash } from 'node:crypto';
-import { WORDS, FAKES } from './english/words.js';
+import { WORDS } from './english/words.js';
+import { TRAPS } from './english/fakes.js';
 import { JUMBLE } from './english/jumble.js';
 import { SPOTFIX } from './english/spotfix.js';
 import { GROUPS } from './english/groups.js';
@@ -14,7 +15,7 @@ export const ROUND_N = { realfake: 20, jumble: 8, spotfix: 8, groups: 1 };
 const EPOCH = Date.UTC(2026, 10, 1);   // Word Groups puzzle #1 = 2026-11-01
 
 const WORD = new Map(WORDS.map(x => [x.w, x]));
-const FAKE = new Set(FAKES);
+const FAKE = new Map(TRAPS.map(x => [x.f, x]));
 const JB = new Map(JUMBLE.map(x => [x.id, x]));
 const SF = new Map(SPOTFIX.map(x => [x.id, x]));
 const GR = new Map(GROUPS.map(x => [x.id, x]));
@@ -59,7 +60,9 @@ export function puzzleFor(tier, day, n) {
   const i = ((k % list.length) + list.length) % list.length;
   return { p: list[i], n: n || k + 1 };
 }
-export const tierOf = voc => voc >= 6 ? 3 : voc >= 4 ? 2 : 1;
+export const tierOf = voc => voc >= 7 ? 3 : voc >= 4 ? 2 : 1;
+// tiers 1-2 show the four group names as clues; tier 3 hides them behind a hint button
+export const showNames = tier => tier < 3;
 
 // ---------- jumble helpers ----------
 const END = /[.?!]$/;   // only the last mark: "3 p.m.?" keeps "3 p.m." and ends with "?"
@@ -84,11 +87,11 @@ const endMark = s => (s.match(END) || ['.'])[0];
 export function buildRound(game, L, low, seen, seed, opt = {}) {
   const rnd = rng(seed);
   if (game === 'realfake') {
-    const n = ROUND_N.realfake, nf = 7;
+    // fakes are misspellings (recieve) and wrong word forms (unhonest), picked near the student's level like real words
+    const n = ROUND_N.realfake, nf = 8;
     const real = pickFrom(WORDS, x => 'w:' + x.w, n - nf, L, low, seen, rnd);
-    const fk = shuffle(FAKES.slice(), rnd);
-    const fakes = [...fk.filter(w => !seen.has('f:' + w)), ...fk.filter(w => seen.has('f:' + w))].slice(0, nf);
-    const items = shuffle([...real.map(x => ({ id: 'w:' + x.w, w: x.w, real: true, m: x.m, lv: x.lv })), ...fakes.map(w => ({ id: 'f:' + w, w, real: false }))], rnd);
+    const fakes = pickFrom(TRAPS, x => 'f:' + x.f, nf, L, low, seen, rnd);
+    const items = shuffle([...real.map(x => ({ id: 'w:' + x.w, w: x.w, real: true, m: x.m, ex: x.ex, lv: x.lv })), ...fakes.map(x => ({ id: 'f:' + x.f, w: x.f, real: false, k: x.k, r: x.r, lv: x.lv }))], rnd);
     // no more than 3 fakes in a row
     for (let t = 0; t < 20; t++) { let run = 0, bad = -1; items.forEach((x, i) => { run = x.real ? 0 : run + 1; if (run > 3 && bad < 0) bad = i; }); if (bad < 0) break; const j = items.findIndex(x => x.real); [items[bad], items[j]] = [items[j], items[bad]]; }
     return { items };
@@ -111,7 +114,7 @@ export function buildRound(game, L, low, seen, seed, opt = {}) {
   if (game === 'groups') {
     const pz = puzzleFor(opt.tier || tierOf(L), opt.day, opt.n);
     if (!pz) return { items: [] };
-    return { items: [{ id: pz.p.id, n: pz.n, tier: pz.p.tier, words: shuffle(pz.p.groups.flatMap(g => g.words), rnd), groups: pz.p.groups }] };
+    return { items: [{ id: pz.p.id, n: pz.n, tier: pz.p.tier, names: showNames(pz.p.tier), words: shuffle(pz.p.groups.flatMap(g => g.words), rnd), groups: pz.p.groups }] };
   }
   return { items: [] };
 }
@@ -120,11 +123,10 @@ export function buildRound(game, L, low, seen, seed, opt = {}) {
 // Each answer is the student's FIRST attempt at the item. Returns { ok, lv, skill, ans } per item, or null if the item isn't real.
 export function scoreItem(game, id, a, L) {
   if (game === 'realfake') {
-    const real = id.startsWith('w:') ? WORD.get(id.slice(2)) : null, fake = id.startsWith('f:') && FAKE.has(id.slice(2));
+    const real = id.startsWith('w:') ? WORD.get(id.slice(2)) : null, fake = id.startsWith('f:') ? FAKE.get(id.slice(2)) : null;
     if (!real && !fake) return null;
     const said = a === true ? true : a === false ? false : null;
-    // made-up words count at the student's own level, so tapping "Real" to everything can't level you up
-    return { ok: said === !!real, lv: real ? real.lv : L, ans: said == null ? '' : said ? 'real' : 'fake' };
+    return { ok: said === !!real, lv: real ? real.lv : fake.lv, ans: said == null ? '' : said ? 'real' : 'fake' };
   }
   if (game === 'jumble') {
     const it = JB.get(id); if (!it) return null;
