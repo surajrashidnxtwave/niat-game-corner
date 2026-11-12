@@ -453,7 +453,7 @@ function askClose(){
   if (L.mustRate) { if (!L.rating) rateNow(); toast('One quick rating, then you’re done.'); return; }
   if (L.i === 0 || last || L.finished) return closeLesson();
   openModal('<h3 id="mtitle">Leave this lesson?</h3><p style="margin:0">Progress inside this lesson won’t be saved. You can start it again any time.</p>'
-    + '<button type="button" class="btn full" id="dl-stay" style="background:var(--ink);color:#fff">Keep going</button>'
+    + '<button type="button" class="btn full" id="dl-stay">Keep going</button>'
     + '<button type="button" class="mclose" id="dl-go">Leave anyway</button>');
   qs('#dl-stay').onclick = () => closeModal();
   qs('#dl-go').onclick = () => { closeModal(); closeLesson(); };
@@ -1719,7 +1719,7 @@ async function renderProfile(){
     const n = Math.min(doneN, 7);
     box.innerHTML = '<div class="card dprof-empty">' + turboImg('thinking', 120, 'dprof-turbo') + '<h2>Drive Profile</h2><p class="muted">Your profile builds as you go: Strategy, Motivation and Voice. Your first snapshot appears after Day 7.</p>'
       + '<div class="dprog big" role="progressbar" aria-label="Days done before your snapshot" aria-valuemin="0" aria-valuemax="7" aria-valuenow="' + n + '"><i style="width:' + (n / 7 * 100) + '%"></i></div><p><b>' + n + ' of 7 days done</b></p>'
-      + '<button class="btn" data-go="drive" style="background:var(--ink);color:#fff">Go to Drive School</button></div>';
+      + '<button class="btn" data-go="drive">Go to Drive School</button></div>';
     return;
   }
   if (!p) { box.innerHTML = '<div class="card dprof-empty"><p class="muted">Loading your Drive Profile…</p></div>'; return; }

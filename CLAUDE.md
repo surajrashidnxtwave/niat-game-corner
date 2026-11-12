@@ -38,3 +38,16 @@ Users are 1st-year B.Tech students in India. All game content must stay within t
 - Admin opens on a Summary page (both products, "What to look at" alerts, universities).
 - Admin: the "Drive School" tab in `public/admin.html` loads `/api/admin?view=drive` (batch DEMO left out) and reads question text from the lesson files. CSVs: drive_students, drive_events, drive_ratings.
 - Test accounts can jump to any screen from the console: `Drive.open(day, screenIndex)` (index after review sets expand).
+
+## UI v2 (branch ui-overhaul, Nov 2026)
+- Font: Plus Jakarta Sans (text) + Barlow Condensed (headlines, big numbers). Styles for home, nav, game shell, results, leaderboard and login live in the "UI v2" block at the end of the `<style>` in `public/index.html`.
+- Home: one dark hero (`#h-today` ring + title + start button, `#h-checks` plan, `#h-week`), then quests and rival, then the library with skill filter chips (`renderLib`, `LIBF`).
+- Phones and tablets get a 4-tab dark dock (Brain Gym, Drive School, Leaderboard, Profiles); laptops keep the sidebar. The dock hides while a pop-up is open.
+- Dark theme: `html[data-theme="dark"]`, chosen with the Theme button (saved in localStorage `gc_theme`, default light). Never hard-code `#fff` or `var(--ink)` as a background: use `--card`, `--chip`, `--tile`, and `--pill` / `--pill-ink` for filled dark pills. In `color-mix`, mix with `var(--card)`, not `#fff`. Drive School's dark tokens are at the end of `drive.css`.
+- After changing `drive.css` or `drive.js`, raise their `?v=` numbers in `index.html`.
+- On the intro screen, Enter starts the game.
+
+## Welcome page + home-screen app (Nov 2026)
+- `public/welcome.html` is the landing page (3D arcade, three.js r128 from CDN). `index.html` sends visitors there only when they are not logged in on this device (`bg_auth` empty) AND the URL has no `#hash`. Its Log in / Insert NIAT ID buttons go to `/#login`; logged-in visitors see "Continue" instead.
+- Don't show game counts on the welcome page: games unlock over time.
+- Home-screen install: `public/manifest.webmanifest`, icons in `public/assets/icons/`, `public/sw.js` (caches nothing, only an offline page), `public/install.js` (any `[data-install]` button: real prompt on Chrome/Edge, steps on iPhone and in-app browsers; hidden when already opened as the app).
