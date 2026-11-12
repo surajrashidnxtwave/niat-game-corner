@@ -187,6 +187,10 @@ const steps = [
      UNIQUE (round_cid, item_id)
    )`,
   `CREATE INDEX IF NOT EXISTS english_answers_item_idx ON english_answers (game, item_id)`,
+  // skill + item level of each answer: level-ups look at the last 20 answers at the student's current level
+  `ALTER TABLE english_answers ADD COLUMN IF NOT EXISTS skill text`,
+  `ALTER TABLE english_answers ADD COLUMN IF NOT EXISTS lv smallint`,
+  `CREATE INDEX IF NOT EXISTS english_answers_student_idx ON english_answers (student_id, skill, lv, at DESC)`,
   // Word Vault: words a student saved, reviewed on a spaced schedule (box 1-5)
   `CREATE TABLE IF NOT EXISTS english_vault (
      student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,

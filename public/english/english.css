@@ -200,3 +200,110 @@ html.w3d .eplayer{background:linear-gradient(160deg,#F6F1FF,#FFF4E6)}
 .eyap.wiggle{animation:ewiggle .6s ease-in-out}
 @keyframes ewiggle{0%,100%{rotate:0deg}25%{rotate:-6deg}60%{rotate:5deg}}
 @media (prefers-reduced-motion:reduce){.eyap.wiggle{animation:none}.eyap-tip{transition:none}}
+
+/* ---------- home: playable sets ---------- */
+button.eset{border:0;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;transition:transform .08s,background .15s}
+button.eset:hover{background:color-mix(in srgb,var(--e-purple) 10%,var(--chip))}
+button.eset:active{transform:scale(.99)}
+button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
+.eset.go .estate{color:var(--e-purple-d)}
+.eset.done{opacity:.75}
+.eset.done .eset-t b{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:color-mix(in srgb,var(--e-ok) 60%,transparent)}
+.etick{width:26px;height:26px;border-radius:50%;background:var(--e-ok);display:grid;place-items:center}
+.etick svg{width:16px;height:16px}
+.evh{font-size:15px!important;color:var(--soft);margin:16px 0 8px!important}
+
+/* ---------- game player extras ---------- */
+.ep-time{font-weight:800;color:var(--soft);font-size:14px;white-space:nowrap;background:var(--card);border-radius:999px;padding:4px 10px;box-shadow:var(--shadow)}
+.eg .ep-body{padding-bottom:150px}
+.ep-yapper{position:fixed;left:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:4;display:flex;align-items:flex-end;gap:6px;max-width:min(560px,calc(100% - 24px));pointer-events:none}
+.ep-yapper[hidden]{display:none}
+.ep-yapper img{width:64px;height:64px;flex:none;filter:drop-shadow(0 6px 10px rgba(75,42,168,.25))}
+.ep-say{background:var(--card);border-radius:18px 18px 18px 4px;padding:10px 14px;box-shadow:0 10px 26px rgba(40,20,90,.18);font-weight:650;font-size:15.5px;line-height:1.45;pointer-events:auto}
+.ep-say i{color:var(--soft)}
+.ep-yapper.pop .ep-say{animation:epop .25s ease-out}
+@keyframes epop{from{transform:translateY(8px) scale(.96);opacity:0}}
+
+/* Real or Fake feedback */
+.erf-card.ok{background:#E7F8EE;box-shadow:0 0 0 3px var(--e-ok),0 14px 34px rgba(30,158,85,.18)}
+.erf-card.bad{background:#FDECEC;box-shadow:0 0 0 3px var(--e-bad),0 14px 34px rgba(224,70,76,.15)}
+.erf-fb{min-height:48px;margin:0;text-align:center;font-weight:700;font-size:16px;max-width:420px}
+.erf-fb.ok{color:#14733E}.erf-fb.bad{color:#B3262C}
+
+/* Jumble */
+.ejb{display:flex;flex-direction:column;gap:14px;margin:auto 0;padding:10px 0}
+.ejb-line{min-height:96px;background:var(--card);border-radius:22px;padding:14px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:8px;align-items:center;align-content:flex-start;border:3px solid transparent;transition:border-color .15s}
+.ejb-line.bad{border-color:var(--e-bad);animation:eshake .4s}
+.ejb-bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:52px}
+.echunk{border:2px solid var(--e-line);background:var(--card);border-radius:14px;padding:10px 14px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 4px 0 var(--e-line);color:var(--ink)}
+.echunk.in{background:var(--e-purple-soft);border-color:color-mix(in srgb,var(--e-purple) 45%,transparent);box-shadow:0 3px 0 color-mix(in srgb,var(--e-purple) 35%,transparent)}
+.echunk.ghost{opacity:.25;box-shadow:none;cursor:default;border-style:dashed}
+.echunk:active{transform:translateY(2px)}
+.eslot{width:64px;height:42px;border-radius:12px;border:2px dashed var(--e-line)}
+.ejb-end{font-weight:900;font-size:20px}
+.ejb-done{font-size:20px;font-weight:800;line-height:1.5;padding:4px}
+.ejb-done.ok{color:#14733E}
+@keyframes eshake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* Spot & Fix */
+.esf{display:flex;flex-direction:column;gap:14px;align-items:center;margin:auto 0;padding:10px 0}
+.esf-ctx{background:#E9F1FF;color:#2C4FA8;font-weight:800;font-size:13.5px;border-radius:999px;padding:5px 12px}
+.esf-s{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--shadow);font-size:20px;line-height:2.2;text-align:center;width:100%}
+.esf-part{border:0;border-bottom:3px solid color-mix(in srgb,var(--e-purple) 30%,transparent);background:transparent;font:inherit;font-weight:700;padding:2px 6px;border-radius:8px;cursor:pointer;color:var(--ink)}
+.esf-part:hover:not([disabled]){background:var(--e-purple-soft)}
+.esf-part[disabled]{cursor:default}
+.esf-part.miss{background:#FDECEC;animation:eshake .4s}
+.esf-part.found{background:#FFF1D6;border-bottom-color:var(--e-amber)}
+.esf-part.right{background:#E7F8EE;border-bottom-color:var(--e-ok);color:#14733E}
+.esf-none.right{background:#E7F8EE;box-shadow:0 0 0 3px var(--e-ok)}
+.esf-fixes{display:grid;gap:8px;width:min(460px,100%)}
+.esf-fixes[hidden]{display:none}
+.eopt.right{border-color:var(--e-ok);background:#E7F8EE;box-shadow:0 4px 0 color-mix(in srgb,var(--e-ok) 40%,transparent)}
+.eopt.bad{border-color:var(--e-bad);background:#FDECEC;box-shadow:0 4px 0 color-mix(in srgb,var(--e-bad) 35%,transparent)}
+.eopt[disabled]{cursor:default}
+
+/* Word Groups */
+.egr{display:flex;flex-direction:column;gap:12px;padding:6px 0}
+.egr-solved{display:flex;flex-direction:column;gap:8px}
+.egr-row{background:var(--g);border-radius:16px;padding:10px 14px;text-align:center;color:#1d1b26}
+.egr-row b{display:block;font-size:15px;text-transform:uppercase;letter-spacing:.04em}
+.egr-row span{font-weight:700;font-size:15px}
+.egr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.egr-grid.shake{animation:eshake .4s}
+.egr-tile{aspect-ratio:1.6;border:0;border-radius:14px;background:var(--card);box-shadow:0 4px 0 var(--e-line);font:inherit;font-weight:800;font-size:clamp(11px,3.4vw,17px);cursor:pointer;padding:4px;overflow-wrap:anywhere;color:var(--ink);text-transform:uppercase}
+.egr-tile.on{background:#4B3B7A;color:#fff;box-shadow:0 4px 0 #2A1C63}
+.egr-miss{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:800;color:var(--soft);font-size:14px}
+.egr-miss i{width:12px;height:12px;border-radius:50%;background:var(--e-purple)}
+.egr-miss i.off{background:var(--e-line)}
+.eshare{display:flex;flex-direction:column;align-items:center}
+.eshare pre{background:var(--card);border-radius:16px;padding:12px 16px;margin:0 0 8px;font-size:18px;line-height:1.3;box-shadow:var(--shadow);text-align:center}
+
+/* Word Vault */
+.evault{margin:auto 0}
+.evask{text-align:center;font-size:20px;margin:6px 0 0}
+.evw{font-family:var(--display);font-size:30px;color:var(--e-purple-d)}
+.evq{background:var(--card);border-radius:20px;padding:16px 18px;box-shadow:var(--shadow);font-size:18px;font-weight:700;line-height:1.55;text-align:center}
+.evgap{color:var(--e-purple-d);font-weight:900}
+
+/* round result */
+.egres h2{font-size:34px}
+.elvup{background:color-mix(in srgb,var(--c) 16%,var(--card));border:2px solid var(--c);border-radius:18px;padding:10px 16px;font-weight:700;font-size:17px}
+.egstats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.egstats div{background:var(--card);border-radius:18px;padding:12px 18px;box-shadow:var(--shadow);min-width:110px}
+.egstats b{display:block;font-family:var(--display);font-size:32px;line-height:1}
+.egstats b small{font-size:16px;color:var(--soft)}
+.egstats span{font-size:13px;font-weight:800;color:var(--soft)}
+.evoffer{width:min(460px,100%);text-align:left}
+.evchk{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:6px 12px;margin:0 6px 8px 0;font-weight:800;cursor:pointer}
+.evoffer .ebtn{display:flex;margin-top:6px}
+@media (max-width:640px){.esf-s{font-size:18px}.echunk{font-size:16px;padding:9px 12px}.ep-yapper img{width:52px;height:52px}}
+@media (prefers-reduced-motion:reduce){.ejb-line.bad,.esf-part.miss,.egr-grid.shake,.ep-yapper.pop .ep-say{animation:none}}
+
+/* short laptop screens and small phones: keep each game on one screen */
+@media (max-height:640px){
+  .erf{gap:10px}.erf-card{aspect-ratio:2.4}.erf-card b{font-size:38px}
+  .egr-tile{aspect-ratio:2.6}.egr{gap:8px}
+  .ep-intro .eyap,.eresult .eyap{width:96px;height:96px}
+  .egstats div{padding:8px 14px}.egstats b{font-size:26px}
+}
+@media (min-width:700px){.egr-grid,.egr-solved{width:min(620px,100%);margin:0 auto}.egr-tile{aspect-ratio:2.2}}

@@ -17,18 +17,18 @@ const SKILLS = [
   { k: 'wri', name: 'Writing',    c: '#F0A43A' }
 ];
 const LEVELS = ['First Sip', 'Regular', 'Chatter', 'Storyteller', 'Debater', 'Anchor', 'Headliner', 'Adda Legend'];
-// v1 games (built: false = not playable in this release yet; listed so the plan is visible on test accounts)
+// v1 games (built: false = not playable in this release yet). Keep built: true in step with BUILT in api/_lib/english-games.js
 const GAMES = [
-  { id: 'groups',  name: 'Word Groups',  skill: 'voc', icon: '🧩', mins: 2, built: false, daily: true },
-  { id: 'realfake',name: 'Real or Fake', skill: 'voc', icon: '🕵️', mins: 2, built: false },
+  { id: 'groups',  name: 'Word Groups',  skill: 'voc', icon: '🧩', mins: 2, built: true, daily: true },
+  { id: 'realfake',name: 'Real or Fake', skill: 'voc', icon: '🕵️', mins: 2, built: true },
   { id: 'catch',   name: 'Catch It',     skill: 'lis', icon: '🎧', mins: 2, built: false },
   { id: 'rewind',  name: 'Story Rewind', skill: 'lis', icon: '📻', mins: 3, built: false },
-  { id: 'jumble',  name: 'Jumble',       skill: 'gra', icon: '🔀', mins: 2, built: false },
-  { id: 'spotfix', name: 'Spot & Fix',   skill: 'gra', icon: '🔍', mins: 2, built: false },
+  { id: 'jumble',  name: 'Jumble',       skill: 'gra', icon: '🔀', mins: 2, built: true },
+  { id: 'spotfix', name: 'Spot & Fix',   skill: 'gra', icon: '🔍', mins: 2, built: true },
   { id: 'reels',   name: 'Reel Reader',  skill: 'rea', icon: '📱', mins: 3, built: false },
   { id: 'vanish',  name: 'Vanish',       skill: 'rea', icon: '💨', mins: 3, built: false },
   { id: 'email',   name: 'Fix My Email', skill: 'wri', icon: '✉️', mins: 3, built: false },
-  { id: 'vault',   name: 'Word Vault',   skill: 'voc', icon: '🔐', mins: 1, built: false, always: true }
+  { id: 'vault',   name: 'Word Vault',   skill: 'voc', icon: '🔐', mins: 1, built: true, always: true }
 ];
 const gameOf = id => GAMES.find(g => g.id === id);
 // Everything Yapper says out loud. After ANY change here, run: python scripts/english-voice.py
@@ -40,7 +40,12 @@ const gameOf = id => GAMES.find(g => g.id === id);
   c2: ['Nice! One more short passage.'],
   catch: ['Part three: Catch it. Listen, then type exactly what you hear. Each sentence plays only once, so stay sharp!'],
   story: ['Last part! Read this quick story, then answer two questions.'],
-  done: ['Done! Here’s where you start. I’ll pick your games from this.']
+  done: ['Done! Here’s where you start. I’ll pick your games from this.'],
+  groups: ['Word Groups! Sixteen words, four hidden groups of four. You get four mistakes. Go!'],
+  realfake: ['Real or Fake! Tap Real if it’s a real English word, Fake if it’s made up. Five seconds each, so be quick!'],
+  jumble: ['Jumble! Tap the pieces in the right order to build the sentence.', 'Careful: one piece doesn’t belong. Leave it out.'],
+  spotfix: ['Spot and Fix! Tap the part with the mistake, then pick the fix. Some sentences are already perfect, so don’t over-fix.'],
+  vault: ['Word Vault time! Let’s see which of your saved words stuck.']
 };/*END_YAPPER_LINES*/
 const skillOf = k => SKILLS.find(s => s.k === k);
 
@@ -178,7 +183,7 @@ function renderHome(root, S){
   if (closed) { tag = 'See you tomorrow'; h = 'Adda’s closed for today'; p = 'Great work! You played ' + mins(t) + ' minutes. Your Word Vault stays open.'; btn = ''; }
   else if (!S.placed) { h = 'Find your level'; p = 'A 5-minute warm-up picks your games. Test accounts can skip it.'; btn = '<button class="ebtn" data-echeck>Start the level check</button>'; }
   else if (done) { tag = 'Goal done ✓'; h = 'Bonus rounds'; p = 'Today’s 15 minutes are done. Keep playing for bonus points, up to 25 minutes.'; btn = '<button class="ebtn" data-eplay>Play a bonus round</button>'; }
-  else if (t > 0) { h = 'Keep going'; p = Math.ceil((GOAL - t) / 60) + ' minutes left in today’s Adda.'; btn = '<button class="ebtn" data-eplay>Continue</button>'; }
+  else if (t > 0) { const n = nextGame(); h = 'Keep going'; p = Math.ceil((GOAL - t) / 60) + ' minutes left in today’s Adda.'; btn = '<button class="ebtn" data-eplay>' + (n ? 'Continue: ' + esc(gameOf(n).name) : 'Play a bonus round') + '</button>'; }
   else { h = 'Start today’s Adda'; p = '5 quick games picked for you. About 15 minutes.'; btn = '<button class="ebtn" data-eplay>Start</button>'; }
   const L = S.levels || {}, lv = SKILLS.map(s => L[s.k]).filter(Boolean);
   const overall = lv.length ? Math.round(lv.reduce((a, b) => a + b, 0) / lv.length) : null;
@@ -192,7 +197,8 @@ function renderHome(root, S){
     + (btn ? '<div class="ehero-row">' + btn + '</div>' : '') + '</div>'
     + yap(closed ? 'idle' : done ? 'correct' : 'idle', 140, 'eyap ehero-yap', closed ? 'closed' : done ? 'done' : 'home') + '</section>'
     + '<div class="egrid"><section class="epanel"><h3>Today’s games</h3><p class="esub">' + (S.placed ? 'Picked for your level. More time goes to the skills you’re building.' : 'Your games appear after the level check.') + '</p>'
-    + '<div class="esets">' + (S.placed && S.circuit && S.circuit.length ? ['groups', ...S.circuit].map(gameOf).filter(Boolean) : GAMES.filter(g => !g.always)).map(g => setRow(g)).join('') + '</div></section>'
+    + '<div class="esets">' + (S.placed && S.circuit && S.circuit.length ? todaySets(S).map(x => setRow(gameOf(x.id), x.done)) : GAMES.filter(g => !g.always).map(g => setRow(g))).join('') + '</div>'
+    + (S.placed || tester() ? '<h3 class="evh">Always open</h3><div class="esets">' + setRow(gameOf('vault'), false, vaultLine(S)) + '</div>' : '') + '</section>'
     + '<aside class="epanel eside"><div class="eyou"><h3>Your skills</h3>'
     + (overall ? '<p class="esub">You’re <b>Level ' + overall + ': ' + LEVELS[overall - 1] + '</b>. Only you can see this.</p>' : '<p class="esub">The level check sets these. Only you can see them.</p>')
     + SKILLS.map(s => skillRow(s, L[s.k])).join('') + '</div>'
@@ -204,12 +210,13 @@ function renderHome(root, S){
     + '<p>The leaderboard counts effort, not who is “best at English”.</p></div></aside></div>';
   syncMute();
 }
-function setRow(g){
-  const s = skillOf(g.skill);
-  return '<div class="eset' + (g.built ? '' : ' soon') + '"><span class="eico" style="--c:' + s.c + '">' + g.icon + '</span>'
-    + '<div class="eset-t"><b>' + esc(g.name) + '</b><small><i style="background:' + s.c + '"></i>' + s.name + ' · about ' + g.mins + ' min' + (g.daily ? ' · daily puzzle' : '') + '</small></div>'
-    + '<span class="estate">' + (g.built ? '' : ICON.lock + ' Soon') + '</span></div>';
+function setRow(g, done, extra){
+  const s = skillOf(g.skill), tag = g.built ? 'button' : 'div';
+  return '<' + tag + ' class="eset' + (g.built ? ' go' : ' soon') + (done ? ' done' : '') + '"' + (g.built ? ' data-egame="' + g.id + '"' : '') + '><span class="eico" style="--c:' + s.c + '">' + g.icon + '</span>'
+    + '<span class="eset-t"><b>' + esc(g.name) + '</b><small><i style="background:' + s.c + '"></i>' + s.name + ' · ' + (extra || 'about ' + g.mins + ' min' + (g.daily ? ' · daily puzzle' : '')) + '</small></span>'
+    + '<span class="estate">' + (done ? '<span class="etick">' + ICON.check + '</span>' : g.built ? 'Play ›' : ICON.lock + ' Soon') + '</span></' + tag + '>';
 }
+function vaultLine(S){ const v = S.vault || {}; return v.total ? (v.due ? v.due + ' due now' : 'nothing due') + ' · ' + plural(v.total, 'word') + ' saved' + (v.mastered ? ' · ' + v.mastered + ' mastered' : '') : 'save words from Real or Fake'; }
 function skillRow(s, lv){
   let bars = ''; for (let i = 1; i <= 8; i++) bars += '<i' + (lv && i <= lv ? ' class="on"' : '') + '></i>';
   return '<div class="eskill" style="--c:' + s.c + '"><div class="eskill-h"><b>' + s.name + '</b><span>' + (lv ? 'Lv ' + lv + ' · ' + LEVELS[lv - 1] : '?') + '</span></div><div class="ebars">' + bars + '</div></div>';
@@ -442,6 +449,422 @@ function result(L){
   qs('#ep-home', CP).onclick = () => { sfx('tap'); closeCheck(); };
 }
 
+/* ================= the games: Word Groups, Real or Fake, Jumble, Spot & Fix, Word Vault =================
+   One player shell for all of them. The server picks each round at the student's level and sends the answers along,
+   so feedback is instant; points and levels come from the server, which re-scores the FIRST attempt at each item. */
+let G = null, GP = null;
+const newCid = () => (ME ? ME.id : 0) + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+const PRAISE = ['Nice!', 'Sharp!', 'Yes!', 'Spot on!', 'Too good!', 'Easy for you!', 'Clean!'];
+const praise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
+const GROUP_C = ['#F5C542', '#4CC38A', '#5B8DEF', '#B07CF0'];
+const GROUP_E = ['🟨', '🟩', '🟦', '🟪'];
+const capFirst = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+// today's sets in order, each marked done by counting today's finished rounds per game
+function todaySets(S){
+  const left = Object.assign({}, (S && S.played) || {});
+  return ['groups', ...((S && S.circuit) || [])].map(id => { const done = left[id] > 0; if (done) left[id]--; return { id, done }; });
+}
+function nextGame(){
+  const S = st(); if (!S) return null;
+  const n = todaySets(S).find(x => !x.done && gameOf(x.id) && gameOf(x.id).built);
+  if (n) return n.id;
+  return S.vault && S.vault.due > 0 ? 'vault' : null;
+}
+// after the 5 sets: bonus rounds lean towards the weaker skill
+function bonusGame(){
+  const S = st(), L = (S && S.levels) || {};
+  const sets = GAMES.filter(g => g.built && !g.daily && !g.always).sort((a, b) => ((L[a.skill] || 1) - (L[b.skill] || 1)) || (Math.random() - 0.5));
+  return sets.length ? sets[Math.floor(Math.random() * Math.min(2, sets.length))].id : null;
+}
+function startNext(){
+  if (isClosed()) { toast('Adda’s closed for today. Your Word Vault is still open.'); return; }
+  openGame(nextGame() || bonusGame());
+}
+
+const pb = () => qs('.ep-body', GP);
+function gprog(f){ if (GP) qs('.ep-prog i', GP).style.width = Math.round(Math.max(0, Math.min(1, f)) * 100) + '%'; }
+function gload(msg){ pb().innerHTML = '<div class="ep-center">' + yap('thinking', 120, 'eyap bob') + '<p class="esub">' + esc(msg) + '</p></div>'; }
+function gfail(msg, retry){
+  pb().innerHTML = '<div class="ep-center">' + yap('oops', 120, 'eyap') + '<p class="esub">' + esc(msg || 'Couldn’t reach Game Corner. Check your internet.') + '</p>'
+    + '<div class="ep-row">' + (retry ? '<button class="ebtn" id="eg-retry">Try again</button>' : '') + '<button class="ebtn ghost" id="eg-close">Close</button></div></div>';
+  if (retry) qs('#eg-retry', GP).onclick = () => { sfx('tap'); retry(); };
+  qs('#eg-close', GP).onclick = () => { sfx('tap'); closeGame(); };
+}
+// Yapper's corner bubble: hints, the "why", praise. Spoken only if a clip exists (fixed lines); the rest is text.
+function say(html, pose){
+  if (!GP) return;
+  const box = qs('.ep-yapper', GP); box.hidden = false;
+  qs('.ep-yapper img', GP).src = 'assets/yapper/yapper-' + (pose || 'idle') + '.svg';
+  const s = qs('.ep-say', GP); s.innerHTML = html; box.classList.remove('pop'); void box.offsetWidth; box.classList.add('pop');
+}
+function hush(){ if (GP) qs('.ep-yapper', GP).hidden = true; }
+function addPts(){ /* shown at the end; the server decides the real number */ }
+function timeLabel(t){ if (!GP) return; const el = qs('.ep-time', GP); if (el) el.textContent = mins(Math.min(t, 5999)) + ' / 15 min'; }
+
+function openGame(game, opt){
+  opt = opt || {};
+  const g = gameOf(game);
+  if (!ME || GP || CP || !g || !g.built) return;
+  sfx('tap'); Voice.stop(); hideTip();
+  GP = frag('<div class="eplayer eg" role="dialog" aria-modal="true" aria-label="' + esc(g.name) + '">'
+    + '<div class="ep-top"><button class="round press ep-x" aria-label="Leave this round">✕</button><div class="ep-prog"><i></i></div><span class="ep-time"></span></div>'
+    + '<div class="ep-body"></div>'
+    + '<div class="ep-yapper" hidden aria-live="polite">' + yap('idle', 64, 'eyap') + '<div class="ep-say"></div></div></div>');
+  document.body.appendChild(GP); document.body.classList.add('eplaying');
+  qs('.ep-x', GP).onclick = askLeaveGame;
+  G = { game, opt, cid: newCid(), t0: Date.now(), ids: [], ans: [], tries: [], ms: [], combo: 0, missed: [], timer: 0 };
+  Adda._play(true, timeLabel); timeLabel(todaySecs());
+  gload('Getting your round ready…');
+  const req = game === 'vault' ? { action: 'vault', op: 'get', token: ME.token } : { action: 'roundstart', game, token: ME.token, lv: opt.lv, n: opt.n };
+  const go = () => api('/api/english', req, 10000).then(r => {
+    if (!GP || !G) return;
+    if (r.status === 409) { closeGame(); toast('Do the level check first.'); return; }
+    if (r.status !== 200 || !r.j.ok) return gfail(null, () => { gload('Trying again…'); go(); });
+    if (r.j.closed) return gfail('Adda’s closed for today. Great work! Your Word Vault is still open.');
+    if (r.j.already) return gfail('You’ve done today’s Word Groups. A new puzzle comes tomorrow!');
+    G.round = r.j.round || { quiz: r.j.quiz };
+    gintro(game);
+  });
+  go();
+}
+function gintro(game){
+  const g = gameOf(game), lines = YAPPER_LINES[game] || [];
+  const extra = game === 'jumble' && G.round.lv >= 4 ? lines[1] : '';
+  const sub = game === 'groups' && G.round.items ? 'Puzzle #' + G.round.items[0].n : game === 'vault' ? plural(G.round.quiz.length, 'word') + ' to review' : 'Level ' + G.round.lv + ' · ' + LEVELS[G.round.lv - 1];
+  pb().innerHTML = '<div class="ep-intro">' + yap('idle', 140, 'eyap bob') + '<div class="ebubble"><span class="etag">' + g.icon + ' ' + esc(g.name) + ' · ' + esc(sub) + '</span>'
+    + '<p>' + esc(lines[0] || '') + '</p>' + (extra ? '<p>' + esc(extra) + '</p>' : '') + '</div><button class="ebtn" id="eg-go">Start</button></div>';
+  Voice.say(lines[0], why => { if (why === 'end' && extra) Voice.say(extra); });
+  const b = qs('#eg-go', GP); b.focus();
+  b.onclick = () => { sfx('go'); Voice.stop(); G.t0 = Date.now(); ({ realfake: rfGame, jumble: jbGame, spotfix: sfGame, groups: grGame, vault: vaultGame })[game](); };
+}
+function askLeaveGame(){
+  if (!GP || qs('.ep-confirm', GP)) return;
+  sfx('tap');
+  const box = frag('<div class="ep-confirm"><div class="epanel"><h3>Leave this round?</h3><p class="esub">This round won’t be saved.</p>'
+    + '<div class="ep-row"><button class="ebtn ghost sm" data-k="stay">Keep playing</button><button class="ebtn sm" data-k="leave">Leave</button></div></div></div>');
+  GP.appendChild(box);
+  box.onclick = e => { const k = e.target.closest('[data-k]'); if (!k) return; box.remove(); if (k.dataset.k === 'leave') closeGame(); };
+}
+function closeGame(){
+  if (!GP) return;
+  Voice.stop(); if (G) clearTimeout(G.timer);
+  GP.remove(); GP = null; G = null;
+  document.body.classList.remove('eplaying');
+  Adda._play(false);
+  render();
+}
+document.addEventListener('keydown', e => {
+  if (!GP || !G || qs('.ep-confirm', GP)) return;
+  if (e.key === 'Escape') return askLeaveGame();
+  if (G.key) G.key(e);
+});
+const nextBtn = (label, fn) => { const b = qs('#eg-next', GP); b.textContent = label || 'Next'; b.hidden = false; b.disabled = false; b.focus({ preventScroll: true }); b.onclick = () => { sfx('tap'); fn(); }; };
+
+/* ---- Real or Fake: 20 words, 5 seconds each ---- */
+function rfGame(){
+  const items = G.round.items; G.ids = items.map(x => x.id);
+  const step = i => {
+    hush();
+    if (i >= items.length) return finish();
+    gprog(i / items.length);
+    const it = items[i];
+    pb().innerHTML = '<div class="erf"><p class="ecount">' + (i + 1) + ' / ' + items.length + (G.combo >= 3 ? ' · 🔥 ' + G.combo : '') + '</p>'
+      + '<div class="erf-card"><b>' + esc(it.w) + '</b></div><div class="erf-time"><i></i></div>'
+      + '<p class="erf-fb" aria-live="polite"></p>'
+      + '<div class="erf-btns"><button class="ebtn ghost" data-a="0">✗ Fake</button><button class="ebtn purple" data-a="1">✓ Real</button></div></div>';
+    const card = qs('.erf-card', GP), bar = qs('.erf-time i', GP), fb = qs('.erf-fb', GP);
+    const t0 = Date.now(); let done = false;
+    const answer = v => {
+      if (done || !G) return; done = true; clearTimeout(G.timer);
+      G.ans[i] = v; G.tries[i] = 1; G.ms[i] = Date.now() - t0;
+      const right = v === it.real;
+      G.combo = right ? G.combo + 1 : 0;
+      if (it.real && !right) G.missed.push(it.w);
+      card.classList.add(right ? 'ok' : 'bad');
+      qa('.erf-btns .ebtn', GP).forEach(b => b.disabled = true);
+      bar.style.transition = 'none';
+      sfx(right ? (G.combo >= 3 ? 'combo' : 'correct') : v === null ? 'softbad' : 'wrong');
+      fb.innerHTML = (v === null ? '⏱ Time’s up. ' : right ? '✓ ' : '✗ ') + (it.real ? '<b>' + esc(it.w) + '</b> is real' + (it.m ? ': ' + esc(it.m) : '.') : '<b>' + esc(it.w) + '</b> is made up.');
+      fb.className = 'erf-fb ' + (right ? 'ok' : 'bad');
+      G.timer = setTimeout(() => step(i + 1), right ? 1100 : 2600);
+      card.onclick = () => { clearTimeout(G.timer); step(i + 1); };
+    };
+    qa('[data-a]', GP).forEach(b => b.onclick = () => answer(b.dataset.a === '1'));
+    G.key = e => { if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'r') answer(true); else if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'f') answer(false); };
+    let x0 = null;
+    card.onpointerdown = e => { if (done) return; x0 = e.clientX; card.setPointerCapture(e.pointerId); };
+    card.onpointermove = e => { if (x0 != null) card.style.transform = 'translateX(' + (e.clientX - x0) + 'px) rotate(' + ((e.clientX - x0) / 20) + 'deg)'; };
+    card.onpointerup = e => { const dx = x0 == null ? 0 : e.clientX - x0; x0 = null; card.style.transform = ''; if (dx > 70) answer(true); else if (dx < -70) answer(false); };
+    requestAnimationFrame(() => { bar.style.transition = 'width 5s linear'; bar.style.width = '0%'; });
+    G.timer = setTimeout(() => answer(null), 5000);
+  };
+  step(0);
+}
+
+/* ---- Jumble: tap the pieces into order (8 sentences); a hint after the first miss, the answer after the second ---- */
+function jbGame(){
+  const items = G.round.items; G.ids = items.map(x => x.id);
+  const step = i => {
+    hush(); G.key = null;
+    if (i >= items.length) return finish();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now();
+    let placed = [], tries = 0, over = false;
+    pb().innerHTML = '<div class="ejb"><p class="ecount">Sentence ' + (i + 1) + ' of ' + items.length + (G.combo >= 2 ? ' · 🔥 ' + G.combo + ' in a row' : '') + '</p>'
+      + '<div class="ejb-line" aria-label="Your sentence"></div><div class="ejb-bank" aria-label="Pieces"></div>'
+      + (it.x ? '<p class="ehint">One piece doesn’t belong. Leave it out.</p>' : '<p class="ehint">Tap the pieces in order. Tap a placed piece to send it back.</p>')
+      + '<div class="ep-row"><button class="ebtn" id="eg-check" disabled>Check</button><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
+    const line = qs('.ejb-line', GP), bank = qs('.ejb-bank', GP), chk = qs('#eg-check', GP);
+    const draw = () => {
+      line.innerHTML = placed.map((k, p) => '<button class="echunk in" data-p="' + p + '">' + esc(p === 0 ? capFirst(it.chunks[k]) : it.chunks[k]) + '</button>').join('')
+        + (placed.length < it.n ? '<span class="eslot"></span>'.repeat(Math.min(3, it.n - placed.length)) : '<span class="ejb-end">' + esc(it.end) + '</span>');
+      bank.innerHTML = it.chunks.map((c, k) => placed.includes(k) ? '<span class="echunk ghost">' + esc(c) + '</span>' : '<button class="echunk" data-k="' + k + '">' + esc(c) + '</button>').join('');
+      chk.disabled = over || placed.length !== it.n;
+    };
+    line.onclick = e => { const b = e.target.closest('[data-p]'); if (!b || over) return; sfx('tap'); placed.splice(+b.dataset.p, 1); line.classList.remove('bad'); draw(); };
+    bank.onclick = e => { const b = e.target.closest('[data-k]'); if (!b || over || placed.length >= it.n) return; sfx('select'); placed.push(+b.dataset.k); line.classList.remove('bad'); draw(); };
+    const show = (o, cls) => { line.innerHTML = '<span class="ejb-done ' + cls + '">' + esc(capFirst(o.join(' ')) + it.end) + '</span>'; bank.innerHTML = ''; };
+    chk.onclick = () => {
+      const got = placed.map(k => it.chunks[k]);
+      tries++; if (tries === 1) G.ans[i] = got; G.tries[i] = tries; G.ms[i] = Date.now() - t0;
+      const ok = it.orders.some(o => o.join(' | ') === got.join(' | '));
+      if (ok) {
+        over = true; G.combo = tries === 1 ? G.combo + 1 : 0;
+        sfx(G.combo >= 3 ? 'combo' : 'correct'); show(got, 'ok');
+        say((tries === 1 ? praise() : 'Got it!') + (G.combo >= 3 ? ' 🔥 ' + G.combo + ' in a row.' : ''), 'correct');
+      } else if (tries === 1) {
+        sfx('wrong'); line.classList.add('bad'); draw();
+        say('<b>Hint:</b> ' + esc(it.hint), 'thinking');
+        return;
+      } else {
+        over = true; G.combo = 0; sfx('softbad'); show(it.orders[0], 'shown');
+        say(esc(it.why), 'oops');
+      }
+      chk.hidden = true; nextBtn(i + 1 < items.length ? 'Next' : 'Finish', () => step(i + 1));
+    };
+    G.key = e => { if (e.key === 'Enter' && !chk.disabled && !chk.hidden) chk.click(); };
+    draw();
+  };
+  step(0);
+}
+
+/* ---- Spot & Fix: tap the wrong part (or "No error"), then choose the fix ---- */
+function sfGame(){
+  const items = G.round.items; G.ids = items.map(x => x.id);
+  const step = i => {
+    hush(); G.key = null;
+    if (i >= items.length) return finish();
+    gprog(i / items.length);
+    const it = items[i], t0 = Date.now();
+    let tries = 0, stage = 'find';
+    G.ans[i] = { p: null, f: null };
+    pb().innerHTML = '<div class="esf"><p class="ecount">Sentence ' + (i + 1) + ' of ' + items.length + '</p>'
+      + (it.ctx === 'formal' ? '<span class="esf-ctx">📧 In a formal email or interview</span>' : '')
+      + '<div class="esf-s">' + it.parts.map((p, k) => '<button class="esf-part" data-p="' + k + '">' + esc(p) + '</button>').join(' ') + '</div>'
+      + '<button class="ebtn ghost sm esf-none" data-p="-1">✓ No error</button>'
+      + '<div class="esf-fixes" hidden></div>'
+      + '<p class="ehint esf-tell">Tap the part with the mistake. Or tap “No error”.</p>'
+      + '<div class="ep-row"><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
+    const fixesEl = qs('.esf-fixes', GP), tell = qs('.esf-tell', GP);
+    const partEl = k => qs('.esf-part[data-p="' + k + '"]', GP);
+    const lock = () => qa('.esf-part,.esf-none', GP).forEach(b => b.disabled = true);
+    const fixed = f => { const el = partEl(it.err); el.innerHTML = esc(it.parts[it.err].replace(it.bad, it.fixes[f])); };
+    const done = () => { lock(); tell.hidden = true; G.ms[i] = Date.now() - t0; nextBtn(i + 1 < items.length ? 'Next' : 'Finish', () => step(i + 1)); };
+    const reveal = () => {
+      sfx('softbad');
+      if (it.err == null) { qs('.esf-none', GP).classList.add('right'); say('This one had <b>no error</b>. ' + esc(it.why), 'oops'); }
+      else { partEl(it.err).classList.add('right'); fixed(it.ans); say('Fix: <b>' + esc(it.fixes[it.ans]) + '</b>. ' + esc(it.why), 'oops'); }
+      done();
+    };
+    qa('.esf-part,.esf-none', GP).forEach(b => b.onclick = () => {
+      if (stage !== 'find') return;
+      const p = +b.dataset.p; tries++; G.tries[i] = tries;
+      if (G.ans[i].p === null) G.ans[i].p = p;
+      const right = it.err == null ? p === -1 : p === it.err;
+      if (right && it.err == null) { sfx('correct'); b.classList.add('right'); say((tries === 1 ? praise() + ' ' : '') + 'No error here. ' + esc(it.why), 'correct'); return done(); }
+      if (right) {
+        sfx('select'); b.classList.add('found'); stage = 'fix'; lock();
+        tell.textContent = 'Found it! Now pick the fix.'; hush();
+        fixesEl.hidden = false;
+        fixesEl.innerHTML = it.fixes.map((f, k) => '<button class="eopt" data-f="' + k + '">' + esc(f) + '</button>').join('');
+        qa('[data-f]', fixesEl).forEach(fb => fb.onclick = () => {
+          if (stage !== 'fix') return; stage = 'done';
+          const f = +fb.dataset.f; G.ans[i].f = f;
+          qa('[data-f]', fixesEl).forEach(x => { x.disabled = true; if (+x.dataset.f === it.ans) x.classList.add('right'); });
+          fixed(it.ans); partEl(it.err).classList.add('right');
+          if (f === it.ans) { sfx('correct'); say((tries === 1 ? praise() + ' ' : '') + esc(it.why), 'correct'); }
+          else { fb.classList.add('bad'); sfx('wrong'); say('Better: <b>' + esc(it.fixes[it.ans]) + '</b>. ' + esc(it.why), 'oops'); }
+          done();
+        });
+        return;
+      }
+      b.classList.add('miss'); setTimeout(() => b.classList.remove('miss'), 500);
+      if (tries === 1) { sfx('wrong'); say('<b>Hint:</b> ' + esc(it.hint), 'thinking'); }
+      else { stage = 'done'; reveal(); }
+    });
+  };
+  step(0);
+}
+
+/* ---- Word Groups: 16 words, 4 groups of 4, 4 mistakes allowed ---- */
+function grGame(){
+  const P = G.round.items[0]; G.ids = [P.id]; G.ans = [[]]; G.tries = [0];
+  let left = P.words.slice(), sel = new Set(), solved = [], miss = 0, out = false;
+  const t0 = Date.now(), tried = new Set();
+  gprog(0);
+  pb().innerHTML = '<div class="egr"><p class="ecount">Puzzle #' + P.n + ' · find 4 groups of 4</p><div class="egr-solved"></div><div class="egr-grid"></div>'
+    + '<div class="egr-miss" aria-label="Mistakes left"></div>'
+    + '<div class="ep-row egr-ctl"><button class="ebtn ghost sm" id="egr-mix">Shuffle</button><button class="ebtn ghost sm" id="egr-clear">Deselect</button><button class="ebtn sm" id="egr-go" disabled>Submit</button></div>'
+    + '<div class="ep-row"><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
+  const grid = qs('.egr-grid', GP), sol = qs('.egr-solved', GP), go = qs('#egr-go', GP);
+  const groupOf = w => P.groups.findIndex(g => g.words.includes(w));
+  const draw = () => {
+    sol.innerHTML = solved.map(gi => { const g = P.groups[gi]; return '<div class="egr-row" style="--g:' + GROUP_C[gi] + '"><b>' + esc(g.name) + '</b><span>' + g.words.map(esc).join(', ') + '</span></div>'; }).join('');
+    grid.innerHTML = left.map(w => '<button class="egr-tile' + (sel.has(w) ? ' on' : '') + '" data-w="' + esc(w) + '" aria-pressed="' + sel.has(w) + '">' + esc(w) + '</button>').join('');
+    qs('.egr-miss', GP).innerHTML = 'Mistakes left: ' + '<i></i>'.repeat(Math.max(0, 4 - miss)) + '<i class="off"></i>'.repeat(Math.min(4, miss));
+    go.disabled = out || sel.size !== 4;
+    gprog(solved.length / 4);
+  };
+  grid.onclick = e => {
+    const b = e.target.closest('[data-w]'); if (!b || out) return;
+    const w = b.dataset.w;
+    if (sel.has(w)) sel.delete(w); else if (sel.size < 4) sel.add(w); else return;
+    sfx('select'); draw();
+  };
+  qs('#egr-mix', GP).onclick = () => { sfx('whoosh'); for (let i = left.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [left[i], left[j]] = [left[j], left[i]]; } draw(); };
+  qs('#egr-clear', GP).onclick = () => { sfx('tap'); sel.clear(); draw(); };
+  const end = win => {
+    out = true; qs('.egr-ctl', GP).hidden = true; grid.innerHTML = '';
+    G.tries[0] = G.ans[0].length; G.ms[0] = Date.now() - t0; G.share = 'English Adda #' + P.n + '\n' + G.ans[0].map(gs => gs.map(w => GROUP_E[groupOf(w)]).join('')).join('\n');
+    if (win) { sfx('fanfare'); say((miss ? 'Solved!' : 'Perfect, no mistakes!') + ' 🎉', 'correct'); try { if (!reduced()) confetti(); } catch (e) {} }
+    nextBtn('See result', () => finish());
+  };
+  // out of mistakes: reveal the remaining groups one at a time, each with its "why"
+  const revealNext = () => {
+    const gi = P.groups.findIndex((g, k) => !solved.includes(k));
+    if (gi < 0) return end(false);
+    solved.push(gi); left = left.filter(w => !P.groups[gi].words.includes(w)); sel.clear();
+    sfx('reveal'); draw(); say('<b>' + esc(P.groups[gi].name) + ':</b> ' + esc(P.groups[gi].why), 'thinking');
+    if (solved.length < 4) nextBtn('Show next group', revealNext); else nextBtn('See result', () => end(false));
+  };
+  go.onclick = () => {
+    const guess = [...sel], key = guess.slice().sort().join('|');
+    if (tried.has(key)) { toast('You already tried that one.'); return; }
+    tried.add(key); G.ans[0].push(guess);
+    const gi = P.groups.findIndex((g, k) => !solved.includes(k) && guess.every(w => g.words.includes(w)));
+    if (gi >= 0) {
+      solved.push(gi); left = left.filter(w => !guess.includes(w)); sel.clear();
+      sfx('correct'); draw(); say('<b>' + esc(P.groups[gi].name) + '.</b> ' + esc(P.groups[gi].why), 'correct');
+      if (solved.length === 4) end(true);
+      return;
+    }
+    miss++;
+    const close = P.groups.some((g, k) => !solved.includes(k) && guess.filter(w => g.words.includes(w)).length === 3);
+    sfx('wrong'); grid.classList.add('shake'); setTimeout(() => grid.classList.remove('shake'), 450);
+    draw();
+    if (miss >= 4) { out = true; go.disabled = true; qs('.egr-ctl', GP).hidden = true; say('Out of tries. No stress, here are the groups.', 'oops'); nextBtn('Show the groups', revealNext); }
+    else say(close ? 'So close! <b>One away.</b>' : 'Not a group. Try another mix.', 'thinking');
+  };
+  draw();
+}
+
+/* ---- Word Vault: review saved words (meaning → word, word → meaning, fill the gap) ---- */
+function vaultGame(){
+  const quiz = G.round.quiz || [];
+  if (!quiz.length) {
+    pb().innerHTML = '<div class="ep-center">' + yap('idle', 120, 'eyap bob') + '<h2 class="ddisplay">Your vault is clear</h2><p class="esub">No words due right now. Words you miss in Real or Fake can be saved here, and they come back on a smart schedule.</p><button class="ebtn" id="eg-close">Back to Adda</button></div>';
+    qs('#eg-close', GP).onclick = () => { sfx('tap'); closeGame(); };
+    return;
+  }
+  G.results = [];
+  const step = i => {
+    hush();
+    if (i >= quiz.length) return finishVault();
+    gprog(i / quiz.length);
+    const q = quiz[i];
+    const ask = q.fmt === 'w2m' ? 'What does <b class="evw">' + esc(q.q) + '</b> mean?' : q.fmt === 'gap' ? 'Which word fits the gap?' : 'Which word means…';
+    const big = q.fmt === 'w2m' ? '' : '<div class="evq">' + (q.fmt === 'gap' ? esc(q.q).replace('_____', '<span class="evgap">_____</span>') : '“' + esc(q.q) + '”') + '</div>';
+    pb().innerHTML = '<div class="estory evault"><p class="ecount">Word ' + (i + 1) + ' of ' + quiz.length + '</p><h3 class="evask">' + ask + '</h3>' + big
+      + '<div class="eopts">' + q.o.map((o, k) => '<button class="eopt" data-o="' + k + '">' + esc(o) + '</button>').join('') + '</div>'
+      + '<div class="ep-row"><button class="ebtn" id="eg-next" hidden>Next</button></div></div>';
+    const t0 = Date.now();
+    qa('[data-o]', GP).forEach(b => b.onclick = () => {
+      const k = +b.dataset.o, ok = k === q.ans;
+      G.results.push({ w: q.w, ok }); G.ms.push(Date.now() - t0);
+      qa('[data-o]', GP).forEach(x => { x.disabled = true; if (+x.dataset.o === q.ans) x.classList.add('right'); });
+      if (!ok) b.classList.add('bad');
+      sfx(ok ? 'correct' : 'wrong');
+      say((ok ? praise() + ' ' : '') + '<b>' + esc(q.w) + '</b>: ' + esc(q.m) + '<br><i>' + esc(q.ex) + '</i>', ok ? 'correct' : 'thinking');
+      nextBtn(i + 1 < quiz.length ? 'Next' : 'Finish', () => step(i + 1));
+    });
+  };
+  step(0);
+}
+function finishVault(){
+  gprog(1); hush(); gload('Saving…');
+  const secs = Math.round((Date.now() - G.t0) / 1000);
+  const send = () => api('/api/english', { action: 'vault', op: 'review', token: ME.token, cid: G.cid, results: G.results, secs }, 10000).then(r => {
+    if (!GP) return;
+    if (r.status !== 200 || !r.j.ok) return gfail('Couldn’t save your review. Check your internet.', send);
+    if (r.j.state) { EA = r.j.state; pulledAt = Date.now(); cacheSave(); }
+    const right = G.results.filter(x => x.ok).length, up = (r.j.moves || []).filter(m => m.box > 1).length;
+    showResult({ correct: right, items: G.results.length, points: r.j.points || 0, note: up ? plural(up, 'word') + ' moved up a box. They’ll come back later.' : 'Missed words come back tomorrow.' });
+  });
+  send();
+}
+
+/* ---- saving a round + the result screen ---- */
+function finish(){
+  gprog(1); hush(); G.key = null; gload('Saving…');
+  const secs = Math.round((Date.now() - G.t0) / 1000);
+  const P = G.game === 'groups' ? G.round.items[0] : null;
+  const send = () => api('/api/english', { action: 'round', token: ME.token, cid: G.cid, game: G.game, ids: G.ids, answers: G.ans, tries: G.tries, ms: G.ms, secs, n: P ? P.n : undefined }, 12000).then(r => {
+    if (!GP) return;
+    if (r.status !== 200 || !r.j.ok) return gfail('Couldn’t save this round. Check your internet.', send);
+    if (r.j.state) { EA = r.j.state; pulledAt = Date.now(); cacheSave(); }
+    showResult(r.j);
+  });
+  send();
+}
+function showResult(j){
+  const game = G.game, items = j.items || G.ids.length, acc = items ? Math.round((j.correct || 0) / items * 100) : 0;
+  const lu = j.levelUp, sk = lu && skillOf(lu.skill);
+  const nxt = nextGame(), closedNow = isClosed();
+  let head = game === 'groups' ? ((j.correct ? 'Puzzle solved!' : 'Puzzle done')) : acc >= 80 ? 'Great round!' : acc >= 50 ? 'Good round!' : 'Round done!';
+  const missed = [...new Set(G.missed || [])];
+  pb().innerHTML = '<div class="eresult egres">' + yap(lu || acc >= 80 ? 'correct' : 'idle', 120, 'eyap bob')
+    + (lu ? '<div class="elvup" style="--c:' + sk.c + '">⬆️ ' + esc(sk.name) + ' is now <b>Level ' + lu.lv + ': ' + LEVELS[lu.lv - 1] + '</b>!</div>' : '')
+    + '<h2 class="ddisplay">' + esc(head) + '</h2>'
+    + '<div class="egstats">' + (game === 'groups' ? '' : '<div><b>' + acc + '%</b><span>first-try right</span></div>') + '<div><b>+' + (j.points || 0) + '</b><span>Adda points</span></div>'
+    + '<div><b>' + mins(todaySecs()) + '<small>/15</small></b><span>minutes today</span></div></div>'
+    + (j.note ? '<p class="esub">' + esc(j.note) + '</p>' : '')
+    + (j.points === 0 && game !== 'vault' && !tester() ? '<p class="esub">No points this time: ' + (game === 'groups' ? 'the daily puzzle pays once a day.' : 'today’s 25 minutes are used up.') + '</p>' : '')
+    + (missed.length ? '<div class="epanel evoffer"><h3>Save words to your Word Vault?</h3><p class="esub">They’ll come back for quick reviews, so they stick.</p>'
+      + missed.map(w => '<label class="evchk"><input type="checkbox" value="' + esc(w) + '" checked> ' + esc(w) + '</label>').join('') + '<button class="ebtn purple sm" id="eg-save">Save words</button></div>' : '')
+    + (G.share ? '<div class="eshare"><pre>' + esc(G.share) + '</pre><button class="ebtn ghost sm" id="eg-share">Copy result</button></div>' : '')
+    + '<div class="ep-row">' + (closedNow ? '' : '<button class="ebtn" id="eg-more">' + (nxt ? 'Next: ' + esc(gameOf(nxt).name) : 'Play a bonus round') + '</button>')
+    + '<button class="ebtn ghost" id="eg-home">Back to Adda</button></div></div>';
+  if (lu) { sfx('levelup'); try { if (!reduced()) confetti(); } catch (e) {} }
+  else if (acc >= 80) sfx('star');
+  const more = qs('#eg-more', GP);
+  if (more) more.onclick = () => { const g = nxt || bonusGame(); closeGame(); openGame(g); };
+  qs('#eg-home', GP).onclick = () => { sfx('tap'); closeGame(); };
+  const save = qs('#eg-save', GP);
+  if (save) save.onclick = () => {
+    const words = qa('.evchk input:checked', GP).map(x => x.value);
+    if (!words.length) { qs('.evoffer', GP).remove(); return; }
+    save.disabled = true; save.textContent = 'Saving…';
+    api('/api/english', { action: 'vault', op: 'add', token: ME.token, words, source: 'realfake' }, 10000).then(r => {
+      const box = qs('.evoffer', GP); if (!box) return;
+      if (r.status === 200 && r.j.ok) { sfx('select'); box.innerHTML = '<p class="esub" style="margin:0">🔐 ' + plural(words.length, 'word') + ' saved. First review tomorrow.</p>'; pull(true); }
+      else { save.disabled = false; save.textContent = 'Try again'; }
+    });
+  };
+  const sh = qs('#eg-share', GP);
+  if (sh) sh.onclick = () => { try { navigator.clipboard.writeText(G.share).then(() => toast('Copied! Share it with your friends.')); } catch (e) { toast('Couldn’t copy.'); } };
+}
+
 /* ================= buttons ================= */
 document.addEventListener('click', e => {
   if (e.target.closest('[data-echeck]')) openCheck();
@@ -450,7 +873,8 @@ document.addEventListener('click', e => {
     if (typeof SFX !== 'undefined' && SFX.muted) return toast('Sound is off. Turn it on to hear Yapper.');
     Voice.say(a, why => { if (why === 'end') Voice.say(b); });
   }
-  else if (e.target.closest('[data-eplay]')) { sfx('tap'); toast('The games are being built. Coming soon!'); }
+  else if (e.target.closest('[data-eplay]')) startNext();
+  else if (e.target.closest('[data-egame]')) { const g = e.target.closest('[data-egame]').dataset.egame; if (g !== 'vault' && isClosed()) toast('Adda’s closed for today. Your Word Vault is still open.'); else openGame(g); }
   else if (e.target.closest('[data-tip]')) showTip(e.target.closest('[data-tip]'), true);
 });
 
@@ -500,6 +924,8 @@ function leave(){ playing = false; flush(); }
 function reset(){ flush(true); playing = false; pend = 0; EA = null; OPEN = null; pulledAt = 0; syncAt = 0; const r = qs('#english-root'); if (r) r.innerHTML = ''; const t = qs('#tab-english'); if (t) t.hidden = true; }
 window.Adda = {
   render, leave, reset, sync,
+  // test accounts only: jump straight into a game, e.g. Adda.open('jumble', 6) or Adda.open('groups', 0, 12) for puzzle #12
+  open(game, lv, n){ if (!tester()) return 'Test accounts only'; openGame(game, { lv, n }); return 'Opening ' + game; },
   _state: st, _todaySecs: todaySecs,
   _play(on, hook){ playing = !!on; secondHook = on ? hook || null : null; lastAct = Date.now(); if (!on) flush(); }
 };

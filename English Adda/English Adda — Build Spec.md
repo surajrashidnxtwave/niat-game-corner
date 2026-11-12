@@ -495,6 +495,7 @@ These live in `public/content/english/`, one per game. Each file is a data file 
 | Level check | 1 full set | 2 sets (A/B, for the re-check) | Written |
 | Boss Round | 2 sets | 4 sets | Built from held-back items |
 
+- **Built so far (step 3, 2026-11-12):** Real or Fake 320 real words (40 per level) + about 140 fakes; Jumble 192 and Spot & Fix 192 (24 per level); Word Groups 30 (10 per tier). Enough for a DEMO pilot; scale to the launch numbers at step 7.
 - **Unseen items first:** the picker serves unseen items first and only repeats an item once the student has seen all items at their level, like Brain Gym's no-repeat picker.
 - **Audio:** about 300 Catch It clips + 30 stories + intros. About 10 MB for the pilot and about 40 MB at launch.
 
@@ -510,7 +511,7 @@ These live in `public/content/english/`, one per game. Each file is a data file 
 
 **1. Write.** Claude writes the content batch.
 
-**2. Automatic checks:** `node scripts/english-check.mjs`. It checks:
+**2. Automatic checks:** `node scripts/english-content-check.mjs`. It checks:
 - schema and required fields
 - unique IDs
 - level tags present
@@ -550,7 +551,7 @@ Each step ends with automatic checks, a reviewer pass on its content, a browser 
 |---|---|---|
 | 1 | **Shell:** sidebar tab (DEMO gate), DB tables, `api/english.js` (`state`, `tick`), home with ring, streak, points, and the closed screen; 2D and 3D | DEMO can open English Adda and the ring fills; other batches don't see it |
 | 2 | **Level check + levels + recommender:** `check.js`, the scoring, the result screen, the daily circuit, Swap | A new DEMO account goes through the check and gets a sensible circuit |
-| 3 | **Objective games:** Real or Fake, Jumble, Spot & Fix, Word Groups, Word Vault, plus `english-check.mjs` and the server re-scoring | All 5 playable with pilot content; points and levels move |
+| 3 | **Objective games:** Real or Fake, Jumble, Spot & Fix, Word Groups, Word Vault, plus `english-content-check.mjs` and the server re-scoring | All 5 playable with pilot content; points and levels move |
 | 4 | **Listening:** `english-voice.py`, Catch It, Story Rewind (multiple-choice mode) | Clips play on a low-end Android phone and on desktop |
 | 5 | **Reading and writing:** Reel Reader, Vanish, Fix My Email, Story Rewind write mode, AI judge tasks, gold set | `test:judge` passes; the fallback works when the AI is switched off |
 | 6 | **Wrap:** Boss Round and Practice Meter, profile tab, leaderboard tab, 11-star rating, admin tab and CSVs | You can play a full 15-minute day and see it in admin |

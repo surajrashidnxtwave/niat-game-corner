@@ -870,6 +870,7 @@ english_events (                             -- rate, swap, boss, levelup
 </tbody>
 </table>
 <ul>
+<li><strong>Built so far (step 3, 2026-11-12):</strong> Real or Fake 320 real words (40 per level) + about 140 fakes; Jumble 192 and Spot &amp; Fix 192 (24 per level); Word Groups 30 (10 per tier). Enough for a DEMO pilot; scale to the launch numbers at step 7.</li>
 <li><strong>Unseen items first:</strong> the picker serves unseen items first and only repeats an item once the student has seen all items at their level, like Brain Gym's no-repeat picker.</li>
 <li><strong>Audio:</strong> about 300 Catch It clips + 30 stories + intros. About 10 MB for the pilot and about 40 MB at launch.</li>
 </ul>
@@ -884,7 +885,7 @@ english_events (                             -- rate, swap, boss, levelup
 </ul>
 <h3 id="94-review-pipeline-for-every-content-batch">9.4 Review pipeline (for every content batch)</h3>
 <p><strong>1. Write.</strong> Claude writes the content batch.</p>
-<p><strong>2. Automatic checks:</strong> <code>node scripts/english-check.mjs</code>. It checks:
+<p><strong>2. Automatic checks:</strong> <code>node scripts/english-content-check.mjs</code>. It checks:
 - schema and required fields
 - unique IDs
 - level tags present
@@ -932,7 +933,7 @@ english_events (                             -- rate, swap, boss, levelup
 </tr>
 <tr>
 <td>3</td>
-<td><strong>Objective games:</strong> Real or Fake, Jumble, Spot &amp; Fix, Word Groups, Word Vault, plus <code>english-check.mjs</code> and the server re-scoring</td>
+<td><strong>Objective games:</strong> Real or Fake, Jumble, Spot &amp; Fix, Word Groups, Word Vault, plus <code>english-content-check.mjs</code> and the server re-scoring</td>
 <td>All 5 playable with pilot content; points and levels move</td>
 </tr>
 <tr>
