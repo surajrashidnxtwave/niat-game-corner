@@ -8,7 +8,7 @@
 //   { action: "round", token, cid, game, ids, answers, tries, ms, secs, mode? } -> { ok, points, correct, levelUp, run?, state }   (re-scored here; mode = chill|rush for Flick and Express)
 //   { action: "vault", token, op: "get" | "add" | "review", ... }   (Word Vault: spaced review, 1 point per right answer, 20 a day)
 //   { action: "rate", token, stars, why, best, text, rounds, secs, games } -> { ok }   (11-star day rating; one per student per India day)
-// Who can open it: batches listed in ENGLISH_BATCHES (comma separated, default "DEMO"; "ALL" opens it to everyone).
+// Who can open it: batches listed in ENGLISH_BATCHES (comma separated, e.g. "DEMO,SVYASA"). Unset = everyone (opened to all on 2026-11-13).
 // Rules the server enforces (the page shows the same rules, but this is the copy that counts):
 //   - the daily ring fills with active seconds; a tick can't add more time than has really passed since the last one
 //   - a goal day = 15+ active minutes; the streak forgives one missed day per 7 days (a "freeze")
@@ -26,7 +26,7 @@ const GOAL_POINTS = 25;
 const VAULT_DAY_MAX = 20;         // Word Vault: 1 point per right answer, at most 20 a day
 const SKILLS = ['voc', 'gra', 'lis', 'rea', 'wri'];
 
-const batches = () => (process.env.ENGLISH_BATCHES || 'DEMO').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+const batches = () => (process.env.ENGLISH_BATCHES || 'ALL').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
 export const allowed = me => { const b = batches(); return b.includes('ALL') || b.includes(String(me.pilot || '').toUpperCase()); };
 export const tester = me => me.pilot === 'DEMO';
 
