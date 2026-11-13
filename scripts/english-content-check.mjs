@@ -57,7 +57,7 @@ const CH = { 1: [4, 4], 2: [4, 5], 3: [5, 5], 4: [5, 6], 5: [6, 6], 6: [6, 7], 7
 for (const x of JUMBLE) {
   const id = x.id;
   if (!lvOk(x)) { err(id, 'bad lv'); continue; }
-  if (!new RegExp('^j' + x.lv + '-\\d\\d$').test(id)) err(id, 'id does not match lv');
+  if (!new RegExp('^j' + x.lv + '-\\d{2,3}$').test(id)) err(id, 'id does not match lv');
   const orders = jumbleOrders(x), n = orders[0].length;
   if (n < CH[x.lv][0] - 1 || n > CH[x.lv][1] + 1) err(id, n + ' chunks is outside the level range ' + CH[x.lv].join('-'));
   const key = o => o.slice().sort().join('|');
@@ -144,7 +144,7 @@ for (const x of PAIRS) {
   const id = x.id;
   if (!lvOk(x)) { err(id, 'bad lv'); continue; }
   prPer[x.lv] = (prPer[x.lv] || 0) + 1;
-  if (!new RegExp('^p' + x.lv + '-\\d\\d$').test(id)) err(id, 'id does not match lv');
+  if (!new RegExp('^p' + x.lv + '-\\d{2,3}$').test(id)) err(id, 'id does not match lv');
   if (!['pic', 'opp', 'mean', 'go'].includes(x.k)) err(id, 'bad kind');
   if (!x.a || !x.b || x.a === x.b) err(id, 'needs two different tiles');
   if (x.a.length > 16 || x.b.length > 22) err(id, 'tile text too long');
@@ -189,7 +189,7 @@ const muPer = {};
 for (const x of MUNCH) {
   const id = x.id;
   if (!lvOk(x)) { err(id, 'bad lv'); continue; }
-  if (!new RegExp('^m' + x.lv + '-\\d\\d$').test(id)) err(id, 'id does not match lv');
+  if (!new RegExp('^m' + x.lv + '-\\d{2,3}$').test(id)) err(id, 'id does not match lv');
   muPer[x.lv] = (muPer[x.lv] || 0) + 1;
   if ((x.s.match(/\[/g) || []).length !== 1) err(id, 'needs exactly one [extra] word');
   const m = munchItem(x);
@@ -212,7 +212,7 @@ const noPer = {};
 for (const x of NOTES) {
   const id = x.id;
   if (!lvOk(x)) { err(id, 'bad lv'); continue; }
-  if (!new RegExp('^n' + x.lv + '-\\d\\d$').test(id)) err(id, 'id does not match lv');
+  if (!new RegExp('^n' + x.lv + '-\\d{2,3}$').test(id)) err(id, 'id does not match lv');
   noPer[x.lv] = (noPer[x.lv] || 0) + 1;
   if (!['chat', 'note', 'notice', 'email', 'poster'].includes(x.kind)) err(id, 'bad kind');
   if (!x.from || x.from.length > 22) err(id, 'from missing or over 22 characters');
@@ -237,7 +237,7 @@ const ecPer = {};
 for (const x of ECHO) {
   const id = x.id;
   if (!lvOk(x)) { err(id, 'bad lv'); continue; }
-  if (!new RegExp('^e' + x.lv + '-\\d\\d$').test(id)) err(id, 'id does not match lv');
+  if (!new RegExp('^e' + x.lv + '-\\d{2,3}$').test(id)) err(id, 'id does not match lv');
   ecPer[x.lv] = (ecPer[x.lv] || 0) + 1;
   const e = echoParse(x);
   if (e.gaps.length < GAPS[x.lv][0] || e.gaps.length > GAPS[x.lv][1]) err(id, e.gaps.length + ' gaps is outside the level range');
