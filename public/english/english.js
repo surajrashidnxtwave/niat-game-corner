@@ -569,6 +569,8 @@ function closeGame(){
   document.body.classList.remove('eplaying');
   Adda._play(false);
   render();
+  // back on the Adda home after a few rounds: ask for today's rating (once a day; never on top of another sheet)
+  if (rateDue()) setTimeout(() => { if (!GP && !CP && view === 'english' && !modalOpen()) rateDay(); }, 300);
 }
 document.addEventListener('keydown', e => {
   if (!GP || !G || qs('.ep-confirm', GP)) return;
@@ -1441,6 +1443,7 @@ function finish(){
     if (!GP) return;
     if (r.status !== 200 || !r.j.ok) return gfail('Couldn’t save this round. Check your internet.', send);
     if (r.j.state) { EA = r.j.state; pulledAt = Date.now(); cacheSave(); }
+    if (G.game !== 'vault') rateCount(G.game);
     showResult(r.j);
   });
   send();
@@ -1482,6 +1485,86 @@ function showResult(j){
   };
   const sh = qs('#eg-share', GP);
   if (sh) sh.onclick = () => { try { navigator.clipboard.writeText(G.share).then(() => toast('Copied! Share it with your friends.')); } catch (e) { toast('Couldn’t copy.'); } };
+}
+
+/* ================= "11-star" rating of the day =================
+   Same idea as Brain Gym and Drive School (Airbnb's 11-star exercise): 5 means "it did its job", 7-11 say what great looks like.
+   Asked once a day, back on the Adda home after 3 saved rounds (or 1 round once the 15 minutes are done). "Not now" asks
+   again next time, at most twice a day. Server copy: /api/english action "rate" (one per student per India day). */
+const RATE_K = 'ea_rate';
+const ADDA_STARS = { 11: '📺 If Netflix calls, tell them I’m ready to check their English subtitles.', 10: '🧑‍🏫 Next English class, I might help the teacher.',
+  9: '💼 Bring on the job emails. HR will reply “You’re hired.”', 8: '📲 Friends, send me your WhatsApp messages. I’ll fix the English.',
+  7: '🔥 See you tomorrow, Mithu. Same time.', 5: '👍 Fine. Did the job.', 3: '😐 Meh. Even Mithu looked bored.', 1: '🥱 I’d rather count crows on the wall.' };
+/* step 2 of the feedback sheet (feedbackSheet in index.html): one question per star choice, [icon, label, follow-up, choices];
+   FB_PLAYED = the games played today. 7-10 are saved as best, the rest as why (see fbSplit in index.html). */
+const ADDA_SETS = {
+  1: ['Ouch. What went wrong?', [
+    ['🐞', 'It didn’t work', 'What went wrong?', ['Sound didn’t play', 'Slow to load', 'A button didn’t work', 'Wrong score']],
+    ['🧗', 'Way too hard', 'What was hard?', ['New words', 'Grammar', 'The clock', 'Listening']],
+    ['😴', 'Boring', 'What felt boring?', ['Same sentences', 'Too long', 'No challenge']],
+    ['🎯', 'Not useful for me', 'What would help?', ['English for jobs', 'Emails and chats', 'Exam English']]]],
+  3: ['What made even Mithu bored?', [
+    ['🥱', 'Too easy', 'Which game?', FB_PLAYED],
+    ['🧩', 'Rules were confusing', 'Which game?', FB_PLAYED],
+    ['🔁', 'Same sentences again', 'Which game?', FB_PLAYED],
+    ['⏳', 'Too long', 'What would help?', ['Fewer items', 'Shorter rounds']]]],
+  5: ['Fine is okay. What would make it a 7?', [
+    ['🎮', 'More games', 'What kind?', ['Word games', 'Story games', 'Listening games', 'Writing games']],
+    ['📚', 'Words I need', 'Which words?', ['Job words', 'College words', 'Daily life words']],
+    ['🔥', 'Harder rounds', 'Harder how?', ['Less time', 'Harder words', 'Longer sentences']],
+    ['🤝', 'Play with friends', 'How?', ['1 vs 1', 'Batch contest']]]],
+  7: ['What will bring you back tomorrow?', [
+    ['🔥', 'My streak', 'What about it?', ['Don’t want to break it', 'Want a longer one']],
+    ['🦜', 'Mithu', 'What about him?', ['His jokes', 'His voice', 'His tips']],
+    ['🎮', 'A game I like', 'Which one?', FB_PLAYED],
+    ['📈', 'Levelling up', 'What pulls you?', ['Close to the next level', 'Beating my best', 'Rush mode']]]],
+  8: ['What would you tell your friends about?', [
+    ['🎮', 'A game I loved', 'Which one?', FB_PLAYED],
+    ['📚', 'Useful words', 'Useful for what?', ['Jobs', 'College', 'Chats and emails']],
+    ['🦜', 'Mithu', 'What about him?', ['His jokes', 'His voice', 'His tips']],
+    ['⏱️', 'Quick and fun', 'What works?', ['Only 15 minutes', 'Feels like a game']]]],
+  9: ['Job-ready feels good! What got better today?', [
+    ['📚', 'My words', 'Which game helped?', FB_PLAYED],
+    ['✍️', 'My grammar', 'Which game helped?', FB_PLAYED],
+    ['📖', 'My reading', 'Which game helped?', FB_PLAYED],
+    ['👂', 'My listening', 'Which game helped?', FB_PLAYED]]],
+  10: ['What was the best moment today?', [
+    ['🎉', 'A new best score', 'In which game?', FB_PLAYED],
+    ['📈', 'A level up', 'Which skill?', ['Words', 'Grammar', 'Reading', 'Listening', 'Writing']],
+    ['💪', 'Getting a hard one right', 'In which game?', FB_PLAYED],
+    ['🦜', 'Mithu made me laugh', 'What did he say?', []]]],
+  11: ['Netflix-ready! What would make English Adda legendary?', [
+    ['🎬', 'Learn from shows', 'From what?', ['Movie clips', 'Song lines', 'Web series']],
+    ['💼', 'Interview English', 'For what?', ['Introduce myself', 'Common questions', 'Group discussion']],
+    ['🏆', 'Contests', 'What kind?', ['Batch contest', 'College vs college']],
+    ['📲', 'A new word every day', 'When?', ['Morning', 'Before class', 'At night']]]]
+};
+function rateRec(){
+  try { const r = JSON.parse(localStorage.getItem(RATE_K)); if (r && ME && r.id === ME.id && r.day === istDay()) return r; } catch (e) {}
+  return { id: ME && ME.id, day: istDay(), rounds: 0, games: [], done: false, later: 0 };
+}
+function rateSave(r){ try { localStorage.setItem(RATE_K, JSON.stringify(r)); } catch (e) {} }
+function rateCount(game){ const r = rateRec(); r.rounds++; if (!r.games.includes(game)) r.games.push(game); rateSave(r); }
+function rateDue(){ if (!ME) return false; const r = rateRec(); return !r.done && r.later < 2 && (r.rounds >= 3 || (r.rounds >= 1 && todaySecs() >= GOAL)); }
+function rateDay(){
+  const rec = rateRec(); let sent = false;
+  const played = rec.games.map(id => (gameOf(id) || {}).name).filter(Boolean).slice(0, 8);
+  const p = openModal('<div id="ea-box"></div>');
+  const box = qs('#mbox');
+  feedbackSheet(qs('#ea-box'), {
+    head: '<p class="small muted" style="margin:0;font-weight:900;letter-spacing:.06em;text-transform:uppercase">English Adda · One quick thing</p>',
+    scroller: box, accent: '#14A37F', label: 'Today’s Adda rating', stars: ADDA_STARS, sets: ADDA_SETS, played, product: 'en', host: ['🦜', 'Mithu'],
+    title: 'How high does today go?', send: 'Send feedback', skip: 'Not now',
+    onSend: async ans => {
+      const r = await api('/api/english', Object.assign({ action: 'rate', token: ME.token, stars: ans.stars }, fbSplit(ans),
+        { more: ans.more, text: ans.text, voice: ans.voice, rounds: rec.rounds, secs: todaySecs(), games: rec.games.slice(0, 20) }), 10000);
+      if (!(r.status === 200 && r.j.ok) && r.status !== 400) return false;
+      sent = true; const now = rateRec(); now.done = true; rateSave(now);
+      return true;
+    },
+    after: () => setTimeout(closeModal, 1900)
+  });
+  p.then(() => { if (!sent) { const now = rateRec(); now.later++; rateSave(now); } });
 }
 
 /* ================= buttons ================= */

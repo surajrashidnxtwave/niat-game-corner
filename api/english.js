@@ -7,6 +7,7 @@
 //   { action: "roundstart", token, game, lv?, n? } -> { ok, round }   (items picked at the student's level; lv/n only for test accounts)
 //   { action: "round", token, cid, game, ids, answers, tries, ms, secs, mode? } -> { ok, points, correct, levelUp, run?, state }   (re-scored here; mode = chill|rush for Flick and Express)
 //   { action: "vault", token, op: "get" | "add" | "review", ... }   (Word Vault: spaced review, 1 point per right answer, 20 a day)
+//   { action: "rate", token, stars, why, best, text, rounds, secs, games } -> { ok }   (11-star day rating; one per student per India day)
 // Who can open it: batches listed in ENGLISH_BATCHES (comma separated, default "DEMO"; "ALL" opens it to everyone).
 // Rules the server enforces (the page shows the same rules, but this is the copy that counts):
 //   - the daily ring fills with active seconds; a tick can't add more time than has really passed since the last one
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
     if (b.action === 'roundstart') return await roundStart(res, me, b);
     if (b.action === 'round') return await saveRound(res, me, b);
     if (b.action === 'vault') return await vault(res, me, b);
+    if (b.action === 'rate') return await rate(res, me, b);
     return res.status(400).json({ ok: false, error: 'bad action' });
   } catch (e) {
     console.error('[english]', e.message);
@@ -54,6 +56,37 @@ export default async function handler(req, res) {
 }
 
 const IST_TODAY = `(now() AT TIME ZONE 'Asia/Kolkata')::date`;
+
+// "11-star" rating of the day (same idea as Brain Gym and Drive School), asked once a day after a few rounds.
+// Stored as an english_events row (kind 'rate'); the client id makes it one per student per India day (a second one is ignored).
+const RATE_LIST = v => Array.isArray(v) ? v.filter(x => text(x, 60)).slice(0, 8) : [];
+// a voice note recorded on the sheet: { id, secs }, kept only if this student uploaded it (see /api/feedback kind "voice")
+async function rateVoice(me, v) {
+  if (!v || !int(v.id, 1, 2 ** 53) || !int(v.secs, 1, 60)) return null;
+  const r = await db()`SELECT 1 FROM feedback_voice WHERE id = ${v.id} AND student_id = ${me.id}`;
+  return r.length ? { id: v.id, secs: v.secs } : null;
+}
+// follow-up chips per picked card: { "card label": ["chip", ...] }
+const RATE_MORE = v => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+  const out = {};
+  for (const [k, list] of Object.entries(v).slice(0, 10)) if (text(k, 60)) { const l = RATE_LIST(list); if (l.length) out[k.trim()] = l; }
+  return out;
+};
+async function rate(res, me, b) {
+  if (!int(b.stars, 1, 11)) return res.status(400).json({ ok: false, error: 'bad rating' });
+  const sql = db();
+  const [{ day }] = await sql.query(`SELECT to_char(${IST_TODAY}, 'YYYY-MM-DD') AS day`);
+  const data = {
+    stars: b.stars, why: RATE_LIST(b.why), best: RATE_LIST(b.best), more: RATE_MORE(b.more), voice: await rateVoice(me, b.voice),
+    text: typeof b.text === 'string' ? b.text.trim().slice(0, 500) : '',
+    rounds: int(b.rounds, 0, 500) ? b.rounds : null, secs: int(b.secs, 0, DAY_MAX) ? b.secs : null,
+    games: Array.isArray(b.games) ? b.games.filter(g => typeof g === 'string' && BUILT.includes(g)).slice(0, 20) : []
+  };
+  await sql.query(`INSERT INTO english_events (client_id, student_id, kind, data) VALUES ($1, $2, 'rate', $3::jsonb) ON CONFLICT (client_id) DO NOTHING`,
+    [me.id + ':rate:' + day, me.id, JSON.stringify(data)]);
+  return res.status(200).json({ ok: true });
+}
 
 async function ensure(sql, me) {
   await sql.query(`INSERT INTO english_students (student_id, started_on) VALUES ($1, ${IST_TODAY}) ON CONFLICT (student_id) DO NOTHING`, [me.id]);

@@ -224,7 +224,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
   <header>
     <div class="bar">
       <div class="brand"><div class="logo">🎮</div><div><h1>Game Corner progress</h1><span id="stamp"></span></div></div>
-      <div class="sections" role="group" aria-label="Section"><button data-sec="sum" aria-pressed="true">📊 Summary</button><button data-sec="bg" aria-pressed="false">🏋️ Brain Gym</button><button data-sec="dv" aria-pressed="false">🚗 Drive School</button></div>
+      <div class="sections" role="group" aria-label="Section"><button data-sec="sum" aria-pressed="true">📊 Summary</button><button data-sec="bg" aria-pressed="false">🏋️ Brain Gym</button><button data-sec="dv" aria-pressed="false">🚗 Drive School</button><button data-sec="en" aria-pressed="false">🦜 English Adda</button></div>
       <button class="btn" id="refresh">↻ Refresh</button>
       <div class="menu">
         <button class="btn" id="dl-btn" aria-haspopup="true" aria-expanded="false">⬇ Download</button>
@@ -237,6 +237,10 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
           <button data-sec="dv" data-csv="drive_students">Drive School students<small>per student: days done, points, saved answers</small></button>
           <button data-sec="dv" data-csv="drive_ratings">Drive School ratings<small>every lesson rating, with what they picked and said</small></button>
           <button data-sec="dv" data-csv="drive_events">Drive School answers<small>everything students did in lessons</small></button>
+          <button data-sec="en" data-csv="english_students">English Adda students<small>per student: levels, minutes, goal days, rounds</small></button>
+          <button data-sec="en" data-csv="english_ratings">English Adda ratings<small>every day rating, with what they picked and said</small></button>
+          <button data-sec="en" data-csv="english_rounds">English Adda rounds<small>every round played</small></button>
+          <button data-sec="en" data-csv="english_answers">English Adda answers<small>every answer to every item (large)</small></button>
         </div>
       </div>
       <button class="btn" id="share">🔗 Copy share link</button>
@@ -259,6 +263,13 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-start" hidden>Starting point</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-unis" hidden>Universities</button>
       <button class="tab" role="tab" data-sec="dv" data-tab="dv-students" hidden>Students</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-overview" hidden>Overview</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-games" hidden>Games</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-skills" hidden>Skills &amp; levels</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-content" hidden>Content check <span class="count" id="en-flag-count">0</span></button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-voice" hidden>Student voice</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-unis" hidden>Universities</button>
+      <button class="tab" role="tab" data-sec="en" data-tab="en-students" hidden>Students</button>
     </nav>
 
     <!-- SUMMARY: both products on one page, for a quick weekly check -->
@@ -267,6 +278,7 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
       <div class="grid2">
         <div class="card prod"><div class="head"><h2>🏋️ Brain Gym<small>Daily brain workouts, 15 minutes a day</small></h2><button class="btn" data-goto="overview">Open Brain Gym →</button></div><div class="mgrid" id="sum-bg"></div></div>
         <div class="card prod"><div class="head"><h2>🚗 Drive School<small>Daily mindset lessons, about 10 minutes each</small></h2><button class="btn" data-goto="dv-overview">Open Drive School →</button></div><div class="mgrid" id="sum-dv"></div></div>
+        <div class="card prod"><div class="head"><h2>🦜 English Adda<small>English word games, 15 minutes a day<span id="sum-en-note"></span></small></h2><button class="btn" data-goto="en-overview">Open English Adda →</button></div><div class="mgrid" id="sum-en"></div></div>
       </div>
       <div class="card">
         <h2>What to look at</h2>
@@ -501,6 +513,125 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         </div>
     </section>
     </div>
+
+    <!-- ENGLISH ADDA: loaded the first time an English Adda page is opened; test accounts (batch DEMO) are left out unless the switch is on -->
+    <div class="controls" id="en-bar" hidden style="align-items:center;margin:0 0 12px">
+      <label class="small" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="en-test"> Include test accounts (batch DEMO)</label>
+      <span class="muted small" id="en-status"></span>
+    </div>
+    <div id="en-body" hidden>
+    <section data-panel="en-overview" hidden>
+      <div class="kpis" id="en-kpis"></div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Students playing each day</h2>
+          <p class="sub">Last 14 days (IST). Daily goal: 15 active minutes. Active time counts only while a game or the level check runs.</p>
+          <div class="legend"><span><i style="background:var(--brand)"></i>Hit the 15-minute goal</span><span><i style="background:var(--brand-3)"></i>Played, under 15 minutes</span></div>
+          <div id="en-daily"></div>
+        </div>
+        <div class="card">
+          <div class="head"><div><h2>How students rate their day</h2><p class="sub">Asked once a day after a few rounds, 1 to 11 stars (choices: 1, 3, 5, 7, 8, 9, 10, 11). 7 means “See you tomorrow, Mithu”.</p></div><button class="btn" data-goto="en-voice">What they said →</button></div>
+          <div class="rstat" id="en-rate-sum"></div>
+          <div class="legend"><span><i style="background:var(--bad)"></i>1–4 Not there yet</span><span><i style="background:#C9CCE0"></i>5–6 Fine</span><span><i style="background:var(--brand)"></i>7–11 Would come back</span></div>
+          <div id="en-stars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Minutes played each day</h2>
+        <p class="sub">Last 14 days (IST), all students together.</p>
+        <div id="en-mins"></div>
+        <details style="margin-top:12px"><summary class="muted small" style="cursor:pointer">Show as a table</summary><div class="scroll"><table id="en-daily-t"></table></div></details>
+      </div>
+    </section>
+
+    <section data-panel="en-games" hidden>
+      <div class="card">
+        <h2>Games</h2>
+        <p class="sub">One row per game, all time. Right first time = items answered right on the first try. Came back = players who played it on 2 or more days. Rush = share of rounds played with the clock. Old games no longer in play are greyed out. Click a column title to sort.</p>
+        <div class="scroll"><table id="en-games-t"></table></div>
+      </div>
+      <div class="card">
+        <h2>Word Vault</h2>
+        <p class="sub" id="en-vault"></p>
+      </div>
+    </section>
+
+    <section data-panel="en-skills" hidden>
+      <div class="grid2">
+        <div class="card">
+          <h2>Find your level (level check)</h2>
+          <p class="sub" id="en-check"></p>
+          <div class="scroll"><table id="en-check-t"></table></div>
+        </div>
+        <div class="card">
+          <h2>Level-ups</h2>
+          <p class="sub">A skill goes up after 80%+ right over the last 20 answers at the student’s level, on 2 or more days. Levels never go down.</p>
+          <div class="scroll"><table id="en-lvup"></table></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Where students are now</h2>
+        <p class="sub">Students at each level, per skill (levels 1–8). Levels are private: students never see each other’s.</p>
+        <div class="scroll"><table id="en-levels"></table></div>
+      </div>
+      <div class="card">
+        <h2>Right first time, by item level</h2>
+        <p class="sub">For each game, the share of answers right on the first try at each item level (number of answers under it). It should fall slowly as the level goes up. A sudden drop means that level may be too hard. Under 20 answers is greyed out.</p>
+        <div class="scroll"><table id="en-lvacc"></table></div>
+      </div>
+    </section>
+
+    <section data-panel="en-content" hidden>
+      <div class="card">
+        <h2>Items to check</h2>
+        <p class="sub">Items answered 5 or more times. <b>Too hard</b> = under 40% right first time: the item may be unclear, or have a second right answer (look at the commonest wrong answer). <b>Too easy</b> = 98%+ right with 20+ answers. Hover an item to see all of it.</p>
+        <div class="controls">
+          <select id="en-cg" aria-label="Filter by game"><option value="">All games</option></select>
+          <select id="en-cf" aria-label="Filter by flag"><option value="hard">Too hard</option><option value="easy">Too easy</option><option value="">All items (5+ answers)</option></select>
+          <input type="search" id="en-cq" placeholder="Search item…" aria-label="Search items">
+        </div>
+        <div class="scroll"><table id="en-items"></table></div>
+      </div>
+    </section>
+
+    <section data-panel="en-voice" hidden>
+      <div class="card">
+        <h2>What students tapped when rating their day</h2>
+        <p class="sub">The follow-up depends on the stars. Students can pick more than one reason, or none.</p>
+        <div class="chipcols" id="en-chips"></div>
+      </div>
+      <div class="card">
+        <h2>What students said when rating their day</h2>
+        <p class="sub">1–4 stars were asked what got in the way. 5–6 were asked what would make it a 7. 7+ were asked what would make it an 11. Only ratings with words or picked reasons. Latest 300.</p>
+        <div class="controls">
+          <input type="search" id="en-rq" placeholder="Search name, NIAT ID or text…" aria-label="Search day ratings">
+          <select id="en-rb" aria-label="Filter by stars"><option value="">All stars</option><option value="low">1–4 stars</option><option value="mid">5–6 stars</option><option value="high">7–11 stars</option></select>
+        </div>
+        <div class="scroll"><table id="en-rtexts"></table></div>
+      </div>
+    </section>
+
+    <section data-panel="en-unis" hidden>
+      <div class="card">
+        <h2>Universities</h2>
+        <p class="sub">Started = opened English Adda. Minutes per student = median minutes played by students who started. Goal days = days with 15+ minutes, all students together. Rating = median stars out of 11. Click a column title to sort.</p>
+        <div class="scroll"><table id="en-unis"></table></div>
+      </div>
+    </section>
+
+    <section data-panel="en-students" hidden>
+      <div class="card">
+        <h2>Students</h2>
+        <p class="sub">Everyone who has opened English Adda. Levels: Vocabulary · Grammar · Listening · Reading · Writing. Full data: Download → English Adda students.</p>
+        <div class="controls">
+          <input type="search" id="en-sq" placeholder="Search name or NIAT ID…" aria-label="Search English Adda students">
+          <select id="en-su" aria-label="Filter by university"><option value="">All universities</option></select>
+        </div>
+        <div class="scroll"><table id="en-students"></table></div>
+        <div class="pager"><span class="muted small" id="en-sinfo"></span><div style="display:flex;gap:6px"><button class="btn" id="en-sprev">← Previous</button><button class="btn" id="en-snext">Next →</button></div></div>
+      </div>
+    </section>
+    </div>
   </main>
 </div>
 
@@ -519,6 +650,23 @@ const NAMES = { 'word-spread':'Word Spread','beat-the-7':'Beat the 7','missing-l
 const gname = id => id ? (NAMES[id] || id) : 'General';
 const DIFF = { easy:'Too easy', right:'Just right', hard:'Too hard' };
 const CAT = { wrong:'Marked my answer wrong', broke:'Something broke', confusing:'Confusing', slow:'Slow or stuck', other:'Other' };
+/* picked reasons, each with the follow-up chips the student tapped: "Too hard (Too fast, New topic)" */
+const pickedTxt = m => { m = m || {}; const mo = m.more || {};
+  const v = m.voice && m.voice.id ? ' <button class="btn" style="padding:2px 9px" data-voice="' + Number(m.voice.id) + '">▶ Voice ' + Math.floor(m.voice.secs / 60) + ':' + String(m.voice.secs % 60).padStart(2, '0') + '</button>' : '';
+  return [...(m.why || []), ...(m.best || [])].map(l => esc(l) + (mo[l] && mo[l].length ? ' <span class="muted small">(' + esc(mo[l].join(', ')) + ')</span>' : '')).join(', ') + v; };
+/* voice notes: fetched with the admin key and played in place, one at a time */
+let VOICE_NOW = null;
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-voice]'); if (!b) return;
+  if (VOICE_NOW) { VOICE_NOW.a.pause(); VOICE_NOW.b.textContent = VOICE_NOW.label; const same = VOICE_NOW.b === b; VOICE_NOW = null; if (same) return; }
+  const label = b.textContent; b.textContent = 'Loading…';
+  const r = await fetch('/api/admin?view=voice&id=' + b.dataset.voice, { headers:{ 'x-admin-key': KEY } }).catch(() => null);
+  if (!r || !r.ok) { b.textContent = label; return toast('Could not load the voice note.'); }
+  const a = new Audio(URL.createObjectURL(await r.blob()));
+  VOICE_NOW = { a, b, label }; b.textContent = '❚❚ Playing';
+  a.onended = () => { b.textContent = label; VOICE_NOW = null; };
+  a.play().catch(() => { b.textContent = label; VOICE_NOW = null; toast('Could not play the voice note.'); });
+});
 const who = (name, id) => '<div class="who">' + esc(name) + '<small>' + esc(id) + '</small></div>';
 let KEY = '', D = null;
 
@@ -558,7 +706,7 @@ function bars(el, rows, series, xlab, tipOf){
 }
 
 /* three sections (Summary, Brain Gym, Drive School), each with its own pages; the last page of each is remembered */
-const LAST = { sum:'sum', bg:'overview', dv:'dv-overview' };
+const LAST = { sum:'sum', bg:'overview', dv:'dv-overview', en:'en-overview' };
 function show(tab){
   const btn = document.querySelector('.tab[data-tab="' + tab + '"]') || document.querySelector('.tab[data-tab="sum"]');
   tab = btn.dataset.tab; const sec = btn.dataset.sec; LAST[sec] = tab;
@@ -569,14 +717,18 @@ function show(tab){
   document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== tab);
   $('dv-body').hidden = sec !== 'dv' || !DV.data;
   $('dv-status').hidden = sec !== 'dv' || !!DV.data;
+  $('en-bar').hidden = sec !== 'en';
+  $('en-body').hidden = sec !== 'en' || !EN.data;
   try { sessionStorage.setItem('bg_tab', tab); } catch (e) {}
   if (!DV.data && !DV.busy && KEY && D) loadDrive();
+  if (!EN.data && !EN.busy && KEY && D) loadEnglish();
 }
 document.querySelectorAll('.sections button').forEach(b => b.onclick = () => { show(LAST[b.dataset.sec]); scrollTo(0, 0); });
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => show(t.dataset.tab));
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-goto]'); if (!b) return;
   show(b.dataset.goto);
+  if (b.dataset.encf != null) { $('en-cf').value = b.dataset.encf; if (EN.data) drawEnItems(); }
   if (b.dataset.day != null && $('dv-qday')) { $('dv-qday').value = b.dataset.day; drawAcc(); $('dv-qcard').scrollIntoView({ behavior:'smooth' }); }
   else scrollTo(0, 0);
 });
@@ -729,7 +881,7 @@ function render(){
   const ASK = s => s >= 7 ? 'Make it an 11' : s >= 5 ? 'Make it a 7' : 'What got in the way';
   table($('t-ideas'), [
     ['When', r => '<span class="muted small">' + esc(when(r.created_at)) + '</span>'], ['Student', r => who(r.name, r.niat_id)], ['Stars', r => '<span class="pill">' + r.stars + '★</span>', 'n'],
-    ['Asked', r => esc(ASK(r.stars))], ['Picked', r => esc((r.meta?.why || []).join(', '))], ['What they said', r => esc(r.comment || ''), 'text'],
+    ['Asked', r => esc(ASK(r.stars))], ['Picked', r => pickedTxt(r.meta)], ['What they said', r => esc(r.comment || ''), 'text'],
     ['Session', r => '<span class="muted small">' + esc((r.meta?.rounds || 0) + ' rounds · ' + Math.round((r.meta?.secs || 0) / 60) + ' min' + (r.meta?.fav ? ' · liked ' + gname(r.meta.fav) : '')) + '</span>']
   ], d.ideas || []);
   table($('t-comments'), [
@@ -1031,9 +1183,10 @@ function renderDrive(){
   /* student voice: tapped reasons, rating comments, writing, stands */
   const chips = (kk, band) => d.chips.filter(c => c.k === kk && (!band || c.band === band));
   const merged = rows => { const m = new Map(); for (const r of rows) m.set(r.chip, (m.get(r.chip) || 0) + r.n); return [...m].map(([chip, n]) => ({ chip, n })).sort((a, b) => b.n - a.n); };
-  $('dv-chips').innerHTML = '<div><h3>What got in the way <span class="muted small">(1–4 stars)</span></h3>' + chipList(chips('why', 'low'), STARC.lo) + '</div>'
-    + '<div><h3>What would make it a 7 <span class="muted small">(5–6 stars)</span></h3>' + chipList(chips('why', 'mid'), '#9B90FF') + '</div>'
-    + '<div><h3>Best part of the lesson <span class="muted small">(5+ stars)</span></h3>' + chipList(merged(chips('best')), 'var(--ok)') + '</div>';
+  $('dv-chips').innerHTML = '<div><h3>What got in the way <span class="muted small">(1–3 stars)</span></h3>' + chipList(chips('why', 'low'), STARC.lo) + '</div>'
+    + '<div><h3>What would make it a 7 <span class="muted small">(5 stars)</span></h3>' + chipList(chips('why', 'mid'), '#9B90FF') + '</div>'
+    + '<div><h3>What worked <span class="muted small">(7–10 stars)</span></h3>' + chipList(merged(chips('best')), 'var(--ok)') + '</div>'
+    + '<div><h3>Ideas for an 11 <span class="muted small">(11 stars)</span></h3>' + chipList(chips('why', 'high'), '#F79009') + '</div>';
   const rd = $('dv-rd'), rcur = rd.value;
   rd.innerHTML = '<option value="">All days</option>' + [...new Set(d.rateTexts.map(t => t.day))].sort((a, b) => a - b).map(n => '<option value="' + n + '">Day ' + n + '</option>').join(''); rd.value = rcur;
   drawRateTexts();
@@ -1073,8 +1226,8 @@ function drawRateTexts(){
     ['When', t => '<span class="muted small">' + esc(when(t.created_at)) + '</span>'], ['Student', t => who(t.name, t.niat_id) + '<div class="muted small">' + esc(t.uni) + '</div>'],
     ['Lesson', t => '<b>Day ' + t.day + '</b><div class="muted small">' + esc((LB.days[t.day] || {}).title || '') + '</div>'],
     ['Stars', t => '<span class="pill" style="' + (t.data.stars >= 7 ? 'background:#ECEAFF' : t.data.stars <= 4 ? 'background:#FDECEA' : '') + '">' + t.data.stars + '★</span>', 'n'],
-    ['Asked', t => '<span class="small">' + esc(ASK[band(t.data.stars)]) + '</span>'], ['Picked', t => esc((t.data.why || []).join(', '))],
-    ['What they said', t => esc(t.data.text || ''), 'text'], ['Best part', t => '<span class="small">' + esc((t.data.best || []).join(', ')) + '</span>']
+    ['Asked', t => '<span class="small">' + esc(ASK[band(t.data.stars)]) + '</span>'], ['Picked', t => pickedTxt(t.data)],
+    ['What they said', t => '<span style="white-space:pre-line">' + esc(t.data.text || '') + '</span>', 'text']
   ], rows, q || dd || b ? 'Nothing matches.' : 'No lesson ratings with words yet.');
 }
 $('dv-rq').oninput = $('dv-rd').onchange = $('dv-rb').onchange = drawRateTexts;
@@ -1108,6 +1261,16 @@ function renderSummary(){
     ['Minutes in lessons today', fmt(DM.today || 0), DM.students_today ? 'median ' + DM.med_today + ' min per student' : 'nobody yet today'],
     ['Lesson rating', DS.all.n ? DS.all.med + ' / 11' : '–', DS.all.n ? pctTxt(DS.all.hi, DS.all.n) + ' gave 7+ · ' + fmt(DS.all.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)],
     ['Minutes in lessons, all time', fmt(DM.total || 0), fmt(w.lessons_w) + ' lessons finished this week' + (w.med_lessons_w != null ? ' (median ' + w.med_lessons_w + ' each)' : '')]
+  ].map(mTile).join('');
+  const en = EN.data, ew = en ? en.week || {} : {}, ek = en ? en.kpi : {}, ES = en ? englishStats() : null;
+  $('sum-en-note').textContent = en && en.test ? ' · test accounts included' : '';
+  $('sum-en').innerHTML = !en ? '<p class="muted">Loading…</p>' : [
+    ['Active this week', fmt(ew.active_w), en.test ? 'test accounts included' : pctTxt(ew.active_w, joined) + ' of students who logged in', delta(ew.active_w, ew.active_pw)],
+    ['Playing today', fmt(ek.active_today), fmt(ek.goal_today) + ' hit the 15-minute goal'],
+    ['Minutes played this week', fmt(ew.minutes_w), ew.med_min_w != null ? 'median ' + ew.med_min_w + ' min per active student' : '', delta(ew.minutes_w, ew.minutes_pw)],
+    ['Minutes played today', fmt(ek.minutes_today), ek.active_today ? 'median ' + ek.med_today + ' min per student' : 'nobody yet today'],
+    ['Day rating', ES.all.n ? ES.all.med + ' / 11' : '–', ES.all.n ? pctTxt(ES.all.hi, ES.all.n) + ' gave 7+ · ' + fmt(ES.all.n) + ' ratings' : 'no ratings yet', pts(ew.hi_w, ew.rated_w, ew.hi_pw, ew.rated_pw)],
+    ['Minutes played, all time', fmt(ek.minutes_total), fmt(ek.started) + ' students started · ' + fmt(ek.rounds_total) + ' rounds']
   ].map(mTile).join('');
 
   /* what to look at: plain rules on the numbers, with a minimum group size */
@@ -1156,9 +1319,32 @@ function renderSummary(){
     if (tBest && tBest.n >= 5) add(good, 'good', 'Drive School', 'Students’ favourite part of lessons: “' + esc(tBest.chip) + '” (' + tBest.n + ').', 'dv-voice');
     if (DS.all.n >= 20 && DS.all.hi / DS.all.n >= .6) add(good, 'good', 'Drive School', pctTxt(DS.all.hi, DS.all.n) + ' of lesson ratings are 7+ (“I’ll be back for the next lesson”).', 'dv-voice');
   }
+  // English Adda (alerts follow the switch: with test accounts on, the place name says so)
+  if (en) {
+    const P = 'English Adda' + (en.test ? ' (test accounts on)' : '');
+    trend(P, ew.active_w, ew.active_pw, 'Active students', 'en-overview');
+    trend(P, ew.minutes_w, ew.minutes_pw, 'Minutes played', 'en-overview');
+    if (ek.started >= N && (en.check || {}).done / ek.started < .7) add(bad, 'warn', P, 'Only ' + pctTxt(en.check.done, ek.started) + ' of students who open English Adda finish the level check. Until then they can’t play.', 'en-skills');
+    if (ew.days_w >= N) { const g = ew.goal_w / ew.days_w; if (g < .3) add(bad, 'warn', P, 'Only ' + pctTxt(ew.goal_w, ew.days_w) + ' of days played this week reached the 15-minute goal.', 'en-overview'); else if (g >= .6) add(good, 'good', P, pctTxt(ew.goal_w, ew.days_w) + ' of days played this week reached the 15-minute goal.', 'en-overview'); }
+    if (ek.played >= N) { const b = ek.came_back / ek.played; if (b < .4) add(bad, 'warn', P, 'Only ' + pctTxt(ek.came_back, ek.played) + ' of students who played came back on another day.', 'en-overview'); else if (b >= .6) add(good, 'good', P, pctTxt(ek.came_back, ek.played) + ' of students who played came back on another day.', 'en-overview'); }
+    const gm = en.games.filter(g => inPlay(g.game) && g.game !== 'vault' && g.items >= 50);
+    const hardG = gm.filter(g => g.correct / g.items < .5).map(g => ename(g.game) + ' (' + pctTxt(g.correct, g.items) + ' right)');
+    if (hardG.length) add(bad, 'warn', P, 'Games most students find hard: ' + esc(hardG.join(', ')) + '.', 'en-games');
+    const lowBack = gm.filter(g => g.players >= N && g.returners / g.players < .3).map(g => ename(g.game) + ' (' + pctTxt(g.returners, g.players) + ')');
+    if (lowBack.length) add(bad, 'info', P, 'Few players come back to: ' + esc(lowBack.join(', ')) + '.', 'en-games');
+    const topG = gm.filter(g => g.players >= N).sort((a, b) => b.returners / b.players - a.returners / a.players)[0];
+    if (topG && topG.returners / topG.players >= .5) add(good, 'good', P, 'Game students come back to most: ' + esc(ename(topG.game)) + ' (' + pctTxt(topG.returners, topG.players) + ' of players).', 'en-games');
+    if (ES.hard.length) add(bad, 'warn', P, ES.hard.length + ' item' + (ES.hard.length === 1 ? ' is' : 's are') + ' answered right by under 40% of students. Check for unclear items or a second right answer.', 'en-content', ' data-encf="hard"');
+    const top = (kk, band) => en.chips.filter(c => c.k === kk && (!band || c.band === band)).sort((a, b) => b.n - a.n)[0];
+    const tLow = top('why', 'low'), tMid = top('why', 'mid'), tBest = top('best');
+    if (tLow && tLow.n >= 5) add(bad, 'warn', P, 'Top reason for low day ratings: “' + esc(tLow.chip) + '” (' + tLow.n + ' students).', 'en-voice');
+    if (tMid && tMid.n >= 5) add(bad, 'info', P, 'Top ask from students who rated 5–6: “' + esc(tMid.chip) + '” (' + tMid.n + ').', 'en-voice');
+    if (tBest && tBest.n >= 5) add(good, 'good', P, 'Students’ favourite part: “' + esc(tBest.chip) + '” (' + tBest.n + ').', 'en-voice');
+    if (ES.all.n >= 20) { const s = ES.all.hi / ES.all.n; if (s >= .6) add(good, 'good', P, pctTxt(ES.all.hi, ES.all.n) + ' of day ratings are 7+ (“See you tomorrow, Mithu”).', 'en-voice'); else if (s < .4) add(bad, 'warn', P, 'Only ' + pctTxt(ES.all.hi, ES.all.n) + ' of day ratings are 7+. Read what students asked for.', 'en-voice'); }
+  }
   const rank = h => h.includes('att bad') ? 0 : h.includes('att warn') ? 1 : 2;   // red first, then amber, then ideas
   bad.sort((x, y) => rank(x) - rank(y));
-  $('sum-bad').innerHTML = bad.join('') || '<li class="att good"><span class="dot"></span><span class="tx">Nothing stands out right now' + (dv ? '' : ' (Drive School still loading)') + '.</span></li>';
+  $('sum-bad').innerHTML = bad.join('') || '<li class="att good"><span class="dot"></span><span class="tx">Nothing stands out right now' + (dv && en ? '' : ' (still loading)') + '.</span></li>';
   $('sum-good').innerHTML = good.join('') || '<li class="att"><span class="dot"></span><span class="tx">Not enough data yet to call anything out.</span></li>';
   drawSumUnis();
 }
@@ -1166,8 +1352,10 @@ function renderSummary(){
 /* one row per university: both products */
 function drawSumUnis(){
   const dvU = new Map(((DV.data || {}).unis || []).map(u => [u.uni, u])), q = $('sum-q').value.trim().toLowerCase();
-  const rows = universities().filter(u => !q || u.uni.toLowerCase().includes(q)).map(u => Object.assign({ dv: dvU.get(u.uni) || { started:0, lessons:0, active7:0, rated:0, rated_hi:0, med_lessons:null, med_stars:null } }, u));
-  const dash = '<span class="muted">–</span>', ld = DV.data ? '' : ' <span class="muted small">loading</span>';
+  const enU = new Map(((EN.data || {}).unis || []).map(u => [u.uni, u]));
+  const rows = universities().filter(u => !q || u.uni.toLowerCase().includes(q)).map(u => Object.assign({ dv: dvU.get(u.uni) || { started:0, lessons:0, active7:0, rated:0, rated_hi:0, med_lessons:null, med_stars:null },
+    en: enU.get(u.uni) || { started:0, active7:0, minutes:0, med_minutes:null, rated:0, med_stars:null } }, u));
+  const dash = '<span class="muted">–</span>', ld = DV.data ? '' : ' <span class="muted small">loading</span>', enl = EN.data ? '' : ' <span class="muted small">loading</span>';
   sortable($('sum-unis'), [
     { k:'uni', h:'University', r:u => '<b>' + esc(u.uni) + '</b>', v:u => u.uni },
     { k:'on_roster', h:'On list', r:u => fmt(u.on_roster), v:u => u.on_roster, cls:'n' },
@@ -1177,7 +1365,11 @@ function drawSumUnis(){
     { k:'dv7', h:'Drive active 7 days', r:u => u.dv.started ? fmt(u.dv.active7) + ' <span class="muted small">' + pctTxt(u.dv.active7, u.dv.started) + '</span>' : dash, v:u => u.dv.started ? u.dv.active7 / u.dv.started : null, cls:'n', tip:'Finished a Drive School lesson in the last 7 days, as a share of students who started' },
     { k:'dvm', h:'Drive minutes', r:u => u.dv.started ? fmt(u.dv.minutes || 0) : dash, v:u => u.dv.minutes || 0, cls:'n', tip:'Total minutes in Drive School lessons, all time' },
     { k:'dvl', h:'Lessons per student', r:u => u.dv.started ? u.dv.med_lessons : dash, v:u => u.dv.started ? u.dv.med_lessons : null, cls:'n', tip:'Median Drive School lessons finished by students who started' },
-    { k:'dvr', h:'Lesson rating', r:u => u.dv.rated ? '<b>' + u.dv.med_stars + '★</b> <span class="muted small">' + u.dv.rated + '</span>' : dash, v:u => u.dv.rated ? u.dv.med_stars : null, cls:'n', tip:'Median Drive School lesson rating out of 11, and how many ratings' }
+    { k:'dvr', h:'Lesson rating', r:u => u.dv.rated ? '<b>' + u.dv.med_stars + '★</b> <span class="muted small">' + u.dv.rated + '</span>' : dash, v:u => u.dv.rated ? u.dv.med_stars : null, cls:'n', tip:'Median Drive School lesson rating out of 11, and how many ratings' },
+    { k:'ens', h:'English started', r:u => u.en.started ? fmt(u.en.started) + (u.joined ? ' <span class="muted small">' + pctTxt(u.en.started, u.joined) + '</span>' : '') : dash + enl, v:u => u.en.started, cls:'n', tip:'Opened English Adda (only batches it is open to)' },
+    { k:'en7', h:'English active 7 days', r:u => u.en.started ? fmt(u.en.active7) + ' <span class="muted small">' + pctTxt(u.en.active7, u.en.started) + '</span>' : dash, v:u => u.en.started ? u.en.active7 / u.en.started : null, cls:'n' },
+    { k:'enm', h:'English minutes per student', r:u => u.en.started ? u.en.med_minutes : dash, v:u => u.en.started ? u.en.med_minutes : null, cls:'n', tip:'Median minutes played by students who started English Adda' },
+    { k:'enr', h:'English rating', r:u => u.en.rated ? '<b>' + u.en.med_stars + '★</b> <span class="muted small">' + u.en.rated + '</span>' : dash, v:u => u.en.rated ? u.en.med_stars : null, cls:'n', tip:'Median English Adda day rating out of 11, and how many ratings' }
   ], rows, SUM, drawSumUnis, q ? 'No university matches.' : 'No universities yet.');
 }
 $('sum-q').oninput = drawSumUnis;
@@ -1223,6 +1415,201 @@ function drawDriveStudents(){
 $('dv-sq').oninput = $('dv-su').onchange = () => { DV.page = 0; drawDriveStudents(); };
 $('dv-sprev').onclick = () => { DV.page--; drawDriveStudents(); };
 $('dv-snext').onclick = () => { DV.page++; drawDriveStudents(); };
+
+/* ---------- English Adda ---------- */
+const EN = { data:null, busy:false, page:0, size:50, test:false };
+try { EN.test = sessionStorage.getItem('en_test') === '1'; } catch (e) {}
+$('en-test').checked = EN.test;
+const EN_GAMES = { realfake:'Real or Fake', pairup:'Dive', flick:'Hop', express:'Express', munch:'Munch', post:'Pigeon Post', echo:'Echo', vault:'Word Vault',
+  groups:'Word Groups', jumble:'Jumble', spotfix:'Spot & Fix' };
+const EN_SKILL = { voc:'Vocabulary', gra:'Grammar', lis:'Listening', rea:'Reading', wri:'Writing' };
+const EN_SK_OF = { realfake:'voc', pairup:'voc', vault:'voc', groups:'voc', flick:'gra', express:'gra', jumble:'gra', spotfix:'gra', munch:'wri', post:'rea', echo:'lis' };
+const EN_LEVELS = ['First Sip', 'Regular', 'Chatter', 'Storyteller', 'Debater', 'Anchor', 'Headliner', 'Adda Legend'];
+const ename = g => EN_GAMES[g] || g;
+const inPlay = g => g === 'vault' || ((EN.data || {}).built || []).includes(g);
+const HARD = .4, EASY = .98;
+
+async function loadEnglish(){
+  EN.busy = true; $('en-status').textContent = 'Loading English Adda…';
+  const r = await fetch('/api/admin?view=english' + (EN.test ? '&test=1' : ''), { headers:{ 'x-admin-key': KEY } }).catch(() => null);
+  const d = r && r.ok ? await r.json().catch(() => null) : null;
+  EN.busy = false;
+  if (!d || !d.ok) { $('en-status').textContent = 'Could not load English Adda. Press Refresh to try again.'; return; }
+  EN.data = d;
+  $('en-status').textContent = d.test ? 'Test accounts are included. Turn this off before sharing numbers.' : (d.kpi.started ? '' : 'No real student has opened English Adda yet (the pilot is on test accounts). Tick the box to see them.');
+  renderEnglish();
+  renderSummary();
+  const on = document.querySelector('.sections [aria-pressed=true]');
+  if (on && on.dataset.sec === 'en') show(LAST.en);
+}
+$('en-test').onchange = () => {
+  EN.test = $('en-test').checked; try { sessionStorage.setItem('en_test', EN.test ? '1' : '0'); } catch (e) {}
+  EN.data = null; $('en-body').hidden = true; loadEnglish();
+};
+
+/* English Adda numbers used by both the English pages and the Summary */
+function englishStats(){
+  const d = EN.data, flagged = d.items.filter(i => inPlay(i.game) && (i.ok / i.n < HARD || (i.n >= 20 && i.ok / i.n >= EASY)));
+  return { all: rateStats(d.rates), hard: d.items.filter(i => inPlay(i.game) && i.ok / i.n < HARD), easy: d.items.filter(i => inPlay(i.game) && i.n >= 20 && i.ok / i.n >= EASY), flagged };
+}
+
+function renderEnglish(){
+  const d = EN.data, k = d.kpi, w = d.week || {}, S = englishStats(), R = S.all;
+  const U = D ? universities() : [], joined = U.reduce((a, u) => a + u.joined, 0);
+  $('en-kpis').innerHTML = [
+    ['hero', 'Students in English Adda', fmt(k.started), (joined && !d.test ? pctTxt(k.started, joined) + ' of students who logged in · ' : '') + fmt(w.new_w) + ' new this week'],
+    ['', 'Active this week', fmt(w.active_w), 'played in the last 7 days', delta(w.active_w, w.active_pw)],
+    ['', 'Minutes played this week', fmt(w.minutes_w), (w.med_min_w != null ? 'median ' + w.med_min_w + ' min per active student · ' : '') + 'all time ' + fmt(k.minutes_total), delta(w.minutes_w, w.minutes_pw)],
+    ['', 'Playing today', fmt(k.active_today), k.active_today ? fmt(k.goal_today) + ' hit the 15-minute goal · median ' + k.med_today + ' min' : 'nobody yet today'],
+    ['', 'Goal days this week', fmt(w.goal_w), w.days_w ? pctTxt(w.goal_w, w.days_w) + ' of days played reached 15 minutes' : 'days with 15+ minutes', pts(w.goal_w, w.days_w, w.goal_pw, w.days_pw)],
+    ['', 'Day rating', R.n ? R.med + ' / 11' : '–', R.n ? pctTxt(R.hi, R.n) + ' gave 7+ (“See you tomorrow”) · ' + fmt(R.n) + ' ratings' : 'no ratings yet', pts(w.hi_w, w.rated_w, w.hi_pw, w.rated_pw)],
+    ['', 'Came back another day', pctTxt(k.came_back, k.played), fmt(k.came_back) + ' of ' + fmt(k.played) + ' who played'],
+    ['', 'Rounds this week', fmt(w.rounds_w), 'all time ' + fmt(k.rounds_total), delta(w.rounds_w, w.rounds_pw)]
+  ].map(kpiTile).join('');
+
+  /* days */
+  const byDay = new Map(d.daily.map(x => [x.day, x])), days = [];
+  for (let i = 13; i >= 0; i--) {
+    const t = new Date(Date.now() - i * 864e5).toLocaleDateString('en-CA', { timeZone:'Asia/Kolkata' }), x = Object.assign({ day:t, trained:0, hit_goal:0, minutes:0, med_min:null, rounds:0 }, byDay.get(t));
+    days.push(Object.assign(x, { goal:x.hit_goal, under:x.trained - x.hit_goal }));
+  }
+  bars($('en-daily'), d.daily.length ? days : [], [{ key:'goal', color:'var(--brand)' }, { key:'under', color:'var(--brand-3)' }], r => dayLabel(r.day),
+    r => dayLabel(r.day) + '\n' + r.trained + ' played · ' + r.hit_goal + ' hit 15 minutes' + (r.trained ? '\nMedian ' + r.med_min + ' min · ' + r.rounds + ' rounds' : ''));
+  bars($('en-mins'), days.some(r => r.minutes) ? days : [], [{ key:'minutes', color:'var(--brand)' }], r => dayLabel(r.day), r => dayLabel(r.day) + '\n' + fmt(r.minutes) + ' minutes played');
+  if (window.innerWidth < 640) ['en-daily', 'en-mins'].forEach(id => $(id).querySelectorAll('.xlab span').forEach((s, i) => { if (i % 2) s.textContent = ''; }));
+  table($('en-daily-t'), [['Day', r => esc(dayLabel(r.day))], ['Played', r => fmt(r.trained), 'n'], ['Hit 15 min', r => fmt(r.hit_goal), 'n'], ['Minutes', r => fmt(r.minutes), 'n'],
+    ['Median time', r => r.med_min == null ? '–' : r.med_min + ' min', 'n'], ['Rounds', r => fmt(r.rounds), 'n']], days.slice().reverse().filter(r => r.trained || r.rounds));
+
+  /* ratings */
+  $('en-rate-sum').innerHTML = R.n ? '<div><b>' + R.med + '<span class="muted small"> / 11</span></b><span>median</span></div><div><b>' + pctTxt(R.hi, R.n) + '</b><span>gave 7 or more</span></div><div><b>' + pctTxt(R.lo, R.n) + '</b><span>gave 1 to 4</span></div><div><b>' + fmt(R.n) + '</b><span>ratings</span></div>' : '';
+  bars($('en-stars'), R.n ? R.c.map((n, i) => ({ s:i + 1, [i >= 6 ? 'hi' : i >= 4 ? 'mid' : 'lo']: n })) : [],
+    [{ key:'lo', color:STARC.lo }, { key:'mid', color:STARC.mid }, { key:'hi', color:STARC.hi }], r => r.s + '★',
+    r => { const n = R.c[r.s - 1]; return r.s + ' stars: ' + n + ' rating' + (n === 1 ? '' : 's') + ' (' + pctTxt(n, R.n) + ')'; });
+
+  drawEnGames();
+  const v = d.vault || {};
+  $('en-vault').textContent = v.students ? fmt(v.students) + ' students have saved ' + fmt(v.words) + ' words (' + fmt(v.mastered) + ' mastered, box 5).' : 'No words saved yet.';
+
+  /* level check, level-ups, levels now, accuracy by level */
+  const c = d.check || {};
+  $('en-check').textContent = c.done ? fmt(c.done) + ' of ' + fmt(k.started) + ' students finished it (' + pctTxt(c.done, k.started) + ')' + (c.med_min != null ? ', median ' + c.med_min + ' minutes' : '') + '. ' + fmt(c.done_w) + ' this week. Median level it gave each skill:' : 'Nobody has finished it yet.';
+  table($('en-check-t'), [['Skill', x => esc(EN_SKILL[x])], ['Median level', x => c['med_' + x] == null ? '–' : c['med_' + x], 'n']], c.done ? Object.keys(EN_SKILL) : []);
+  const lu = new Map(d.levelups.map(x => [x.skill, x]));
+  table($('en-lvup'), [['Skill', x => esc(EN_SKILL[x])], ['All time', x => fmt((lu.get(x) || {}).n), 'n'], ['This week', x => fmt((lu.get(x) || {}).n_w), 'n']], d.levelups.length ? Object.keys(EN_SKILL) : [], 'No level-ups yet.');
+  const lv = {}; for (const x of d.levels) (lv[x.skill] = lv[x.skill] || {})[x.lv] = x.n;
+  table($('en-levels'), [['Skill', x => '<b>' + esc(EN_SKILL[x]) + '</b>']].concat([1, 2, 3, 4, 5, 6, 7, 8].map(n => ['<span data-tip="' + esc(EN_LEVELS[n - 1]) + '">' + n + '</span>', x => {
+    const m = lv[x] || {}, t = Object.values(m).reduce((a, b) => a + b, 0), v = m[n] || 0;
+    return v ? fmt(v) + ' <span class="muted small">' + pctTxt(v, t) + '</span>' : '<span class="muted">–</span>'; }, 'n'])), d.levels.length ? Object.keys(EN_SKILL) : [], 'No levels yet.');
+  const la = {}; for (const x of d.levelAcc) (la[x.game] = la[x.game] || {})[x.lv] = x;
+  const gl = Object.keys(la).sort((a, b) => (inPlay(b) - inPlay(a)) || ename(a).localeCompare(ename(b)));
+  table($('en-lvacc'), [['Game', g => '<b' + (inPlay(g) ? '' : ' class="muted"') + '>' + esc(ename(g)) + '</b><div class="muted small">' + esc(EN_SKILL[EN_SK_OF[g]] || '') + '</div>']].concat([1, 2, 3, 4, 5, 6, 7, 8].map(n => ['Lv ' + n, g => {
+    const x = la[g][n]; if (!x) return '<span class="muted">–</span>';
+    const p = x.ok / x.n, col = x.n < 20 ? 'var(--soft)' : p < .5 ? 'var(--bad)' : p < .7 ? '#B54708' : 'var(--ink)';
+    return '<span style="color:' + col + ';font-weight:800">' + pctTxt(x.ok, x.n) + '</span><div class="muted small">' + fmt(x.n) + '</div>'; }, 'n'])), gl, 'No answers yet.');
+
+  /* content check */
+  $('en-flag-count').textContent = S.flagged.length;
+  const cg = $('en-cg'), ccur = cg.value;
+  cg.innerHTML = '<option value="">All games</option>' + [...new Set(d.items.map(i => i.game))].filter(inPlay).map(g => '<option value="' + esc(g) + '">' + esc(ename(g)) + '</option>').join(''); cg.value = ccur;
+  drawEnItems();
+
+  /* student voice */
+  const chips = (kk, band) => d.chips.filter(x => x.k === kk && (!band || x.band === band));
+  const merged = rows => { const m = new Map(); for (const r of rows) m.set(r.chip, (m.get(r.chip) || 0) + r.n); return [...m].map(([chip, n]) => ({ chip, n })).sort((a, b) => b.n - a.n); };
+  $('en-chips').innerHTML = '<div><h3>What got in the way <span class="muted small">(1–3 stars)</span></h3>' + chipList(chips('why', 'low'), STARC.lo) + '</div>'
+    + '<div><h3>What would make it a 7 <span class="muted small">(5 stars)</span></h3>' + chipList(chips('why', 'mid'), '#9B90FF') + '</div>'
+    + '<div><h3>What worked <span class="muted small">(7–10 stars)</span></h3>' + chipList(merged(chips('best')), 'var(--ok)') + '</div>'
+    + '<div><h3>Ideas for an 11 <span class="muted small">(11 stars)</span></h3>' + chipList(chips('why', 'high'), '#F79009') + '</div>';
+  drawEnRateTexts();
+
+  drawEnUnis();
+  const sel = $('en-su'), cu = sel.value;
+  sel.innerHTML = '<option value="">All universities</option>' + [...new Set(d.students.map(s => s.uni))].sort().map(u => '<option>' + esc(u) + '</option>').join('');
+  sel.value = cu; EN.page = 0; drawEnStudents();
+}
+
+const ENG = { sort:'rounds', dir:-1 };
+function drawEnGames(){
+  const dash = '<span class="muted">–</span>';
+  sortable($('en-games-t'), [
+    { k:'game', h:'Game', r:g => '<b' + (inPlay(g.game) ? '' : ' class="muted"') + '>' + esc(ename(g.game)) + '</b>' + (inPlay(g.game) ? '' : ' <span class="pill">old</span>') + '<div class="muted small">' + esc(EN_SKILL[EN_SK_OF[g.game]] || '') + '</div>', v:g => ename(g.game) },
+    { k:'players', h:'Players', r:g => fmt(g.players), v:g => g.players, cls:'n' },
+    { k:'rounds', h:'Rounds', r:g => fmt(g.rounds), v:g => g.rounds, cls:'n' },
+    { k:'rw', h:'This week', r:g => fmt(g.rounds_w), v:g => g.rounds_w, cls:'n' },
+    { k:'min', h:'Minutes', r:g => fmt(g.minutes), v:g => g.minutes, cls:'n', tip:'Total minutes in rounds, all time (each round capped at 30 minutes)' },
+    { k:'acc', h:'Right first time', r:g => g.items ? meter(g.correct, g.items) : dash, v:g => g.items ? g.correct / g.items : null, cls:'n' },
+    { k:'secs', h:'Round time', r:g => g.med_secs == null ? dash : Math.round(g.med_secs / 6) / 10 + ' min', v:g => g.med_secs, cls:'n', tip:'Median length of a round' },
+    { k:'score', h:'Score', r:g => g.med_score == null ? dash : fmt(g.med_score), v:g => g.med_score, cls:'n', tip:'Median run score per round (run games only)' },
+    { k:'rush', h:'Rush', r:g => g.rush ? pctTxt(g.rush, g.rounds) : dash, v:g => g.rush / g.rounds, cls:'n', tip:'Share of rounds played in Rush (with a clock)' },
+    { k:'back', h:'Came back', r:g => g.players ? fmt(g.returners) + ' <span class="muted small">' + pctTxt(g.returners, g.players) + '</span>' : dash, v:g => g.players ? g.returners / g.players : null, cls:'n', tip:'Players who played this game on 2 or more days' }
+  ], EN.data.games, ENG, drawEnGames, 'No rounds played yet.');
+}
+
+function drawEnItems(){
+  const g = $('en-cg').value, f = $('en-cf').value, q = $('en-cq').value.trim().toLowerCase();
+  const rows = EN.data.items.filter(i => inPlay(i.game) && (!g || i.game === g)
+    && (!f || (f === 'hard' ? i.ok / i.n < HARD : i.n >= 20 && i.ok / i.n >= EASY))
+    && (!q || (i.text + ' ' + (i.right || '') + ' ' + i.item_id).toLowerCase().includes(q)))
+    .sort((a, b) => f === 'easy' ? b.ok / b.n - a.ok / a.n || b.n - a.n : a.ok / a.n - b.ok / b.n || b.n - a.n).slice(0, 300);
+  table($('en-items'), [
+    ['Game', i => esc(ename(i.game)) + '<div class="muted small">' + esc(i.item_id) + '</div>'],
+    ['Level', i => i.lv == null ? '–' : i.lv, 'n'],
+    ['Item', i => '<span data-tip="' + esc(i.text) + '">' + esc(cut(String(i.text || ''), 90)) + '</span>', 'text'],
+    ['Right answer', i => '<span class="small">' + esc(i.right || '') + '</span>'],
+    ['Answered', i => fmt(i.n), 'n'],
+    ['Right first time', i => (i.ok / i.n < HARD ? '<span class="tag">Check this</span> ' : '') + meter(i.ok, i.n), 'n'],
+    ['Commonest wrong answer', i => i.top_wrong ? '<span class="small">' + esc(cut(String(i.top_wrong), 60)) + '</span> <span class="muted small">×' + i.top_wrong_n + '</span>' : '<span class="muted">–</span>']
+  ], rows, g || f || q ? 'Nothing matches. Items show up here after 5 answers.' : 'No item has 5 answers yet.');
+}
+$('en-cg').onchange = $('en-cf').onchange = $('en-cq').oninput = drawEnItems;
+
+function drawEnRateTexts(){
+  const q = $('en-rq').value.trim().toLowerCase(), b = $('en-rb').value;
+  const band = s => s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low', ASK = { low:'What got in the way', mid:'Make it a 7', high:'Make it an 11' };
+  const rows = EN.data.rateTexts.filter(t => (!b || band(t.data.stars) === b)
+    && (!q || (t.name + ' ' + t.niat_id + ' ' + (t.data.text || '') + ' ' + (t.data.why || []).join(' ')).toLowerCase().includes(q)));
+  table($('en-rtexts'), [
+    ['When', t => '<span class="muted small">' + esc(when(t.created_at)) + '</span>'], ['Student', t => who(t.name, t.niat_id) + '<div class="muted small">' + esc(t.uni) + '</div>'],
+    ['Stars', t => '<span class="pill" style="' + (t.data.stars >= 7 ? 'background:#ECEAFF' : t.data.stars <= 4 ? 'background:#FDECEA' : '') + '">' + t.data.stars + '★</span>', 'n'],
+    ['Asked', t => '<span class="small">' + esc(ASK[band(t.data.stars)]) + '</span>'], ['Picked', t => pickedTxt(t.data)],
+    ['What they said', t => '<span style="white-space:pre-line">' + esc(t.data.text || '') + '</span>', 'text'],
+    ['That day', t => '<span class="small">' + (t.data.rounds ? t.data.rounds + ' rounds' : '') + (t.data.secs ? ' · ' + Math.round(t.data.secs / 60) + ' min' : '') + '</span>']
+  ], rows, q || b ? 'Nothing matches.' : 'No day ratings with words yet.');
+}
+$('en-rq').oninput = $('en-rb').onchange = drawEnRateTexts;
+
+const ENU = { sort:'started', dir:-1 };
+function drawEnUnis(){
+  sortable($('en-unis'), [
+    { k:'uni', h:'University', r:u => esc(u.uni), v:u => u.uni },
+    { k:'started', h:'Started', r:u => fmt(u.started), v:u => u.started, cls:'n' },
+    { k:'placed', h:'Did level check', r:u => meter(u.placed, u.started), v:u => pct(u.placed, u.started), cls:'n' },
+    { k:'mps', h:'Minutes per student', r:u => u.med_minutes == null ? '–' : u.med_minutes, v:u => u.med_minutes, cls:'n', tip:'Median minutes played by students who started' },
+    { k:'min', h:'Minutes', r:u => fmt(u.minutes), v:u => u.minutes, cls:'n', tip:'Total minutes played, all time' },
+    { k:'goal', h:'Goal days', r:u => fmt(u.goal_days), v:u => u.goal_days, cls:'n', tip:'Days with 15+ minutes, all students together' },
+    { k:'a7', h:'Active 7 days', r:u => fmt(u.active7) + ' <span class="muted small">' + pctTxt(u.active7, u.started) + '</span>', v:u => pct(u.active7, u.started), cls:'n' },
+    { k:'rate', h:'Rating', r:u => u.rated ? '<b>' + u.med_stars + '★</b> <span class="muted small">' + pctTxt(u.rated_hi, u.rated) + ' 7+ · ' + u.rated + '</span>' : '<span class="muted">–</span>', v:u => u.med_stars, cls:'n', tip:'Median day rating out of 11' }
+  ], EN.data.unis, ENU, drawEnUnis, 'No student has opened English Adda yet.');
+}
+
+function drawEnStudents(){
+  const q = $('en-sq').value.trim().toLowerCase(), u = $('en-su').value;
+  const rows = EN.data.students.filter(s => (!u || s.uni === u) && (!q || s.name.toLowerCase().includes(q) || String(s.niat_id).toLowerCase().includes(q)));
+  const pages = Math.max(1, Math.ceil(rows.length / EN.size)); EN.page = Math.min(EN.page, pages - 1);
+  table($('en-students'), [
+    ['Student', s => who(s.name, s.niat_id)], ['University', s => esc(s.uni) + '<div class="muted small">' + esc(s.batch) + '</div>'],
+    ['Started', s => '<span class="small">' + esc(dayLabel(s.started_on)) + '</span>'],
+    ['Levels', s => s.placed ? '<span class="small num" data-tip="' + esc(Object.keys(EN_SKILL).map(k => EN_SKILL[k] + ': ' + ((s.levels || {})[k] || '–')).join('\n')) + '">' + Object.keys(EN_SKILL).map(k => (s.levels || {})[k] || '–').join(' · ') + '</span>' : '<span class="muted small">no level check</span>'],
+    ['Minutes', s => fmt(s.minutes), 'n'], ['Goal days', s => fmt(s.goal_days), 'n'], ['Rounds', s => fmt(s.rounds), 'n'], ['Points', s => fmt(s.points), 'n'],
+    ['Vault words', s => fmt(s.vault), 'n'], ['Median rating', s => s.stars == null ? '<span class="muted">–</span>' : s.stars + '★', 'n'],
+    ['Last played', s => s.last_day ? '<span class="small">' + esc(dayLabel(s.last_day)) + '</span>' : '<span class="muted">–</span>']
+  ], rows.slice(EN.page * EN.size, (EN.page + 1) * EN.size), q || u ? 'No student matches.' : 'No student has opened English Adda yet.');
+  $('en-sinfo').textContent = rows.length ? 'Showing ' + (EN.page * EN.size + 1) + '–' + Math.min(rows.length, (EN.page + 1) * EN.size) + ' of ' + fmt(rows.length) : '';
+  $('en-sprev').disabled = EN.page === 0; $('en-snext').disabled = EN.page >= pages - 1;
+}
+$('en-sq').oninput = $('en-su').onchange = () => { EN.page = 0; drawEnStudents(); };
+$('en-sprev').onclick = () => { EN.page--; drawEnStudents(); };
+$('en-snext').onclick = () => { EN.page++; drawEnStudents(); };
 
 /* share: the key goes after # so it is never sent to the server or saved in its logs */
 $('share').onclick = async () => {

@@ -132,6 +132,18 @@ const steps = [
    )`,
   `CREATE INDEX IF NOT EXISTS drive_events_student_idx ON drive_events (student_id, day)`,
   `CREATE INDEX IF NOT EXISTS drive_events_kind_idx ON drive_events (kind, day)`,
+  // voice notes from the feedback sheet ("Tap to record", 1 minute at most), shared by Brain Gym, Drive School and English Adda.
+  // The rating row that follows points at it with { voice: { id, secs } }.
+  `CREATE TABLE IF NOT EXISTS feedback_voice (
+     id          bigserial PRIMARY KEY,
+     student_id  int NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+     product     text NOT NULL CHECK (product IN ('bg','dv','en')),
+     secs        smallint NOT NULL CHECK (secs BETWEEN 1 AND 60),
+     mime        text NOT NULL,
+     audio       bytea NOT NULL,
+     created_at  timestamptz NOT NULL DEFAULT now()
+   )`,
+  `CREATE INDEX IF NOT EXISTS feedback_voice_student_idx ON feedback_voice (student_id, created_at)`,
   // ---------- English Adda (own points, timer, streak and levels; separate from Brain Gym and Drive School) ----------
   // one row per student who has opened English Adda; levels = private skill levels 1-8 {voc, gra, lis, rea, wri}
   `CREATE TABLE IF NOT EXISTS english_students (

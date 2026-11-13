@@ -1576,22 +1576,57 @@ function finish(a, quiet){
 }
 
 /* ================= end-of-lesson "11-star" rating =================
-   Same idea as Brain Gym's end-of-session rating (Airbnb's 11-star exercise): 5 means "it worked", 6-11 say what great looks like,
+   Same idea as Brain Gym's end-of-session rating (Airbnb's 11-star exercise): 5 means "it worked", 7-11 say what great looks like,
    and the follow-up asks what would push it higher. Asked once after every first finish (not replays). Stars are required, the rest is optional.
    The student can't leave the lesson or start the next one without rating. If the tab closes first, it's asked before the next lesson.
    Answers wait in localStorage until the server has them (offline, or the finish is still queued). Server copy: /api/drive action "rate". */
 const RK = 'ds_rate';
-const STARS = ['Waste of my time', 'Didn’t enjoy it', 'Meh', 'Okay, but I’ll forget it', 'It was fine. Nothing special',
-  'Better than I expected', 'I’ll be back for the next lesson', 'I’d tell my friends about it', 'I’d pick this over scrolling reels',
-  'I’ll use this in my studies this week', 'It changed how I think about learning'];
-const RATE_ASK = {
-  low:  { q: 'What got in the way?', ph: 'Tell us what to fix (optional)',
-          chips: ['Too long', 'Boring', 'Confusing', 'Too much typing', 'Bugs or slow', 'Not useful for me'] },
-  mid:  { q: 'What one change would make it a 7, so you come back for the next one?', ph: 'Your idea (optional)',
-          chips: ['Shorter lesson', 'More games', 'Examples from my college life', 'Less typing', 'Harder questions', 'See what my batch thinks'] },
-  high: { q: 'What would make Drive School an 11, something you’d tell every friend about?', ph: 'Dream big. No idea is too crazy. (optional)', chips: [] }
+const STARS = { 11: '🛸 Turbo, start the flying car. Next stop: my dream job.', 10: '✍️ I could teach this lesson myself. Turbo wants my autograph.',
+  9: '💪 Exams? Hard days? Bring it on.', 8: '📲 This lesson is going straight to my best friend.', 7: '🔥 Next lesson? I’m coming early.',
+  5: '👍 It was fine. I learned a thing.', 3: '😐 Meh. My mind went for a walk.', 1: '🛑 Engine off. Waste of my time.' };
+/* step 2 of the feedback sheet (feedbackSheet in index.html): one question per star choice, [icon, label, follow-up, choices].
+   Each question asks what in THIS lesson led to the rating. 7-10 are saved as best, the rest as why (see fbSplit in index.html). */
+const DV_SETS = {
+  1: ['Ouch. What made it a waste?', [
+    ['🐞', 'It didn’t work', 'What went wrong?', ['Voice didn’t play', 'Slow to load', 'A button didn’t work', 'Lost my answers']],
+    ['⏳', 'Way too long', 'Which part?', ['The story', 'The questions', 'Typing answers']],
+    ['😕', 'Didn’t get the point', 'What was unclear?', ['The main idea', 'The example', 'What to do next']],
+    ['🎯', 'Not for me', 'Why not?', ['Too basic', 'Not my problem']]]],
+  3: ['What made your mind go for a walk?', [
+    ['📖', 'Too much reading', 'What would help?', ['Shorter story', 'Turbo reads it to me']],
+    ['⌨️', 'Too much typing', 'What would help?', ['Tap answers', 'Fewer questions']],
+    ['🔁', 'Heard it before', 'Which part?', ['The idea', 'The example', 'The tips']],
+    ['🧩', 'Confusing', 'What was confusing?', ['A question', 'The story', 'What to do next']]]],
+  5: ['You learned a thing. What would make it a 7?', [
+    ['🏫', 'Examples from my college life', 'About what?', ['Exams', 'Hostel life', 'Friends', 'Placements']],
+    ['🎮', 'More games', 'What kind?', ['Quick quiz', 'Pick a side', 'Story choices']],
+    ['✂️', 'Shorter lesson', 'How short?', ['5 minutes', 'Less reading']],
+    ['👥', 'See my batch’s answers', 'What would you like to see?', ['Batch answers', 'How I compare']]]],
+  7: ['What’s pulling you to the next lesson?', [
+    ['🏎️', 'Turbo', 'What about him?', ['His jokes', 'His voice', 'His tips']],
+    ['📖', 'The stories', 'What about them?', ['They feel real', 'Want to know the next one']],
+    ['🛠️', 'Tips I can use', 'Where?', ['Exams', 'Daily study', 'Friends']],
+    ['🔥', 'My streak', 'What about it?', ['Don’t want to break it', 'The points']]]],
+  8: ['What would you share from this lesson?', [
+    ['📖', 'The story', 'Why share it?', ['Felt real', 'Made me think', 'Funny']],
+    ['⚖️', 'Take a Stand', 'Why share it?', ['Good question to argue', 'Want my friend’s view']],
+    ['🛠️', 'A tip', 'For what?', ['Exams', 'Habits', 'Focus']],
+    ['🏎️', 'Turbo', 'What about him?', ['His jokes', 'His tips']]]],
+  9: ['What made you feel ready?', [
+    ['🧠', 'A new way to think', 'About what?', ['Mistakes', 'Hard work', 'Marks']],
+    ['📋', 'The plan I made', 'What kind?', ['Study plan', 'If-then plan', 'Daily habit']],
+    ['💪', 'A story like mine', 'How?', ['Same problem as me', 'Gave me hope']]]],
+  10: ['What was the best part of today’s lesson?', [
+    ['📖', 'The story', 'What made it good?', ['Felt real', 'Made me think', 'Funny']],
+    ['❓', 'A question', 'What did it do?', ['Made me think', 'Changed my mind']],
+    ['⚖️', 'Take a Stand', 'What did you like?', ['Picking a side', 'Seeing other views']],
+    ['🏎️', 'Turbo', 'What about him?', ['His jokes', 'His voice', 'His tips']]]],
+  11: ['Flying car ready! What would make Drive School legendary?', [
+    ['🗣️', 'Chat with Turbo', 'About what?', ['My doubts', 'A daily check-in']],
+    ['🏆', 'Real-life challenges', 'Like what?', ['7-day challenge', 'Habit tracker', 'Batch challenge']],
+    ['👥', 'Learn with friends', 'How?', ['Study group', 'Live debate']],
+    ['🎓', 'Hear from real people', 'Who?', ['Seniors', 'Toppers', 'People from companies']]]]
 };
-const BEST = ['Turbo', 'The story', 'The questions', 'The game', 'Take a Stand', 'Tips I can use'];
 function rates(){ try { const q = JSON.parse(localStorage.getItem(RK)); if (q && ME && q.id === ME.id) return q.items || []; } catch (e) {} return []; }
 function ratesSet(items){ try { if (items.length) localStorage.setItem(RK, JSON.stringify({ id: ME && ME.id, items })); else localStorage.removeItem(RK); } catch (e) {} }
 const unrated = () => rates().find(x => !x.ans);
@@ -1608,49 +1643,20 @@ async function flushRates(){
 }
 /* the rating form; box = where it goes, scroller = what scrolls to the follow-up, done(box) runs once it's answered */
 function rateUI(box, day, late, done, scroller){
-  let stars = 0, why = [], best = [];
-  box.innerHTML = '<div class="drate">'
-    + '<p class="dkicker">' + (late ? 'Before your next lesson' : 'One last thing') + '</p>'
-    + '<h3 id="mtitle">How high does Day ' + day + ' go?</h3>'
-    + '<p class="dnote" style="margin:0 0 10px">' + (late ? 'You left Day ' + day + ' before rating it. ' : '') + 'Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you.</p>'
-    + ladderHtml(STARS, 'Lesson rating') + '<div class="smore" id="dr-more"></div></div>';
-  const chipRow = (k, list) => '<div class="chips2" data-k="' + k + '">' + list.map(c => '<button type="button" aria-pressed="false">' + c + '</button>').join('') + '</div>';
-  const follow = () => {
-    const band = stars >= 7 ? 'high' : stars >= 5 ? 'mid' : 'low', a = RATE_ASK[band], more = qs('#dr-more', box);
-    if (more.dataset.band === band) return;
-    more.dataset.band = band; why = []; best = [];
-    more.innerHTML = '<h4>' + a.q + '</h4>' + (a.chips.length ? chipRow('why', a.chips) : '')
-      + '<textarea class="field" id="dr-text" maxlength="500" rows="3" placeholder="' + a.ph + '"></textarea>'
-      + (band !== 'low' ? '<h4>Best part today <span class="dnote">(optional)</span></h4>' + chipRow('best', BEST) : '')
-      + '<button type="button" class="dbtn" id="dr-send">' + (late ? 'Send' : 'Send and finish') + '</button>';
-    qa('.chips2 button', more).forEach(b => b.onclick = () => {
-      const on = b.getAttribute('aria-pressed') !== 'true', k = b.parentNode.dataset.k; b.setAttribute('aria-pressed', on);
-      const list = k === 'why' ? why : best, t = b.textContent;
-      if (on) list.push(t); else list.splice(list.indexOf(t), 1);
-    });
-    qs('#dr-send', more).onclick = () => {
-      const ans = { stars, why, best, text: qs('#dr-text', more).value.trim(), late: !!late };
-      ratesSet(rates().map(x => x.day === day ? Object.assign(x, { ans }) : x));   // kept until the server has it
+  box.innerHTML = '<div class="drate"></div>';
+  const inner = qs('.drate', box);
+  feedbackSheet(inner, {
+    head: '<p class="dkicker">' + (late ? 'Before your next lesson' : 'One last thing') + '</p>' + (late ? '<p class="dnote" style="margin:0">You left Day ' + day + ' before rating it.</p>' : ''),
+    scroller, accent: 'var(--d-brand-a, #7C4DFF)', label: 'Lesson rating', stars: STARS, sets: DV_SETS, product: 'dv', host: ['🏎️', 'Turbo'],
+    title: 'How high does Day ' + day + ' go?', send: late ? 'Send feedback' : 'Send and finish', skip: null,
+    onSend: ans => {
+      const a = Object.assign(fbSplit(ans), { stars: ans.stars, more: ans.more, text: ans.text, voice: ans.voice, late: !!late });
+      ratesSet(rates().map(x => x.day === day ? Object.assign(x, { ans: a }) : x));   // kept until the server has it
       const item = rates().find(x => x.day === day);
       if (ME && item) sendRate(item);
-      sfx(stars >= 8 ? 'correct' : 'select');
-      box.innerHTML = '<div class="reward dcenter"><div class="big" style="font-size:52px">' + (stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️') + '</div><h3>Thank you!</h3>'
-        + '<p class="dnote">The Drive School team reads every answer. ' + (stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make the next lesson better.') + '</p></div>';
-      done(box);
-    };
-    more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
-  };
-  qa('.rung', box).forEach(b => b.onclick = () => {
-    stars = +b.dataset.s;
-    pickRung(box, b);
-    sfx(stars >= 8 ? 'correct' : 'select');
-    if (stars >= 10 && !reduced()) confetti();
-    const first = !qs('#dr-more', box).dataset.band;
-    follow();
-    if (first && scroller) setTimeout(() => {
-      const m = qs('#dr-more', box);
-      scroller.scrollTo({ top: m.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 16, behavior: reduced() ? 'auto' : 'smooth' });
-    }, 120);
+      return Promise.resolve(true);
+    },
+    after: () => done(box)
   });
 }
 /* inside the lesson, right after a first finish */

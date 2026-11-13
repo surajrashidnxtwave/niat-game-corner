@@ -271,6 +271,71 @@ button.tile:active{transform:scale(.95)}
 .pick.shown{opacity:1}
 .pick.hi{background:linear-gradient(120deg,#FF8A2A,#FF4D8D)}
 .rung.on.hi-on{color:#fff}
+/* feedback sheet: Rate -> Tell more -> Done (shared by Brain Gym, Drive School and English Adda) */
+.fb{--fb-a:#6D4AFF;display:grid;gap:12px}
+.fb-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0;padding:0;list-style:none}
+.fb-steps li{font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);padding-top:8px;border-top:4px solid var(--line);transition:border-color 200ms ease,color 200ms ease}
+.fb-steps li:nth-child(2){text-align:center}.fb-steps li:nth-child(3){text-align:right}
+.fb-steps li.on{border-color:var(--fb-a);color:var(--ink)}
+.fb-card{display:grid;gap:4px}
+.fb-card h3{margin:0;font-size:19px}
+.fb-card > p{margin:0 0 6px}
+.ladder.folded .zone:not(:has(.on)),.ladder.folded .rung:not(.on),.ladder.folded .zone small,.ladder.folded .pick{display:none}
+.ladder.folded .zone{padding:0;background:none;box-shadow:none}
+.ladder.folded .rung.on{background:var(--pill);color:var(--pill-ink)}
+.ladder.folded .rung.on.hi6{background:linear-gradient(120deg,#FF8A2A,#FF4D8D);color:#fff}
+.fb-change{justify-self:start;font-size:13px;font-weight:800;color:var(--fb-a);padding:2px 4px;text-decoration:underline}
+.fb-more{display:grid;gap:10px}
+.fb-more h4{margin:0;font-size:16px;line-height:1.3}
+.fb-more > p{margin:-6px 0 0}
+.fb-tiles{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
+.fb-tiles::-webkit-scrollbar{display:none}
+.fb-tile{position:relative;flex:0 0 118px;min-height:96px;display:grid;align-content:space-between;gap:8px;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line);text-align:left;scroll-snap-align:start;transition:transform 160ms var(--ease-out),box-shadow 150ms ease,background-color 150ms ease}
+.fb-tile:active{transform:scale(.97)}
+.fb-tile .ic{font-size:22px;line-height:1}
+.fb-tile .lb{font-size:13.5px;font-weight:800;line-height:1.25}
+.fb-tile .ck{position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;font-size:12px;color:#fff}
+.fb-tile[aria-checked=true]{background:color-mix(in srgb,var(--fb-a) 12%,var(--card));box-shadow:inset 0 0 0 1.5px var(--fb-a)}
+.fb-tile[aria-checked=true] .ck{background:var(--fb-a);box-shadow:none}
+.fb-panel{display:grid;gap:8px;padding:12px;border-radius:14px;background:var(--chip)}
+.fb-panel small{font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--fb-a)}
+.fb-panel h5{margin:0;font-size:15px}
+.fb-panel .chips2 button{background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line)}
+.fb-panel .chips2 button[aria-pressed=true]{background:var(--fb-a);color:#fff;box-shadow:none}
+.fb-panel textarea.field{min-height:58px;height:58px;resize:vertical}
+.fb-foot{position:sticky;bottom:-16px;z-index:2;display:grid;gap:2px;padding:10px 0 4px;background:var(--card)}
+.fb-send{background:var(--fb-a)!important;color:#fff!important}
+.fb-send:disabled{opacity:.45}
+.fb-done{display:grid;gap:8px;justify-items:center;text-align:center;padding:6px 0}
+.fb-done .big{font-size:60px;line-height:1.1}
+.fb-done h3{margin:0;font-size:21px}
+.fb-done p{margin:0}
+.fb-sum{display:grid;gap:4px;width:100%;text-align:left;padding:10px 12px;border-radius:12px;background:var(--chip);font-size:13px}
+.fb-sum b{font-weight:900}
+.fb-safe{justify-self:start;display:inline-flex;gap:6px;align-items:center;font-size:11.5px;font-weight:700;color:var(--soft);background:var(--chip);border-radius:999px;padding:4px 10px;margin:2px 0 6px}
+.fb-tile.fb-rec{background:color-mix(in srgb,var(--ok) 12%,var(--card));box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--ok) 45%,transparent)}
+.fb-tile.fb-rec .lb{color:var(--ok)}
+.fb-tile.fb-rec .hint{font-size:11px;font-weight:700;color:var(--soft);line-height:1.2}
+.fb-tile.fb-rec.live{background:color-mix(in srgb,var(--bad) 12%,var(--card));box-shadow:inset 0 0 0 2px var(--bad)}
+.fb-tile.fb-rec.live .lb{color:var(--bad)}
+.fb-tile.fb-rec.has{box-shadow:inset 0 0 0 2.5px var(--ok)}
+.fb-dot{width:9px;height:9px;border-radius:50%;background:var(--bad);display:inline-block;margin-right:5px;vertical-align:middle}
+.fb-wave{display:flex;gap:2px;align-items:center;height:20px}
+.fb-wave i{width:3px;border-radius:2px;background:var(--bad);height:30%}
+.fb-vnote{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:12px;background:color-mix(in srgb,var(--ok) 12%,var(--card))}
+.fb-vnote .play{width:32px;height:32px;border-radius:50%;background:var(--ok);color:#fff;font-size:12px;display:grid;place-items:center;flex:none}
+.fb-vnote .track{flex:1;height:6px;border-radius:3px;background:color-mix(in srgb,var(--ok) 22%,transparent);overflow:hidden}
+.fb-vnote .track b{display:block;height:100%;width:0;background:var(--ok)}
+.fb-vnote .len{font-size:12px;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
+.fb-vnote .del{font-size:12px;font-weight:800;color:var(--soft);padding:2px 4px}
+.fb-vbox:empty{display:none}
+.fb-host{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;background:color-mix(in srgb,var(--fb-a) 9%,var(--card));border-radius:14px;padding:10px 12px}
+.fb-host .av{font-size:26px;line-height:1}
+.fb-host p{font-size:13.5px;margin:0}
+.fb-host b{display:block;font-size:12px;color:var(--fb-a)}
+@media (prefers-reduced-motion:no-preference){.fb-tile.fb-rec.live .fb-dot{animation:fbblink 1s infinite}}
+@keyframes fbblink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.fb-tile,.fb-steps li{transition:none}}
 .smore.in > *{animation:rise 280ms var(--ease-out) both}
 .smore.in > *:nth-child(2){animation-delay:40ms}
 .smore.in > *:nth-child(3){animation-delay:80ms}
@@ -1159,8 +1224,8 @@ html[data-theme="dark"] .hfoot .btn{box-shadow:var(--shadow),inset 0 0 0 1px rgb
 <script src="content/rt.js" onerror="0"></script>
 <script src="content/st.js" onerror="0"></script>
 <script src="content/aiq.js" onerror="0"></script>
-<script src="drive/drive.js?v=15" defer></script>
-<script src="english/english.js?v=24" defer></script>
+<script src="drive/drive.js?v=18" defer></script>
+<script src="english/english.js?v=27" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -3505,7 +3570,7 @@ function openReport(){
 document.addEventListener('click', e => { if (e.target.closest('[data-report]')) openReport(); });
 
 /* ================= end-of-session "11-star" feedback =================
-   Inspired by Airbnb's 11-star exercise: 5 means "it worked", 6-11 describe what exceptional looks like,
+   Inspired by Airbnb's 11-star exercise: 5 means "it worked", 7-11 describe what exceptional looks like,
    and the follow-up asks what would push it higher.
    A session starts with the first round and ends when the student taps "End session", picks "Done for today"
    at the daily goal, or taps "Leave anyway". Ending always asks for the rating (stars required, text optional).
@@ -3517,25 +3582,68 @@ let SESS = newSess(), pendingRate = null;
   if (old && old.rounds && Date.now() - (old.last || 0) >= SESS_IDLE) pendingRate = old;   // left without ending: ask on return
   else if (old && old.rounds) SESS = old;                                                  // came back soon: same session
   S.sess = SESS; }
-const STAR_TXT = ['Waste of time','Didn’t enjoy it','Meh','Okay, but forgettable','It worked. Nothing special',
-  'Better than I expected','I’ll be back tomorrow','I’d tell my friends about it','I’d pick this over scrolling reels',
-  'It made me sharper in class','It changed how I learn'];
-const STAR_ASK = {
-  low:{ q:'What got in the way?', ph:'Tell us what to fix (optional)',
-        chips:['Boring or repetitive','Too hard','Too easy','Rules were confusing','Bugs or slow','Not useful for my studies'] },
-  mid:{ q:'What one change would make it a 7, so you can’t wait for tomorrow?', ph:'Your idea (optional)',
-        chips:['More new games','Harder challenges','Compete with friends','Better rewards','Shorter sets','Connect it to my classes'] },
-  high:{ q:'What would make Game Corner an 11, something you’d tell every friend about?', ph:'Dream big. No idea is too crazy.', chips:[] }
+/* 8 rungs (1, 3, 5, 7-11): each line is how the student feels right now, said big. Drive School and English Adda pass their own. */
+const STAR_TXT = { 11:'🚀 If ISRO calls, tell them my brain is ready for the Moon mission.', 10:'🧠 My brain deserves its own fan page now.',
+  9:'🌙 Give me any puzzle. I’ll solve it in my sleep.', 8:'📣 I’m telling the whole hostel. They have to try this.',
+  7:'🔥 Tomorrow can’t come fast enough.', 5:'👍 It was fine. Did its job.', 3:'😐 Meh. My brain was on airplane mode.',
+  1:'😴 I’d rather watch the ceiling fan spin.' };
+/* step 2 of the feedback sheet: one question per star choice, 4 cards each ([icon, label, follow-up, choices]; FB_PLAYED = this
+   session's games). Every list also gets "Something else". Each question asks what in THIS session led to the rating.
+   1-5: what went wrong / what would make it better (saved as why). 7-10: what worked (saved as best). 11: ideas (saved as why). */
+const FB_PLAYED = 'PLAYED';   // in a card's choices: "the games played this session" (used by Drive School and English Adda too)
+const BG_SETS = {
+  1: ['Ouch. What made it a waste of time?', [
+    ['🐞','It didn’t work','Where did it break?',['Game froze','Slow to load','A button didn’t work','Wrong score']],
+    ['🧗','Way too hard','What was too hard?',['The rules','The speed','The questions']],
+    ['😴','Boring','What felt boring?',['Same games again','Too slow','No challenge']],
+    ['🎯','Not useful for me','What would make it useful?',['Link it to my classes','Help for placements']]]],
+  3: ['What kept your brain on airplane mode?', [
+    ['🔁','Same games again','Which game?',FB_PLAYED],
+    ['🧩','Rules were confusing','Which game?',FB_PLAYED],
+    ['🥱','Too easy','Which game?',FB_PLAYED],
+    ['⏳','Too long','How long feels right?',['5 minutes','10 minutes']]]],
+  5: ['Fine is okay. What would make it a 7?', [
+    ['🎮','New games','What kind?',['Word games','Number games','Memory games','Coding games']],
+    ['🔥','Harder levels','Harder how?',['Less time','Tougher puzzles']],
+    ['🎁','Better rewards','What reward?',['Badges','Avatars','Unlock games faster']],
+    ['🤝','Play with friends','How?',['1 vs 1 match','Batch contest']]]],
+  7: ['What will bring you back tomorrow?', [
+    ['🔥','My streak','What about it?',['Don’t want to break it','Want a longer one']],
+    ['🔓','The next game to unlock','What pulls you?',['Curious what’s next','Want all the games']],
+    ['🏆','Beating my score','In which game?',FB_PLAYED],
+    ['🎯','The 15-minute goal','What works?',['Short enough to finish','Filling the ring','The reward chest']]]],
+  8: ['What would you tell your friends about?', [
+    ['🎮','A game I loved','Which one?',FB_PLAYED],
+    ['🧠','It trains my brain','Which part?',['Memory','Focus','Thinking fast']],
+    ['⏱️','Only 15 minutes a day','Why does that work?',['Fits between classes','Easy to keep going']],
+    ['🏆','The leaderboard','What do you like?',['Seeing my rank','Beating my batch']]]],
+  9: ['What made you feel this sharp?', [
+    ['🧩','Solving a hard one','In which game?',FB_PLAYED],
+    ['⚡','Getting faster','How?',['Quicker answers','Fewer mistakes']],
+    ['📈','Levelling up','What happened?',['New level','New best score','Unlocked a game']],
+    ['💡','Finding a trick','What did you find?',['A pattern','A shortcut','A way to remember']]]],
+  10: ['Fan-page worthy! What was the best moment?', [
+    ['🎉','A new best score','In which game?',FB_PLAYED],
+    ['🤯','An aha moment','In which game?',FB_PLAYED],
+    ['🔓','Unlocking a game','Tell us in a line',[]],
+    ['🎁','The reward chest','What did you like?',['The surprise','The coins']]]],
+  11: ['Mission ready! What would make Game Corner legendary?', [
+    ['🚀','Bigger challenges','Like what?',['Weekly mega puzzle','Boss level','Timed contest']],
+    ['🏅','Compete with other colleges','How?',['College leaderboard','College vs college contest']],
+    ['🛠️','Help make new games','How?',['Suggest a game','Vote on new games']],
+    ['🎓','Link it to my classes','Which subject?',['Python','Aptitude','Placements']]]]
 };
+/* where a picked card is saved: 7-10 = what worked (best), everything else = why (problems, asks, ideas) */
+const fbSplit = ans => ans.stars >= 7 && ans.stars <= 10 ? { why: [], best: ans.tiles } : { why: ans.tiles, best: [] };
 /* 11 at the top: climbing is better. Grouped so the baseline (5) and "beyond 5" are obvious. */
-/* Drive School passes its own 11 lines (txt) and label */
+/* Drive School and English Adda pass their own lines (txt, keyed by star) and label */
 function ladderHtml(txt, label){
   txt = txt || STAR_TXT;
-  const rung = n => '<button type="button" class="rung" role="radio" aria-checked="false" data-s="'+n+'"><span class="n">'+n+'<i>★</i></span><span class="t">'+txt[n-1]+'</span></button>';
+  const rung = n => '<button type="button" class="rung" role="radio" aria-checked="false" data-s="'+n+'"><span class="n">'+n+'<i>★</i></span><span class="t">'+txt[n]+'</span></button>';
   return '<div class="ladder" role="radiogroup" aria-label="'+(label || 'Session rating')+', 1 to 11 stars"><span class="pick" aria-hidden="true"></span>'
-    + '<div class="zone hi"><small>Beyond 5 ✨ What great looks like</small>'+[11,10,9,8,7,6].map(rung).join('')+'</div>'
+    + '<div class="zone hi"><small>Beyond 5 ✨ What great looks like</small>'+[11,10,9,8,7].map(rung).join('')+'</div>'
     + '<div class="zone mid"><small>The baseline</small>'+rung(5)+'</div>'
-    + '<div class="zone lo"><small>Not there yet</small>'+[4,3,2,1].map(rung).join('')+'</div></div>';
+    + '<div class="zone lo"><small>Not there yet</small>'+[3,1].map(rung).join('')+'</div></div>';
 }
 function pickRung(box, b){
   const n = +b.dataset.s, lad = box.querySelector('.ladder'), pick = lad.querySelector('.pick');
@@ -3550,60 +3658,216 @@ function pickRung(box, b){
   pick.classList.toggle('hi', n >= 6);
   void pick.offsetWidth; pick.style.transition = ''; pick.classList.add('shown');
 }
+/* ---- feedback sheet: Rate -> Tell more -> Done. Shared by Brain Gym, Drive School and English Adda ----
+   Step 1 is the 11-star ladder (1, 3, 5, 7-11); after a tap it folds to the chosen line (Change opens it again).
+   Step 2: every star choice has its own question and cards (cfg.sets[stars] = [question, [[icon, label, follow-up, choices], ...]];
+   choices FB_PLAYED = the games played this session). The student picks ONE main card, which opens its follow-up
+   (chips, pick any) and an optional note. The first card is "Tap to record": a voice note of 1 minute at most.
+   Step 3: the host's thank-you (warm for low ratings, a celebration for high ones) and a summary.
+   cfg: { head, title, stars, label, accent, sets, played, host: [emoji, name], product: 'bg'|'dv'|'en', send, skip, scroller,
+          onSend(ans) -> Promise<bool>, after(box, ans) }
+   ans: { stars, band, tiles: [label] (0 or 1), more: { label: [chip] }, notes: { label: text }, text, voice: { id, secs } | null } */
+const FB_MAX_REC = 60;
+const fbBand = s => s >= 7 ? 'high' : s >= 5 ? 'mid' : 'low';
+const FB_THANKS = {
+  low: ['Sorry it was a bad one. Thanks for telling us. We read every answer.', 'That’s on us. This goes straight to the team.'],
+  mid: ['Thanks! Your idea goes straight to the team.', 'Noted. Let’s make the next one a 7.'],
+  high: ['You just made the team’s day. Thank you!', 'That’s the dream. Thanks for the boost!', 'Best feedback ever. See you next time!']
+};
+const fbMMSS = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+const fbCanRecord = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+function fbBlob64(blob){ return new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1] || ''); r.onerror = no; r.readAsDataURL(blob); }); }
+function feedbackSheet(box, cfg){
+  let stars = 0, pick = null, chips = [], note = '', sent = false;
+  const V = { rec: null, stream: null, parts: [], blob: null, url: null, secs: 0, live: false, timer: 0, limit: false, audio: null };
+  const E = s => esc(String(s));
+  const accent = cfg.accent ? ' style="--fb-a:' + cfg.accent + '"' : '';
+  box.innerHTML = (cfg.head || '') + '<div class="fb"' + accent + '>'
+    + '<ol class="fb-steps"><li class="on">Rate</li><li>Tell more</li><li>Done</li></ol>'
+    + '<section class="fb-card"><h3 id="mtitle">' + cfg.title + '</h3>'
+    + '<p class="small muted">Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you. Takes 10 seconds.</p>'
+    + '<span class="fb-safe">🔒 Only the team sees this. It never changes your points.</span>'
+    + ladderHtml(cfg.stars, cfg.label) + '<button type="button" class="fb-change" hidden>Change my rating</button></section>'
+    + '<section class="fb-more" hidden></section>'
+    + '<div class="fb-foot"><button type="button" class="btn full fb-send" disabled>Pick a line to rate</button>'
+    + (cfg.skip ? '<button type="button" class="mclose">' + cfg.skip + '</button>' : '') + '</div></div>';
+  const q = s => box.querySelector(s), lad = q('.ladder'), moreBox = q('.fb-more'), steps = box.querySelectorAll('.fb-steps li');
+  const cards = () => { const set = cfg.sets[stars]; return set ? set[1].concat([['💬', 'Something else', 'Tell us in a line', []]]).map(c => ({ icon: c[0], label: c[1], q: c[2], opts: c[3] === FB_PLAYED ? (cfg.played || []) : c[3] })) : []; };
+
+  /* ---- voice note: tap to start, tap to stop, stops by itself at 1:00 ---- */
+  const stopTracks = () => { if (V.stream) V.stream.getTracks().forEach(t => t.stop()); V.stream = null; };
+  const paintRec = () => {
+    const r = q('.fb-rec'); if (!r) return;
+    r.classList.toggle('live', V.live); r.classList.toggle('has', !V.live && !!V.blob);
+    r.innerHTML = V.live
+      ? '<span class="ic"><span class="fb-wave" aria-hidden="true">' + '<i></i>'.repeat(9) + '</span></span><span class="lb"><span class="fb-dot"></span>' + fbMMSS(V.secs) + ' / 1:00</span><span class="hint">Tap to stop</span>'
+      : V.blob ? '<span class="ic">🎙️</span><span class="lb">Recorded</span><span class="hint">Tap to record again</span>'
+      : '<span class="ic">🎙️</span><span class="lb">Tap to record</span><span class="hint">Up to 1 minute</span>';
+    r.setAttribute('aria-label', V.live ? 'Recording, tap to stop' : 'Tap to record a voice note, up to 1 minute');
+  };
+  const voiceBox = () => {
+    const v = q('.fb-vbox'); if (!v) return;
+    if (V.live) { v.innerHTML = '<p class="small" style="margin:0;color:var(--bad)">Recording… speak now. Tap the red card to stop. <span class="fb-vmsg">It stops by itself at 1 minute.</span></p>'; return; }
+    if (!V.blob) { v.innerHTML = ''; return; }
+    v.innerHTML = (V.limit ? '<p class="small muted" style="margin:0">1 minute is the limit, so we stopped and saved it.</p>' : '')
+      + '<div class="fb-vnote"><button type="button" class="play" aria-label="Play voice note">▶</button><span class="track"><b></b></span><span class="len">' + fbMMSS(V.secs) + '</span><button type="button" class="del">Delete</button></div>';
+    const play = v.querySelector('.play'), bar = v.querySelector('.track b');
+    play.onclick = () => {
+      if (V.audio && !V.audio.paused) { V.audio.pause(); play.textContent = '▶'; return; }
+      V.audio = V.audio || new Audio(V.url);
+      V.audio.ontimeupdate = () => { const d = isFinite(V.audio.duration) && V.audio.duration ? V.audio.duration : V.secs; bar.style.width = Math.min(100, V.audio.currentTime / d * 100) + '%'; };
+      V.audio.onended = () => { play.textContent = '▶'; bar.style.width = '100%'; };
+      V.audio.play().then(() => { play.textContent = '❚❚'; }).catch(() => {});
+    };
+    v.querySelector('.del').onclick = () => { if (V.audio) V.audio.pause(); if (V.url) URL.revokeObjectURL(V.url); V.blob = V.url = V.audio = null; V.secs = 0; paintRec(); voiceBox(); };
+  };
+  const stopRec = atLimit => {
+    if (!V.live) return;
+    clearInterval(V.timer); V.live = false; V.limit = !!atLimit;
+    try { if (V.rec && V.rec.state !== 'inactive') V.rec.stop(); } catch (e) {}
+    paintRec(); voiceBox();
+  };
+  const startRec = async () => {
+    if (!fbCanRecord()) { toast('Your browser can’t record here. You can type a note instead.'); return; }
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+    catch (e) { toast('We couldn’t use your mic. Allow it in your browser, or type a note instead.'); return; }
+    if (sent || !box.isConnected) { stream.getTracks().forEach(t => t.stop()); return; }
+    if (V.audio) V.audio.pause();
+    if (V.url) URL.revokeObjectURL(V.url);
+    V.blob = V.url = V.audio = null; V.parts = []; V.stream = stream; V.secs = 0; V.limit = false;
+    const type = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/webm'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+    try { V.rec = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 24000 } : { audioBitsPerSecond: 24000 }); }
+    catch (e) { V.rec = new MediaRecorder(stream); }
+    V.rec.ondataavailable = e => { if (e.data && e.data.size) V.parts.push(e.data); };
+    V.rec.onstop = () => {
+      stopTracks();
+      const blob = new Blob(V.parts, { type: (V.rec.mimeType || type || 'audio/webm').split(';')[0] });
+      if (blob.size > 400 && V.secs >= 1) { V.blob = blob; V.url = URL.createObjectURL(blob); }
+      paintRec(); voiceBox();
+    };
+    V.rec.start(1000);
+    V.live = true; paintRec(); voiceBox();
+    const t0 = Date.now();
+    V.timer = setInterval(() => {
+      V.secs = Math.min(FB_MAX_REC, Math.floor((Date.now() - t0) / 1000));
+      if (V.secs >= FB_MAX_REC) return stopRec(true);
+      const l = q('.fb-rec .lb'); if (l) l.innerHTML = '<span class="fb-dot"></span>' + fbMMSS(V.secs) + ' / 1:00';
+      const m = q('.fb-vmsg'); if (m && V.secs >= FB_MAX_REC - 10) m.textContent = (FB_MAX_REC - V.secs) + ' seconds left.';
+      if (!reduced()) box.querySelectorAll('.fb-wave i').forEach(i => { i.style.height = (25 + Math.random() * 75) + '%'; });
+    }, 150);
+  };
+  // the sheet can close mid-recording (Escape, Not now): free the mic
+  const watch = new MutationObserver(() => { if (!box.isConnected || !q('.fb-rec')) { clearInterval(V.timer); try { if (V.rec && V.rec.state !== 'inactive') V.rec.stop(); } catch (e) {} stopTracks(); if (!box.isConnected) watch.disconnect(); } });
+  watch.observe(document.body, { childList: true, subtree: true });
+
+  /* ---- step 2 ---- */
+  const panel = () => {
+    const p = q('.fb-pan'); const c = pick == null ? null : cards()[pick];
+    if (!c) { p.innerHTML = ''; return; }
+    p.innerHTML = '<div class="fb-panel"><small>' + E(c.label) + '</small><h5>' + E(c.q) + '</h5>'
+      + (c.opts.length ? '<div class="chips2">' + c.opts.map(o => '<button type="button" aria-pressed="' + chips.includes(o) + '">' + E(o) + '</button>').join('') + '</div>' : '')
+      + '<textarea class="field" maxlength="300" rows="2" aria-label="Note" placeholder="' + (c.opts.length ? 'Add a note (optional)' : 'Tell us in a line (optional)') + '"></textarea></div>';
+    const ta = p.querySelector('textarea'); ta.value = note; ta.oninput = () => { note = ta.value; };
+    p.querySelectorAll('.chips2 button').forEach(b => b.onclick = () => {
+      const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on);
+      if (on) chips.push(b.textContent); else chips.splice(chips.indexOf(b.textContent), 1);
+    });
+  };
+  const more = () => {
+    const set = cfg.sets[stars]; pick = null; chips = []; note = '';
+    moreBox.innerHTML = '<h4>' + E(set[0]) + '</h4><p class="small muted">Almost done. Pick the main reason, or tap to record. Both optional.</p>'
+      + '<div class="fb-tiles" role="radiogroup" aria-label="' + E(set[0]) + '">'
+      + (fbCanRecord() ? '<button type="button" class="fb-tile fb-rec"></button>' : '')
+      + cards().map((c, i) => '<button type="button" class="fb-tile" role="radio" aria-checked="false" data-i="' + i + '"><span class="ic" aria-hidden="true">' + c.icon + '</span><span class="lb">' + E(c.label) + '</span><span class="ck" aria-hidden="true">✓</span></button>').join('')
+      + '</div><div class="fb-vbox"></div><div class="fb-pan"></div>';
+    moreBox.hidden = false; moreBox.classList.remove('smore', 'in'); void moreBox.offsetWidth; moreBox.classList.add('smore', 'in');
+    paintRec(); voiceBox();
+    const rec = q('.fb-rec'); if (rec) rec.onclick = () => { if (V.live) stopRec(false); else startRec(); };
+    box.querySelectorAll('.fb-tile[data-i]').forEach(b => b.onclick = () => {
+      const i = +b.dataset.i;
+      if (pick === i) pick = null; else { pick = i; chips = []; note = ''; }
+      try { SFX.play('tap'); } catch (e) {}
+      box.querySelectorAll('.fb-tile[data-i]').forEach(t => t.setAttribute('aria-checked', +t.dataset.i === pick));
+      panel();
+    });
+  };
+  const fold = on => {
+    lad.classList.toggle('folded', on); q('.fb-change').hidden = !on;
+    const r = lad.querySelector('.rung.on'); if (r) r.classList.toggle('hi6', stars >= 6);
+  };
+  q('.fb-change').onclick = () => { fold(false); const r = lad.querySelector('.rung.on'); if (r) requestAnimationFrame(() => pickRung(box, r)); };
+  box.querySelectorAll('.rung').forEach(b => b.onclick = () => {
+    const was = stars; stars = +b.dataset.s;
+    pickRung(box, b);
+    try { SFX.play(stars >= 8 ? 'correct' : 'select'); } catch (e) {}
+    if (stars !== was) more();
+    steps[1].classList.add('on');
+    const send = q('.fb-send'); send.disabled = false; send.textContent = cfg.send || 'Send feedback';
+    setTimeout(() => {
+      fold(true);
+      const sc = cfg.scroller || box;
+      if (sc.scrollTo) sc.scrollTo({ top: Math.max(0, moreBox.offsetTop - 70), behavior: reduced() ? 'auto' : 'smooth' });
+    }, reduced() ? 0 : 320);
+  });
+
+  /* ---- send ---- */
+  q('.fb-send').onclick = async () => {
+    const send = q('.fb-send'); if (!stars || sent) return;
+    if (V.live) { stopRec(false); await new Promise(r => setTimeout(r, 350)); }
+    const c = pick == null ? null : cards()[pick];
+    const ans = { stars, band: fbBand(stars), tiles: c ? [c.label] : [], more: {}, notes: {}, text: '', voice: null };
+    if (c && chips.length) ans.more[c.label] = chips.slice();
+    if (c && note.trim()) ans.notes[c.label] = note.trim();
+    ans.text = note.trim().slice(0, 500);
+    send.disabled = true; send.textContent = 'Sending…';
+    if (V.blob && ME) {
+      try {
+        const audio = await fbBlob64(V.blob);
+        const r = await api('/api/feedback', { token: ME.token, kind: 'voice', product: cfg.product, secs: Math.max(1, Math.min(FB_MAX_REC, V.secs)), mime: V.blob.type || 'audio/webm', audio }, 20000);
+        if (r.status === 200 && r.j.ok) ans.voice = { id: r.j.id, secs: Math.max(1, Math.min(FB_MAX_REC, V.secs)) };
+        else toast('Your voice note couldn’t be sent. Your rating is still saved.');
+      } catch (e) { toast('Your voice note couldn’t be sent. Your rating is still saved.'); }
+    }
+    const ok = await cfg.onSend(ans);
+    if (!ok) { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; return; }
+    sent = true; watch.disconnect(); if (V.audio) V.audio.pause();
+    const lines = FB_THANKS[ans.band], line = lines[Math.floor(Math.random() * lines.length)], host = cfg.host || ['🙌', 'The team'];
+    box.innerHTML = '<div class="fb"' + accent + '><ol class="fb-steps"><li class="on">Rate</li><li class="on">Tell more</li><li class="on">Done</li></ol>'
+      + '<div class="fb-done reward"><div class="big">' + (stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️') + '</div><h3>Thank you!</h3>'
+      + '<div class="fb-host"><span class="av" aria-hidden="true">' + host[0] + '</span><p><b>' + E(host[1]) + '</b>' + E(line) + '</p></div>'
+      + '<div class="fb-sum"><div>Your rating: <b>' + stars + ' ★</b></div>'
+      + (c ? '<div>Main reason: <b>' + E(c.label) + '</b>' + (chips.length ? ' (' + E(chips.join(', ')) + ')' : '') + '</div>' : '')
+      + (ans.voice ? '<div>Voice note: <b>' + fbMMSS(ans.voice.secs) + '</b></div>' : '') + '</div></div></div>';
+    if (stars >= 9 && !reduced()) { try { confetti(); } catch (e) {} }
+    if (V.url) URL.revokeObjectURL(V.url);
+    if (cfg.after) cfg.after(box, ans);
+  };
+  return { sent: () => sent };
+}
 function endSession(phase){
   const s = phase === 'last' ? pendingRate : SESS;
   if (!ME || !s) return Promise.resolve();
   if (!s.rounds) { toast('Play a round first. Then end your session and rate it.'); return Promise.resolve(); }
-  let stars = 0, why = [], fav = null, sent = false;
+  let sent = false;
   const sum = '<div class="ssum"><span>🎯 <b>'+s.rounds+'</b> set'+(s.rounds === 1 ? '' : 's')+'</span><span>⏱ <b>'+fmt(s.secs)+'</b></span><span>🏋️ <b>+'+s.kg+'</b> kg</span></div>';
   const head = phase === 'last'
-    ? '<h3 id="mtitle">Rate your last session</h3><p class="small muted" style="margin:0">You left before ending it on '+new Date(s.last).toLocaleDateString('en-IN', { weekday:'long' })+'.</p>'
-    : '<div class="shead">'+slot3d('star', '', img3d('star', 64))+'<h3 id="mtitle">Session complete</h3></div>';
-  const p = openModal(head + sum
-    + '<div><p style="margin:0;font-weight:900;font-size:17px">How high does this session go?</p>'
-    + '<p class="small muted" style="margin:2px 0 0">Most apps stop at 5 stars. Ours go to 11. Tap the line that’s true for you.</p></div>'
-    + ladderHtml()
-    + '<div class="smore" id="s-more"></div>'
-    + '<button type="button" class="mclose">'+(phase === 'last' ? 'Skip' : 'Back to training')+'</button>');
+    ? '<p class="small muted" style="margin:0"><b>Rate your last session.</b> You left before ending it on '+new Date(s.last).toLocaleDateString('en-IN', { weekday:'long' })+'.</p>'
+    : '<div class="shead">'+slot3d('star', '', img3d('star', 64))+'<h3>Session complete</h3></div>';
+  const games = s.games.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
+  const p = openModal('<div id="s-box"></div>');
   const box = $('mbox');
-  const follow = () => {
-    const band = stars >= 7 ? 'high' : stars >= 5 ? 'mid' : 'low', a = STAR_ASK[band], more = $('s-more');
-    if (more.dataset.band === band) return;
-    more.dataset.band = band; why = []; fav = null;
-    const games = s.games.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
-    more.innerHTML = '<h4>'+a.q+'</h4>'
-      + (a.chips.length ? '<div class="chips2" data-k="why">'+a.chips.map(c => '<button type="button" aria-pressed="false">'+c+'</button>').join('')+'</div>' : '')
-      + '<textarea class="field" id="s-text" maxlength="500" placeholder="'+a.ph+'"></textarea>'
-      + (band === 'high' && games.length ? '<h4>Favourite workout this session</h4><div class="chips2" data-k="fav">'+games.map(g => '<button type="button" aria-pressed="false" data-g="'+g.id+'">'+g.name+'</button>').join('')+'</div>' : '')
-      + '<button type="button" class="btn full" id="s-send" style="background:var(--gym);color:#fff">'+(phase === 'last' ? 'Send' : 'Send and end session')+'</button>';
-    more.querySelectorAll('[data-k="why"] button').forEach(b => b.onclick = () => {
-      const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on);
-      why = on ? why.concat(b.textContent) : why.filter(x => x !== b.textContent);
-    });
-    more.querySelectorAll('[data-k="fav"] button').forEach(b => b.onclick = () => {
-      fav = fav === b.dataset.g ? null : b.dataset.g;
-      more.querySelectorAll('[data-k="fav"] button').forEach(x => x.setAttribute('aria-pressed', x.dataset.g === fav));
-    });
-    $('s-send').onclick = async () => {
-      const send = $('s-send'); send.disabled = true; send.classList.add('busy'); send.textContent = 'Sending…';
-      const ok = await sendFeedback({ kind:'session', rating: stars, comment: $('s-text').value.trim() || null,
-        meta:{ phase, why, fav, rounds: s.rounds, secs: s.secs, kg: s.kg, games: s.games.slice(0, 20) } });
-      if (!ok) { send.disabled = false; send.classList.remove('busy'); send.textContent = 'Couldn’t send. Try again'; return; }
-      sent = true;
-      box.innerHTML = '<div class="reward"><div class="big">'+(stars >= 8 ? '🚀' : stars >= 5 ? '🙌' : '🛠️')+'</div><h3>Thank you!</h3>'
-        + '<p class="muted">Every answer is read by the Game Corner team. '+(stars >= 7 ? 'We’re working on that 11.' : 'We’ll use it to make tomorrow better.')+'</p></div>';
-      setTimeout(closeModal, 1700);
-    };
-    more.classList.remove('in'); void more.offsetWidth; more.classList.add('in');
-  };
-  box.querySelectorAll('.rung').forEach(b => b.onclick = () => {
-    stars = +b.dataset.s;
-    pickRung(box, b);
-    SFX.play(stars >= 8 ? 'correct' : 'select');
-    if (stars >= 10 && !reduced()) confetti();
-    const first = !$('s-more').dataset.band;
-    follow();
-    if (first && box.scrollTo) setTimeout(() => box.scrollTo({ top: $('s-more').offsetTop - 16, behavior: reduced() ? 'auto' : 'smooth' }), 120);
+  feedbackSheet($('s-box'), {
+    head: head + sum, scroller: box, accent: '#6D4AFF', label: 'Session rating', product: 'bg', host: ['💪', 'Coach'],
+    title: 'How high does this session go?', sets: BG_SETS, played: games.map(g => g.name).slice(0, 8),
+    send: phase === 'last' ? 'Send feedback' : 'Send and end session', skip: phase === 'last' ? 'Skip for now' : 'Back to training',
+    onSend: ans => {
+      const picked = Object.values(ans.more).flat(), favG = games.find(g => picked.includes(g.name));
+      return sendFeedback({ kind:'session', rating: ans.stars, comment: ans.text || null,
+        meta: Object.assign(fbSplit(ans), { phase, more: ans.more, voice: ans.voice, fav: favG && ans.stars >= 7 ? favG.id : null,
+               rounds: s.rounds, secs: s.secs, kg: s.kg, games: s.games.slice(0, 20) }) });
+    },
+    after: () => { sent = true; setTimeout(closeModal, 1900); }
   });
   return p.then(() => {
     if (phase === 'last') { pendingRate = null; return; }   // rated or skipped: never ask about it again

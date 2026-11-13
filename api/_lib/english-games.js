@@ -34,6 +34,25 @@ const MU = new Map(MUNCH.map(x => [x.id, x]));
 const NO = new Map(NOTES.map(x => [x.id, x]));
 const EC = new Map(ECHO.map(x => [x.id, x]));
 export const wordInfo = w => WORD.get(w) || null;
+// short text of an item for the admin report (content health): what the student saw, plus the right answer where it helps
+export function itemLabel(game, id) {
+  id = String(id);
+  if (game === 'realfake') {
+    if (id.startsWith('w:')) return { text: id.slice(2), right: 'Real word', lv: (WORD.get(id.slice(2)) || {}).lv };
+    const f = FAKE.get(id.slice(2)); return { text: id.slice(2), right: f ? 'Fake (' + (f.k === 'spell' ? 'right spelling: ' : 'right form: ') + f.r + ')' : 'Fake', lv: f && f.lv };
+  }
+  if (game === 'flick') { const m = /^(.+):([gb])$/.exec(id), it = m && SF.get(m[1]); if (!it) return null;
+    const ans = it.ans == null ? null : it.fixes[it.ans];
+    return { text: it.s.replace(/\s*\/\s*/g, ' ').replace(/\[([^\]]*)\]/, (x, w) => m[2] === 'g' && ans ? ans : w), right: m[2] === 'g' ? 'Right sentence (Hop)' : 'Wrong: fix “' + (ans || '') + '”', lv: it.lv }; }
+  const strip = t => String(t || '').replace(/\s*\/\s*/g, ' ').replace(/\[([^\]|]*)(\|[^\]]*)?\]/g, '[$1]');
+  if (game === 'express') { const it = JB.get(id); return it && { text: strip(it.s), right: '', lv: it.lv }; }
+  if (game === 'pairup') { const it = PR.get(id); return it && { text: it.a + ' → ' + it.b, right: it.b, lv: it.lv, kind: it.k }; }
+  if (game === 'munch') { const it = MU.get(id); return it && { text: strip(it.s), right: 'extra word in [ ]', lv: it.lv }; }
+  if (game === 'post') { const it = NO.get(id); return it && { text: it.q, right: it.a, lv: it.lv }; }
+  if (game === 'echo') { const it = EC.get(id); return it && { text: it.s.replace(/\[([^\]|]*)[^\]]*\]/g, '[$1]'), right: 'first word in [ ]', lv: it.lv }; }
+  if (game === 'groups') { const it = GR.get(id); return it && { text: 'Word Groups ' + id, right: '', lv: it.tier }; }
+  return { text: id, right: '' };
+}
 
 export function rng(seed) {
   let h = createHash('sha1').update(String(seed)).digest().readUInt32LE(0);

@@ -145,13 +145,26 @@ async function finish(res, me, b) {
 // Stored as a drive_events row (kind 'rate'), one per student per day: a second rating of the same day is ignored.
 // Needs the day to be finished first; if the finish is still in the offline queue, the page keeps the rating and resends it later.
 const RATE_LIST = v => Array.isArray(v) ? v.filter(x => text(x, 60)).slice(0, 8) : [];
+// a voice note recorded on the sheet: { id, secs }, kept only if this student uploaded it (see /api/feedback kind "voice")
+async function rateVoice(me, v) {
+  if (!v || !int(v.id, 1, 2 ** 53) || !int(v.secs, 1, 60)) return null;
+  const r = await db()`SELECT 1 FROM feedback_voice WHERE id = ${v.id} AND student_id = ${me.id}`;
+  return r.length ? { id: v.id, secs: v.secs } : null;
+}
+// follow-up chips per picked card: { "card label": ["chip", ...] }
+const RATE_MORE = v => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+  const out = {};
+  for (const [k, list] of Object.entries(v).slice(0, 10)) if (text(k, 60)) { const l = RATE_LIST(list); if (l.length) out[k.trim()] = l; }
+  return out;
+};
 async function rate(res, me, b) {
   if (!int(b.day, 0, DRIVE_LAST_BUILT) || !int(b.stars, 1, 11)) return res.status(400).json({ ok: false, error: 'bad rating' });
   const sql = db();
   const done = await sql`SELECT 1 FROM drive_days WHERE student_id = ${me.id} AND day = ${b.day}`;
   if (!done.length) return res.status(409).json({ ok: false, error: 'finish first' });
   const data = {
-    stars: b.stars, why: RATE_LIST(b.why), best: RATE_LIST(b.best),
+    stars: b.stars, why: RATE_LIST(b.why), best: RATE_LIST(b.best), more: RATE_MORE(b.more), voice: await rateVoice(me, b.voice),
     text: typeof b.text === 'string' ? b.text.trim().slice(0, 500) : '',
     secs: int(b.secs, 0, 86_400) ? b.secs : null, late: b.late === true
   };

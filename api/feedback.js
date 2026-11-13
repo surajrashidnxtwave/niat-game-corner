@@ -6,6 +6,25 @@ import { db, GAME_IDS, studentFor, limited, int, dbReady } from './_lib/db.js';
 
 const KINDS = ['game', 'verdict', 'general', 'mood', 'bug', 'session'], DIFF = ['easy', 'right', 'hard'], MOODS = ['tired', 'okay', 'sharp'];
 
+// Voice note from the feedback sheet ("Tap to record"): { kind: "voice", product: bg|dv|en, secs: 1-60, mime, audio: base64 } -> { ok, id }
+// 1 minute at most (the page stops recording at 60 s; the size cap below also bounds the length). At most 15 a day per student.
+// The rating that follows stores { voice: { id, secs } }; the admin page plays it through /api/admin?view=voice&id=...
+const VOICE_PRODUCTS = ['bg', 'dv', 'en'], VOICE_MIME = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/mpeg'];
+const VOICE_MAX_BYTES = 600_000, VOICE_DAY_MAX = 15;
+async function voice(res, me, b) {
+  const mime = String(b.mime || '').split(';')[0].trim().toLowerCase();
+  if (!VOICE_PRODUCTS.includes(b.product) || !int(b.secs, 1, 60) || !VOICE_MIME.includes(mime) || typeof b.audio !== 'string'
+      || b.audio.length > Math.ceil(VOICE_MAX_BYTES * 4 / 3) + 4 || !/^[A-Za-z0-9+/]+=*$/.test(b.audio)) return res.status(400).json({ ok: false, error: 'bad voice note' });
+  const bytes = Buffer.from(b.audio, 'base64');
+  if (bytes.length < 400 || bytes.length > VOICE_MAX_BYTES) return res.status(400).json({ ok: false, error: 'bad voice note' });
+  const sql = db();
+  const [{ n }] = await sql`SELECT COUNT(*)::int AS n FROM feedback_voice WHERE student_id = ${me.id} AND created_at > now() - interval '1 day'`;
+  if (n >= VOICE_DAY_MAX) return res.status(429).json({ ok: false, error: 'too many voice notes today' });
+  const [row] = await sql`INSERT INTO feedback_voice (student_id, product, secs, mime, audio)
+    VALUES (${me.id}, ${b.product}, ${b.secs}, ${mime}, decode(${bytes.toString('hex')}, 'hex')) RETURNING id`;
+  return res.status(200).json({ ok: true, id: Number(row.id) });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'POST only' });
   if (!dbReady(res)) return;
@@ -15,6 +34,7 @@ export default async function handler(req, res) {
     if (!me) return res.status(401).json({ ok: false, error: 'not joined' });
     if (limited('f:' + me.id, 30)) return res.status(429).json({ ok: false, error: 'slow down' });
 
+    if (b.kind === 'voice') return await voice(res, me, b);
     if (!KINDS.includes(b.kind)) return res.status(400).json({ ok: false, error: 'bad kind' });
     const game = b.game == null ? null : GAME_IDS.includes(b.game) ? b.game : undefined;
     const rating = b.rating == null ? null : int(b.rating, 1, b.kind === 'session' ? 11 : 5) ? b.rating : undefined;
