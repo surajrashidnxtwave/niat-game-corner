@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link href="drive/drive.css?v=19" rel="stylesheet">
-<link href="english/english.css?v=26" rel="stylesheet">
+<link href="english/english.css?v=27" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('gc_theme')==='dark'?'dark':'light'}catch(e){}</script>
@@ -1145,8 +1145,10 @@ html[data-theme="dark"] .hfoot .btn{box-shadow:var(--shadow),inset 0 0 0 1px rgb
   <div class="ptabs" role="tablist" aria-label="Profiles">
     <button role="tab" id="pt-thinking" data-ptab="thinking" aria-selected="true" aria-controls="m-thinking">Thinking Profile</button>
     <button role="tab" id="pt-drive" data-ptab="drive" aria-selected="false" aria-controls="m-drive">Drive Profile</button>
+    <button role="tab" id="pt-english" data-ptab="english" aria-selected="false" aria-controls="m-english" hidden>English Profile</button>
   </div>
   <div id="m-drive" role="tabpanel" aria-labelledby="pt-drive" hidden></div>
+  <div id="m-english" role="tabpanel" aria-labelledby="pt-english" hidden></div>
   <div class="mgrid" id="m-thinking" role="tabpanel" aria-labelledby="pt-thinking">
     <div class="mcol mleft">
       <div class="card scan" id="m-scan"></div>
@@ -1224,8 +1226,8 @@ html[data-theme="dark"] .hfoot .btn{box-shadow:var(--shadow),inset 0 0 0 1px rgb
 <script src="content/rt.js" onerror="0"></script>
 <script src="content/st.js" onerror="0"></script>
 <script src="content/aiq.js" onerror="0"></script>
-<script src="drive/drive.js?v=18" defer></script>
-<script src="english/english.js?v=27" defer></script>
+<script src="drive/drive.js?v=19" defer></script>
+<script src="english/english.js?v=28" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;

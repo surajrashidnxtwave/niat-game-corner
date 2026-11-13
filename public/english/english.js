@@ -92,7 +92,10 @@ function setOpen(v){
   OPEN = v;
   try { if (ME) localStorage.setItem(OK_KEY, JSON.stringify({ id: ME.id, v })); } catch (e) {}
   const t = qs('#tab-english'); if (t) t.hidden = !v;
+  profTabSync();
 }
+// My Profiles: show or hide the English Profile tab (drive.js runs the tabs)
+function profTabSync(){ if (typeof view !== 'undefined' && view === 'muscles' && window.Drive) Drive.profileTab(); }
 function st(){
   if (!EA) EA = cacheLoad();
   if (EA && EA.today !== istDay()) { EA.today = istDay(); EA.todaySecs = 0; EA.closed = false; pull(true); }   // a new India day
@@ -1613,6 +1616,93 @@ document.addEventListener('focusout', e => { if (e.target.matches && e.target.ma
 addEventListener('scroll', hideTip, { passive: true });
 addEventListener('hashchange', hideTip);
 
+/* ================= English Profile (My Profiles tab) ================= */
+// Private to the student: levels, progress to the next level, games, the last 4 weeks. Data from /api/english action 'profile'.
+let PROF = null, profAt = 0, profBox = null;
+function profile(box){
+  profBox = box || profBox; if (!profBox || !ME) return;
+  if (Date.now() - profAt > 30000) {
+    profAt = Date.now();
+    api('/api/english', { action: 'profile', token: ME.token }).then(r => {
+      if (r.status === 200 && r.j.ok) { PROF = r.j.profile; if (profBox && !profBox.hidden) renderProfile(profBox); }
+      else if (!PROF) { profAt = 0; profBox.innerHTML = '<div class="card eprof-empty"><p class="muted">Couldn’t load your English Profile. Check your internet and open this tab again.</p></div>'; }
+    });
+  }
+  renderProfile(profBox);
+}
+function renderProfile(box){
+  const p = PROF;
+  if (!p) { box.innerHTML = '<div class="card eprof-empty"><p class="muted">Loading your English Profile…</p></div>'; return; }
+  if (!p.placed) {
+    box.innerHTML = '<div class="card eprof-empty">' + yap('thinking', 120, 'eyap') + '<h2>English Profile</h2>'
+      + '<p class="muted">Your profile starts after the 5-minute level check in English Adda. It shows your five skills, how close you are to the next level, and your games.</p>'
+      + '<button class="ebtn" data-go="english">Go to English Adda</button></div>';
+    return;
+  }
+  const S = p.skills, lvs = SKILLS.map(s => S[s.k].lv || 1);
+  const overall = Math.round(lvs.reduce((a, b) => a + b, 0) / lvs.length);
+  const hi = Math.max(...lvs), lo = Math.min(...lvs);
+  const best = SKILLS.filter(s => (S[s.k].lv || 1) === hi).map(s => s.name), weak = SKILLS.filter(s => (S[s.k].lv || 1) === lo).map(s => s.name);
+  const list = a => a.length < 2 ? a[0] : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  const line = hi === lo ? 'Your five skills are level with each other. Keep going and watch them climb.'
+    : 'Strongest: <b>' + esc(list(best)) + '</b>. Building: <b>' + esc(list(weak)) + '</b>. Today’s games give more time to the skills you’re building.';
+  const mins = Math.round(p.secs / 60), pct = (a, b) => b ? Math.round(a / b * 100) : null;
+  const stat = (v, l) => '<div class="eprof-stat"><b>' + v + '</b><span>' + l + '</span></div>';
+
+  // one row per skill: level bars, where it started, and the road to the next level
+  const skillCard = s => {
+    const x = S[s.k], lv = x.lv || 1, nr = x.near, acc = pct(x.ok, x.n);
+    let next;
+    if (lv >= 8) next = '<p class="eprof-next">Top level. Nothing left to unlock here!</p>';
+    else {
+      const need = 16, have = nr.ok, left = 20 - nr.n;
+      const msg = nr.n < 20 ? 'Answer ' + plural(left, 'more question') + ' at this level, then get 16 of your last 20 right.'
+        : nr.ok >= need ? (nr.days < 2 ? 'Almost there! Play this skill on one more day to level up.' : 'Ready: your next round can level you up.')
+        : 'Get ' + (need - nr.ok) + ' more right in your last 20 to level up.';
+      next = '<div class="eprof-road"><span class="eprof-meter" role="progressbar" aria-label="' + s.name + ': right answers in the last 20 at this level" aria-valuemin="0" aria-valuemax="20" aria-valuenow="' + have + '">'
+        + '<i style="width:' + (have / 20 * 100) + '%"></i><em style="left:80%"></em></span><b>' + have + '/20</b></div>'
+        + '<p class="eprof-next">' + msg + '</p>';
+    }
+    let bars = ''; for (let i = 1; i <= 8; i++) bars += '<i' + (i <= lv ? ' class="on"' : '') + '></i>';
+    const up = x.start && lv > x.start ? ' <span class="eprof-up">▲ ' + (lv - x.start) + ' since your level check</span>' : '';
+    return '<div class="eprof-skill" style="--c:' + s.c + '"><div class="eskill-h"><b>' + s.name + '</b><span>Lv ' + lv + ' · ' + LEVELS[lv - 1] + '</span></div>'
+      + '<div class="ebars">' + bars + '</div>'
+      + '<p class="eprof-meta">' + (acc == null ? 'No answers yet' : acc + '% right over ' + x.n.toLocaleString('en-IN') + ' answers') + up + '</p>' + next + '</div>';
+  };
+
+  // the last 4 weeks, oldest first: full = goal met, light = played a little
+  const byDay = Object.fromEntries(p.days.map(x => [x.d, x.s]));
+  const cells = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(p.today + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - i);
+    const k = d.toISOString().slice(0, 10), s = byDay[k] || 0;
+    const cls = s >= GOAL ? 'goal' : s > 0 ? 'some' : '';
+    const label = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' }) + ': ' + (s >= GOAL ? 'goal done' : s > 0 ? Math.max(1, Math.round(s / 60)) + ' min' : 'not played');
+    cells.push('<i class="' + cls + (i === 0 ? ' today' : '') + '" title="' + label + '"></i>');
+  }
+
+  const played = GAMES.filter(g => g.built && !g.always && p.games[g.id]);
+  const gameRow = g => {
+    const x = p.games[g.id], s = skillOf(g.skill), a = pct(x.correct, x.items);
+    return '<div class="eprof-game"><span class="eico" style="--c:' + s.c + '">' + g.icon + '</span><span class="eprof-gname"><b>' + esc(g.name) + '</b><small>' + plural(x.rounds, 'round') + (a == null ? '' : ' · ' + a + '% right') + '</small></span>'
+      + '<span class="eprof-best"><small>Best</small><b>' + (x.chill || 0).toLocaleString('en-IN') + '</b>' + (x.rush ? '<small>Rush ' + x.rush.toLocaleString('en-IN') + '</small>' : '') + '</span></div>';
+  };
+  const upName = k => (skillOf(k) || {}).name || k;
+  const fmtD = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+  box.innerHTML = '<section class="eprof-head">' + yap('correct', 120, 'eyap eprof-yap')
+    + '<div><span class="etag">Only you can see this</span><h2 class="ddisplay">Your English Profile</h2>'
+    + '<p class="eprof-lv">Level ' + overall + ': <b>' + LEVELS[overall - 1] + '</b></p><p>' + line + '</p></div></section>'
+    + '<div class="eprof-stats">' + stat('🔥 ' + p.streak, 'day streak') + stat(p.goalDays, plural(p.goalDays, 'goal day').replace(/^\d+ /, '')) + stat(mins, 'minutes played')
+    + stat(Object.values(p.games).reduce((a, g) => a + g.rounds, 0), 'rounds') + stat((p.points || 0).toLocaleString('en-IN'), 'Adda points') + stat(p.vault.total, 'words saved' + (p.vault.mastered ? ' · ' + p.vault.mastered + ' mastered' : '')) + '</div>'
+    + '<div class="eprof-grid"><section class="epanel"><h3>Your skills</h3><p class="esub">To level up a skill: 16 of your last 20 answers right at your level, on 2 different days. Levels never go down.</p>'
+    + SKILLS.map(skillCard).join('') + '</section>'
+    + '<div class="eprof-side"><section class="epanel"><h3>Last 4 weeks</h3><p class="esub">Dark = 15-minute goal done. Light = played a little.</p><div class="eprof-cal">' + cells.join('') + '</div></section>'
+    + '<section class="epanel"><h3>Your games</h3>' + (played.length ? '<div class="eprof-games">' + played.map(gameRow).join('') + '</div>' : '<p class="esub">Play a game in English Adda and it shows here with your best score.</p>') + '</section>'
+    + (p.ups.length ? '<section class="epanel"><h3>Level-ups</h3><ul class="eprof-ups">' + p.ups.map(u => '<li><span style="--c:' + ((skillOf(u.skill) || {}).c || '#8B5CF6') + '"></span><b>' + esc(upName(u.skill)) + '</b> reached Lv ' + u.to + ' · ' + LEVELS[u.to - 1] + '<small>' + fmtD(u.d) + '</small></li>').join('') + '</ul></section>' : '')
+    + '</div></div>';
+}
+
 /* ================= hooks for index.html ================= */
 // called on every route: shows the tab once the server says this batch can open English Adda
 let syncAt = 0;
@@ -1620,12 +1710,13 @@ function sync(){
   if (!ME) { const t = qs('#tab-english'); if (t) t.hidden = true; return; }
   if (OPEN === null) OPEN = openLoad();
   const t = qs('#tab-english'); if (t) t.hidden = OPEN !== true;
+  profTabSync();
   if (Date.now() - syncAt > 60000) { syncAt = Date.now(); pull(); }
 }
 function leave(){ playing = false; flush(); }
-function reset(){ flush(true); playing = false; pend = 0; EA = null; OPEN = null; pulledAt = 0; syncAt = 0; const r = qs('#english-root'); if (r) r.innerHTML = ''; const t = qs('#tab-english'); if (t) t.hidden = true; }
+function reset(){ flush(true); playing = false; pend = 0; EA = null; OPEN = null; pulledAt = 0; syncAt = 0; PROF = null; profAt = 0; const pb = qs('#m-english'); if (pb) pb.innerHTML = ''; const r = qs('#english-root'); if (r) r.innerHTML = ''; const t = qs('#tab-english'); if (t) t.hidden = true; }
 window.Adda = {
-  render, leave, reset, sync,
+  render, leave, reset, sync, profile, isOpen: () => OPEN === true,
   // test accounts only: jump straight into a game, e.g. Adda.open('express', 6) or Adda.open('groups', 0, 12) for puzzle #12
   open(game, lv, n){ if (!tester()) return 'Test accounts only'; openGame(game, { lv, n }); return 'Opening ' + game; },
   _state: st, _todaySecs: todaySecs,

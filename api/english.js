@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     if (!me) return res.status(401).json({ ok: false, error: 'not joined' });
     if (!allowed(me)) return res.status(403).json({ ok: false, open: false, error: 'not open for your batch yet' });
     if (b.action === 'state') return res.status(200).json({ ok: true, state: await state(me) });
+    if (b.action === 'profile') return res.status(200).json({ ok: true, profile: await profile(me) });
     if (b.action === 'tick') return await tick(res, me, b);
     if (b.action === 'checkstart') return await checkStart(res, me);
     if (b.action === 'checknext') return checkNext(res, b);
@@ -121,6 +122,50 @@ async function state(me) {
   };
 }
 const cleanLevels = l => { const o = {}; for (const k of SKILLS) o[k] = int(l && l[k], 1, 8) ? l[k] : null; return o; };
+
+// ---------- English Profile (My Profiles tab): private to the student ----------
+async function profile(me) {
+  const sql = db();
+  await ensure(sql, me);
+  const [stu] = await sql`SELECT to_char(started_on, 'YYYY-MM-DD') AS started_on, points, levels, placement, placed_at FROM english_students WHERE student_id = ${me.id}`;
+  const levels = cleanLevels(stu.levels);
+  const [days, today, games, skills, near, ups, vlt] = await Promise.all([
+    sql.query(`SELECT to_char(day, 'YYYY-MM-DD') AS d, active FROM english_daily WHERE student_id = $1 AND day > ${IST_TODAY} - 400 ORDER BY day DESC`, [me.id]),
+    sql.query(`SELECT to_char(${IST_TODAY}, 'YYYY-MM-DD') AS d`),
+    sql.query(`SELECT game, count(*)::int AS rounds, COALESCE(sum(items), 0)::int AS items, COALESCE(sum(correct), 0)::int AS correct,
+                 max((meta->>'score')::int) FILTER (WHERE COALESCE(meta->>'mode', 'chill') = 'chill') AS chill,
+                 max((meta->>'score')::int) FILTER (WHERE meta->>'mode' = 'rush') AS rush
+               FROM english_rounds WHERE student_id = $1 GROUP BY game`, [me.id]),
+    sql.query(`SELECT skill, count(*)::int AS n, count(*) FILTER (WHERE ok)::int AS ok FROM english_answers WHERE student_id = $1 GROUP BY skill`, [me.id]),
+    // the answers that count towards the next level: the last 20 at the current level of each skill
+    sql.query(`SELECT skill, count(*)::int AS n, count(*) FILTER (WHERE ok)::int AS ok, count(DISTINCT d)::int AS days FROM (
+                 SELECT skill, ok, to_char(at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') AS d,
+                        row_number() OVER (PARTITION BY skill ORDER BY at DESC) AS rn
+                 FROM english_answers WHERE student_id = $1 AND lv = COALESCE(($2::jsonb ->> skill)::int, 1)) x
+               WHERE rn <= 20 GROUP BY skill`, [me.id, JSON.stringify(levels)]),
+    sql.query(`SELECT data, to_char(at AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD') AS d FROM english_events WHERE student_id = $1 AND kind = 'levelup' ORDER BY at DESC LIMIT 20`, [me.id]),
+    sql.query(`SELECT count(*)::int AS total, count(*) FILTER (WHERE box = 5)::int AS mastered FROM english_vault WHERE student_id = $1`, [me.id])
+  ]);
+  const t = today[0].d, goalDates = days.filter(x => x.active >= GOAL).map(x => x.d);
+  const start = stu.placement && stu.placement.levels ? cleanLevels(stu.placement.levels) : {};
+  const by = (rows, k) => Object.fromEntries(rows.map(r => [r[k], r]));
+  const sk = by(skills, 'skill'), nr = by(near, 'skill');
+  return {
+    today: t, startedOn: stu.started_on, placed: !!stu.placed_at, points: stu.points,
+    streak: streak(goalDates, t).n, goalDays: goalDates.length,
+    secs: days.reduce((a, x) => a + x.active, 0), daysPlayed: days.filter(x => x.active > 0).length,
+    days: days.filter(x => x.d > shiftDay(t, -28)).map(x => ({ d: x.d, s: x.active })),
+    skills: Object.fromEntries(SKILLS.map(k => [k, {
+      lv: levels[k], start: start[k] || null,
+      n: (sk[k] || {}).n || 0, ok: (sk[k] || {}).ok || 0,
+      near: { n: (nr[k] || {}).n || 0, ok: (nr[k] || {}).ok || 0, days: (nr[k] || {}).days || 0 }
+    }])),
+    games: Object.fromEntries(games.map(g => [g.game, { rounds: g.rounds, items: g.items, correct: g.correct, chill: g.chill || 0, rush: g.rush || 0 }])),
+    ups: ups.map(u => ({ skill: u.data.skill, to: u.data.to, d: u.d })),
+    vault: vlt[0]
+  };
+}
+const shiftDay = (d, n) => { const x = new Date(d + 'T00:00:00Z'); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 
 // Goal days in a row, ending today (or yesterday while today's goal isn't met yet).
 // One missed day is forgiven per 7 days (a freeze); a second miss inside that window ends the streak.

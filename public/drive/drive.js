@@ -1697,10 +1697,15 @@ async function showSplit(day, sides){
 let profTab = 'thinking', PROF = null, profAt = 0;
 function profileTab(){
   qa('[data-ptab]').forEach(b => b.setAttribute('aria-selected', b.dataset.ptab === profTab));
-  const th = qs('#m-thinking'), dr = qs('#m-drive');
+  const th = qs('#m-thinking'), dr = qs('#m-drive'), en = qs('#m-english'), enTab = qs('#pt-english');
   if (!th || !dr) return;
-  th.hidden = profTab !== 'thinking'; dr.hidden = profTab !== 'drive';
+  // English Profile tab: only for batches that can open English Adda (english.js owns that panel)
+  const enOn = !!(window.Adda && Adda.isOpen && Adda.isOpen());
+  if (enTab) enTab.hidden = !enOn;
+  if (profTab === 'english' && !enOn) { profTab = 'thinking'; qa('[data-ptab]').forEach(b => b.setAttribute('aria-selected', b.dataset.ptab === profTab)); }
+  th.hidden = profTab !== 'thinking'; dr.hidden = profTab !== 'drive'; if (en) en.hidden = profTab !== 'english';
   if (profTab === 'drive') renderProfile();
+  if (profTab === 'english') Adda.profile(en);
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-ptab]'); if (!b) return;
