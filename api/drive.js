@@ -12,7 +12,7 @@
 //   - points per lesson are capped, so an edited page can't inflate the leaderboard
 import { db, studentFor, limited, ipOf, int, text, dbReady } from './_lib/db.js';
 
-export const DRIVE_LAST_BUILT = 14;     // highest day with content in this release
+export const DRIVE_LAST_BUILT = 28;     // highest day with content in this release
 const DAILY_MAX = 3;
 const MAX_PTS = 400;                    // generous cap per lesson; real lessons give about 100–250
 const KINDS = ['attempt', 'predict', 'recall', 'plan', 'rewrite', 'reflect', 'stand', 'game', 'scale', 'study', 'pairs', 'theory', 'sort', 'review', 'story', 'practice'];
@@ -86,7 +86,7 @@ function cleanEvents(list) {
     && e.data && typeof e.data === 'object' && JSON.stringify(e.data).length <= 6000);
 }
 // memo: only these keys, each small; later lessons read them (Day 7 retest, Day 19 plan check, Day 55 stand)
-const MEMO_KEYS = /^(predict|recall|pairs|plan_d\d+|stand_d\d+|reason|study|studyHours|scales|bounce)$/;
+const MEMO_KEYS = /^(predict|recall|pairs|plan_d\d+|stand_d\d+|reason|study|studyHours|scales|bounce|wait|replay)$/;
 function cleanMemo(m) {
   const out = {};
   if (!m || typeof m !== 'object') return out;

@@ -1,6 +1,8 @@
 // POST /api/feedback { token, kind: "game" | "verdict" | "general" | "mood" | "bug" | "session", game?, rating?, difficulty?, fair?, comment?, meta? }
 //   mood: meta.mood is tired | okay | sharp.  bug: comment (what went wrong) is required.
 //   session: end-of-session "11-star" rating; rating 1-11 is required (every other kind rates 1-5).
+//   general with meta.product (bg | dv | en): the sidebar Feedback button's 11-star rating of one section; rating 1-11 required.
+//   (Old general rows, from before Nov 2026, have no meta.product and a 1-5 face rating.)
 // Student text is stored as plain text and only ever shown escaped on the admin page.
 import { db, GAME_IDS, studentFor, limited, int, dbReady } from './_lib/db.js';
 
@@ -37,7 +39,8 @@ export default async function handler(req, res) {
     if (b.kind === 'voice') return await voice(res, me, b);
     if (!KINDS.includes(b.kind)) return res.status(400).json({ ok: false, error: 'bad kind' });
     const game = b.game == null ? null : GAME_IDS.includes(b.game) ? b.game : undefined;
-    const rating = b.rating == null ? null : int(b.rating, 1, b.kind === 'session' ? 11 : 5) ? b.rating : undefined;
+    const star11 = b.kind === 'session' || (b.kind === 'general' && b.meta && b.meta.product != null);
+    const rating = b.rating == null ? null : int(b.rating, 1, star11 ? 11 : 5) ? b.rating : undefined;
     const difficulty = b.difficulty == null ? null : DIFF.includes(b.difficulty) ? b.difficulty : undefined;
     const fair = b.fair == null ? null : typeof b.fair === 'boolean' ? b.fair : undefined;
     const comment = b.comment == null || b.comment === '' ? null : typeof b.comment === 'string' && b.comment.length <= (b.kind === 'bug' ? 1000 : 500) ? b.comment.trim() : undefined;
@@ -45,7 +48,8 @@ export default async function handler(req, res) {
     if ([game, rating, difficulty, fair, comment, meta].includes(undefined)) return res.status(400).json({ ok: false, error: 'bad field' });
     if (b.kind === 'mood' && !MOODS.includes(meta?.mood)) return res.status(400).json({ ok: false, error: 'bad mood' });
     if (b.kind === 'bug' && !comment) return res.status(400).json({ ok: false, error: 'Please tell us what went wrong.' });
-    if (b.kind === 'session' && rating == null) return res.status(400).json({ ok: false, error: 'Pick a star rating.' });
+    if (star11 && rating == null) return res.status(400).json({ ok: false, error: 'Pick a star rating.' });
+    if (b.kind === 'general' && meta?.product != null && !VOICE_PRODUCTS.includes(meta.product)) return res.status(400).json({ ok: false, error: 'bad section' });
     if (b.kind !== 'mood' && rating == null && difficulty == null && fair == null && !comment) return res.status(400).json({ ok: false, error: 'empty' });
 
     await db()`INSERT INTO feedback (student_id, kind, game_id, rating, difficulty, fair, comment, meta)

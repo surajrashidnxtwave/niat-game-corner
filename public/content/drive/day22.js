@@ -1,0 +1,63 @@
+/* Drive School · Day 22 · Strategy · Self-explanation (Chi et al. 1989; Chi et al. 1994; Bisra et al. 2018).
+   STATUS: written by Claude Code, FOR TEAM REVIEW before release.
+   Check: the "Prove it" facts. Chi, Bassok, Lewis, Reimann & Glaser, Cognitive Science 13 (1989): students who learned more from
+   worked physics examples explained the steps to themselves more. Bisra, Liu, Nesbit, Salimi & Winne, Educational Psychology Review 30 (2018):
+   a meta-analysis of 64 reports (69 effect sizes), overall g = .55, a medium effect. Facts checked online by Claude Code, Nov 17, 2026.
+   The code was run in Python 3: marks {'Asha': 72, 'Ravi': 54, 'Meena': 90} -> total 216, print(total / len(marks)) prints 72.0;
+   counting 'a' in 'banana' gives 3; m = {'Asha': 72}; m['Asha'] = 75 updates the value (len stays 1), m['Ravi'] = 60 adds a key.
+   The "Feel it" screen reuses the rewrite type: each code line is a label, the student explains it in their own words. */
+window.DRIVE_LESSONS[22] = { screens: [
+  { type:'info', kicker:'Day 22 · Strategy', title:'Explain it to yourself', visual:['🐍 📄', '👀 ✅ ❓', '🗣️ 🧠', '🔍'],
+    body:['You read a solved program in your notes. Every line makes sense. 👀','Then the exam asks you to write one. Blank. 😶','Today: a trick that turns “I get it” into “I can do it”.'],
+    guide:'You’ll explain some code first. No marks for it.', cta:'Start' },
+  { type:'rewrite', kicker:'Feel it', title:'Explain each line in your own words',
+    text:'This code finds the class average. For each line, say what it does and why it’s there. At least 4 words each.',
+    lines:['marks = {\'Asha\': 72, \'Ravi\': 54, \'Meena\': 90}','total = 0','for name in marks:','total = total + marks[name]','print(total / len(marks))'],
+    guide:'Don’t just read the code out loud. Say why.' },
+  { type:'info', kicker:'Compare', title:'One way to explain each line', visual:['🔍', '💡'],
+    pairLabel:'Line',
+    pairs:[['marks = {\'Asha\': 72, \'Ravi\': 54, \'Meena\': 90}','A dictionary: each name is a key, each mark is its value. So we can look up a mark by name.'],
+           ['total = 0','Start the sum at 0. We need a box to add marks into, and it must start empty.'],
+           ['for name in marks:','Loop over the dictionary. Looping over a dict gives the keys, so name is Asha, then Ravi, then Meena.'],
+           ['total = total + marks[name]','Look up this person’s mark and add it to the running sum. After the loop, total is 216.'],
+           ['print(total / len(marks))','Sum ÷ number of students = the average. 216 ÷ 3 prints 72.0. It’s a float because / always gives one.']],
+    body:['Yours don’t need to match these.'], guide:'Notice: each one says why, not just what.' },
+  { type:'info', kicker:'Name it', title:'Self-explanation', visual:['📖 ➡️ 🗣️', '❓ why?', '🔗 🧠', '✅'],
+    body:['<b>Self-explanation</b> means stopping at each step and telling yourself why it works.','“It adds marks[name] to total” just reads the code out loud. 🦜','“It adds this person’s mark to the running sum” shows you know what it’s <i>for</i>.','The why links the new step to things you already know. That link is what you remember.'],
+    guide:'What it does is easy. Why it’s there is the learning.' },
+  { type:'info', kicker:'Prove it', title:'What the research says', visual:['🧪 📚', '🗣️ 📈', '✅'],
+    facts:[['1989','study: students who learned most from solved examples explained each step to themselves'],['64','studies pooled in a 2018 review'],['Medium','boost to learning when students were asked to self-explain']],
+    body:['Researchers watched students study solved physics problems. The ones who learned most kept asking themselves why each step worked.','Later studies asked students to do it on purpose. It helped in maths, science and more.'],
+    note:'Sources: Chi et al., Cognitive Science, 1989; Bisra et al., Educational Psychology Review, 2018.',
+    guide:'Same notes. Different way of reading them.' },
+  { type:'bet', id:'d22q1', kicker:'Spot the understanding · bet on it', q:'Which explanation of <code>print(total / len(marks))</code> shows real understanding?',
+    opts:[['“It prints total divided by len of marks.”',false,'This reads the code out loud in words. You could say it without knowing what it’s for.'],
+          ['“It prints the average: sum ÷ number of students.”',true,'Yes. It says what the line is for and how the pieces connect.'],
+          ['“It prints the final answer of the program.”',false,'True, but vague. It doesn’t say what the answer is or why.'],
+          ['“It divides and prints. We did this in class.”',false,'Feeling you’ve seen it isn’t the same as knowing why it works.']],
+    why:'Real understanding says what a step is for and how it links to the rest, not just what the code says.' },
+  { type:'swipe', id:'d22sw', kicker:'Swipe it', title:'Just reading it, or explaining it?', sides:['Just reading it','Explaining it'],
+    cards:[['“count = count + 1 adds 1 to count.”',0,'That’s the code in words. No why.'],
+           ['“Each time we find an ‘a’, we add 1, so count ends as the number of a’s.”',1,'It says what the line is for in the whole program.'],
+           ['“for ch in ‘banana’ goes through banana.”',0,'Reads the line out loud.'],
+           ['“The loop gives one letter at a time, so we can check each one.”',1,'It says why the loop is needed.'],
+           ['“m[‘Asha’] = 75 sets Asha to 75.”',0,'True, but it misses the key point.'],
+           ['“Asha is already a key, so this changes her mark. It doesn’t add a new one.”',1,'It links the line to how dictionaries work.']],
+    guide:'Swipe right if it says why, not just what.' },
+  { type:'quiz', id:'d22q2', kicker:'Use it', q:'You’re studying a solved example in your Python notes. Which way of reading it helps most?',
+    opts:[['Read it slowly twice, top to bottom',false,'Rereading feels smooth, but you never stop to ask why each step is there.'],
+          ['Highlight the lines that look important',false,'Highlighting marks the page. It doesn’t make you explain anything.'],
+          ['At each line, ask “why is this here?” and answer it',true,'Yes. That’s self-explanation. Answering the why is what builds understanding.'],
+          ['Copy the whole program neatly into your notebook',false,'Copying keeps your hands busy, not your brain.']],
+    why:'Stop at each step and explain why it works. If you can’t, that’s the exact line to look at again.' },
+  { type:'quiz', id:'d22q3', kicker:'Use it', q:'Ravi explains a line, gets stuck on why it works, and feels bad. What does getting stuck tell him?',
+    opts:[['He found the exact gap in his understanding',true,'Right. Self-explanation shows you where the gap is. Now he knows what to ask or look up.'],
+          ['He’s just not good at coding',false,'That’s the fixed-mindset trap. Getting stuck is information, not a verdict.'],
+          ['Self-explaining doesn’t work for him',false,'It just did its job: it showed him what he doesn’t get yet.'],
+          ['He should skip that line and keep going',false,'Skipping it hides the gap until the exam finds it for him.']],
+    why:'Not being able to explain a step is useful. It points to exactly what to fix.' },
+  { type:'commit', key:'d22', q:'Pick one way to self-explain this week.',
+    opts:['If I read a solved example, then I’ll say why each line is there before moving on.','If I copy code from class, then I’ll write a short “why” comment next to each line.','If I get stuck explaining a step, then I’ll mark it and ask about it in the next class.'],
+    guide:'Pick the one you’ll use first.' },
+  { type:'wrap', lines:['What it does is easy. Why it works is the learning. 🗣️','Tomorrow: the marshmallow test. Is willpower really the secret?'] }
+]};

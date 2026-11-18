@@ -467,7 +467,7 @@ export default async function handler(req, res) {
     if (q.get('view') === 'drive') return res.status(200).json(await driveReport(sql));
     if (q.get('view') === 'english') return res.status(200).json(await englishReport(sql, q.get('test') === '1'));
 
-    const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, best, week] = await Promise.all([
+    const [pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, anytime, best, week] = await Promise.all([
       sql`WITH pr AS (SELECT student_id, SUM(active)::int AS active, SUM(plays)::int AS plays FROM progress GROUP BY student_id)
           SELECT s.pilot, COUNT(*)::int AS on_roster, COUNT(s.joined_at)::int AS joined,
                  COUNT(*) FILTER (WHERE s.last_seen > now() - interval '7 days')::int AS active7,
@@ -495,7 +495,7 @@ export default async function handler(req, res) {
           FROM plays WHERE played_at > now() - interval '14 days' GROUP BY 1 ORDER BY 1`,
       sql`SELECT f.created_at, s.name, s.roll AS niat_id, f.kind, f.game_id, f.rating, f.difficulty, f.comment
           FROM feedback f JOIN students s ON s.id = f.student_id
-          WHERE f.comment IS NOT NULL AND f.kind NOT IN ('bug', 'session') ORDER BY f.created_at DESC LIMIT 200`,
+          WHERE f.comment IS NOT NULL AND f.kind NOT IN ('bug', 'session') AND NOT (f.kind = 'general' AND f.meta ? 'product') ORDER BY f.created_at DESC LIMIT 200`,
       sql`SELECT f.created_at, s.name, f.game_id, f.meta, f.comment
           FROM feedback f JOIN students s ON s.id = f.student_id
           WHERE f.kind = 'verdict' AND f.fair = false ORDER BY f.created_at DESC LIMIT 100`,
@@ -520,6 +520,10 @@ export default async function handler(req, res) {
           FROM feedback f JOIN students s ON s.id = f.student_id
           WHERE f.kind = 'session' AND (f.comment IS NOT NULL OR jsonb_array_length(COALESCE(f.meta->'why', '[]'::jsonb)) > 0 OR jsonb_array_length(COALESCE(f.meta->'best', '[]'::jsonb)) > 0 OR COALESCE(f.meta->>'voice', '') <> '')
           ORDER BY f.created_at DESC LIMIT 200`,
+      // the sidebar Feedback button: 11-star ratings of one section, any time (not tied to a session, lesson or day)
+      sql`SELECT f.created_at, s.name, s.roll AS niat_id, f.rating AS stars, f.comment, f.meta
+          FROM feedback f JOIN students s ON s.id = f.student_id
+          WHERE f.kind = 'general' AND f.meta ? 'product' ORDER BY f.created_at DESC LIMIT 300`,
       // every student's best % per game, for the skill profiles
       sql`SELECT s.pilot, p.student_id, p.game_id, p.best_pct FROM progress p JOIN students s ON s.id = p.student_id WHERE p.plays > 0`,
       // this week (last 7 India days) vs the 7 days before, for the Summary page's trend arrows
@@ -541,7 +545,7 @@ export default async function handler(req, res) {
     for (const p of pilots) p.uni = uniOf(p.pilot);
     for (const st of students) st.uni = uniOf(st.batch);
     const skills = skillProfiles(best);
-    return res.status(200).json({ ok: true, pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, skills, week: week[0] });
+    return res.status(200).json({ ok: true, pilots, games, daily, comments, unfair, students, moods, bugs, goal, stars, ideas, anytime, skills, week: week[0] });
   } catch (e) {
     console.error('[admin]', e.message);
     return res.status(500).json({ ok: false, error: 'server error' });

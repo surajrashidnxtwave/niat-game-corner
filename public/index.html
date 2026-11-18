@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link href="drive/drive.css?v=19" rel="stylesheet">
-<link href="english/english.css?v=27" rel="stylesheet">
+<link href="drive/drive.css?v=21" rel="stylesheet">
+<link href="english/english.css?v=28" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('gc_theme')==='dark'?'dark':'light'}catch(e){}</script>
@@ -199,6 +199,14 @@ button.tile:active{transform:scale(.95)}
 .diff button[aria-pressed="true"]{background:var(--pill);color:var(--pill-ink)}
 .fbcard textarea.field{min-height:80px}
 .fbdone{text-align:center;font-weight:900;color:var(--ok);padding:6px 0}
+.gf-pick{display:grid;gap:10px}
+.gf-sec{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;text-align:left;padding:12px 14px;border-radius:16px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line);transition:box-shadow 150ms ease,background-color 150ms ease}
+.gf-sec:hover{box-shadow:inset 0 0 0 2px var(--fb-a);background:color-mix(in srgb,var(--fb-a) 6%,var(--card))}
+.gf-sec .av{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:26px;background:color-mix(in srgb,var(--fb-a) 14%,var(--card))}
+.gf-sec b{display:block;font-size:16px}
+.gf-sec small{display:block;font-size:12.5px;color:var(--soft);font-weight:700}
+.gf-sec .go{font-size:24px;font-weight:900;color:var(--fb-a)}
+.gf-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--soft)}
 .vfb{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:800;color:var(--soft)}
 .vfb button{font-size:15px;padding:3px 10px;border-radius:999px;background:var(--chip)}
 .vfb button[aria-pressed="true"]{background:var(--pill);color:var(--pill-ink)}
@@ -288,9 +296,8 @@ button.tile:active{transform:scale(.95)}
 .fb-more{display:grid;gap:10px}
 .fb-more h4{margin:0;font-size:16px;line-height:1.3}
 .fb-more > p{margin:-6px 0 0}
-.fb-tiles{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 2px 6px;margin:0 -2px;scrollbar-width:none}
-.fb-tiles::-webkit-scrollbar{display:none}
-.fb-tile{position:relative;flex:0 0 118px;min-height:96px;display:grid;align-content:space-between;gap:8px;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line);text-align:left;scroll-snap-align:start;transition:transform 160ms var(--ease-out),box-shadow 150ms ease,background-color 150ms ease}
+.fb-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;padding:2px}
+.fb-tile{position:relative;min-height:84px;display:grid;align-content:space-between;gap:8px;padding:10px 12px;border-radius:14px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line);text-align:left;scroll-snap-align:start;transition:transform 160ms var(--ease-out),box-shadow 150ms ease,background-color 150ms ease}
 .fb-tile:active{transform:scale(.97)}
 .fb-tile .ic{font-size:22px;line-height:1}
 .fb-tile .lb{font-size:13.5px;font-weight:800;line-height:1.25}
@@ -1226,8 +1233,8 @@ html[data-theme="dark"] .hfoot .btn{box-shadow:var(--shadow),inset 0 0 0 1px rgb
 <script src="content/rt.js" onerror="0"></script>
 <script src="content/st.js" onerror="0"></script>
 <script src="content/aiq.js" onerror="0"></script>
-<script src="drive/drive.js?v=19" defer></script>
-<script src="english/english.js?v=28" defer></script>
+<script src="drive/drive.js?v=22" defer></script>
+<script src="english/english.js?v=29" defer></script>
 <script>
 /* ================= core ================= */
 const M = window.Motion || null;
@@ -3456,33 +3463,47 @@ async function sendFeedback(body){
   const r = await api('/api/feedback', Object.assign({ token: ME.token }, body));
   return r.status === 200 && r.j.ok;
 }
-function feedbackForm(box, o){
-  let rating = null, diff = null;
-  box.innerHTML = '<h3>'+esc(o.title)+'</h3>'
-    + '<div class="faces">'+FACES.map((f,i) => '<button type="button" class="press" data-r="'+(i+1)+'" aria-pressed="false" aria-label="'+FACE_TXT[i]+'">'+f+'</button>').join('')+'</div>'
-    + (o.diff ? '<div class="diff"><button type="button" data-d="easy" aria-pressed="false">Too easy</button><button type="button" data-d="right" aria-pressed="false">Just right</button><button type="button" data-d="hard" aria-pressed="false">Too hard</button></div>' : '')
-    + '<textarea class="field" maxlength="500" placeholder="'+(o.placeholder || 'Anything to tell us? (optional)')+'"></textarea>'
-    + '<button type="button" class="btn full fbsend" disabled>Send feedback</button>';
-  const ta = box.querySelector('textarea'), send = box.querySelector('.fbsend');
-  const ready = () => send.disabled = !(rating || diff || ta.value.trim());
-  box.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rating = +b.dataset.r; box.querySelectorAll('[data-r]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
-  box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { diff = b.dataset.d; box.querySelectorAll('[data-d]').forEach(x => x.setAttribute('aria-pressed', x === b)); SFX.play('select'); ready(); });
-  ta.oninput = ready;
-  send.onclick = async () => {
-    send.disabled = true; send.textContent = 'Sending…';
-    const ok = await sendFeedback({ kind: o.kind, game: o.game || null, rating, difficulty: diff, comment: ta.value.trim() || null });
-    if (ok) { box.innerHTML = '<div class="fbdone">Thanks! Your feedback helps us improve Game Corner. 🙌</div>'; anim(box, { scale:[.97,1], opacity:[0,1] }); }
-    else { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; }
-  };
+/* sidebar "Feedback": the student picks which section to rate (Brain Gym, Drive School, English Adda), then gets that section's
+   11-star sheet (same lines and questions as its own rating). Saved as feedback kind "general" with meta.product = bg | dv | en.
+   It never counts as a session, lesson or day rating. */
+function fbSections(){
+  const out = [{ id:'bg', name:'Brain Gym', sub:'Brain games and your daily workout', host:['💪','Coach'], accent:'#6D4AFF', stars: STAR_TXT, sets: BG_SETS,
+    played: (SESS.games.length ? SESS.games.map(id => GAMES.find(g => g.id === id)) : unlockedGames()).filter(Boolean).map(g => g.name).slice(0, 8) }];
+  if (window.Drive && Drive.fb) out.push({ id:'dv', name:'Drive School', sub:'Lessons with Turbo', host:['🏎️','Turbo'], accent:'#7C4DFF', stars: Drive.fb.stars, sets: Drive.fb.sets, played: [] });
+  if (window.Adda && Adda.fb && Adda.isOpen && Adda.isOpen()) out.push({ id:'en', name:'English Adda', sub:'English games with Mithu', host:['🦜','Mithu'], accent:'#14A37F', stars: Adda.fb.stars, sets: Adda.fb.sets, played: Adda.fb.played() });
+  return out;
 }
 function renderGeneralFeedback(){
-  feedbackForm($('gf-card'), { kind:'general', title:'How do you feel about Game Corner so far?', placeholder:'What do you like? What should we change or add?' });
+  const box = $('gf-card'), secs = fbSections();
+  box.innerHTML = '<h3>Which part do you want to rate?</h3><p class="small muted" style="margin:0">Pick one. You can rate the others after.</p>'
+    + '<div class="gf-pick">' + secs.map(x => '<button type="button" class="gf-sec press" data-fbsec="' + x.id + '" style="--fb-a:' + x.accent + '"><span class="av" aria-hidden="true">' + x.host[0] + '</span><span><b>' + esc(x.name) + '</b><small>' + esc(x.sub) + '</small></span><span class="go" aria-hidden="true">›</span></button>').join('') + '</div>';
+  box.querySelectorAll('[data-fbsec]').forEach(b => b.onclick = () => { try { SFX.play('select'); } catch (e) {} rateSection(secs.find(x => x.id === b.dataset.fbsec)); });
 }
+function rateSection(x){
+  const box = $('gf-card');
+  box.innerHTML = '<div id="gf-sheet"></div>';
+  feedbackSheet($('gf-sheet'), {
+    head: '<div class="gf-head"><span>Rating <b>' + esc(x.name) + '</b></span><button type="button" class="linkbtn" data-fbback>Pick another</button></div>',
+    accent: x.accent, label: x.name + ' rating', stars: x.stars, sets: x.sets, played: x.played, product: x.id, host: x.host,
+    title: 'How high does ' + esc(x.name) + ' go?', send: 'Send feedback', skip: null, scroller: document.scrollingElement,
+    onSend: ans => sendFeedback({ kind:'general', rating: ans.stars, comment: ans.text || null,
+      meta: Object.assign(fbSplit(ans), { product: x.id, more: ans.more, voice: ans.voice }) }),
+    after: b => {
+      b.insertAdjacentHTML('beforeend', '<button type="button" class="btn light full" data-fbback style="margin-top:12px">Rate another part</button>');
+    }
+  });
+  scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
+}
+document.addEventListener('click', e => { if (e.target.closest('[data-fbback]')) renderGeneralFeedback(); });
+// drive.js and english.js load after the first route(): add their sections once they're in
+addEventListener('load', () => { if (view === 'feedback' && !$('gf-sheet')) renderGeneralFeedback(); });
 
 /* pop-up sheet shared by the mood check-in and the problem report */
-let modalBack = null, modalDone = null, modalHideT = null;
+let modalBack = null, modalDone = null, modalHideT = null, modalLock = false;
 const modalOpen = () => $('modal').classList.contains('open');
-function openModal(html){
+/* opts.lock: a tap outside or Escape doesn't close it (only its own buttons do). Used for required ratings. */
+function openModal(html, opts){
+  modalLock = !!(opts && opts.lock);
   if (modalDone) { const d = modalDone; modalDone = null; d(); }
   clearTimeout(modalHideT);
   const m = $('modal');
@@ -3495,15 +3516,15 @@ function openModal(html){
   return new Promise(r => { modalDone = r; });
 }
 function closeModal(){
-  const m = $('modal');
+  const m = $('modal'); modalLock = false;
   m.classList.remove('open'); m.classList.add('closing');
   clearTimeout(modalHideT);
   modalHideT = setTimeout(() => { m.hidden = true; m.classList.remove('closing'); $('mbox').innerHTML = ''; }, reduced() ? 0 : 210);
   if (modalBack && modalBack.focus) modalBack.focus({ preventScroll: true });
   if (modalDone) { const d = modalDone; modalDone = null; d(); }
 }
-$('modal').addEventListener('click', e => { if (e.target === $('modal') || e.target.closest('.mclose')) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalOpen()) closeModal(); });
+$('modal').addEventListener('click', e => { if (e.target.closest('.mclose') || (e.target === $('modal') && !modalLock)) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalOpen() && !modalLock) closeModal(); });
 
 /* A: one tap after each round, then an optional emoji rating */
 function feelForm(box, g){
@@ -3583,7 +3604,8 @@ let SESS = newSess(), pendingRate = null;
 { const old = S.sess;
   if (old && old.rounds && Date.now() - (old.last || 0) >= SESS_IDLE) pendingRate = old;   // left without ending: ask on return
   else if (old && old.rounds) SESS = old;                                                  // came back soon: same session
-  S.sess = SESS; }
+  if (!pendingRate && S.owed && S.owed.rounds) pendingRate = S.owed;                       // asked before but not sent yet
+  S.sess = SESS; S.owed = pendingRate || null; }
 /* 8 rungs (1, 3, 5, 7-11): each line is how the student feels right now, said big. Drive School and English Adda pass their own. */
 const STAR_TXT = { 11:'🚀 If ISRO calls, tell them my brain is ready for the Moon mission.', 10:'🧠 My brain deserves its own fan page now.',
   9:'🌙 Give me any puzzle. I’ll solve it in my sleep.', 8:'📣 I’m telling the whole hostel. They have to try this.',
@@ -3666,7 +3688,7 @@ function pickRung(box, b){
    choices FB_PLAYED = the games played this session). The student picks ONE main card, which opens its follow-up
    (chips, pick any) and an optional note. The first card is "Tap to record": a voice note of 1 minute at most.
    Step 3: the host's thank-you (warm for low ratings, a celebration for high ones) and a summary.
-   cfg: { head, title, stars, label, accent, sets, played, host: [emoji, name], product: 'bg'|'dv'|'en', send, skip, scroller,
+   cfg: { head, title, stars, label, accent, sets, played, host: [emoji, name], product: 'bg'|'dv'|'en', send, skip, later, scroller,
           onSend(ans) -> Promise<bool>, after(box, ans) }
    ans: { stars, band, tiles: [label] (0 or 1), more: { label: [chip] }, notes: { label: text }, text, voice: { id, secs } | null } */
 const FB_MAX_REC = 60;
@@ -3680,7 +3702,7 @@ const fbMMSS = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 const fbCanRecord = () => !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
 function fbBlob64(blob){ return new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1] || ''); r.onerror = no; r.readAsDataURL(blob); }); }
 function feedbackSheet(box, cfg){
-  let stars = 0, pick = null, chips = [], note = '', sent = false;
+  let stars = 0, pick = null, chips = [], note = '', sent = false, fails = 0;
   const V = { rec: null, stream: null, parts: [], blob: null, url: null, secs: 0, live: false, timer: 0, limit: false, audio: null };
   const E = s => esc(String(s));
   const accent = cfg.accent ? ' style="--fb-a:' + cfg.accent + '"' : '';
@@ -3832,7 +3854,12 @@ function feedbackSheet(box, cfg){
       } catch (e) { toast('Your voice note couldn’t be sent. Your rating is still saved.'); }
     }
     const ok = await cfg.onSend(ans);
-    if (!ok) { send.disabled = false; send.textContent = 'Couldn’t send. Try again'; return; }
+    if (!ok) {
+      send.disabled = false; send.textContent = 'Couldn’t send. Try again'; fails++;
+      // a required sheet with no skip: after two failed sends (bad internet) let the student out, it asks again later
+      if (fails >= 2 && cfg.later && !q('.fb-later')) q('.fb-foot').insertAdjacentHTML('beforeend', '<button type="button" class="mclose fb-later">' + cfg.later + '</button>');
+      return;
+    }
     sent = true; watch.disconnect(); if (V.audio) V.audio.pause();
     const lines = FB_THANKS[ans.band], line = lines[Math.floor(Math.random() * lines.length)], host = cfg.host || ['🙌', 'The team'];
     box.innerHTML = '<div class="fb"' + accent + '><ol class="fb-steps"><li class="on">Rate</li><li class="on">Tell more</li><li class="on">Done</li></ol>'
@@ -3857,12 +3884,12 @@ function endSession(phase){
     ? '<p class="small muted" style="margin:0"><b>Rate your last session.</b> You left before ending it on '+new Date(s.last).toLocaleDateString('en-IN', { weekday:'long' })+'.</p>'
     : '<div class="shead">'+slot3d('star', '', img3d('star', 64))+'<h3>Session complete</h3></div>';
   const games = s.games.map(id => GAMES.find(g => g.id === id)).filter(Boolean);
-  const p = openModal('<div id="s-box"></div>');
+  const p = openModal('<div id="s-box"></div>', { lock: true });
   const box = $('mbox');
   feedbackSheet($('s-box'), {
     head: head + sum, scroller: box, accent: '#6D4AFF', label: 'Session rating', product: 'bg', host: ['💪', 'Coach'],
     title: 'How high does this session go?', sets: BG_SETS, played: games.map(g => g.name).slice(0, 8),
-    send: phase === 'last' ? 'Send feedback' : 'Send and end session', skip: phase === 'last' ? 'Skip for now' : 'Back to training',
+    send: phase === 'last' ? 'Send feedback' : 'Send and end session', skip: phase === 'last' ? null : 'Back to training', later: 'Try again later',
     onSend: ans => {
       const picked = Object.values(ans.more).flat(), favG = games.find(g => picked.includes(g.name));
       return sendFeedback({ kind:'session', rating: ans.stars, comment: ans.text || null,
@@ -3872,7 +3899,7 @@ function endSession(phase){
     after: () => { sent = true; setTimeout(closeModal, 1900); }
   });
   return p.then(() => {
-    if (phase === 'last') { pendingRate = null; return; }   // rated or skipped: never ask about it again
+    if (phase === 'last') { if (sent) { pendingRate = null; S.owed = null; save(); } return; }   // required: if it couldn't be sent, it's asked again next time
     if (!sent) return;                                       // "Back to training": the session goes on
     SESS = newSess(); S.sess = SESS; CIRCUIT = false; save();
     if (view === 'home') renderHome(); else location.hash = '';

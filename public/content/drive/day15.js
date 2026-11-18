@@ -1,0 +1,61 @@
+/* Drive School · Day 15 · Strategy · Myth: learning styles (Pashler, McDaniel, Rohrer & Bjork 2008).
+   STATUS: written by Claude Code, FOR TEAM REVIEW before release.
+   Check: the "Prove it" facts. Pashler et al., Psychological Science in the Public Interest 9(3), 2008: very few studies used a design
+   that could test "teach to your style", and the ones that did found no support (some found the opposite).
+   Coffield, Moseley, Hall & Ecclestone 2004 (Learning and Skills Research Centre report) counted 71 learning-style models.
+   Dekker, Lee, Howard-Jones & Jolles, Frontiers in Psychology 3, 2012: 93% of UK and 96% of Dutch teachers agreed that people learn better
+   in their preferred style (Dekker's table checked online). Pashler and Coffield from the published summaries. Checked by Claude Code, Nov 17, 2026.
+   The "what learner are you" quiz is 3 polls; each answer counts for one type (option order = Visual, Listener, Reader, Hands-on). */
+window.DRIVE_LESSONS[15] = { screens: [
+  { type:'info', kicker:'Day 15 · Strategy', title:'What kind of learner are you?', visual:['👀 👂 📖 ✋', '❓', '🕵️'],
+    body:['You’ve probably heard it: “I’m a visual learner.” 👀','Quick 3-question quiz first. Find your type.','Then we check what the research says about it.'],
+    guide:'Answer like you really would.', cta:'Take the quiz' },
+  { type:'poll', key:'d15a', kicker:'Quiz · 1 of 3', q:'You need to learn a new Python topic. What do you do first?',
+    opts:['Watch a video with diagrams','Ask a friend to explain it out loud','Read the notes or the docs','Open the editor and try things'],
+    btn:'Next', guide:'First thing you’d actually do.' },
+  { type:'poll', key:'d15b', kicker:'Quiz · 2 of 3', q:'What helps you remember a class best?',
+    opts:['The slides and pictures','What the teacher said','The notes I wrote','The lab where I did it myself'],
+    btn:'Next', guide:'Go with your gut.' },
+  { type:'poll', key:'d15c', kicker:'Quiz · 3 of 3', q:'A new phone. How do you figure it out?',
+    opts:['Look at the pictures in the guide','Get someone to tell me','Read the instructions','Just start tapping'],
+    btn:'See my type', guide:'Last one.' },
+  { type:'pollResult', key:'d15type', keys:['d15a','d15b','d15c'], labels:['Visual','Listener','Reader','Hands-on'], mix:'A mix', title:'Your learner type',
+    body:['So should every class be taught in your style? Many people think so.','Let’s test that idea.'],
+    guide:'Hold on to that result. Plot twist coming.' },
+  { type:'poll', key:'d15guess', kicker:'Predict', q:'A “visual learner” and a “listener” both learn a topic. Will each learn more if it’s taught in their own style?',
+    opts:['Yes, matching the style helps a lot','A little','No real difference'], guide:'What do you think the studies found?' },
+  { type:'info', kicker:'Name it', title:'The learning styles myth', visual:['👀 ≠ 🧠', '🎯 ❌', '🗺️ 🎵 🐍'],
+    body:['The idea: teach each person in their style, and they learn more. It’s called <b>learning styles</b>.','Having likes is real. You may enjoy videos more.','But getting taught in your favourite style doesn’t make you learn more. 🤷'],
+    guide:'Liking a style isn’t the same as learning more from it.' },
+  { type:'info', kicker:'Prove it', title:'What the research says', visual:['📚 📚 📚', '🔍', '❌'],
+    facts:[['71','different learning style systems, counted in one 2004 review'],['93%','of UK teachers in a 2012 survey believed the myth'],['Almost none','good tests that support it, in a big 2008 review']],
+    body:['To test it fairly, you teach each style both ways and compare.','The few studies that did this found no boost from matching. Some found the opposite.'],
+    note:'Sources: Pashler, McDaniel, Rohrer & Bjork, Psychological Science in the Public Interest, 2008; Coffield et al., Learning and Skills Research Centre, 2004; Dekker et al., Frontiers in Psychology, 2012.',
+    guide:'So many teachers believe it. Still no proof. 😬' },
+  { type:'info', kicker:'Name it', title:'So what does work?', visual:['🐍 → 💻', '🖼️ + 📝', '❓ 🔁'],
+    body:['<b>Match the topic, not the person.</b> Learn Flexbox by seeing layouts. Learn Python by writing code. 🐍','<b>Words + pictures</b> help almost everyone. Not just “visual learners”. 🖼️','And the big two still win for everyone: quiz yourself, and space it out. 🔁'],
+    guide:'One method doesn’t fit a person. It fits a topic.' },
+  { type:'swipe', id:'d15sw', kicker:'Swipe it', title:'Myth or backed by research?', sides:['Myth','Backed'],
+    cards:[['I’m a listener, so I should only study with audio.',0,'Studying in your “style” didn’t boost learning in fair tests.'],
+           ['Draw the HTML box model while you learn it.',1,'Words plus a picture helps almost everyone.'],
+           ['Hands-on people shouldn’t read the Python docs.',0,'Everyone needs to read docs. Your style doesn’t change that.'],
+           ['Learn Git by typing the commands yourself.',1,'That matches the topic: Git is a skill you do.'],
+           ['Teachers should test students’ styles and split the class.',0,'No good evidence it helps. It can even box students in.'],
+           ['Quiz yourself after each class, whatever your “type”.',1,'Retrieval practice works for everyone.']],
+    guide:'Swipe right if research backs it.' },
+  { type:'quiz', id:'d15q1', kicker:'Spot the myth', q:'A senior posts 3 study tips. Which one is the myth?',
+    opts:[['“Find your learning style and only study that way.”',true,'Yes. Fair tests found no boost from studying in your “style”.'],
+          ['“Close your notes and write what you remember.”',false,'That’s retrieval practice. It’s one of the best-backed methods.'],
+          ['“Spread your revision over many days.”',false,'That’s spacing. Strong evidence behind it.']],
+    why:'Learning styles feel true because we all have likes. But liking a method isn’t learning more from it.' },
+  { type:'quiz', id:'d15q2', kicker:'Use it', q:'Rohan says, “I’m visual, so I only watch Python videos. I never code along.” Best advice?',
+    opts:[['Keep watching, since videos match your style',false,'That’s the myth. Watching feels easy but builds little skill.'],
+          ['Pause the video and write the code yourself',true,'Yes. Python is a doing skill, so learn it by doing.'],
+          ['Switch to audio-only lectures for a change',false,'Swapping one passive method for another won’t help.'],
+          ['Watch the same video again at a slower speed',false,'It’s still rereading in video form.']],
+    why:'Match the method to the topic. For coding, that means writing code and testing yourself.' },
+  { type:'commit', key:'d15', q:'Pick one change to try this week.',
+    opts:['If I watch a coding video, then I’ll pause it and type the code myself.','If I learn a new idea, then I’ll draw a quick sketch of it next to my notes.','If I finish a topic, then I’ll quiz myself on it, whatever my “type”.'],
+    guide:'Pick one you can try tomorrow.' },
+  { type:'wrap', lines:['Learner types: busted. 💥','Tomorrow: how long does it really take to build a habit?'] }
+]};

@@ -362,6 +362,11 @@ pre{white-space:pre-wrap;margin:6px 0 0;font:12px ui-monospace,Menlo,Consolas,mo
         <div class="scroll"><table id="t-ideas"></table></div>
       </div>
       <div class="card">
+        <h2>Feedback button (any time)</h2>
+        <p class="sub">From the Feedback button in the sidebar. The student picks Brain Gym, Drive School or English Adda and rates it out of 11. Not counted in session, lesson or day ratings. Latest 300.</p>
+        <div class="scroll"><table id="t-anytime"></table></div>
+      </div>
+      <div class="card">
         <h2>Game comments</h2>
         <p class="sub">Latest 200.</p>
         <div class="scroll"><table id="t-comments"></table></div>
@@ -884,6 +889,11 @@ function render(){
     ['Asked', r => esc(ASK(r.stars))], ['Picked', r => pickedTxt(r.meta)], ['What they said', r => esc(r.comment || ''), 'text'],
     ['Session', r => '<span class="muted small">' + esc((r.meta?.rounds || 0) + ' rounds · ' + Math.round((r.meta?.secs || 0) / 60) + ' min' + (r.meta?.fav ? ' · liked ' + gname(r.meta.fav) : '')) + '</span>']
   ], d.ideas || []);
+  const SEC = { bg:'Brain Gym', dv:'Drive School', en:'English Adda' };
+  table($('t-anytime'), [
+    ['When', r => '<span class="muted small">' + esc(when(r.created_at)) + '</span>'], ['Student', r => who(r.name, r.niat_id)], ['Section', r => esc(SEC[r.meta?.product] || '')],
+    ['Stars', r => '<span class="pill">' + r.stars + '★</span>', 'n'], ['Asked', r => esc(ASK(r.stars))], ['Picked', r => pickedTxt(r.meta)], ['What they said', r => esc(r.comment || ''), 'text']
+  ], d.anytime || []);
   table($('t-comments'), [
     ['When', c => '<span class="muted small">' + esc(when(c.created_at)) + '</span>'], ['Student', c => who(c.name, c.niat_id)], ['Game', c => esc(gname(c.game_id))],
     ['Rating', c => c.rating ? ['😫','🙁','😐','🙂','🤩'][c.rating - 1] : ''], ['Difficulty', c => esc(DIFF[c.difficulty] || '')], ['Comment', c => esc(c.comment), 'text']

@@ -672,6 +672,11 @@ button.eset:focus-visible{outline:3px solid var(--e-purple);outline-offset:2px}
 .tabbar .inner:has(#tab-english:not([hidden])){grid-template-columns:repeat(5,minmax(0,1fr))}
 .tabbar #tab-english svg{display:none}
 .tabbar .tab-yap{width:24px;height:24px;margin:-1px 0;order:-1}
+/* laptop sidebar: Mithu sits on the right of the tab, the same way Turbo does on Drive School (icon on the left, mascot on the right) */
+@media (min-width:960px){
+  .tabbar #tab-english svg{display:block}
+  .tabbar .tab-yap{width:36px;height:36px;margin:-8px -4px -8px auto;order:0}
+}
 
 /* ---------- English Profile (My Profiles tab) ---------- */
 .eprof-empty{text-align:center;padding:28px 20px}

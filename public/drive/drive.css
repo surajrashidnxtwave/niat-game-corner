@@ -270,6 +270,7 @@ html.w3d .dfoot{background:linear-gradient(to top,rgba(253,234,244,.95) 70%,rgba
 .dpairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
 .dpairs div{background:var(--d-soft);border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px}
 .dpairs b{font-family:ui-monospace,Consolas,monospace}
+.dpairs.dsheet{grid-template-columns:minmax(0,1fr)}.dpairs.dsheet div{justify-content:flex-start;gap:12px}.dpairs.dsheet b{font-family:inherit;flex:0 0 112px}
 .dptest{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:12px 0}
 .dptest label{display:grid;grid-template-columns:90px minmax(0,1fr);align-items:center;gap:10px;font-weight:800}
 .dpay{width:100%;border-collapse:separate;border-spacing:4px;margin:10px 0;font-size:14px}
@@ -468,3 +469,11 @@ pre.dcode{background:var(--d-soft);border-radius:14px;padding:12px 14px;font-siz
 html[data-theme="dark"].w3d .dplayer{background:linear-gradient(135deg,rgba(29,26,69,.84),rgba(44,23,54,.84))}
 html[data-theme="dark"] .dfoot,html[data-theme="dark"].w3d .dfoot{background:linear-gradient(to top,rgba(44,23,54,.96) 70%,rgba(44,23,54,0))}
 html[data-theme="dark"] .dtop .dtester{background:#3A3013;color:#FFE3A0}
+
+/* Day 28 auditCompare: Day 0 vs now, two lists side by side */
+.daudit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.daudit > div{background:var(--chip);border-radius:14px;padding:10px 12px}
+.daudit b{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.daudit ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px;font-size:13.5px}
+.daudit li.ok{font-weight:800}
+.daudit li.meh{color:var(--soft)}

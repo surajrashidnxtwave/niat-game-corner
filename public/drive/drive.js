@@ -7,7 +7,7 @@
 
 /* ================= config ================= */
 const FLAGS = {};                  // screens with flag:'x' show only when FLAGS.x is true (Day 0 now uses our own items, no flag)
-const BUILT = 14;                  // highest day with content in this release (the server has the same number)
+const BUILT = 28;                  // highest day with content in this release (the server has the same number)
 const DAILY_MAX = 3;
 const TZ = 'Asia/Kolkata';
 
@@ -939,7 +939,7 @@ wrap(s, a){
 
 /* Day 4: study a set of word pairs, then reread it (mode:'read') or quiz yourself on it (mode:'quiz') */
 pairStudy(s, a){
-  const list = '<div class="dpairs">' + s.pairs.map(p => '<div><b>' + p[0] + '</b><span>' + p[1] + '</span></div>').join('') + '</div>';
+  const list = '<div class="dpairs' + (s.sheet ? ' dsheet' : '') + '">' + s.pairs.map(p => '<div><b>' + p[0] + '</b><span>' + p[1] + '</span></div>').join('') + '</div>';
   a.card.appendChild(frag(kick(s.kicker) + '<h3>' + s.title + '</h3><p>' + s.text + '</p><p class="dtimer" id="dp-tmr">⏱ ' + s.secs + ' seconds</p>' + list));
   let t = s.secs;
   a.cont(s.btn || 'Continue', false);
@@ -1061,7 +1061,16 @@ tf(s, a){
         if (k < n) { sfx('tap'); show(); return; }
         addPts(right * 4);
         log('attempt', { dim: s.dim || dimOf(L.track), correct: right >= n - 1, score: right, of: n, first: true, ms: Date.now() - t0, from: L.d });
-        next();
+        if (s.key) L.data[s.key] = right;
+        if (s.vs == null) return next();
+        // s.vs: the key of an earlier slider guess ("how many will you get right?"); show guess vs score. s.msgs: { over, same, under }
+        const g = L.data[s.vs], m = s.msgs || {};
+        a.card.innerHTML = '';
+        a.card.appendChild(frag(kick(s.resultKicker || 'Your result') + '<h3>' + (s.resultTitle || 'Your guess vs your score') + '</h3><div class="dfacts">'
+          + '<div class="dfact"><b>' + (g ?? '–') + ' / ' + n + '</b><span>your guess</span></div><div class="dfact"><b>' + right + ' / ' + n + '</b><span>your score</span></div></div>'
+          + '<p>' + (g == null ? '' : g > right ? (m.over || 'You guessed higher than you scored.') : g === right ? (m.same || 'Your guess was spot on.') : (m.under || 'You did better than you guessed.')) + '</p>'));
+        guide(s.resultGuide || '');
+        a.cont();
       };
       qs('#dp-main').focus({ preventScroll: true });
     });
@@ -1366,6 +1375,7 @@ drillResult(s, a){
 ifthen(s, a){
   const ex = s.examples || [];
   a.card.appendChild(frag(kick(s.kicker || 'Your plan') + '<h3>' + s.q + '</h3>' + (s.text ? '<p>' + s.text + '</p>' : '')
+    + (s.old && L.data.oldPlan ? '<div class="dquote">' + esc(L.data.oldPlan) + '</div><p class="dnote">' + (s.oldNote || 'Your old plan. Make the new one better.') + '</p>' : '')
     + (ex.length ? '<p class="dnote">Stuck? Tap an example, then change it to fit your week.</p><div class="dbank">' + ex.map((e, i) => '<button class="dchipw" data-i="' + i + '">If ' + e[0] + ', then I’ll ' + e[1] + '</button>').join('') + '</div>' : '')
     + '<div class="dfield"><label for="dp-if">If…</label><input id="dp-if" type="text" autocomplete="off" placeholder="' + esc(s.ifPh || 'a time, a place or a feeling') + '"></div>'
     + '<div class="dfield"><label for="dp-then">then I’ll…</label><input id="dp-then" type="text" autocomplete="off" placeholder="' + esc(s.thenPh || 'one small, clear action') + '"></div>'
@@ -1383,7 +1393,7 @@ ifthen(s, a){
   a.cont(s.btn || 'Save my plan', false, () => {
     const [x, y] = clean(), text = 'If ' + x + ', then I’ll ' + y + '.', k = 'plan_d' + L.d;
     L.memo[k] = (Array.isArray(L.memo[k]) ? L.memo[k] : []).concat(text);
-    log('plan', { key: s.key, text, cue: x, action: y, fromExample: used >= 0, words: words(text) });
+    log('plan', { key: s.key, text, cue: x, action: y, fromExample: used >= 0, words: words(text), old: s.old ? L.data.oldPlan || null : undefined });
     addPts(10); sfx('select');
   });
 },
@@ -1425,6 +1435,68 @@ commons(s, a){
   };
   actions('');
   draw('');
+},
+
+/* Day 15: tally earlier polls into one result ("what learner are you"). Each poll in s.keys counts its option i for s.labels[i].
+   A tie shows s.mix. The result is only shown, never scored. */
+pollResult(s, a){
+  const n = s.labels.map(() => 0);
+  s.keys.forEach(k => { const v = L.data[k]; if (v >= 0 && v < n.length) n[v]++; });
+  const top = Math.max(...n), win = n.map((c, i) => c === top ? i : -1).filter(i => i >= 0);
+  const label = !top ? (s.none || 'Not sure') : win.length > 1 ? (s.mix || 'A mix') : s.labels[win[0]];
+  L.data[s.key || 'pollResult'] = label;
+  log('predict', { key: s.key || 'pollResult', result: label, counts: n });
+  a.card.appendChild(frag(kick(s.kicker || 'Your result') + '<h3>' + (s.title || 'Your result') + '</h3><div class="dcenter"><div class="dbig" style="font-size:48px">' + esc(label) + '</div></div>'
+    + (s.body || []).map(p => '<p>' + p + '</p>').join('')));
+  a.cont(s.btn);
+},
+
+/* Day 19: look back at the if-then plans saved on an earlier day (memo plan_dN: an array from ifthen, or one string from an old commit).
+   For each plan the student taps how it went (s.opts, best first). The plan that went worst is kept in L.data.oldPlan,
+   and an ifthen screen with old:true shows it for the rewrite. No saved plans (skipped, a test account): s.fallback plans are shown
+   with s.emptyQ / s.emptyText instead, and the log says missing:true. Logged as kind 'review' so it doesn't count as a new plan. */
+/* Day 28: Day 0's study answers (memo) next to this lesson's re-check (L.data). Strong/weak = option indexes of the habit list.
+   { then:{habits, hours}, now:{habits, hours}, strong:[i], weak:[i], body (shown if Day 0 answers are missing) } */
+auditCompare(s, a){
+  const memo = st().memo, src = L.screens.find(x => x.type === 'multi' && x.key === s.now.habits) || {}, opts = src.opts || [];
+  const was = Array.isArray(memo[s.then.habits]) ? memo[s.then.habits] : null, now = L.data[s.now.habits] || [];
+  const hThen = memo[s.then.hours], hNow = L.data[s.now.hours];
+  const strong = (s.strong || []).map(i => opts[i]), weak = (s.weak || []).map(i => opts[i]);
+  const n = list => (list || []).filter(x => strong.includes(x)).length;
+  const li = x => '<li class="' + (strong.includes(x) ? 'ok' : weak.includes(x) ? 'meh' : '') + '">' + (strong.includes(x) ? '💪 ' : weak.includes(x) ? '🫠 ' : '') + esc(x) + '</li>';
+  const col = (h, list) => '<div><b>' + h + '</b><ul>' + (list && list.length ? list.map(li).join('') : '<li class="muted">Nothing picked</li>') + '</ul></div>';
+  if (!was) {
+    a.card.appendChild(frag(kick(s.kicker) + '<h3>' + (s.title || '') + '</h3>' + (s.body || []).map(t => '<p>' + t + '</p>').join('')));
+  } else {
+    const up = n(now) - n(was);
+    a.card.appendChild(frag(kick(s.kicker) + '<h3>' + (s.title || '') + '</h3>'
+      + '<div class="dfacts"><div class="dfact"><b>' + (hThen == null ? '–' : hThen + ' h') + ' → ' + (hNow == null ? '–' : hNow + ' h') + '</b><span>hours a week, Day 0 → now</span></div>'
+      + '<div class="dfact"><b>' + n(was) + ' → ' + n(now) + '</b><span>strong habits (💪), Day 0 → now</span></div></div>'
+      + '<div class="daudit">' + col('Day 0', was) + col('Now', now) + '</div>'
+      + '<p>' + (up > 0 ? 'More 💪 habits than on Day 0. That’s real change.' : up < 0 ? 'Fewer 💪 habits than on Day 0. No stress. Pick one to bring back.' : 'Same number of 💪 habits as Day 0. One small swap is enough to start.') + '</p>'
+      + '<p class="dnote">💪 Testing yourself and practice questions stick. 🫠 Rereading, highlighting and the night before feel good but fade fast.</p>'));
+  }
+  log('review', { key: 'audit28', missing: !was, strongThen: was ? n(was) : null, strongNow: n(now), hoursThen: hThen ?? null, hoursNow: hNow ?? null });
+  a.cont(s.btn || 'Continue', true);
+},
+
+planCheck(s, a){
+  const raw = st().memo['plan_d' + s.from];
+  let plans = (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(p => typeof p === 'string' && p.trim()).slice(0, 4);
+  const missing = !plans.length; if (missing) plans = s.fallback || [];
+  const res = plans.map(() => -1);
+  a.card.appendChild(frag(kick(s.kicker || 'Look back') + '<h3>' + (missing ? s.emptyQ || s.q : s.q) + '</h3>' + ((missing ? s.emptyText : s.text) ? '<p>' + (missing ? s.emptyText : s.text) + '</p>' : '')
+    + '<div class="dsortlist">' + plans.map((p, i) => '<div class="dsortrow col"><q>' + esc(p) + '</q><div class="dseg wrap" role="group" aria-label="How plan ' + (i + 1) + ' went">'
+      + s.opts.map((o, j) => '<button data-i="' + i + '" data-v="' + j + '" aria-pressed="false">' + o + '</button>').join('') + '</div></div>').join('') + '</div>'));
+  qa('.dseg button', a.card).forEach(b => b.onclick = () => {
+    sfx('tap'); res[+b.dataset.i] = +b.dataset.v;
+    qa('button', b.parentElement).forEach(x => x.setAttribute('aria-pressed', x === b)); a.ready(res.every(v => v >= 0));
+  });
+  a.cont(s.btn || 'Continue', !plans.length, () => {
+    L.data.oldPlan = plans.length ? plans[res.indexOf(Math.max(...res))] : '';
+    log('review', { key: s.key || 'planCheck', from: s.from, missing, plans: plans.map((p, i) => ({ text: p, result: s.opts[res[i]], v: res[i] })) });
+    addPts(10);
+  });
 },
 
 /* mindset games inside a lesson (review days) */
@@ -1530,6 +1602,152 @@ const GAMES = {
       a.cont();
     };
     pickRound('');
+  },
+
+  /* Wait for It (delay of gratification): each round, take a small reward now or wait for a bigger one.
+     Final schema (Day 21 uses it; Lv 2 on Day 49 can use longer waits and harder questions):
+       { type:'gameRound', game:'waitForIt', level:1, kicker, title, intro?, end?, guide?,
+         points?: { now:5, later:15, miss:0 },                          // defaults for every round
+         rounds: [ { secs:6, now?, later?, tag? },                        // the wait is a countdown of secs seconds
+                   { q, code?, opts:[[text, correct, explanation?], ...], why?, now?, later?, tag? } ] }  // the wait is one more question
+     While waiting (countdown or question) a "Take it now instead" button stays open: tapping it counts as giving in (switched).
+     A missed question pays points.miss (default 0), so waiting is a real bet.
+     Logs { game:'waitForIt', level, waits, held, of, paid, switched, earned, nowTotal, best, chances, retries }:
+       waits = Wait picks, held = waits not given up, paid = waits that got the bigger reward,
+       nowTotal = points if every "now" was taken, best = points if every wait paid off.
+       chances (= of) and retries (= held) let the Drive Profile count waiting as a Motivation "does" signal, like retries in Bounce Back. */
+  waitForIt(s, a){
+    const rs = s.rounds, P = Object.assign({ now: 5, later: 15, miss: 0 }, s.points);
+    let k = 0, waits = 0, paid = 0, switched = 0, earned = 0;
+    const pv = r => ({ now: r.now ?? P.now, later: r.later ?? P.later });
+    const head = () => kick(s.kicker || 'Game · Wait for It') + '<h3>' + (s.title || 'Now or later?') + ' (' + (k + 1) + ' of ' + rs.length + ')</h3>';
+    const choose = msg => {
+      const r = rs[k], v = pv(r);
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(head() + (k === 0 && s.intro ? '<p>' + s.intro + '</p>' : '') + (msg ? '<p class="dnote" aria-live="polite">' + msg + '</p>' : '')
+        + '<div class="dsides two"><button class="dsidecard" data-w="0"><b>🍬 Take +' + v.now + ' now</b><span>Yours right away. No risk.</span></button>'
+        + '<button class="dsidecard" data-w="1"><b>⏳ Wait for +' + v.later + '</b><span>' + (r.tag || (r.q ? 'Answer one more question first. Miss it and you get ' + P.miss + '.' : 'Wait ' + (r.secs || 5) + ' seconds first.')) + '</span></button></div>'));
+      actions('');
+      qa('[data-w]', a.card).forEach(b => b.onclick = () => { sfx('select'); if (b.dataset.w === '1') { waits++; wait(); } else take('You took +' + v.now + '.'); });
+    };
+    const take = (msg, gaveIn) => { const v = pv(rs[k]); clearInterval(L.timer); if (gaveIn) switched++; earned += v.now; addPts(v.now); sfx('softok'); step(msg); };
+    const win = v => { paid++; earned += v.later; addPts(v.later); sfx('correct'); guide('Worth the wait. +' + v.later + '.', 'ok'); };
+    const step = msg => { k++; if (k < rs.length) choose(msg); else end(msg); };
+    const wait = () => {
+      const r = rs[k], v = pv(r);
+      a.card.innerHTML = '';
+      actions('<button class="dbtn ghost" id="dp-give">🍬 Take +' + v.now + ' now instead</button>');
+      qs('#dp-give').onclick = () => { guide('You took the sure thing. That’s allowed.', ''); take('You took +' + v.now + ' instead of waiting.', true); };
+      if (!r.q) {
+        let t = r.secs || 5;
+        a.card.appendChild(frag(head() + '<p>Hold on for +' + v.later + '…</p><div class="dcenter"><div class="dbig" id="dp-wt" aria-live="off">' + t + '</div><p class="dnote">seconds left</p></div>'));
+        L.timer = setInterval(() => {
+          t--; const el = qs('#dp-wt'); if (!el) return clearInterval(L.timer);
+          el.textContent = Math.max(0, t);
+          if (t <= 0) { clearInterval(L.timer); win(v); step('You waited and got +' + v.later + '.'); }
+        }, 1000);
+        return;
+      }
+      a.card.appendChild(frag(head() + '<p>' + r.q + '</p>' + (r.code ? '<pre class="dmono dcode">' + r.code + '</pre>' : '')
+        + '<div class="dopts">' + r.opts.map((o, i) => '<button class="dopt" data-i="' + i + '">' + o[0] + '</button>').join('') + '</div>'));
+      qa('.dopt', a.card).forEach(b => b.onclick = () => {
+        const i = +b.dataset.i, ok = !!r.opts[i][1], best = r.opts.find(o => o[1]);
+        qa('.dopt', a.card).forEach((x, j) => { x.disabled = true; if (r.opts[j][1]) x.classList.add('right'); else if (j === i) x.classList.add('wrong'); });
+        if (ok) win(v);
+        else { if (P.miss) { earned += P.miss; addPts(P.miss); } sfx('softbad'); guide('Missed this one. Waiting is a bet.', 'bad'); }
+        a.card.appendChild(frag('<p class="dnote" aria-live="polite">' + (ok ? '<b class="dok">Right.</b> ' : '<b class="dbad">The answer is ' + best[0] + '.</b> ') + (r.why || '') + '</p>'));
+        actions('<button class="dbtn" id="dp-main">' + (k < rs.length - 1 ? 'Next round' : 'See my round') + '</button>');
+        qs('#dp-main').onclick = () => { sfx('tap'); step(''); };
+        qs('#dp-main').focus({ preventScroll: true });
+      });
+    };
+    const end = msg => {
+      const nowTotal = rs.reduce((t, r) => t + pv(r).now, 0), best = rs.reduce((t, r) => t + pv(r).later, 0), held = waits - switched;
+      log('game', { game: 'waitForIt', level: s.level || 1, waits, held, of: rs.length, paid, switched, earned, nowTotal, best, chances: rs.length, retries: held });
+      L.memo.wait = { level: s.level || 1, waits, held, of: rs.length };
+      actions('');
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(kick(s.kicker || 'Game · Wait for It') + '<h3>Round done</h3>' + (msg ? '<p class="dnote">' + msg + '</p>' : '')
+        + '<div class="dfacts"><div class="dfact"><b>' + held + ' / ' + rs.length + '</b><span>times you waited it out</span></div>'
+        + '<div class="dfact"><b>' + earned + '</b><span>your points (taking every “now”: ' + nowTotal + ')</span></div>'
+        + (switched ? '<div class="dfact"><b>' + switched + '</b><span>times you gave up mid-wait</span></div>' : '') + '</div><p>' + (s.end || '') + '</p>'));
+      a.cont();
+    };
+    choose('');
+  },
+
+  /* Error Replay: answer questions; after a miss, choose "See why" (the explanation) or "Skip".
+     Each missed question's twin (a similar question) comes back later in the same round, after 2 other questions (or at the end).
+     Final schema (Day 28 uses it):
+       { type:'gameRound', game:'errorReplay', level:1, kicker, title, intro?, end?, guide?, points?: { right:10, twin:10 },
+         items: [ { q, code?, opts:[[text, correct, explanation], ...], why,
+                    twin: { q, code?, opts:[[text, correct, explanation], ...], why } } ] }
+     A question answered right the first time has no twin. Skip still shows which option was right, but not why.
+     After a twin, the right answer and its why are always shown.
+     Logs { game:'errorReplay', level, of, right, misses, opened, skipped, twins, twinRight,
+            twinsSeen, twinRightSeen, twinsSkipped, twinRightSkipped, chances, retries }
+       (chances = misses, retries = opened: opening the explanation after a miss counts as a Motivation "does" signal). */
+  errorReplay(s, a){
+    const P = Object.assign({ right: 10, twin: 10 }, s.points);
+    const q = s.items.map(it => ({ it, twin: false }));
+    let k = 0, right = 0, misses = 0, opened = 0, skipped = 0;
+    const T = { seen: [0, 0], skip: [0, 0] };   // [asked, right] for twins after See why / after Skip
+    const mark = (it, i, showRight) => qa('.dopt', a.card).forEach((x, j) => { x.disabled = true; if (it.opts[j][1]) { if (showRight) x.classList.add('right'); } else if (j === i) x.classList.add('wrong'); });
+    const say = html => { qs('#dp-erx').innerHTML = html; };
+    const nextBtn = () => {
+      actions('<button class="dbtn" id="dp-main">' + (k < q.length - 1 ? 'Next' : 'See my round') + '</button>');
+      qs('#dp-main').onclick = () => { sfx('tap'); k++; k < q.length ? draw() : end(); };
+      qs('#dp-main').focus({ preventScroll: true });
+    };
+    const draw = () => {
+      const c = q[k], it = c.twin ? c.it.twin : c.it;
+      a.card.innerHTML = '';
+      a.card.appendChild(frag(kick(c.twin ? '🔁 It’s back' : (s.kicker || 'Game · Error Replay')) + '<h3>' + (c.twin ? 'One like the one you missed' : (s.title || 'Pick the answer')) + '</h3>'
+        + (k === 0 && s.intro ? '<p>' + s.intro + '</p>' : '') + '<p>' + it.q + '</p>' + (it.code ? '<pre class="dmono dcode">' + it.code + '</pre>' : '')
+        + '<div class="dopts">' + it.opts.map((o, i) => '<button class="dopt" data-i="' + i + '">' + o[0] + '</button>').join('') + '</div><div id="dp-erx" aria-live="polite"></div>'));
+      actions('');
+      qa('.dopt', a.card).forEach(b => b.onclick = () => answer(c, it, +b.dataset.i));
+    };
+    const why = (it, i) => {
+      const r = it.opts.find(o => o[1]);
+      return '<div class="dwhy" style="margin:14px 0 0"><p><b>' + (it.opts[i][1] ? 'Your answer' : 'Why not') + ':</b> ' + (it.opts[i][2] || '') + '</p>'
+        + (it.opts[i][1] ? '' : '<p><b>Right answer:</b> ' + r[0] + '. ' + (r[2] || '') + '</p>') + (it.why ? '<p>' + it.why + '</p>' : '') + '</div>';
+    };
+    const answer = (c, it, i) => {
+      const ok = !!it.opts[i][1];
+      if (c.twin) {
+        const t = c.seen ? T.seen : T.skip; t[0]++;
+        mark(it, i, true);
+        if (ok) { t[1]++; addPts(P.twin); }
+        sfx(ok ? 'correct' : 'softbad'); guide(ok ? 'Got it the second time.' : 'Still tricky. Read this one.', ok ? 'ok' : 'bad');
+        say(why(it, i)); nextBtn(); return;
+      }
+      if (ok) {
+        right++; addPts(P.right); mark(it, i, true); sfx('correct'); guide('Yes!', 'ok');
+        say('<p class="dnote"><b class="dok">Right.</b> ' + (it.opts[i][2] || '') + '</p>'); nextBtn(); return;
+      }
+      misses++; mark(it, i, false); sfx('softbad'); guide('Missed it. See why, or skip?', 'bad');
+      const later = seen => { if (c.it.twin) q.splice(Math.min(q.length, k + 3), 0, { it: c.it, twin: true, seen }); };
+      actions('<button class="dbtn ghost" id="dp-skip">Skip</button><button class="dbtn" id="dp-see">See why</button>');
+      qs('#dp-see').onclick = () => { opened++; sfx('select'); later(true); mark(it, i, true); say(why(it, i)); guide(''); nextBtn(); };
+      qs('#dp-skip').onclick = () => { skipped++; sfx('tap'); later(false); mark(it, i, true); say('<p class="dnote">Skipped. A look-alike may come back later.</p>'); guide(''); nextBtn(); };
+      qs('#dp-see').focus({ preventScroll: true });
+    };
+    const end = () => {
+      const twins = T.seen[0] + T.skip[0], twinRight = T.seen[1] + T.skip[1];
+      log('game', { game: 'errorReplay', level: s.level || 1, of: s.items.length, right, misses, opened, skipped, twins, twinRight,
+        twinsSeen: T.seen[0], twinRightSeen: T.seen[1], twinsSkipped: T.skip[0], twinRightSkipped: T.skip[1], chances: misses, retries: opened });
+      L.memo.replay = { level: s.level || 1, misses, opened, twinRight, twins };
+      actions('');
+      a.card.innerHTML = '';
+      const f = (b, t) => '<div class="dfact"><b>' + b + '</b><span>' + t + '</span></div>';
+      a.card.appendChild(frag(kick(s.kicker || 'Game · Error Replay') + '<h3>Round done</h3><div class="dfacts">' + f(right + ' / ' + s.items.length, 'right the first time')
+        + (misses ? f(opened + ' / ' + misses, 'misses where you tapped See why') : '')
+        + (T.seen[0] ? f(T.seen[1] + ' / ' + T.seen[0], 'look-alikes right after See why') : '')
+        + (T.skip[0] ? f(T.skip[1] + ' / ' + T.skip[0], 'look-alikes right after Skip') : '') + '</div><p>' + (s.end || '') + '</p>'));
+      a.cont();
+    };
+    draw();
   }
 };
 
@@ -1648,7 +1866,7 @@ function rateUI(box, day, late, done, scroller){
   feedbackSheet(inner, {
     head: '<p class="dkicker">' + (late ? 'Before your next lesson' : 'One last thing') + '</p>' + (late ? '<p class="dnote" style="margin:0">You left Day ' + day + ' before rating it.</p>' : ''),
     scroller, accent: 'var(--d-brand-a, #7C4DFF)', label: 'Lesson rating', stars: STARS, sets: DV_SETS, product: 'dv', host: ['🏎️', 'Turbo'],
-    title: 'How high does Day ' + day + ' go?', send: late ? 'Send feedback' : 'Send and finish', skip: null,
+    title: 'How high does Day ' + day + ' go?', send: late ? 'Send feedback' : 'Send and finish', skip: null, later: late ? 'Try again later' : null,
     onSend: ans => {
       const a = Object.assign(fbSplit(ans), { stars: ans.stars, more: ans.more, text: ans.text, voice: ans.voice, late: !!late });
       ratesSet(rates().map(x => x.day === day ? Object.assign(x, { ans: a }) : x));   // kept until the server has it
@@ -1671,10 +1889,10 @@ function rateNow(){
   rateUI(card, L.d, false, box => { if (!L) return; L.mustRate = false; guide('Thanks! That helps a lot.', 'ok', null, true); L.after(box); }, qs('#dp-scroll'));
   anim(card, { opacity: [0, 1], y: [12, 0] }, { duration: 0.3 });
 }
-/* a lesson finished but not rated (tab closed): asked in a sheet. Resolves true once rated */
+/* a lesson finished but not rated (tab closed): asked in a sheet that must be answered (no "Not now"). Resolves true once rated */
 function rateLater(item){
   let sent = false;
-  const p = openModal('<div id="dr-box"></div><button type="button" class="mclose">Not now</button>');
+  const p = openModal('<div id="dr-box"></div>', { lock: true });
   rateUI(qs('#dr-box'), item.day, true, () => { sent = true; setTimeout(closeModal, 1400); }, qs('#mbox'));
   return p.then(() => {
     if (!sent) toast('Rate Day ' + item.day + ' to start your next lesson.');
@@ -1801,7 +2019,8 @@ function render2(){
 function leave(){ if (!L) Voice.stop(); /* lessons are an overlay and keep running */ }
 /* on logout: forget this student's Drive state so the next login starts clean */
 function reset(){ if (L) closeLesson(); Voice.stop(); DS = null; pulledAt = 0; PROF = null; profAt = 0; DBOARD = null; dboardAt = 0; const r = qs('#drive-root'); if (r) r.innerHTML = ''; }
-window.Drive = { render: render2, leave, profileTab, boardOn, renderBoard, open: openLesson, reset, _state: st };
+window.Drive = { render: render2, leave, profileTab, boardOn, renderBoard, open: openLesson, reset, _state: st,
+  fb: { stars: STARS, sets: DV_SETS } };   // the sidebar Feedback page rates Drive School with the same lines and questions
 // the page's first route() ran before this file loaded
 if (typeof view !== 'undefined') {
   if (view === 'drive') render2();

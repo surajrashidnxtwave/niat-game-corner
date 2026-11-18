@@ -1492,8 +1492,8 @@ function showResult(j){
 
 /* ================= "11-star" rating of the day =================
    Same idea as Brain Gym and Drive School (Airbnb's 11-star exercise): 5 means "it did its job", 7-11 say what great looks like.
-   Asked once a day, back on the Adda home after 3 saved rounds (or 1 round once the 15 minutes are done). "Not now" asks
-   again next time, at most twice a day. Server copy: /api/english action "rate" (one per student per India day). */
+   Asked once a day, back on the Adda home after 3 saved rounds (or 1 round once the 15 minutes are done). Required: no "Not now"
+   (if it can't be sent, "Try again later" appears and it's asked again after the next round). Server copy: /api/english action "rate" (one per student per India day). */
 const RATE_K = 'ea_rate';
 const ADDA_STARS = { 11: '📺 If Netflix calls, tell them I’m ready to check their English subtitles.', 10: '🧑‍🏫 Next English class, I might help the teacher.',
   9: '💼 Bring on the job emails. HR will reply “You’re hired.”', 8: '📲 Friends, send me your WhatsApp messages. I’ll fix the English.',
@@ -1548,16 +1548,16 @@ function rateRec(){
 }
 function rateSave(r){ try { localStorage.setItem(RATE_K, JSON.stringify(r)); } catch (e) {} }
 function rateCount(game){ const r = rateRec(); r.rounds++; if (!r.games.includes(game)) r.games.push(game); rateSave(r); }
-function rateDue(){ if (!ME) return false; const r = rateRec(); return !r.done && r.later < 2 && (r.rounds >= 3 || (r.rounds >= 1 && todaySecs() >= GOAL)); }
+function rateDue(){ if (!ME) return false; const r = rateRec(); return !r.done && (r.rounds >= 3 || (r.rounds >= 1 && todaySecs() >= GOAL)); }
 function rateDay(){
   const rec = rateRec(); let sent = false;
   const played = rec.games.map(id => (gameOf(id) || {}).name).filter(Boolean).slice(0, 8);
-  const p = openModal('<div id="ea-box"></div>');
+  const p = openModal('<div id="ea-box"></div>', { lock: true });
   const box = qs('#mbox');
   feedbackSheet(qs('#ea-box'), {
     head: '<p class="small muted" style="margin:0;font-weight:900;letter-spacing:.06em;text-transform:uppercase">English Adda · One quick thing</p>',
     scroller: box, accent: '#14A37F', label: 'Today’s Adda rating', stars: ADDA_STARS, sets: ADDA_SETS, played, product: 'en', host: ['🦜', 'Mithu'],
-    title: 'How high does today go?', send: 'Send feedback', skip: 'Not now',
+    title: 'How high does today go?', send: 'Send feedback', skip: null, later: 'Try again later',
     onSend: async ans => {
       const r = await api('/api/english', Object.assign({ action: 'rate', token: ME.token, stars: ans.stars }, fbSplit(ans),
         { more: ans.more, text: ans.text, voice: ans.voice, rounds: rec.rounds, secs: todaySecs(), games: rec.games.slice(0, 20) }), 10000);
@@ -1720,6 +1720,8 @@ window.Adda = {
   // test accounts only: jump straight into a game, e.g. Adda.open('express', 6) or Adda.open('groups', 0, 12) for puzzle #12
   open(game, lv, n){ if (!tester()) return 'Test accounts only'; openGame(game, { lv, n }); return 'Opening ' + game; },
   _state: st, _todaySecs: todaySecs,
+  // the sidebar Feedback page rates English Adda with the same lines and questions; played = games played today
+  fb: { stars: ADDA_STARS, sets: ADDA_SETS, played: () => rateRec().games.map(id => (gameOf(id) || {}).name).filter(Boolean).slice(0, 8) },
   _play(on, hook){ playing = !!on; secondHook = on ? hook || null : null; lastAct = Date.now(); if (!on) flush(); }
 };
 // the page's first route() ran before this file loaded
