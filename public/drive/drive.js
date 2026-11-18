@@ -277,7 +277,8 @@ function renderHome(){
   const curLevel = nx ? Math.max(0, Math.ceil(nx.d / 7) - 1) : 7;
   const levels = [];
   for (let w = 0; w < 8; w++) {
-    if (w > curLevel + 1) { levels.push('<div class="dlevel-later"><small>Level ' + (w + 1) + '</small><b>' + LEVELS[w] + '</b></div>'); continue; }
+    // students see their level and the next one; test accounts see every level that has lessons built
+    if (w > (tester() ? Math.ceil(BUILT / 7) - 1 : curLevel + 1)) { levels.push('<div class="dlevel-later"><small>Level ' + (w + 1) + '</small><b>' + LEVELS[w] + '</b></div>'); continue; }
     const days = COURSE.filter(x => x.d > 0 && Math.ceil(x.d / 7) === w + 1);
     if (w === 0) days.unshift(COURSE[0]);
     levels.push('<div class="dlevel"><small>Level ' + (w + 1) + '</small><b>' + LEVELS[w] + '</b></div><div class="dpath">' + days.map(x => node(x, nx)).join('') + '</div>');
