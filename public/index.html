@@ -993,9 +993,24 @@ body:has(.modal.open) .tabbar .inner{opacity:0;transform:translateY(12px)}
   .side-brand b{display:block;font:800 24px/1 var(--display)}
   .side-brand small{display:block;margin-top:2px;color:var(--soft);font-size:12px;font-weight:700}
   .tabbar .side-foot{margin-top:auto}
+  /* never let the bottom rows (3D world, Theme) fall off the screen: scroll the sidebar if it still doesn't fit */
+  .tabbar .inner{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+  .tabbar .inner::-webkit-scrollbar{display:none}
+  .tabbar .inner > *{flex-shrink:0}
   #tab-out[hidden]{display:none}
   #tab-out .tab-lab{display:flex;flex-direction:column;align-items:flex-start;text-align:left;min-width:0;line-height:1.2}
   .tab-who{font-size:12px;font-weight:700;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+  @media (max-height:820px){
+    .tabbar .inner{gap:2px;padding:12px 10px}
+    .tabbar .tab{padding:8px 14px}
+    .side-brand{padding:2px 6px 10px}
+    .side-brand .logo{width:36px;height:36px}
+    .side-brand b{font-size:21px}
+  }
+  @media (max-height:660px){
+    .tabbar .tab{padding:6px 12px;font-size:14px}
+    .side-brand small{display:none}
+  }
 
   .top h2{font:800 34px/1.1 var(--display)}
   .hero{margin-top:18px;padding:30px 32px 24px;border-radius:32px}
